@@ -1,0 +1,947 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced 3D Model Loader</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 400px;
+            z-index: 100;
+        }
+        #loading-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s;
+        }
+        #progress-bar-container {
+            width: 80%;
+            max-width: 500px;
+            height: 30px;
+            background-color: #333;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        #progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #4CAF50;
+            transition: width 0.3s;
+        }
+        #loading-text {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        #loading-stats {
+            font-size: 14px;
+            color: #aaa;
+        }
+        #memory-usage {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+        #error-message {
+            color: #ff5555;
+            text-align: center;
+            max-width: 80%;
+            display: none;
+        }
+        #controls-info {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-container">
+        <h2>Cargando Modelo 3D Colombiano</h2>
+        <div id="loading-text">Inicializando cargador...</div>
+        <div id="progress-bar-container">
+            <div id="progress-bar"></div>
+        </div>
+        <div id="loading-stats">0 MB de 34 MB (0%)</div>
+        <div id="error-message"></div>
+    </div>
+
+    <div id="info">
+        <h2>Modelo 3D Colombiano</h2>
+        <p>Este visualizador está optimizado para cargar modelos 3D extremadamente grandes.</p>
+    </div>
+
+    <div id="controls-info">
+        <p>Controles: Click izquierdo + arrastrar para rotar | Rueda del ratón para zoom | Click derecho + arrastrar para mover</p>
+    </div>
+
+    <div id="memory-usage">Memoria: Calculando...</div>
+
+    <!-- Three.js y bibliotecas relacionadas (versión optimizada) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/BufferGeometryUtils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stats.js@0.17.0/build/stats.min.js"></script>
+
+    <script>
+        // Configuración inicial
+        let camera, scene, renderer, controls, stats;
+        let model = null;
+        let isLoading = true;
+        let loadingManager;
+        let memoryInterval;
+        
+        // Variables para limitar la tasa de renderizado
+        let lastFrameTime = 0;
+        const targetFPS = 30; // Limitar a 30 FPS para ahorrar recursos
+        const frameInterval = 1000 / targetFPS;
+        
+        // Elementos DOM
+        const loadingContainer = document.getElementById('loading-container');
+        const progressBar = document.getElementById('progress-bar');
+        const loadingText = document.getElementById('loading-text');
+        const loadingStats = document.getElementById('loading-stats');
+        const errorMessage = document.getElementById('error-message');
+        const memoryUsage = document.getElementById('memory-usage');
+
+        // Inicializar la escena
+        init();
+        
+        function init() {
+            // Crear escena con fondo negro
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x000000); // Negro como lo solicita el usuario
+            
+            // Crear cámara
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 5, 10);
+            
+            // Crear renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            
+            // Configuración mejorada de sombras
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Sombras más suaves
+            renderer.shadowMap.autoUpdate = true; // Actualizar sombras automáticamente
+            
+            renderer.outputEncoding = THREE.sRGBEncoding;
+            renderer.gammaFactor = 2.2;
+            renderer.physicallyCorrectLights = true;
+            
+            // Optimizaciones de rendimiento
+            renderer.powerPreference = "high-performance";
+            renderer.precision = "mediump"; // Precisión media para mejor rendimiento
+            renderer.antialias = window.devicePixelRatio < 2; // Desactivar antialiasing en dispositivos de alta densidad
+            document.body.appendChild(renderer.domElement);
+            
+            // Controles de órbita mejorados
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.rotateSpeed = 0.8;
+            controls.zoomSpeed = 1.2;
+            controls.panSpeed = 0.8;
+            controls.autoRotate = false; // Inicialmente desactivado
+            controls.autoRotateSpeed = 0.5;
+            
+            // Añadir botón para activar/desactivar rotación automática
+            const autoRotateButton = document.createElement('button');
+            autoRotateButton.textContent = 'Activar Rotación';
+            autoRotateButton.style.position = 'absolute';
+            autoRotateButton.style.top = '10px';
+            autoRotateButton.style.right = '10px';
+            autoRotateButton.style.padding = '8px 12px';
+            autoRotateButton.style.backgroundColor = '#4CAF50';
+            autoRotateButton.style.color = 'white';
+            autoRotateButton.style.border = 'none';
+            autoRotateButton.style.borderRadius = '4px';
+            autoRotateButton.style.cursor = 'pointer';
+            autoRotateButton.style.zIndex = '1000';
+            
+            autoRotateButton.addEventListener('click', function() {
+                controls.autoRotate = !controls.autoRotate;
+                this.textContent = controls.autoRotate ? 'Detener Rotación' : 'Activar Rotación';
+                this.style.backgroundColor = controls.autoRotate ? '#f44336' : '#4CAF50';
+            });
+            
+            document.body.appendChild(autoRotateButton);
+            
+            // Iluminación mejorada para sombras más pronunciadas
+            // Luz ambiental muy reducida para que las sombras sean más visibles
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+            scene.add(ambientLight);
+            
+            // Luz principal con configuración de sombras mejorada
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8); // Intensidad moderada
+            directionalLight.position.set(5, 10, 5); // Posición ajustada
+            directionalLight.castShadow = true;
+            
+            // Mejorar calidad de sombras
+            directionalLight.shadow.mapSize.width = 2048; // Mayor resolución para sombras más nítidas
+            directionalLight.shadow.mapSize.height = 2048;
+            directionalLight.shadow.camera.near = 0.1;
+            directionalLight.shadow.camera.far = 100;
+            directionalLight.shadow.camera.left = -15;
+            directionalLight.shadow.camera.right = 15;
+            directionalLight.shadow.camera.top = 15;
+            directionalLight.shadow.camera.bottom = -15;
+            directionalLight.shadow.bias = -0.0005; // Ajustado para evitar artefactos
+            directionalLight.shadow.normalBias = 0.02;
+            directionalLight.shadow.radius = 3; // Mayor suavizado para sombras más naturales
+            scene.add(directionalLight);
+            
+            // Añadir helper para visualizar la cámara de sombras (útil para depuración)
+            // const shadowCameraHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
+            // scene.add(shadowCameraHelper);
+            
+            // Segunda luz direccional para sombras desde otro ángulo
+            const secondaryLight = new THREE.DirectionalLight(0xffffff, 0.4);
+            secondaryLight.position.set(-3, 8, -3);
+            secondaryLight.castShadow = true;
+            secondaryLight.shadow.mapSize.width = 1024; // Resolución moderada
+            secondaryLight.shadow.mapSize.height = 1024;
+            secondaryLight.shadow.camera.near = 0.1;
+            secondaryLight.shadow.camera.far = 100;
+            secondaryLight.shadow.camera.left = -10;
+            secondaryLight.shadow.camera.right = 10;
+            secondaryLight.shadow.camera.top = 10;
+            secondaryLight.shadow.camera.bottom = -10;
+            secondaryLight.shadow.bias = -0.0003;
+            secondaryLight.shadow.radius = 2; // Suavizado moderado
+            scene.add(secondaryLight);
+            
+            // Luz de relleno suave desde abajo
+            const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
+            fillLight.position.set(0, -3, 0);
+            scene.add(fillLight);
+            
+            // Añadir plano invisible debajo para recibir sombras (mejorado)
+            const groundGeometry = new THREE.PlaneBufferGeometry(100, 100); // Geometría más grande
+            const groundMaterial = new THREE.ShadowMaterial({
+                opacity: 0.4, // Mayor opacidad para sombras más visibles
+                transparent: true
+            });
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.position.y = -1.5; // Posición ajustada
+            ground.receiveShadow = true;
+            ground.matrixAutoUpdate = false;
+            ground.updateMatrix();
+            scene.add(ground);
+            
+            // Eliminar el plano grande que añadimos anteriormente
+            // No añadiremos un plano para sombras ya que el modelo ya tiene su propia base
+            
+            // Añadir control de brillo
+            const brightnessControl = document.createElement('div');
+            brightnessControl.style.position = 'absolute';
+            brightnessControl.style.bottom = '50px';
+            brightnessControl.style.right = '10px';
+            brightnessControl.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+            brightnessControl.style.padding = '10px';
+            brightnessControl.style.borderRadius = '5px';
+            brightnessControl.style.zIndex = '1000';
+            brightnessControl.innerHTML = `
+                <label for="brightness" style="color: white; display: block; margin-bottom: 5px;">Brillo:</label>
+                <input type="range" id="brightness" min="0.1" max="1.0" step="0.1" value="0.3" style="width: 100px;">
+            `;
+            document.body.appendChild(brightnessControl);
+            
+            // Manejar cambios en el control de brillo
+            const brightnessSlider = document.getElementById('brightness');
+            brightnessSlider.addEventListener('input', function() {
+                const value = parseFloat(this.value);
+                ambientLight.intensity = value;
+                directionalLight.intensity = value * 2;
+                frontLight.intensity = value * 1.3;
+                backLight.intensity = value;
+                fillLight.intensity = value * 0.3;
+            });
+            
+            // Stats para monitoreo de rendimiento
+            stats = new Stats();
+            stats.showPanel(0); // Panel 0 = fps
+            document.body.appendChild(stats.dom);
+            
+            // Monitoreo de memoria
+            memoryInterval = setInterval(updateMemoryUsage, 1000);
+            
+            // Cargar el modelo
+            loadModel();
+            
+            // Manejar redimensionamiento de ventana
+            window.addEventListener('resize', onWindowResize);
+            
+            // Iniciar bucle de animación
+            animate();
+        }
+        
+        function loadModel() {
+            loadingText.textContent = "Preparando carga del modelo...";
+            
+            // Crear loading manager para seguimiento de progreso
+            loadingManager = new THREE.LoadingManager();
+            
+            loadingManager.onProgress = function(url, itemsLoaded, itemsTotal) {
+                const progress = itemsLoaded / itemsTotal * 100;
+                progressBar.style.width = progress + '%';
+                
+                const loadedMB = (itemsLoaded / (1024 * 1024)).toFixed(2);
+                const totalMB = (itemsTotal / (1024 * 1024)).toFixed(2);
+                loadingStats.textContent = `${loadedMB} MB de ${totalMB} MB (${Math.round(progress)}%)`;
+                
+                loadingText.textContent = `Cargando modelo 3D... ${Math.round(progress)}%`;
+            };
+            
+            loadingManager.onError = function(url) {
+                console.error('Error cargando:', url);
+                showError(`Error cargando el recurso: ${url}`);
+            };
+            
+            // Configurar el cargador GLTF
+            const loader = new THREE.GLTFLoader(loadingManager);
+            
+            // Configurar Draco para descompresión
+            const dracoLoader = new THREE.DRACOLoader();
+            dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+            loader.setDRACOLoader(dracoLoader);
+            
+            // Implementar caché para el modelo
+            const modelUrl = `Modelo3DCafeColombiano.glb`;
+            const modelCacheKey = `model-cache-${modelUrl}`;
+            
+            // Intentar cargar desde caché primero
+            try {
+                loadingText.textContent = "Verificando caché...";
+                
+                // Verificar si el modelo está en caché
+                if (window.localStorage && localStorage.getItem(modelCacheKey)) {
+                    loadingText.textContent = "Cargando desde caché...";
+                    console.log("Modelo encontrado en caché");
+                    
+                    try {
+                        // Cargar desde caché
+                        const cachedData = localStorage.getItem(modelCacheKey);
+                        const blob = dataURItoBlob(cachedData);
+                        loadModelFromBlob(blob);
+                        return; // Salir si se cargó desde caché
+                    } catch (cacheError) {
+                        console.warn("Error cargando desde caché:", cacheError);
+                        // Continuar con carga normal si hay error
+                    }
+                }
+                
+                // Si no está en caché, cargar normalmente
+                loadingText.textContent = "Iniciando carga del modelo...";
+                console.log("Iniciando carga del modelo con fetch");
+                
+                // Usar fetch con opciones optimizadas
+                console.log("Intentando fetch a:", modelUrl);
+                fetch(modelUrl, {
+                    method: 'GET',
+                    cache: 'force-cache', // Usar caché del navegador si está disponible
+                    priority: 'high' // Prioridad alta para la carga
+                })
+                    .then(response => {
+                        console.log("Respuesta recibida:", response);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        console.log("Respuesta OK, obteniendo content-length");
+                        
+                        const contentLength = response.headers.get('content-length');
+                        console.log("Content-Length:", contentLength);
+                        const totalBytes = parseInt(contentLength, 10);
+                        console.log("Total bytes a cargar:", totalBytes);
+                        let loadedBytes = 0;
+                        
+                        // Crear un lector de stream
+                        console.log("Creando lector de stream");
+                        const reader = response.body.getReader();
+                        const chunks = [];
+                        console.log("Iniciando lectura de chunks");
+                        
+                        // Función para leer chunks
+                        function readChunk() {
+                            console.log("Leyendo chunk...");
+                            return reader.read().then(({ done, value }) => {
+                                if (done) {
+                                    console.log("Lectura completada, procesando chunks");
+                                    // Combinar todos los chunks
+                                    console.log("Combinando chunks, total bytes:", loadedBytes);
+                                    let chunksAll;
+                                    try {
+                                        chunksAll = new Uint8Array(loadedBytes);
+                                        let position = 0;
+                                        for (const chunk of chunks) {
+                                            console.log("Procesando chunk de tamaño:", chunk.length);
+                                            chunksAll.set(chunk, position);
+                                            position += chunk.length;
+                                        }
+                                        console.log("Chunks combinados correctamente");
+                                    } catch (error) {
+                                        console.error("Error combinando chunks:", error);
+                                        showError(`Error combinando chunks: ${error.message}`);
+                                        return;
+                                    }
+                                    
+                                    loadingText.textContent = "Procesando modelo...";
+                                    
+                                    // Crear un blob y URL
+                                    const blob = new Blob([chunksAll], { type: 'model/gltf-binary' });
+                                    
+                                    // Guardar en caché para futuras cargas
+                                    if (window.localStorage) {
+                                        try {
+                                            const reader = new FileReader();
+                                            reader.onload = function() {
+                                                try {
+                                                    localStorage.setItem(modelCacheKey, reader.result);
+                                                    console.log("Modelo guardado en caché");
+                                                } catch (e) {
+                                                    console.warn("No se pudo guardar en caché:", e);
+                                                }
+                                            };
+                                            reader.readAsDataURL(blob);
+                                        } catch (e) {
+                                            console.warn("Error al preparar caché:", e);
+                                        }
+                                    }
+                                    
+                                    loadModelFromBlob(blob, loader);
+                                    
+                                    return;
+                                }
+                                
+                                // Procesar este chunk
+                                loadedBytes += value.length;
+                                chunks.push(value);
+                                
+                                // Actualizar progreso
+                                const progress = (loadedBytes / totalBytes) * 100;
+                                progressBar.style.width = `${progress}%`;
+                                
+                                const loadedMB = (loadedBytes / (1024 * 1024)).toFixed(2);
+                                const totalMB = (totalBytes / (1024 * 1024)).toFixed(2);
+                                loadingStats.textContent = `${loadedMB} MB de ${totalMB} MB (${Math.round(progress)}%)`;
+                                
+                                loadingText.textContent = `Cargando modelo 3D... ${Math.round(progress)}%`;
+                                
+                                // Leer el siguiente chunk
+                                return readChunk();
+                            });
+                        }
+                        
+                        // Iniciar lectura de chunks
+                        return readChunk();
+                    })
+                    .catch(error => {
+                        console.error('Error en fetch:', error);
+                        showError(`Error cargando el modelo: ${error.message}`);
+                    });
+            } catch (error) {
+                console.error('Error en carga:', error);
+                showError(`Error inesperado: ${error.message}`);
+            }
+        }
+        
+        // Función para cargar el modelo desde un blob
+        function loadModelFromBlob(blob) {
+            const url = URL.createObjectURL(blob);
+            
+            // Cargar desde el blob URL con opciones optimizadas
+            loader.load(url, (gltf) => {
+                model = gltf.scene;
+                
+                // Optimizar el modelo
+                optimizeModel(model);
+                
+                // Ignorar errores de texturas no soportadas
+                console.log("Ignorando errores de texturas no soportadas");
+                
+                // Añadir a la escena
+                scene.add(model);
+                
+                // Centrar y escalar el modelo
+                centerModel(model);
+                
+                // Ocultar pantalla de carga
+                loadingContainer.style.opacity = 0;
+                setTimeout(() => {
+                    loadingContainer.style.display = 'none';
+                }, 500);
+                
+                isLoading = false;
+                
+                // Limpiar URL
+                URL.revokeObjectURL(url);
+                
+                // Actualizar sombras una vez
+                renderer.shadowMap.needsUpdate = true;
+                
+                console.log('Modelo cargado correctamente');
+            },
+            // Progreso de procesamiento
+            (xhr) => {
+                loadingText.textContent = `Procesando modelo... ${Math.round((xhr.loaded / xhr.total) * 100)}%`;
+            },
+            // Error
+            (error) => {
+                console.error('Error procesando modelo:', error);
+                showError(`Error procesando modelo: ${error.message}`);
+            });
+        }
+        
+        // Función para cargar el modelo desde un blob
+        function loadModelFromBlob(blob, loader) {
+            const url = URL.createObjectURL(blob);
+            
+            // Cargar desde el blob URL con opciones optimizadas
+            loader.load(url,
+                // Callback de éxito
+                (gltf) => {
+                    model = gltf.scene;
+                    
+                    // Optimizar el modelo
+                    optimizeModel(model);
+                    
+                    // Ignorar errores de texturas no soportadas
+                    console.log("Ignorando errores de texturas no soportadas");
+                    
+                    // Añadir a la escena
+                    scene.add(model);
+                    
+                    // Centrar y escalar el modelo
+                    centerModel(model);
+                    
+                    // Ocultar pantalla de carga
+                    loadingContainer.style.opacity = 0;
+                    setTimeout(() => {
+                        loadingContainer.style.display = 'none';
+                    }, 500);
+                    
+                    isLoading = false;
+                    
+                    // Limpiar URL
+                    URL.revokeObjectURL(url);
+                    
+                    // Actualizar sombras una vez
+                    renderer.shadowMap.needsUpdate = true;
+                    
+                    console.log('Modelo cargado correctamente');
+                },
+                // Progreso de procesamiento
+                (xhr) => {
+                    loadingText.textContent = `Procesando modelo... ${Math.round((xhr.loaded / xhr.total) * 100)}%`;
+                },
+                // Error
+                (error) => {
+                    console.error('Error procesando modelo:', error);
+                    showError(`Error procesando modelo: ${error.message}`);
+                }
+            );
+        }
+        
+        // Función para convertir dataURI a Blob
+        function dataURItoBlob(dataURI) {
+            const byteString = atob(dataURI.split(',')[1]);
+            const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            return new Blob([ab], {type: mimeString});
+        }
+        
+        // Función para convertir dataURI a Blob
+        function dataURItoBlob(dataURI) {
+            const byteString = atob(dataURI.split(',')[1]);
+            const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            return new Blob([ab], {type: mimeString});
+        }
+        
+        function optimizeModel(model) {
+            // Aplicar optimizaciones al modelo
+            let triangleCount = 0;
+            let meshCount = 0;
+            
+            model.traverse((node) => {
+                if (node.isMesh) {
+                    meshCount++;
+                    
+                    // Contar triángulos para estadísticas
+                    if (node.geometry) {
+                        if (node.geometry.index !== null) {
+                            triangleCount += node.geometry.index.count / 3;
+                        } else if (node.geometry.attributes.position) {
+                            triangleCount += node.geometry.attributes.position.count / 3;
+                        }
+                    }
+                    
+                    // Optimizaciones de rendimiento para meshes
+                    node.castShadow = true;
+                    node.receiveShadow = true;
+                    node.frustumCulled = true; // Activar frustum culling
+                    node.matrixAutoUpdate = false; // Desactivar actualización automática de matriz
+                    node.updateMatrix(); // Actualizar matriz una vez
+                    
+                    // Optimizar geometrías
+                    if (node.geometry) {
+                        // Eliminar atributos no utilizados para ahorrar memoria
+                        const geometry = node.geometry;
+                        if (!geometry.attributes.normal) {
+                            geometry.computeVertexNormals();
+                        }
+                        
+                        // Eliminar atributos no esenciales si existen
+                        const nonEssentialAttribs = ['color', 'fog', 'lineDistance'];
+                        nonEssentialAttribs.forEach(attrib => {
+                            if (geometry.attributes[attrib]) {
+                                geometry.deleteAttribute(attrib);
+                            }
+                        });
+                        
+                        // Computar una sola vez
+                        geometry.computeBoundingSphere();
+                        geometry.computeBoundingBox();
+                    }
+                    
+                    // Optimizar y ajustar materiales
+                    if (node.material) {
+                        // Convertir arrays de materiales a un solo material si es posible
+                        if (Array.isArray(node.material) && node.material.length === 1) {
+                            node.material = node.material[0];
+                        }
+                        
+                        // Procesar cada material (ya sea un array o un solo material)
+                        const materials = Array.isArray(node.material) ? node.material : [node.material];
+                        
+                        materials.forEach(material => {
+                            // Optimizar materiales
+                            material.needsUpdate = true;
+                            
+                            // Configuración básica para materiales
+                            if (material.metalness !== undefined) {
+                                material.metalness = Math.min(material.metalness, 0.4);
+                            }
+                            
+                            if (material.roughness !== undefined) {
+                                material.roughness = Math.max(material.roughness, 0.5);
+                            }
+                            
+                            // Configuración de sombras
+                            material.shadowSide = THREE.FrontSide;
+                            
+                            // Eliminar emisión para ahorrar cálculos
+                            if (material.emissive !== undefined) {
+                                material.emissive.setRGB(0, 0, 0);
+                            }
+                            
+                            // Reducir especularidad
+                            if (material.specular !== undefined) {
+                                material.specular.multiplyScalar(0.4);
+                            }
+                            
+                            // Optimizar transparencia
+                            if (material.transparent && material.opacity > 0.95) {
+                                material.transparent = false;
+                                material.opacity = 1.0;
+                            }
+                            
+                            // Desactivar características costosas
+                            material.flatShading = true; // Más rápido que smooth shading
+                            material.fog = false; // Desactivar niebla
+                            material.lights = true; // Mantener luces
+                            
+                            // Reducir calidad de texturas si existen
+                            if (material.map) {
+                                material.map.anisotropy = 1; // Valor mínimo
+                                material.map.minFilter = THREE.LinearFilter; // Filtro más simple
+                                material.map.generateMipmaps = false; // Desactivar mipmaps
+                            }
+                        });
+                    }
+                }
+            });
+            
+            console.log("Modelo optimizado y ajustado para menor brillo");
+        }
+        
+        function centerModel(model) {
+            // Calcular bounding box
+            const box = new THREE.Box3().setFromObject(model);
+            const center = box.getCenter(new THREE.Vector3());
+            
+            // Centrar el modelo
+            model.position.x = -center.x;
+            model.position.y = -center.y;
+            model.position.z = -center.z;
+            
+            // Obtener el tamaño del modelo
+            const size = box.getSize(new THREE.Vector3());
+            const maxDim = Math.max(size.x, size.y, size.z);
+            
+            // Ajustar la escala - hacerlo más grande
+            // En lugar de reducir modelos grandes, aumentamos todos los modelos
+            const scale = 1.5; // Reducir un poco la escala para que no sea tan grande
+            model.scale.set(scale, scale, scale);
+            
+            console.log("Dimensiones del modelo:", size);
+            console.log("Dimensión máxima:", maxDim);
+            
+            // Ajustar la cámara para que esté más cerca
+            const distance = maxDim * 1.2; // Más cerca que antes
+            camera.position.set(distance * 0.5, distance * 0.3, distance * 0.5);
+            camera.lookAt(0, 0, 0);
+            
+            // Ajustar los límites de los controles
+            controls.minDistance = distance * 0.3; // Permitir acercarse más
+            controls.maxDistance = distance * 3;   // Permitir alejarse más
+            controls.target.set(0, 0, 0);
+            controls.update();
+            
+            // Añadir un mensaje para el usuario
+            const infoDiv = document.getElementById('info');
+            infoDiv.innerHTML += `
+                <p style="color: #4CAF50;">Modelo cargado correctamente. Usa los controles para navegar.</p>
+                <p>Dimensiones del modelo: X: ${size.x.toFixed(2)}, Y: ${size.y.toFixed(2)}, Z: ${size.z.toFixed(2)}</p>
+            `;
+        }
+        
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            progressBar.style.backgroundColor = '#ff5555';
+            loadingText.style.color = '#ff5555';
+        }
+        
+        // Función para limpiar memoria
+        function cleanupMemory() {
+            // Forzar recolección de basura si está disponible
+            if (window.gc) {
+                window.gc();
+            }
+            
+            // Liberar texturas y geometrías no utilizadas
+            if (THREE.Cache) {
+                THREE.Cache.clear();
+            }
+            
+            console.log("Memoria liberada");
+        }
+        
+        function updateMemoryUsage() {
+            if (window.performance && window.performance.memory) {
+                const memory = window.performance.memory;
+                const totalMB = (memory.totalJSHeapSize / (1024 * 1024)).toFixed(2);
+                const usedMB = (memory.usedJSHeapSize / (1024 * 1024)).toFixed(2);
+                const limitMB = (memory.jsHeapSizeLimit / (1024 * 1024)).toFixed(2);
+                
+                memoryUsage.textContent = `Memoria: ${usedMB}MB / ${limitMB}MB`;
+                
+                // Advertir si el uso de memoria es alto
+                if (memory.usedJSHeapSize > memory.jsHeapSizeLimit * 0.8) {
+                    memoryUsage.style.color = '#ff5555';
+                    // Intentar liberar memoria
+                    cleanupMemory();
+                } else {
+                    memoryUsage.style.color = '#ffffff';
+                }
+            } else {
+                memoryUsage.textContent = 'Memoria: No disponible';
+            }
+        }
+        
+        // Función optimizada para redimensionar ventana
+        let resizeTimeout;
+        function onWindowResize() {
+            // Debounce para evitar múltiples redimensionamientos
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.shadowMap.needsUpdate = true;
+            }, 250);
+        }
+        
+        function optimizeModel(model) {
+            // Aplicar optimizaciones al modelo
+            let triangleCount = 0;
+            let meshCount = 0;
+            
+            model.traverse((node) => {
+                if (node.isMesh) {
+                    meshCount++;
+                    
+                    // Contar triángulos para estadísticas
+                    if (node.geometry) {
+                        if (node.geometry.index !== null) {
+                            triangleCount += node.geometry.index.count / 3;
+                        } else if (node.geometry.attributes.position) {
+                            triangleCount += node.geometry.attributes.position.count / 3;
+                        }
+                    }
+                    
+                    // Optimizaciones de rendimiento para meshes
+                    node.castShadow = true;
+                    node.receiveShadow = true;
+                    node.frustumCulled = true; // Activar frustum culling
+                    node.matrixAutoUpdate = false; // Desactivar actualización automática de matriz
+                    node.updateMatrix(); // Actualizar matriz una vez
+                    
+                    // Optimizar geometrías
+                    if (node.geometry) {
+                        // Eliminar atributos no utilizados para ahorrar memoria
+                        const geometry = node.geometry;
+                        if (!geometry.attributes.normal) {
+                            geometry.computeVertexNormals();
+                        }
+                        
+                        // Computar una sola vez
+                        geometry.computeBoundingSphere();
+                        geometry.computeBoundingBox();
+                    }
+                    
+                    // Optimizar materiales
+                    if (node.material) {
+                        // Convertir arrays de materiales a un solo material si es posible
+                        if (Array.isArray(node.material) && node.material.length === 1) {
+                            node.material = node.material[0];
+                        }
+                        
+                        // Procesar cada material (ya sea un array o un solo material)
+                        const materials = Array.isArray(node.material) ? node.material : [node.material];
+                        
+                        materials.forEach(material => {
+                            // Optimizar materiales
+                            material.needsUpdate = true;
+                            
+                            // Configuración básica para materiales
+                            if (material.metalness !== undefined) {
+                                material.metalness = Math.min(material.metalness, 0.4);
+                            }
+                            
+                            if (material.roughness !== undefined) {
+                                material.roughness = Math.max(material.roughness, 0.5);
+                            }
+                            
+                            // Configuración de sombras
+                            material.shadowSide = THREE.FrontSide;
+                            
+                            // Eliminar emisión para ahorrar cálculos
+                            if (material.emissive !== undefined) {
+                                material.emissive.setRGB(0, 0, 0);
+                            }
+                            
+                            // Reducir especularidad
+                            if (material.specular !== undefined) {
+                                material.specular.multiplyScalar(0.4);
+                            }
+                        });
+                    }
+                }
+            });
+            
+            console.log(`Modelo optimizado: ${meshCount} meshes, ${Math.round(triangleCount)} triángulos`);
+        }
+        
+        // Función para animar la escena
+        
+        function animate(currentTime) {
+            requestAnimationFrame(animate);
+            
+            // Limitar FPS para ahorrar recursos
+            const elapsed = currentTime - lastFrameTime;
+            if (elapsed < frameInterval) return;
+            lastFrameTime = currentTime - (elapsed % frameInterval);
+            
+            stats.begin();
+            
+            // Actualizar controles solo si están activos
+            if (controls.enabled) {
+                controls.update();
+            }
+            
+            // Rotar el modelo si está cargado y la rotación automática está activada
+            if (model && controls.autoRotate) {
+                model.rotation.y += 0.002;
+            }
+            
+            // Renderizar escena
+            renderer.render(scene, camera);
+            
+            stats.end();
+            
+            // Monitorear memoria cada 30 frames
+            if (Math.random() < 0.03) { // ~3% de probabilidad por frame
+                updateMemoryUsage();
+            }
+        }
+        
+        // Añadir teclas de acceso rápido
+        window.addEventListener('keydown', function(event) {
+            switch(event.key) {
+                case 'r': // Tecla R para activar/desactivar rotación
+                    controls.autoRotate = !controls.autoRotate;
+                    break;
+                case '+': // Tecla + para acercar
+                    camera.position.multiplyScalar(0.9);
+                    break;
+                case '-': // Tecla - para alejar
+                    camera.position.multiplyScalar(1.1);
+                    break;
+                case 'h': // Tecla H para mostrar/ocultar información
+                    const info = document.getElementById('info');
+                    info.style.display = info.style.display === 'none' ? 'block' : 'none';
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>

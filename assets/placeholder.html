@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Placeholders</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .placeholder-list {
+            margin-top: 20px;
+        }
+        .placeholder {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .placeholder h2 {
+            margin-top: 0;
+            color: #444;
+        }
+        .placeholder-image {
+            width: 100%;
+            height: 200px;
+            background-color: #ddd;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+            font-size: 18px;
+            color: #666;
+            border-radius: 5px;
+        }
+        .instructions {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #e6f7ff;
+            border-left: 4px solid #1890ff;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Image Placeholders</h1>
+        
+        <div class="placeholder-list">
+            <div class="placeholder">
+                <h2>Coffee Region</h2>
+                <div class="placeholder-image">coffee_region.jpg</div>
+            </div>
+            
+            <div class="placeholder">
+                <h2>Cartagena</h2>
+                <div class="placeholder-image">cartagena.jpg</div>
+            </div>
+            
+            <div class="placeholder">
+                <h2>Bogotá</h2>
+                <div class="placeholder-image">bogota.jpg</div>
+            </div>
+            
+            <div class="placeholder">
+                <h2>Amazon</h2>
+                <div class="placeholder-image">amazon.jpg</div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>Instructions:</h3>
+            <p>Please add the following image files to the assets directory:</p>
+            <ul>
+                <li>coffee_region.jpg</li>
+                <li>cartagena.jpg</li>
+                <li>bogota.jpg</li>
+                <li>amazon.jpg</li>
+            </ul>
+            <p>These images will be used in the popups when interacting with the 3D model elements.</p>
+        </div>
+    </div>
+</body>
+</html>

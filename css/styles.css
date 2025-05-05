@@ -1,0 +1,251 @@
+/* Global Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    overflow: hidden;
+    background-color: #000;
+    color: #fff;
+}
+
+/* Loading Screen */
+.loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.loader {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-text {
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: #fff;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.5;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.5;
+    }
+}
+
+/* Main Container */
+.container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+}
+
+/* Canvas */
+#scene-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* UI Overlay */
+.ui-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    pointer-events: none; /* Allow clicks to pass through to canvas */
+}
+
+/* Navigation Hints */
+.navigation-hints {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    gap: 20px;
+}
+
+.hint {
+    display: flex;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 10px 15px;
+    border-radius: 20px;
+    pointer-events: auto;
+}
+
+.hint i {
+    margin-right: 10px;
+    font-size: 18px;
+}
+
+/* Interactive Indicators */
+#interactive-indicators {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.indicator {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.3);
+    border: 2px solid #fff;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    pointer-events: auto;
+    animation: pulse-indicator 2s infinite;
+}
+
+@keyframes pulse-indicator {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.7;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+}
+
+/* Popup Styles */
+#popup-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    pointer-events: auto;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+#popup-container.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.popup-content {
+    background-color: #1a1a1a;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 800px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #333;
+}
+
+.popup-header h2 {
+    color: #fff;
+    font-size: 24px;
+}
+
+#popup-close {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+#popup-body {
+    padding: 20px;
+    color: #ccc;
+    line-height: 1.6;
+}
+
+/* Custom Cursor */
+.custom-cursor {
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 9999;
+    transition: width 0.3s, height 0.3s, background-color 0.3s;
+}
+
+.custom-cursor.hover {
+    width: 40px;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.8);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .navigation-hints {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .popup-content {
+        width: 95%;
+    }
+    
+    .hint {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+    
+    .hint i {
+        font-size: 16px;
+    }
+}
