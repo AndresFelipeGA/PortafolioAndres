@@ -145,6 +145,8 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.0/examples/js/loaders/GLTFLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.0/examples/js/loaders/DRACOLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.0/examples/js/utils/BufferGeometryUtils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.0/examples/js/loaders/FontLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.0/examples/js/geometries/TextGeometry.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/stats.js@0.17.0/build/stats.min.js"></script>
 
     <script>
@@ -464,7 +466,23 @@
             
             loadingManager.onError = function(url) {
                 console.error('Error cargando:', url);
-                showError(`Error cargando el recurso: ${url}`);
+                
+                // Verificar si es un error de textura (blob URL)
+                if (url.startsWith('blob:')) {
+                    console.warn('Error cargando textura desde blob URL. Continuando con carga...');
+                    // No mostrar error al usuario, solo registrar en consola
+                    // Esto permitirá que el modelo se cargue incluso si algunas texturas fallan
+                    
+                    // Intentar recuperar la carga después de un error de textura
+                    setTimeout(() => {
+                        if (isLoading) {
+                            console.log("Continuando carga después de error de textura...");
+                            loadingManager.onProgress(url, 1, 1); // Simular progreso completo para este recurso
+                        }
+                    }, 500);
+                } else {
+                    showError(`Error cargando el recurso: ${url}`);
+                }
             };
             
             // Configurar el cargador GLTF
@@ -636,12 +654,26 @@
             return new Blob([ab], {type: mimeString});
         }
         
-        // Función para cargar el modelo desde un blob
+        // Función para cargar el modelo desde un blob con manejo mejorado de errores
         function loadModelFromBlob(blob, loader) {
-            const url = URL.createObjectURL(blob);
+            if (!blob || !(blob instanceof Blob)) {
+                console.error("Error: Se recibió un blob inválido", blob);
+                showError("Error: El archivo del modelo es inválido o está corrupto");
+                return;
+            }
             
-            // Cargar desde el blob URL con opciones optimizadas
-            loader.load(url,
+            try {
+                const url = URL.createObjectURL(blob);
+                console.log("Blob URL creado:", url);
+                
+                // Verificar que el blob tenga un tamaño razonable
+                console.log("Tamaño del blob:", blob.size, "bytes");
+                if (blob.size < 1000) {
+                    console.warn("Advertencia: El blob es muy pequeño, podría estar incompleto");
+                }
+                
+                // Cargar desde el blob URL con opciones optimizadas y mejor manejo de errores
+                loader.load(url,
                 // Callback de éxito
                 (gltf) => {
                     // Limpiar modelo anterior si existe
@@ -689,6 +721,77 @@
                     
                     model = gltf.scene;
                     
+                    // Identificar el suelo para tratamiento especial
+                    let floorMeshes = []; // Cambiado a array para capturar múltiples suelos
+                    model.traverse((node) => {
+                        // Buscar el suelo basado en características comunes
+                        if (node.isMesh) {
+                            if (node.name.toLowerCase().includes('suelo') ||
+                                node.name.toLowerCase().includes('floor') ||
+                                node.name.toLowerCase().includes('ground') ||
+                                node.name.toLowerCase().includes('piso') ||
+                                (node.position.y < 0.1 && node.scale.x > 3 && node.scale.z > 3)) {
+                                console.log("Suelo encontrado:", node.name);
+                                floorMeshes.push(node);
+                            }
+                        }
+                    });
+                    
+                    // Usar el primer suelo encontrado como principal, pero procesar todos
+                    let floorMesh = floorMeshes.length > 0 ? floorMeshes[0] : null;
+                    console.log(`Se encontraron ${floorMeshes.length} elementos de suelo`);
+                    
+                    // Procesar todos los suelos encontrados
+                    floorMeshes.forEach(floor => {
+                        console.log("Aplicando tratamiento especial al suelo:", floor.name);
+                        
+                        // Forzar recepción de sombras para todos los suelos
+                        floor.receiveShadow = true;
+                        
+                        if (Array.isArray(floor.material)) {
+                            floor.material.forEach(mat => {
+                                // Asegurarnos de que la textura del suelo se mantenga y sea visible
+                                if (mat.map) {
+                                    // Asegurar que la textura sea visible
+                                    mat.map.needsUpdate = true;
+                                    // Forzar generación de mipmaps para mejor calidad
+                                    mat.map.generateMipmaps = true;
+                                    // Usar filtros de alta calidad
+                                    mat.map.minFilter = THREE.LinearMipmapLinearFilter;
+                                    mat.map.magFilter = THREE.LinearFilter;
+                                    // Aumentar anisotropía para mejor calidad en ángulos oblicuos
+                                    mat.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
+                                } else {
+                                    mat.color.set(0xD2B48C); // Color arena/tierra
+                                }
+                                
+                                // Asegurar que el material sea opaco y visible
+                                mat.transparent = false;
+                                mat.opacity = 1.0;
+                                mat.visible = true;
+                                mat.needsUpdate = true;
+                            });
+                        } else if (floor.material) {
+                            // Si el suelo no tiene textura, asignarle un color más natural
+                            if (!floor.material.map) {
+                                floor.material.color.set(0xD2B48C); // Color arena/tierra
+                            } else {
+                                // Optimizar la textura existente
+                                floor.material.map.needsUpdate = true;
+                                floor.material.map.generateMipmaps = true;
+                                floor.material.map.minFilter = THREE.LinearMipmapLinearFilter;
+                                floor.material.map.magFilter = THREE.LinearFilter;
+                                floor.material.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
+                            }
+                            
+                            // Asegurar que el material sea opaco y visible
+                            floor.material.transparent = false;
+                            floor.material.opacity = 1.0;
+                            floor.material.visible = true;
+                            floor.material.needsUpdate = true;
+                        }
+                    });
+                    
                     // Optimizar el modelo
                     optimizeModel(model);
                     
@@ -704,23 +807,89 @@
                             const materials = Array.isArray(node.material) ? node.material : [node.material];
                             
                             materials.forEach(material => {
-                                // Desactivar mapas que causan problemas con UV sets personalizados
-                                if (material.metalnessMap) {
-                                    console.log("Desactivando metalnessMap para evitar errores de UV");
-                                    material.metalness = 0.4; // Valor fijo en lugar de usar mapa
-                                    material.metalnessMap = null;
+                                // Manejo mejorado para mapas que causan problemas con UV sets personalizados
+                                // Verificar y desactivar todos los mapas que podrían usar UV sets personalizados
+                                const problematicMaps = [
+                                    'metalnessMap', 'roughnessMap', 'normalMap',
+                                    'aoMap', 'emissiveMap', 'displacementMap',
+                                    'clearcoatMap', 'clearcoatRoughnessMap', 'clearcoatNormalMap'
+                                    // Eliminamos 'map' para permitir que se muestre la textura del suelo
+                                    // 'map', 'lightMap', 'bumpMap', 'specularMap', 'envMap'
+                                ];
+                                
+                                // Verificar si este nodo es el suelo o parte del suelo
+                                const isFloor = node.name.toLowerCase().includes('suelo') ||
+                                               node.name.toLowerCase().includes('floor') ||
+                                               node.name.toLowerCase().includes('ground') ||
+                                               (node.position.y < 0.1 && node.scale.x > 5 && node.scale.z > 5);
+                                
+                                // Si es el suelo, preservar sus texturas
+                                if (isFloor) {
+                                    console.log("Preservando texturas para el suelo:", node.name);
+                                    // No desactivar mapas para el suelo
+                                    return;
                                 }
                                 
-                                if (material.roughnessMap) {
-                                    console.log("Desactivando roughnessMap para evitar errores de UV");
-                                    material.roughness = 0.6; // Valor fijo en lugar de usar mapa
-                                    material.roughnessMap = null;
+                                // Primero, intentar corregir los UV sets
+                                if (node.geometry && node.geometry.attributes) {
+                                    // Si hay UV sets personalizados, intentar copiarlos al UV set principal
+                                    for (let key in node.geometry.attributes) {
+                                        if (key.startsWith('uv') && key !== 'uv') {
+                                            console.log(`Encontrado UV set personalizado: ${key}, intentando usar como UV principal`);
+                                            try {
+                                                // Copiar el UV set personalizado al UV set principal
+                                                node.geometry.attributes.uv = node.geometry.attributes[key];
+                                                console.log("UV set personalizado copiado correctamente");
+                                            } catch (e) {
+                                                console.warn("No se pudo copiar UV set:", e);
+                                            }
+                                        }
+                                    }
                                 }
                                 
-                                if (material.normalMap) {
-                                    console.log("Desactivando normalMap para evitar errores de UV");
-                                    material.normalMap = null;
+                                // Luego, desactivar mapas problemáticos
+                                // Verificar si hay problemas con los UV sets antes de desactivar mapas
+                                let hasUVProblems = false;
+                                
+                                // Comprobar si hay errores de UV sets personalizados
+                                if (node.geometry && node.geometry.attributes) {
+                                    for (let key in node.geometry.attributes) {
+                                        if (key.startsWith('uv') && key !== 'uv' && material.map) {
+                                            // Solo marcar como problema si realmente hay un mapa que usa UV sets personalizados
+                                            hasUVProblems = true;
+                                            console.log("Detectado posible problema de UV sets en:", node.name || "mesh sin nombre");
+                                            break;
+                                        }
+                                    }
                                 }
+                                
+                                // Solo desactivar mapas problemáticos si realmente hay problemas de UV
+                                if (hasUVProblems) {
+                                    problematicMaps.forEach(mapName => {
+                                        if (material[mapName]) {
+                                            console.log(`Desactivando ${mapName} para evitar errores de UV personalizados`);
+                                            
+                                            // Establecer valores predeterminados según el tipo de mapa
+                                            if (mapName === 'metalnessMap') {
+                                                material.metalness = 0.4;
+                                            } else if (mapName === 'roughnessMap') {
+                                                material.roughness = 0.6;
+                                            } else if (mapName === 'emissiveMap') {
+                                                material.emissive.setRGB(0, 0, 0);
+                                            } else if (mapName === 'aoMap') {
+                                                material.aoMapIntensity = 0;
+                                            }
+                                            
+                                            // Desactivar el mapa
+                                            material[mapName] = null;
+                                        }
+                                    });
+                                } else {
+                                    console.log("No se detectaron problemas de UV sets, manteniendo mapas de textura");
+                                }
+                                
+                                // Forzar actualización del material
+                                material.needsUpdate = true;
                                 
                                 material.needsUpdate = true;
                             });
@@ -730,8 +899,226 @@
                     // Añadir a la escena
                     scene.add(model);
                     
+                    // Función para arreglar texturas de suelo problemáticas y manejar errores de carga
+                    const fixFloorTextures = () => {
+                        console.log("Buscando y reparando suelos con problemas de textura...");
+                        
+                        // Crear una textura de respaldo para el suelo
+                        const createFallbackTexture = () => {
+                            // Crear un canvas para generar una textura procedural
+                            const canvas = document.createElement('canvas');
+                            canvas.width = 512;
+                            canvas.height = 512;
+                            const ctx = canvas.getContext('2d');
+                            
+                            // Rellenar con color base
+                            ctx.fillStyle = '#E0D2BC'; // Color arena/tierra claro
+                            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                            
+                            // Añadir patrón de piedras
+                            for (let i = 0; i < 200; i++) {
+                                const x = Math.random() * canvas.width;
+                                const y = Math.random() * canvas.height;
+                                const radius = 2 + Math.random() * 5;
+                                
+                                // Variar ligeramente el color
+                                const shade = 0.8 + Math.random() * 0.4;
+                                ctx.fillStyle = `rgba(200, 190, 170, ${shade})`;
+                                
+                                ctx.beginPath();
+                                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                                ctx.fill();
+                            }
+                            
+                            // Añadir algunas líneas para simular juntas entre piedras
+                            ctx.strokeStyle = 'rgba(160, 150, 140, 0.5)';
+                            ctx.lineWidth = 1;
+                            for (let i = 0; i < 20; i++) {
+                                const x1 = Math.random() * canvas.width;
+                                const y1 = Math.random() * canvas.height;
+                                const x2 = x1 + (Math.random() - 0.5) * 100;
+                                const y2 = y1 + (Math.random() - 0.5) * 100;
+                                
+                                ctx.beginPath();
+                                ctx.moveTo(x1, y1);
+                                ctx.lineTo(x2, y2);
+                                ctx.stroke();
+                            }
+                            
+                            // Crear textura de Three.js desde el canvas
+                            const texture = new THREE.CanvasTexture(canvas);
+                            texture.wrapS = THREE.RepeatWrapping;
+                            texture.wrapT = THREE.RepeatWrapping;
+                            texture.repeat.set(4, 4); // Repetir para cubrir áreas grandes
+                            
+                            // Configurar filtros y mipmaps
+                            texture.generateMipmaps = true;
+                            texture.minFilter = THREE.LinearMipmapLinearFilter;
+                            texture.magFilter = THREE.LinearFilter;
+                            texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+                            
+                            return texture;
+                        };
+                        
+                        // Crear la textura de respaldo una sola vez
+                        const fallbackTexture = createFallbackTexture();
+                        
+                        // Contador para seguimiento
+                        let floorsFixed = 0;
+                        
+                        // Buscar específicamente el suelo principal (el más grande)
+                        let mainFloor = null;
+                        let largestFloorSize = 0;
+                        
+                        // Primera pasada para identificar el suelo principal
+                        model.traverse((node) => {
+                            if (node.isMesh) {
+                                // Verificar si es un suelo basado en nombre o posición/escala
+                                const isFloor = node.name.toLowerCase().includes('suelo') ||
+                                               node.name.toLowerCase().includes('floor') ||
+                                               node.name.toLowerCase().includes('ground') ||
+                                               node.name.toLowerCase().includes('piso') ||
+                                               (node.position.y < 0.1 && node.scale.x > 3 && node.scale.z > 3);
+                                
+                                if (isFloor) {
+                                    // Calcular tamaño aproximado del suelo
+                                    const size = node.scale.x * node.scale.z;
+                                    console.log(`Suelo encontrado: ${node.name}, tamaño: ${size}`);
+                                    
+                                    // Si es el más grande hasta ahora, guardarlo como suelo principal
+                                    if (size > largestFloorSize) {
+                                        largestFloorSize = size;
+                                        mainFloor = node;
+                                        console.log(`Nuevo suelo principal: ${node.name}, tamaño: ${size}`);
+                                    }
+                                }
+                            }
+                        });
+                        
+                        // Si encontramos el suelo principal, aplicar tratamiento especial
+                        if (mainFloor) {
+                            console.log(`Aplicando tratamiento especial al suelo principal: ${mainFloor.name}`);
+                            
+                            // Forzar recepción de sombras
+                            mainFloor.receiveShadow = true;
+                            
+                            // Verificar y ajustar materiales
+                            if (mainFloor.material) {
+                                const materials = Array.isArray(mainFloor.material) ? mainFloor.material : [mainFloor.material];
+                                
+                                materials.forEach(mat => {
+                                    // Asegurarse de que el material sea visible
+                                    mat.visible = true;
+                                    mat.transparent = false;
+                                    mat.opacity = 1.0;
+                                    
+                                    // Si tiene textura, asegurarse de que esté correctamente configurada
+                                    if (mat.map) {
+                                        console.log("Suelo principal tiene textura, optimizando...");
+                                        mat.map.needsUpdate = true;
+                                        mat.map.generateMipmaps = true;
+                                        mat.map.minFilter = THREE.LinearMipmapLinearFilter;
+                                        mat.map.magFilter = THREE.LinearFilter;
+                                        mat.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
+                                        
+                                        // Asegurarse de que el color no interfiera con la textura
+                                        mat.color.setRGB(1, 1, 1);
+                                    }
+                                    // Si no tiene textura, darle un color natural
+                                    else {
+                                        console.log("Suelo principal sin textura, aplicando color natural");
+                                        mat.color.set(0xD2B48C); // Color arena/tierra
+                                    }
+                                    
+                                    // Ajustar propiedades de material para mejor visualización
+                                    mat.roughness = 0.7;
+                                    mat.metalness = 0.2;
+                                    mat.flatShading = false;
+                                    
+                                    mat.needsUpdate = true;
+                                    floorsFixed++;
+                                });
+                            }
+                        }
+                        
+                        // Segunda pasada para el resto de suelos
+                        model.traverse((node) => {
+                            // Saltar el suelo principal que ya fue procesado
+                            if (mainFloor && node === mainFloor) return;
+                            
+                            if (node.isMesh) {
+                                // Identificar si es un suelo
+                                const isFloor = node.name.toLowerCase().includes('suelo') ||
+                                               node.name.toLowerCase().includes('floor') ||
+                                               node.name.toLowerCase().includes('ground') ||
+                                               node.name.toLowerCase().includes('piso') ||
+                                               (node.position.y < 0.1 && node.scale.x > 3 && node.scale.z > 3);
+                                
+                                if (isFloor) {
+                                    console.log(`Reparando suelo: ${node.name}`);
+                                    
+                                    // Forzar recepción de sombras
+                                    node.receiveShadow = true;
+                                    
+                                    // Verificar si el material del suelo está bien
+                                    if (node.material) {
+                                        const materials = Array.isArray(node.material) ? node.material : [node.material];
+                                        
+                                        materials.forEach(mat => {
+                                            // Enfoque más conservador para arreglar texturas
+                                            
+                                            // Si hay una textura existente, solo optimizarla sin reemplazarla
+                                            if (mat.map) {
+                                                console.log(`Optimizando textura existente para ${node.name}`);
+                                                mat.map.needsUpdate = true;
+                                                mat.map.generateMipmaps = true;
+                                                mat.map.minFilter = THREE.LinearMipmapLinearFilter;
+                                                mat.map.magFilter = THREE.LinearFilter;
+                                                mat.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
+                                                
+                                                // Asegurarse de que el color no interfiera con la textura
+                                                if (mat.color) {
+                                                    // Ajustar el color solo si es demasiado blanco
+                                                    if (mat.color.r > 0.95 && mat.color.g > 0.95 && mat.color.b > 0.95) {
+                                                        console.log(`Ajustando color del material para ${node.name}`);
+                                                        mat.color.setRGB(0.9, 0.9, 0.9); // Ligeramente gris para que la textura se vea mejor
+                                                    }
+                                                }
+                                            }
+                                            // Si no hay textura, solo ajustar el color
+                                            else if (mat.color) {
+                                                // Si el color es blanco o muy claro, darle un color más natural
+                                                if (mat.color.r > 0.9 && mat.color.g > 0.9 && mat.color.b > 0.9) {
+                                                    console.log(`Ajustando color para suelo sin textura: ${node.name}`);
+                                                    mat.color.set(0xD2B48C); // Color arena/tierra
+                                                    floorsFixed++;
+                                                }
+                                            }
+                                            
+                                            // Asegurar que el material sea opaco y visible
+                                            mat.transparent = false;
+                                            mat.opacity = 1.0;
+                                            mat.visible = true;
+                                            mat.needsUpdate = true;
+                                        });
+                                    }
+                                }
+                            }
+                        });
+                        
+                        console.log(`Reparados ${floorsFixed} suelos con problemas de textura`);
+                    };
+                    
+                    // Ejecutar la función para arreglar texturas
+                    fixFloorTextures();
+                    // Ejecutar nuevamente después de un momento para asegurar que se aplique
+                    setTimeout(fixFloorTextures, 1000);
+                    
                     // Centrar y escalar el modelo
                     centerModel(model);
+                    
+                    // Añadir texto flotante con el nombre
+                    addFloatingText(model);
                     
                     // Ocultar pantalla de carga
                     loadingContainer.style.opacity = 0;
@@ -756,12 +1143,107 @@
                 (xhr) => {
                     loadingText.textContent = `Procesando modelo... ${Math.round((xhr.loaded / xhr.total) * 100)}%`;
                 },
-                // Error
+                // Manejo de errores mejorado
                 (error) => {
                     console.error('Error procesando modelo:', error);
-                    showError(`Error procesando modelo: ${error.message}`);
+                    
+                    // Registrar información detallada sobre el error
+                    if (error.stack) {
+                        console.error('Stack trace:', error.stack);
+                    }
+                    
+                    // Verificar si el error está relacionado con recursos o texturas
+                    if (error.message && (error.message.includes('Custom UV set') ||
+                                         error.message.includes('blob:') ||
+                                         error.message.includes('texture') ||
+                                         error.message.includes('resource'))) {
+                        console.warn('Error relacionado con UV sets personalizados. Intentando cargar con opciones alternativas...');
+                        
+                        // Configurar opciones especiales para el cargador
+                        const specialLoader = new THREE.GLTFLoader();
+                        specialLoader.setDRACOLoader(dracoLoader);
+                        
+                        // Intentar cargar nuevamente con opciones modificadas
+                        setTimeout(() => {
+                            try {
+                                // Crear un nuevo blob URL para evitar problemas de caché
+                                const newUrl = URL.createObjectURL(blob);
+                                specialLoader.load(newUrl,
+                                    (gltf) => {
+                                        // Procesar el modelo con manejo especial para materiales
+                                        console.log("Carga alternativa exitosa, procesando modelo...");
+                                        
+                                        // Desactivar todos los mapas problemáticos en todos los materiales
+                                        gltf.scene.traverse((node) => {
+                                            if (node.isMesh && node.material) {
+                                                const materials = Array.isArray(node.material) ? node.material : [node.material];
+                                                materials.forEach(mat => {
+                                                    // Desactivar todos los mapas de textura
+                                                    for (let key in mat) {
+                                                        if (mat[key] && mat[key].isTexture) {
+                                                            console.log(`Desactivando ${key} en material alternativo`);
+                                                            mat[key] = null;
+                                                        }
+                                                    }
+                                                    
+                                                    // Establecer valores predeterminados
+                                                    if (mat.metalness !== undefined) mat.metalness = 0.4;
+                                                    if (mat.roughness !== undefined) mat.roughness = 0.6;
+                                                    if (mat.emissive !== undefined) mat.emissive.setRGB(0, 0, 0);
+                                                    
+                                                    mat.needsUpdate = true;
+                                                });
+                                            }
+                                        });
+                                        
+                                        // Continuar con el procesamiento normal
+                                        if (model) {
+                                            disposeModel(model);
+                                            scene.remove(model);
+                                        }
+                                        
+                                        model = gltf.scene;
+                                        optimizeModel(model);
+                                        updateModelQuality(currentQuality);
+                                        scene.add(model);
+                                        centerModel(model);
+                                        addFloatingText(model);
+                                        
+                                        // Ocultar pantalla de carga
+                                        loadingContainer.style.opacity = 0;
+                                        setTimeout(() => {
+                                            loadingContainer.style.display = 'none';
+                                        }, 500);
+                                        
+                                        isLoading = false;
+                                        URL.revokeObjectURL(newUrl);
+                                        renderer.shadowMap.needsUpdate = true;
+                                        cleanupMemory();
+                                        console.log('Modelo cargado correctamente (método alternativo)');
+                                    },
+                                    (xhr) => {
+                                        loadingText.textContent = `Procesando modelo (alternativo)... ${Math.round((xhr.loaded / xhr.total) * 100)}%`;
+                                    },
+                                    (secondError) => {
+                                        console.error('Error en intento alternativo:', secondError);
+                                        showError(`Error procesando modelo: ${error.message}. Intento alternativo también falló: ${secondError.message}`);
+                                    }
+                                );
+                            } catch (retryError) {
+                                console.error('Error en reintento:', retryError);
+                                showError(`Error procesando modelo: ${error.message}. Reintento falló: ${retryError.message}`);
+                            }
+                        }, 1000); // Esperar 1 segundo antes de reintentar
+                    } else {
+                        // Para otros tipos de errores, mostrar mensaje normal
+                        showError(`Error procesando modelo: ${error.message}`);
+                    }
                 }
             );
+                } catch (error) {
+                    console.error("Error crítico al crear URL o cargar modelo:", error);
+                    showError(`Error crítico al cargar el modelo: ${error.message}`);
+                }
         }
         
         function optimizeModel(model) {
@@ -857,11 +1339,28 @@
                             material.fog = false; // Desactivar niebla
                             material.lights = true; // Mantener luces
                             
-                            // Reducir calidad de texturas si existen
+                            // Ajustar calidad de texturas según el tipo de objeto
                             if (material.map) {
-                                material.map.anisotropy = 1; // Valor mínimo
-                                material.map.minFilter = THREE.LinearFilter; // Filtro más simple
-                                material.map.generateMipmaps = false; // Desactivar mipmaps
+                                // Verificar si este material pertenece a un suelo
+                                const isFloorMaterial = node.name.toLowerCase().includes('suelo') ||
+                                                       node.name.toLowerCase().includes('floor') ||
+                                                       node.name.toLowerCase().includes('ground') ||
+                                                       node.name.toLowerCase().includes('piso') ||
+                                                       (node.position.y < 0.1 && node.scale.x > 3 && node.scale.z > 3);
+                                
+                                if (isFloorMaterial) {
+                                    // Para suelos, usar alta calidad de textura
+                                    material.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
+                                    material.map.minFilter = THREE.LinearMipmapLinearFilter;
+                                    material.map.magFilter = THREE.LinearFilter;
+                                    material.map.generateMipmaps = true;
+                                    console.log(`DEBUG: Aplicada alta calidad de textura para suelo: ${node.name}`);
+                                } else {
+                                    // Para otros objetos, usar configuración normal
+                                    material.map.anisotropy = 1; // Valor mínimo
+                                    material.map.minFilter = THREE.LinearFilter; // Filtro más simple
+                                    material.map.generateMipmaps = false; // Desactivar mipmaps
+                                }
                             }
                         });
                     }
@@ -869,6 +1368,93 @@
             });
             
             console.log("Modelo optimizado y ajustado para menor brillo");
+        }
+        
+        function addFloatingText(model) {
+            // Cargar la fuente para el texto 3D
+            const fontLoader = new THREE.FontLoader();
+            
+            // URL de la fuente Helvetica o similar
+            const fontUrl = 'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json';
+            
+            fontLoader.load(fontUrl, function(font) {
+                // Configuración para el nombre principal
+                const nameConfig = {
+                    font: font,
+                    size: 0.3,
+                    height: 0.05,
+                    curveSegments: 12,
+                    bevelEnabled: false
+                };
+                
+                // Configuración para los subtítulos (más pequeños)
+                const titleConfig = {
+                    font: font,
+                    size: 0.15,
+                    height: 0.02,
+                    curveSegments: 8,
+                    bevelEnabled: false
+                };
+                
+                // Crear material para el texto (blanco brillante)
+                const textMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xffffff,
+                    emissive: 0x444444,
+                    metalness: 0.3,
+                    roughness: 0.2
+                });
+                
+                // Crear geometría para el nombre principal
+                const nameGeometry = new THREE.TextGeometry('Andres Felipe Gonzalez Aristizabal', nameConfig);
+                nameGeometry.computeBoundingBox();
+                
+                // Centrar el texto horizontalmente
+                const nameWidth = nameGeometry.boundingBox.max.x - nameGeometry.boundingBox.min.x;
+                
+                // Crear mesh para el nombre
+                const nameMesh = new THREE.Mesh(nameGeometry, textMaterial);
+                nameMesh.position.set(-nameWidth/2, 0.5, 0); // Posición inicial
+                
+                // Grupo para contener todos los textos
+                const textGroup = new THREE.Group();
+                textGroup.add(nameMesh);
+                
+                // Títulos/roles a mostrar
+                const titles = [
+                    'Full Stack Developer',
+                    'Data Engineer',
+                    'Prompt Engineer / AI Trainer',
+                    'AI Ops',
+                    'AI Architect'
+                ];
+                
+                // Crear y posicionar cada título
+                let verticalOffset = 0.3; // Espacio debajo del nombre
+                
+                titles.forEach(title => {
+                    const titleGeometry = new THREE.TextGeometry(title, titleConfig);
+                    titleGeometry.computeBoundingBox();
+                    
+                    const titleWidth = titleGeometry.boundingBox.max.x - titleGeometry.boundingBox.min.x;
+                    
+                    const titleMesh = new THREE.Mesh(titleGeometry, textMaterial);
+                    titleMesh.position.set(-titleWidth/2, -verticalOffset, 0);
+                    
+                    textGroup.add(titleMesh);
+                    verticalOffset += 0.2; // Incrementar para el siguiente título
+                });
+                
+                // Posicionar el grupo de texto en el área marcada con el círculo rojo (en el suelo)
+                // Estas coordenadas están ajustadas para colocar el texto en el área marcada
+                textGroup.position.set(0, -0.2, 2); // Bajado en el eje Z (reducido de 4 a 2)
+                textGroup.rotation.x = -Math.PI / 2; // Rotado para que esté plano en el suelo (acostado)
+                textGroup.scale.set(3.0, 3.0, 3.0); // Agrandado aún más (casi el doble del tamaño anterior)
+                
+                // Añadir el grupo de texto a la escena
+                scene.add(textGroup);
+                
+                console.log("Texto 3D añadido a la escena");
+            });
         }
         
         function centerModel(model) {
@@ -921,11 +1507,59 @@
             `;
         }
         
+        // Función mejorada para mostrar errores con más detalles
         function showError(message) {
+            console.error("ERROR:", message);
+            
+            // Mostrar mensaje de error en la interfaz
             errorMessage.textContent = message;
             errorMessage.style.display = 'block';
-            progressBar.style.backgroundColor = '#ff5555';
-            loadingText.style.color = '#ff5555';
+            progressBar.style.backgroundColor = '#ff3333';
+            loadingText.style.color = '#ff3333';
+            
+            // Añadir botón para reintentar
+            const retryButton = document.createElement('button');
+            retryButton.textContent = "Reintentar carga";
+            retryButton.style.marginTop = "20px";
+            retryButton.style.padding = "10px 20px";
+            retryButton.style.backgroundColor = "#4CAF50";
+            retryButton.style.color = "white";
+            retryButton.style.border = "none";
+            retryButton.style.borderRadius = "5px";
+            retryButton.style.cursor = "pointer";
+            
+            // Eliminar botón anterior si existe
+            const existingButton = document.querySelector('#retry-button');
+            if (existingButton) {
+                existingButton.parentNode.removeChild(existingButton);
+            }
+            
+            retryButton.id = 'retry-button';
+            retryButton.addEventListener('click', () => {
+                // Eliminar el botón
+                if (retryButton.parentNode) {
+                    retryButton.parentNode.removeChild(retryButton);
+                }
+                
+                // Restablecer estilos
+                loadingText.style.color = "";
+                progressBar.style.backgroundColor = "";
+                errorMessage.style.display = 'none';
+                
+                // Reiniciar la carga
+                loadingText.textContent = "Reiniciando carga...";
+                loadModel();
+            });
+            
+            // Añadir el botón al contenedor de carga
+            loadingContainer.appendChild(retryButton);
+            
+            // Registrar error en la consola con stack trace si está disponible
+            if (new Error().stack) {
+                console.error("Stack trace:", new Error().stack);
+            }
+            
+            isLoading = false;
         }
         
         // Función para limpiar memoria
