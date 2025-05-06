@@ -73,6 +73,30 @@
             border-radius: 5px;
             font-size: 12px;
         }
+        #coordinates-display {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            color: white;
+            z-index: 100;
+            font-family: monospace;
+        }
+        #coordinates-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            z-index: 100;
+        }
         #error-message {
             color: #ff5555;
             text-align: center;
@@ -87,27 +111,6 @@
             padding: 10px;
             border-radius: 5px;
             font-size: 14px;
-        }
-        #quality-controls {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: rgba(0, 0, 0, 0.7);
-            padding: 10px;
-            border-radius: 5px;
-            z-index: 100;
-        }
-        .quality-btn {
-            margin: 5px;
-            padding: 5px 10px;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            background-color: #555;
-            color: white;
-        }
-        .quality-btn.active {
-            background-color: #4CAF50;
         }
     </style>
 </head>
@@ -127,17 +130,22 @@
         <p>Este visualizador está optimizado para cargar modelos 3D extremadamente grandes.</p>
     </div>
 
-    <div id="quality-controls">
-        <button id="low-quality" class="quality-btn">Calidad Baja</button>
-        <button id="medium-quality" class="quality-btn active">Calidad Media</button>
-        <button id="high-quality" class="quality-btn">Calidad Alta</button>
-    </div>
+    <!-- Quality controls removed - always using medium quality -->
 
     <div id="controls-info">
         <p>Controles: Click izquierdo + arrastrar para rotar | Rueda del ratón para zoom | Click derecho + arrastrar para mover</p>
     </div>
 
     <div id="memory-usage">Memoria: Calculando...</div>
+    
+    <div id="coordinates-display">
+        <h3>Sistema de Coordenadas</h3>
+        <div id="camera-position">Cámara: X: 0.00, Y: 0.00, Z: 0.00</div>
+        <div id="camera-target">Objetivo: X: 0.00, Y: 0.00, Z: 0.00</div>
+        <div id="mouse-position">Ratón: X: 0.00, Y: 0.00, Z: 0.00</div>
+    </div>
+    
+    <button id="coordinates-toggle">Ocultar Coordenadas</button>
 
     <!-- Three.js y bibliotecas relacionadas (versión actualizada) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r132/three.min.js"></script>
@@ -158,6 +166,16 @@
         let memoryInterval;
         let currentQuality = 'medium'; // Calidad por defecto
         let disposables = []; // Array para almacenar objetos que necesitan ser limpiados
+        
+        // Variables para el sistema de coordenadas
+        let axesHelper, gridHelper;
+        let coordinatesVisible = true;
+        let raycaster = new THREE.Raycaster();
+        let mouse = new THREE.Vector2();
+        let mousePosition = new THREE.Vector3();
+        
+        // Punto de origen personalizado (offset para el sistema de coordenadas)
+        const originOffset = new THREE.Vector3(-7.91, -13.98, -0.14);
         
         // Variables para limitar la tasa de renderizado
         let lastFrameTime = 0;
@@ -219,30 +237,7 @@
             controls.rotateSpeed = 0.8;
             controls.zoomSpeed = 1.2;
             controls.panSpeed = 0.8;
-            controls.autoRotate = false; // Inicialmente desactivado
-            controls.autoRotateSpeed = 0.5;
-            
-            // Añadir botón para activar/desactivar rotación automática
-            const autoRotateButton = document.createElement('button');
-            autoRotateButton.textContent = 'Activar Rotación';
-            autoRotateButton.style.position = 'absolute';
-            autoRotateButton.style.top = '10px';
-            autoRotateButton.style.right = '10px';
-            autoRotateButton.style.padding = '8px 12px';
-            autoRotateButton.style.backgroundColor = '#4CAF50';
-            autoRotateButton.style.color = 'white';
-            autoRotateButton.style.border = 'none';
-            autoRotateButton.style.borderRadius = '4px';
-            autoRotateButton.style.cursor = 'pointer';
-            autoRotateButton.style.zIndex = '1000';
-            
-            autoRotateButton.addEventListener('click', function() {
-                controls.autoRotate = !controls.autoRotate;
-                this.textContent = controls.autoRotate ? 'Detener Rotación' : 'Activar Rotación';
-                this.style.backgroundColor = controls.autoRotate ? '#f44336' : '#4CAF50';
-            });
-            
-            document.body.appendChild(autoRotateButton);
+            // Eliminada funcionalidad de rotación automática
             
             // Iluminación mejorada para sombras más pronunciadas
             // Aumentar la luz ambiental para mejor visibilidad
@@ -334,8 +329,11 @@
             // Monitoreo de memoria
             memoryInterval = setInterval(updateMemoryUsage, 2000); // Reducir frecuencia a 2 segundos
             
-            // Configurar controles de calidad
-            setupQualityControls();
+            // Aplicar calidad media directamente (sin botones)
+            setQuality('medium');
+            
+            // Configurar sistema de coordenadas
+            setupCoordinateSystem();
             
             // Cargar el modelo
             loadModel();
@@ -347,26 +345,102 @@
             animate();
         }
         
-        function setupQualityControls() {
-            const lowQualityBtn = document.getElementById('low-quality');
-            const mediumQualityBtn = document.getElementById('medium-quality');
-            const highQualityBtn = document.getElementById('high-quality');
+        // Quality controls setup removed - always using medium quality
+        
+        // Función para configurar el sistema de coordenadas
+        function setupCoordinateSystem() {
+            // Crear ejes X, Y, Z (rojo, verde, azul) - más grandes para cubrir todo el modelo
+            axesHelper = new THREE.AxesHelper(50);
+            // Posicionar los ejes en el punto de origen personalizado
+            axesHelper.position.copy(originOffset);
+            scene.add(axesHelper);
             
-            lowQualityBtn.addEventListener('click', () => setQuality('low'));
-            mediumQualityBtn.addEventListener('click', () => setQuality('medium'));
-            highQualityBtn.addEventListener('click', () => setQuality('high'));
+            // Crear cuadrícula para el suelo - mucho más grande y con más divisiones
+            gridHelper = new THREE.GridHelper(100, 100, 0x444444, 0x888888);
+            // No añadimos el grid a la escena todavía - se añadirá después de detectar el nivel del suelo
+            
+            // Configurar elementos de la UI
+            const coordDisplay = document.getElementById('coordinates-display');
+            const coordToggle = document.getElementById('coordinates-toggle');
+            
+            // Actualizar coordenadas inmediatamente
+            updateCoordinatesDisplay();
+            
+            // Manejar eventos de ratón para raycasting
+            document.addEventListener('mousemove', onMouseMove);
+            
+            // Configurar botón para mostrar/ocultar coordenadas
+            coordToggle.addEventListener('click', function() {
+                coordinatesVisible = !coordinatesVisible;
+                
+                // Actualizar visibilidad de los helpers
+                axesHelper.visible = coordinatesVisible;
+                gridHelper.visible = coordinatesVisible;
+                coordDisplay.style.display = coordinatesVisible ? 'block' : 'none';
+                
+                // Actualizar texto del botón
+                this.textContent = coordinatesVisible ? 'Ocultar Coordenadas' : 'Mostrar Coordenadas';
+                this.style.backgroundColor = coordinatesVisible ? '#f44336' : '#4CAF50';
+            });
+            
+            // Función para calcular posición 3D del ratón mediante raycasting
+            function onMouseMove(event) {
+                if (!coordinatesVisible) return;
+                
+                // Calcular posición normalizada del ratón (-1 a +1)
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+                
+                // Actualizar raycaster
+                raycaster.setFromCamera(mouse, camera);
+                
+                // Calcular intersecciones con toda la escena, no solo el modelo
+                const intersects = raycaster.intersectObjects(scene.children, true);
+                
+                // Si hay intersección, actualizar posición del ratón en 3D
+                if (intersects.length > 0) {
+                    mousePosition.copy(intersects[0].point);
+                    // Actualizar inmediatamente las coordenadas
+                    updateCoordinatesDisplay();
+                }
+            }
+            
+            // Función para actualizar la visualización de coordenadas
+            function updateCoordinatesDisplay() {
+                if (!coordinatesVisible) return;
+                
+                const camPos = camera.position;
+                const target = controls.target;
+                
+                // Crear copias de los vectores para aplicar el offset
+                const adjustedCamPos = new THREE.Vector3().copy(camPos).sub(originOffset);
+                const adjustedTarget = new THREE.Vector3().copy(target).sub(originOffset);
+                const adjustedMousePos = new THREE.Vector3().copy(mousePosition).sub(originOffset);
+                
+                // Formatear coordenadas con 2 decimales
+                const formatCoord = (vec) => `X: ${vec.x.toFixed(2)}, Y: ${vec.y.toFixed(2)}, Z: ${vec.z.toFixed(2)}`;
+                
+                // Actualizar texto en la UI con coordenadas relativas al nuevo origen
+                document.getElementById('camera-position').textContent = `Cámara: ${formatCoord(adjustedCamPos)}`;
+                document.getElementById('camera-target').textContent = `Objetivo: ${formatCoord(adjustedTarget)}`;
+                document.getElementById('mouse-position').textContent = `Ratón: ${formatCoord(adjustedMousePos)}`;
+            }
+            
+            // Añadir función de actualización de coordenadas al bucle de animación
+            disposables.push({
+                update: updateCoordinatesDisplay
+            });
+            
+            // También actualizar cuando los controles cambian
+            controls.addEventListener('change', updateCoordinatesDisplay);
         }
         
         function setQuality(quality) {
             if (quality === currentQuality) return;
             
-            // Actualizar botones
-            document.querySelectorAll('.quality-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`${quality}-quality`).classList.add('active');
-            
-            // Guardar calidad actual
+            // Guardar calidad actual (sin actualizar botones UI)
             currentQuality = quality;
-            console.log(`Calidad cambiada a: ${quality}`);
+            console.log(`Calidad establecida a: ${quality}`);
             
             // Aplicar configuraciones según calidad
             switch(quality) {
@@ -1114,6 +1188,9 @@
                     // Ejecutar nuevamente después de un momento para asegurar que se aplique
                     setTimeout(fixFloorTextures, 1000);
                     
+                    // Detectar el nivel del suelo y posicionar la cuadrícula
+                    positionGridAtFloorLevel(model);
+                    
                     // Centrar y escalar el modelo
                     centerModel(model);
                     
@@ -1247,6 +1324,10 @@
         }
         
         function optimizeModel(model) {
+            // Coordenadas del cóndor que necesita tratamiento especial
+            const condorPosition = new THREE.Vector3(35.69, 29.51, -19.42);
+            const specialTreatmentRadius = 10; // Radio para detectar objetos cercanos al cóndor
+            
             // Aplicar optimizaciones al modelo
             let triangleCount = 0;
             let meshCount = 0;
@@ -1292,6 +1373,16 @@
                         geometry.computeBoundingBox();
                     }
                     
+                    // Calcular distancia al cóndor
+                    const distance = node.position.distanceTo(condorPosition);
+                    const isNearCondor = distance < specialTreatmentRadius;
+                    
+                    // Verificar si es el cóndor o está cerca del cóndor por su posición o nombre
+                    const isCondorOrNearby = isNearCondor ||
+                                            node.name.toLowerCase().includes('condor') ||
+                                            node.name.toLowerCase().includes('bird') ||
+                                            node.name.toLowerCase().includes('ave');
+                    
                     // Optimizar y ajustar materiales
                     if (node.material) {
                         // Convertir arrays de materiales a un solo material si es posible
@@ -1306,60 +1397,84 @@
                             // Optimizar materiales
                             material.needsUpdate = true;
                             
-                            // Configuración básica para materiales
-                            if (material.metalness !== undefined) {
-                                material.metalness = Math.min(material.metalness, 0.4);
-                            }
-                            
-                            if (material.roughness !== undefined) {
-                                material.roughness = Math.max(material.roughness, 0.5);
-                            }
-                            
-                            // Configuración de sombras
-                            material.shadowSide = THREE.FrontSide;
-                            
-                            // Eliminar emisión para ahorrar cálculos
-                            if (material.emissive !== undefined) {
-                                material.emissive.setRGB(0, 0, 0);
-                            }
-                            
-                            // Reducir especularidad
-                            if (material.specular !== undefined) {
-                                material.specular.multiplyScalar(0.4);
-                            }
-                            
-                            // Optimizar transparencia
-                            if (material.transparent && material.opacity > 0.95) {
-                                material.transparent = false;
-                                material.opacity = 1.0;
-                            }
-                            
-                            // Desactivar características costosas
-                            material.flatShading = true; // Más rápido que smooth shading
-                            material.fog = false; // Desactivar niebla
-                            material.lights = true; // Mantener luces
-                            
-                            // Ajustar calidad de texturas según el tipo de objeto
-                            if (material.map) {
-                                // Verificar si este material pertenece a un suelo
-                                const isFloorMaterial = node.name.toLowerCase().includes('suelo') ||
-                                                       node.name.toLowerCase().includes('floor') ||
-                                                       node.name.toLowerCase().includes('ground') ||
-                                                       node.name.toLowerCase().includes('piso') ||
-                                                       (node.position.y < 0.1 && node.scale.x > 3 && node.scale.z > 3);
+                            // Si es el cóndor o está cerca, aplicar configuración de alta calidad
+                            if (isCondorOrNearby) {
+                                console.log(`Aplicando tratamiento especial para objeto cerca del cóndor: ${node.name} (distancia: ${distance.toFixed(2)})`);
                                 
-                                if (isFloorMaterial) {
-                                    // Para suelos, usar alta calidad de textura
+                                // Mantener transparencia si existe
+                                if (material.transparent) {
+                                    material.transparent = true;
+                                    material.alphaTest = 0.5; // Ayuda con problemas de transparencia
+                                }
+                                
+                                // Usar smooth shading para mejor calidad
+                                material.flatShading = false;
+                                
+                                // Alta calidad de texturas
+                                if (material.map) {
                                     material.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
                                     material.map.minFilter = THREE.LinearMipmapLinearFilter;
                                     material.map.magFilter = THREE.LinearFilter;
                                     material.map.generateMipmaps = true;
-                                    console.log(`DEBUG: Aplicada alta calidad de textura para suelo: ${node.name}`);
-                                } else {
-                                    // Para otros objetos, usar configuración normal
-                                    material.map.anisotropy = 1; // Valor mínimo
-                                    material.map.minFilter = THREE.LinearFilter; // Filtro más simple
-                                    material.map.generateMipmaps = false; // Desactivar mipmaps
+                                }
+                            } else {
+                                // Para objetos normales, aplicar optimizaciones estándar
+                                
+                                // Configuración básica para materiales
+                                if (material.metalness !== undefined) {
+                                    material.metalness = Math.min(material.metalness, 0.4);
+                                }
+                                
+                                if (material.roughness !== undefined) {
+                                    material.roughness = Math.max(material.roughness, 0.5);
+                                }
+                                
+                                // Configuración de sombras
+                                material.shadowSide = THREE.FrontSide;
+                                
+                                // Eliminar emisión para ahorrar cálculos
+                                if (material.emissive !== undefined) {
+                                    material.emissive.setRGB(0, 0, 0);
+                                }
+                                
+                                // Reducir especularidad
+                                if (material.specular !== undefined) {
+                                    material.specular.multiplyScalar(0.4);
+                                }
+                                
+                                // Optimizar transparencia
+                                if (material.transparent && material.opacity > 0.95) {
+                                    material.transparent = false;
+                                    material.opacity = 1.0;
+                                }
+                                
+                                // Desactivar características costosas
+                                material.flatShading = true; // Más rápido que smooth shading
+                                material.fog = false; // Desactivar niebla
+                                material.lights = true; // Mantener luces
+                                
+                                // Ajustar calidad de texturas según el tipo de objeto
+                                if (material.map) {
+                                    // Verificar si este material pertenece a un suelo
+                                    const isFloorMaterial = node.name.toLowerCase().includes('suelo') ||
+                                                           node.name.toLowerCase().includes('floor') ||
+                                                           node.name.toLowerCase().includes('ground') ||
+                                                           node.name.toLowerCase().includes('piso') ||
+                                                           (node.position.y < 0.1 && node.scale.x > 3 && node.scale.z > 3);
+                                    
+                                    if (isFloorMaterial) {
+                                        // Para suelos, usar alta calidad de textura
+                                        material.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
+                                        material.map.minFilter = THREE.LinearMipmapLinearFilter;
+                                        material.map.magFilter = THREE.LinearFilter;
+                                        material.map.generateMipmaps = true;
+                                        console.log(`DEBUG: Aplicada alta calidad de textura para suelo: ${node.name}`);
+                                    } else {
+                                        // Para otros objetos, usar configuración normal
+                                        material.map.anisotropy = 1; // Valor mínimo
+                                        material.map.minFilter = THREE.LinearFilter; // Filtro más simple
+                                        material.map.generateMipmaps = false; // Desactivar mipmaps
+                                    }
                                 }
                             }
                         });
@@ -1457,6 +1572,58 @@
             });
         }
         
+        // Función para detectar el nivel del suelo y posicionar la cuadrícula
+        function positionGridAtFloorLevel(model) {
+            console.log("Detectando nivel del suelo...");
+            
+            // Inicializar con un valor alto
+            let lowestPoint = 1000;
+            
+            // Recorrer todos los objetos del modelo
+            model.traverse((node) => {
+                if (node.isMesh) {
+                    // Obtener la geometría
+                    const geometry = node.geometry;
+                    
+                    // Si tiene posición, calcular el punto más bajo
+                    if (geometry && geometry.attributes && geometry.attributes.position) {
+                        const positions = geometry.attributes.position.array;
+                        
+                        // Recorrer todos los vértices (cada 3 valores: x, y, z)
+                        for (let i = 1; i < positions.length; i += 3) {
+                            // Convertir la posición local del vértice a posición mundial
+                            const vertexY = positions[i];
+                            const worldY = vertexY + node.position.y;
+                            
+                            // Actualizar el punto más bajo
+                            if (worldY < lowestPoint) {
+                                lowestPoint = worldY;
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Ajustar ligeramente por debajo del punto más bajo para evitar z-fighting
+            const floorLevel = lowestPoint - 0.05;
+            
+            console.log(`Nivel del suelo detectado: ${floorLevel}`);
+            
+            // Posicionar la cuadrícula en el nivel del suelo y en el punto de origen personalizado
+            gridHelper.position.set(originOffset.x, floorLevel, originOffset.z);
+            
+            // Añadir la cuadrícula a la escena
+            scene.add(gridHelper);
+            
+            // Actualizar el mensaje en la UI
+            const coordDisplay = document.getElementById('coordinates-display');
+            const floorInfo = document.createElement('div');
+            floorInfo.textContent = `Nivel del suelo: Y=${floorLevel.toFixed(2)}`;
+            floorInfo.style.marginTop = '10px';
+            floorInfo.style.color = '#4CAF50';
+            coordDisplay.appendChild(floorInfo);
+        }
+        
         function centerModel(model) {
             // Calcular bounding box
             const box = new THREE.Box3().setFromObject(model);
@@ -1488,9 +1655,9 @@
             controls.minDistance = distance * 0.3; // Permitir acercarse más
             controls.maxDistance = distance * 3;   // Permitir alejarse más
             
-            // Limitar ángulos de rotación para evitar ver debajo del modelo
-            controls.minPolarAngle = Math.PI * 0.1; // Limitar vista desde arriba
-            controls.maxPolarAngle = Math.PI * 0.45; // Restringir para no ver debajo del modelo
+            // Permitir mayor libertad de movimiento de cámara
+            controls.minPolarAngle = Math.PI * 0.05; // Permitir vista más desde arriba
+            controls.maxPolarAngle = Math.PI * 0.85; // Permitir ver más abajo para inspeccionar el suelo
             
             // Mantener la capacidad de inclinar la cámara pero limitada
             controls.enablePan = true;
@@ -1685,17 +1852,13 @@
             
             stats.begin();
             
-            // Actualizar controles solo si están activos y hay cambios
-            if (controls.enabled && (controls.autoRotate || controls.update())) {
+            // Actualizar controles solo si están activos
+            if (controls.enabled) {
                 controls.update();
             }
             
-            // Rotar el modelo si está cargado y la rotación automática está activada
-            if (model && controls.autoRotate) {
-                model.rotation.y += 0.002;
-                // Forzar actualización solo del modelo, no de toda la escena
-                renderer.shadowMap.needsUpdate = false;
-            }
+            // Forzar actualización solo del modelo, no de toda la escena
+            renderer.shadowMap.needsUpdate = false;
             
             // Renderizar escena con optimizaciones
             if (currentQuality === 'low') {
@@ -1709,6 +1872,11 @@
             }
             
             stats.end();
+            
+            // Actualizar objetos disposables (incluye sistema de coordenadas)
+            disposables.forEach(obj => {
+                if (obj.update) obj.update();
+            });
             
             // Monitorear memoria con menos frecuencia según la calidad
             const memoryCheckProbability = currentQuality === 'low' ? 0.01 : 0.03;
@@ -1725,9 +1893,6 @@
         // Añadir teclas de acceso rápido
         window.addEventListener('keydown', function(event) {
             switch(event.key) {
-                case 'r': // Tecla R para activar/desactivar rotación
-                    controls.autoRotate = !controls.autoRotate;
-                    break;
                 case '+': // Tecla + para acercar
                     camera.position.multiplyScalar(0.9);
                     break;
