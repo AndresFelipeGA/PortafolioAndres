@@ -88,11 +88,32 @@
             border-radius: 5px;
             font-size: 14px;
         }
+        #quality-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 100;
+        }
+        .quality-btn {
+            margin: 5px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            background-color: #555;
+            color: white;
+        }
+        .quality-btn.active {
+            background-color: #4CAF50;
+        }
     </style>
 </head>
 <body>
     <div id="loading-container">
-        <h2>Cargando Modelo 3D Colombiano</h2>
+        <h2>Cargando Modelo Colombiano</h2>
         <div id="loading-text">Inicializando cargador...</div>
         <div id="progress-bar-container">
             <div id="progress-bar"></div>
@@ -102,8 +123,14 @@
     </div>
 
     <div id="info">
-        <h2>Modelo 3D Colombiano</h2>
+        <h2>Modelo Colombiano</h2>
         <p>Este visualizador está optimizado para cargar modelos 3D extremadamente grandes.</p>
+    </div>
+
+    <div id="quality-controls">
+        <button id="low-quality" class="quality-btn">Calidad Baja</button>
+        <button id="medium-quality" class="quality-btn active">Calidad Media</button>
+        <button id="high-quality" class="quality-btn">Calidad Alta</button>
     </div>
 
     <div id="controls-info">
@@ -112,12 +139,12 @@
 
     <div id="memory-usage">Memoria: Calculando...</div>
 
-    <!-- Three.js y bibliotecas relacionadas (versión optimizada) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/BufferGeometryUtils.js"></script>
+    <!-- Three.js y bibliotecas relacionadas (versión actualizada) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r132/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.0/examples/js/loaders/DRACOLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.0/examples/js/utils/BufferGeometryUtils.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/stats.js@0.17.0/build/stats.min.js"></script>
 
     <script>
@@ -127,11 +154,13 @@
         let isLoading = true;
         let loadingManager;
         let memoryInterval;
+        let currentQuality = 'medium'; // Calidad por defecto
+        let disposables = []; // Array para almacenar objetos que necesitan ser limpiados
         
         // Variables para limitar la tasa de renderizado
         let lastFrameTime = 0;
-        const targetFPS = 30; // Limitar a 30 FPS para ahorrar recursos
-        const frameInterval = 1000 / targetFPS;
+        let targetFPS = 30; // Limitar a 30 FPS para ahorrar recursos
+        let frameInterval = 1000 / targetFPS;
         
         // Elementos DOM
         const loadingContainer = document.getElementById('loading-container');
@@ -153,15 +182,23 @@
             camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
             camera.position.set(0, 5, 10);
             
-            // Crear renderer
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setPixelRatio(window.devicePixelRatio);
+            // Crear renderer con configuración optimizada
+            renderer = new THREE.WebGLRenderer({
+                antialias: false, // Desactivar antialiasing para mejorar rendimiento
+                powerPreference: "high-performance",
+                precision: "mediump", // Precisión media para mejor rendimiento
+                alpha: false, // No necesitamos transparencia
+                stencil: false, // No necesitamos stencil buffer
+                depth: true // Mantener depth buffer
+            });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // Limitar pixel ratio
             renderer.setSize(window.innerWidth, window.innerHeight);
             
             // Configuración mejorada de sombras
             renderer.shadowMap.enabled = true;
             renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Sombras más suaves
-            renderer.shadowMap.autoUpdate = true; // Actualizar sombras automáticamente
+            renderer.shadowMap.autoUpdate = false; // Actualizar sombras manualmente para ahorrar recursos
+            renderer.shadowMap.needsUpdate = true; // Actualizar una vez al inicio
             
             renderer.outputEncoding = THREE.sRGBEncoding;
             renderer.gammaFactor = 2.2;
@@ -206,12 +243,12 @@
             document.body.appendChild(autoRotateButton);
             
             // Iluminación mejorada para sombras más pronunciadas
-            // Luz ambiental muy reducida para que las sombras sean más visibles
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+            // Aumentar la luz ambiental para mejor visibilidad
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
             scene.add(ambientLight);
             
             // Luz principal con configuración de sombras mejorada
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8); // Intensidad moderada
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0); // Mayor intensidad
             directionalLight.position.set(5, 10, 5); // Posición ajustada
             directionalLight.castShadow = true;
             
@@ -254,19 +291,9 @@
             fillLight.position.set(0, -3, 0);
             scene.add(fillLight);
             
-            // Añadir plano invisible debajo para recibir sombras (mejorado)
-            const groundGeometry = new THREE.PlaneBufferGeometry(100, 100); // Geometría más grande
-            const groundMaterial = new THREE.ShadowMaterial({
-                opacity: 0.4, // Mayor opacidad para sombras más visibles
-                transparent: true
-            });
-            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-            ground.rotation.x = -Math.PI / 2;
-            ground.position.y = -1.5; // Posición ajustada
-            ground.receiveShadow = true;
-            ground.matrixAutoUpdate = false;
-            ground.updateMatrix();
-            scene.add(ground);
+            // Eliminamos el plano blanco que estaba debajo del modelo
+            // El modelo ya tiene su propia base con textura de piedra
+            // No necesitamos añadir un plano adicional
             
             // Eliminar el plano grande que añadimos anteriormente
             // No añadiremos un plano para sombras ya que el modelo ya tiene su propia base
@@ -303,7 +330,10 @@
             document.body.appendChild(stats.dom);
             
             // Monitoreo de memoria
-            memoryInterval = setInterval(updateMemoryUsage, 1000);
+            memoryInterval = setInterval(updateMemoryUsage, 2000); // Reducir frecuencia a 2 segundos
+            
+            // Configurar controles de calidad
+            setupQualityControls();
             
             // Cargar el modelo
             loadModel();
@@ -313,6 +343,106 @@
             
             // Iniciar bucle de animación
             animate();
+        }
+        
+        function setupQualityControls() {
+            const lowQualityBtn = document.getElementById('low-quality');
+            const mediumQualityBtn = document.getElementById('medium-quality');
+            const highQualityBtn = document.getElementById('high-quality');
+            
+            lowQualityBtn.addEventListener('click', () => setQuality('low'));
+            mediumQualityBtn.addEventListener('click', () => setQuality('medium'));
+            highQualityBtn.addEventListener('click', () => setQuality('high'));
+        }
+        
+        function setQuality(quality) {
+            if (quality === currentQuality) return;
+            
+            // Actualizar botones
+            document.querySelectorAll('.quality-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`${quality}-quality`).classList.add('active');
+            
+            // Guardar calidad actual
+            currentQuality = quality;
+            console.log(`Calidad cambiada a: ${quality}`);
+            
+            // Aplicar configuraciones según calidad
+            switch(quality) {
+                case 'low':
+                    renderer.setPixelRatio(1);
+                    renderer.shadowMap.enabled = false;
+                    targetFPS = 30;
+                    break;
+                case 'medium':
+                    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+                    renderer.shadowMap.enabled = true;
+                    renderer.shadowMap.type = THREE.PCFShadowMap;
+                    targetFPS = 30;
+                    break;
+                case 'high':
+                    renderer.setPixelRatio(window.devicePixelRatio);
+                    renderer.shadowMap.enabled = true;
+                    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                    targetFPS = 60;
+                    break;
+            }
+            
+            // Actualizar intervalo de frames
+            frameInterval = 1000 / targetFPS;
+            
+            // Actualizar modelo si ya está cargado
+            if (model) {
+                updateModelQuality(quality);
+            }
+            
+            // Forzar actualización de sombras
+            renderer.shadowMap.needsUpdate = true;
+            
+            // Limpiar memoria
+            cleanupMemory();
+        }
+        
+        function updateModelQuality(quality) {
+            model.traverse((node) => {
+                if (node.isMesh && node.material) {
+                    const materials = Array.isArray(node.material) ? node.material : [node.material];
+                    
+                    materials.forEach(material => {
+                        // Ajustar calidad de materiales según nivel
+                        switch(quality) {
+                            case 'low':
+                                material.flatShading = true;
+                                if (material.map) {
+                                    material.map.minFilter = THREE.NearestFilter;
+                                    material.map.magFilter = THREE.NearestFilter;
+                                    material.map.generateMipmaps = false;
+                                }
+                                break;
+                            case 'medium':
+                                material.flatShading = false; // Changed to false for better quality
+                                if (material.map) {
+                                    material.map.minFilter = THREE.LinearFilter;
+                                    material.map.magFilter = THREE.LinearFilter;
+                                    material.map.generateMipmaps = true; // Enable mipmaps for better quality
+                                }
+                                break;
+                            case 'high':
+                                material.flatShading = false;
+                                if (material.map) {
+                                    material.map.minFilter = THREE.LinearMipmapLinearFilter;
+                                    material.map.magFilter = THREE.LinearFilter;
+                                    material.map.generateMipmaps = true;
+                                }
+                                break;
+                        }
+                        material.needsUpdate = true;
+                    });
+                    
+                    // Ajustar sombras
+                    node.castShadow = quality !== 'low';
+                    node.receiveShadow = quality !== 'low';
+                }
+            });
         }
         
         function loadModel() {
@@ -329,7 +459,7 @@
                 const totalMB = (itemsTotal / (1024 * 1024)).toFixed(2);
                 loadingStats.textContent = `${loadedMB} MB de ${totalMB} MB (${Math.round(progress)}%)`;
                 
-                loadingText.textContent = `Cargando modelo 3D... ${Math.round(progress)}%`;
+                loadingText.textContent = `Cargando modelo... ${Math.round(progress)}%`;
             };
             
             loadingManager.onError = function(url) {
@@ -340,9 +470,14 @@
             // Configurar el cargador GLTF
             const loader = new THREE.GLTFLoader(loadingManager);
             
+            // Añadir logging para diagnóstico
+            console.log("THREE.js version:", THREE.REVISION);
+            console.log("GLTFLoader version:", THREE.GLTFLoader ? THREE.GLTFLoader.REVISION : "unknown");
+            
             // Configurar Draco para descompresión
             const dracoLoader = new THREE.DRACOLoader();
             dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+            console.log("Configurando DRACOLoader con path:", 'https://www.gstatic.com/draco/v1/decoders/');
             loader.setDRACOLoader(dracoLoader);
             
             // Implementar caché para el modelo
@@ -429,6 +564,9 @@
                                     // Crear un blob y URL
                                     const blob = new Blob([chunksAll], { type: 'model/gltf-binary' });
                                     
+                                    // Liberar memoria
+                                    chunksAll = null;
+                                    
                                     // Guardar en caché para futuras cargas
                                     if (window.localStorage) {
                                         try {
@@ -464,7 +602,7 @@
                                 const totalMB = (totalBytes / (1024 * 1024)).toFixed(2);
                                 loadingStats.textContent = `${loadedMB} MB de ${totalMB} MB (${Math.round(progress)}%)`;
                                 
-                                loadingText.textContent = `Cargando modelo 3D... ${Math.round(progress)}%`;
+                                loadingText.textContent = `Cargando modelo... ${Math.round(progress)}%`;
                                 
                                 // Leer el siguiente chunk
                                 return readChunk();
@@ -484,51 +622,18 @@
             }
         }
         
-        // Función para cargar el modelo desde un blob
-        function loadModelFromBlob(blob) {
-            const url = URL.createObjectURL(blob);
-            
-            // Cargar desde el blob URL con opciones optimizadas
-            loader.load(url, (gltf) => {
-                model = gltf.scene;
-                
-                // Optimizar el modelo
-                optimizeModel(model);
-                
-                // Ignorar errores de texturas no soportadas
-                console.log("Ignorando errores de texturas no soportadas");
-                
-                // Añadir a la escena
-                scene.add(model);
-                
-                // Centrar y escalar el modelo
-                centerModel(model);
-                
-                // Ocultar pantalla de carga
-                loadingContainer.style.opacity = 0;
-                setTimeout(() => {
-                    loadingContainer.style.display = 'none';
-                }, 500);
-                
-                isLoading = false;
-                
-                // Limpiar URL
-                URL.revokeObjectURL(url);
-                
-                // Actualizar sombras una vez
-                renderer.shadowMap.needsUpdate = true;
-                
-                console.log('Modelo cargado correctamente');
-            },
-            // Progreso de procesamiento
-            (xhr) => {
-                loadingText.textContent = `Procesando modelo... ${Math.round((xhr.loaded / xhr.total) * 100)}%`;
-            },
-            // Error
-            (error) => {
-                console.error('Error procesando modelo:', error);
-                showError(`Error procesando modelo: ${error.message}`);
-            });
+        // Esta función ya está definida arriba, eliminamos la duplicación
+        
+        // Función para convertir dataURI a Blob
+        function dataURItoBlob(dataURI) {
+            const byteString = atob(dataURI.split(',')[1]);
+            const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            return new Blob([ab], {type: mimeString});
         }
         
         // Función para cargar el modelo desde un blob
@@ -539,13 +644,88 @@
             loader.load(url,
                 // Callback de éxito
                 (gltf) => {
+                    // Limpiar modelo anterior si existe
+                    if (model) {
+                        disposeModel(model);
+                        scene.remove(model);
+                    }
+                    
+                    console.log("Modelo cargado, analizando estructura...");
+                    // Inspeccionar el modelo para diagnóstico
+                    let uvSets = {};
+                    let materialTypes = {};
+                    
+                    gltf.scene.traverse((node) => {
+                        if (node.isMesh) {
+                            // Verificar UV sets
+                            if (node.geometry && node.geometry.attributes) {
+                                for (let key in node.geometry.attributes) {
+                                    if (key.startsWith('uv')) {
+                                        uvSets[key] = (uvSets[key] || 0) + 1;
+                                    }
+                                }
+                            }
+                            
+                            // Verificar materiales
+                            if (node.material) {
+                                const materials = Array.isArray(node.material) ? node.material : [node.material];
+                                materials.forEach(mat => {
+                                    const type = mat.type || 'Unknown';
+                                    materialTypes[type] = (materialTypes[type] || 0) + 1;
+                                    
+                                    // Verificar mapas de textura
+                                    for (let mapName in mat) {
+                                        if (mat[mapName] && mat[mapName].isTexture) {
+                                            console.log(`Material tiene ${mapName}`);
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    });
+                    
+                    console.log("UV sets encontrados:", uvSets);
+                    console.log("Tipos de materiales:", materialTypes);
+                    
                     model = gltf.scene;
                     
                     // Optimizar el modelo
                     optimizeModel(model);
                     
-                    // Ignorar errores de texturas no soportadas
-                    console.log("Ignorando errores de texturas no soportadas");
+                    // Aplicar calidad actual
+                    updateModelQuality(currentQuality);
+                    
+                    // Manejar errores de texturas no soportadas
+                    console.log("Intentando manejar errores de texturas no soportadas");
+                    
+                    // Recorrer materiales para ajustar configuraciones problemáticas
+                    model.traverse((node) => {
+                        if (node.isMesh && node.material) {
+                            const materials = Array.isArray(node.material) ? node.material : [node.material];
+                            
+                            materials.forEach(material => {
+                                // Desactivar mapas que causan problemas con UV sets personalizados
+                                if (material.metalnessMap) {
+                                    console.log("Desactivando metalnessMap para evitar errores de UV");
+                                    material.metalness = 0.4; // Valor fijo en lugar de usar mapa
+                                    material.metalnessMap = null;
+                                }
+                                
+                                if (material.roughnessMap) {
+                                    console.log("Desactivando roughnessMap para evitar errores de UV");
+                                    material.roughness = 0.6; // Valor fijo en lugar de usar mapa
+                                    material.roughnessMap = null;
+                                }
+                                
+                                if (material.normalMap) {
+                                    console.log("Desactivando normalMap para evitar errores de UV");
+                                    material.normalMap = null;
+                                }
+                                
+                                material.needsUpdate = true;
+                            });
+                        }
+                    });
                     
                     // Añadir a la escena
                     scene.add(model);
@@ -567,6 +747,9 @@
                     // Actualizar sombras una vez
                     renderer.shadowMap.needsUpdate = true;
                     
+                    // Forzar limpieza de memoria
+                    cleanupMemory();
+                    
                     console.log('Modelo cargado correctamente');
                 },
                 // Progreso de procesamiento
@@ -579,30 +762,6 @@
                     showError(`Error procesando modelo: ${error.message}`);
                 }
             );
-        }
-        
-        // Función para convertir dataURI a Blob
-        function dataURItoBlob(dataURI) {
-            const byteString = atob(dataURI.split(',')[1]);
-            const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
-            const ab = new ArrayBuffer(byteString.length);
-            const ia = new Uint8Array(ab);
-            for (let i = 0; i < byteString.length; i++) {
-                ia[i] = byteString.charCodeAt(i);
-            }
-            return new Blob([ab], {type: mimeString});
-        }
-        
-        // Función para convertir dataURI a Blob
-        function dataURItoBlob(dataURI) {
-            const byteString = atob(dataURI.split(',')[1]);
-            const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
-            const ab = new ArrayBuffer(byteString.length);
-            const ia = new Uint8Array(ab);
-            for (let i = 0; i < byteString.length; i++) {
-                ia[i] = byteString.charCodeAt(i);
-            }
-            return new Blob([ab], {type: mimeString});
         }
         
         function optimizeModel(model) {
@@ -742,6 +901,15 @@
             // Ajustar los límites de los controles
             controls.minDistance = distance * 0.3; // Permitir acercarse más
             controls.maxDistance = distance * 3;   // Permitir alejarse más
+            
+            // Limitar ángulos de rotación para evitar ver debajo del modelo
+            controls.minPolarAngle = Math.PI * 0.1; // Limitar vista desde arriba
+            controls.maxPolarAngle = Math.PI * 0.45; // Restringir para no ver debajo del modelo
+            
+            // Mantener la capacidad de inclinar la cámara pero limitada
+            controls.enablePan = true;
+            controls.panSpeed = 0.5; // Reducir velocidad de inclinación
+            
             controls.target.set(0, 0, 0);
             controls.update();
             
@@ -772,7 +940,58 @@
                 THREE.Cache.clear();
             }
             
+            // Limpiar objetos en la lista de disposables
+            while (disposables.length > 0) {
+                const obj = disposables.pop();
+                if (obj && obj.dispose) {
+                    obj.dispose();
+                }
+            }
+            
+            // Forzar recolección de basura del navegador
+            setTimeout(() => {
+                if (window.gc) window.gc();
+            }, 100);
+            
             console.log("Memoria liberada");
+        }
+        
+        // Función para liberar recursos de un modelo
+        function disposeModel(model) {
+            if (!model) return;
+            
+            model.traverse((object) => {
+                if (object.isMesh) {
+                    if (object.geometry) {
+                        object.geometry.dispose();
+                    }
+                    
+                    if (object.material) {
+                        if (Array.isArray(object.material)) {
+                            object.material.forEach(material => disposeMaterial(material));
+                        } else {
+                            disposeMaterial(object.material);
+                        }
+                    }
+                }
+            });
+            
+            console.log("Modelo anterior liberado");
+        }
+        
+        // Función para liberar recursos de un material
+        function disposeMaterial(material) {
+            if (!material) return;
+            
+            // Liberar texturas
+            for (const key in material) {
+                if (material[key] && material[key].isTexture) {
+                    material[key].dispose();
+                }
+            }
+            
+            // Liberar material
+            material.dispose();
         }
         
         function updateMemoryUsage() {
@@ -781,15 +1000,23 @@
                 const totalMB = (memory.totalJSHeapSize / (1024 * 1024)).toFixed(2);
                 const usedMB = (memory.usedJSHeapSize / (1024 * 1024)).toFixed(2);
                 const limitMB = (memory.jsHeapSizeLimit / (1024 * 1024)).toFixed(2);
+                const usagePercent = ((memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100).toFixed(1);
                 
-                memoryUsage.textContent = `Memoria: ${usedMB}MB / ${limitMB}MB`;
+                memoryUsage.textContent = `Memoria: ${usedMB}MB / ${limitMB}MB (${usagePercent}%)`;
                 
-                // Advertir si el uso de memoria es alto
+                // Establecer color según el uso de memoria
                 if (memory.usedJSHeapSize > memory.jsHeapSizeLimit * 0.8) {
+                    // Uso crítico (>80%)
                     memoryUsage.style.color = '#ff5555';
-                    // Intentar liberar memoria
+                    // Intentar liberar memoria inmediatamente
                     cleanupMemory();
+                } else if (memory.usedJSHeapSize > memory.jsHeapSizeLimit * 0.6) {
+                    // Uso alto (>60%)
+                    memoryUsage.style.color = '#ffaa55';
+                    // Programar limpieza de memoria
+                    setTimeout(cleanupMemory, 1000);
                 } else {
+                    // Uso normal
                     memoryUsage.style.color = '#ffffff';
                 }
             } else {
@@ -810,117 +1037,54 @@
             }, 250);
         }
         
-        function optimizeModel(model) {
-            // Aplicar optimizaciones al modelo
-            let triangleCount = 0;
-            let meshCount = 0;
-            
-            model.traverse((node) => {
-                if (node.isMesh) {
-                    meshCount++;
-                    
-                    // Contar triángulos para estadísticas
-                    if (node.geometry) {
-                        if (node.geometry.index !== null) {
-                            triangleCount += node.geometry.index.count / 3;
-                        } else if (node.geometry.attributes.position) {
-                            triangleCount += node.geometry.attributes.position.count / 3;
-                        }
-                    }
-                    
-                    // Optimizaciones de rendimiento para meshes
-                    node.castShadow = true;
-                    node.receiveShadow = true;
-                    node.frustumCulled = true; // Activar frustum culling
-                    node.matrixAutoUpdate = false; // Desactivar actualización automática de matriz
-                    node.updateMatrix(); // Actualizar matriz una vez
-                    
-                    // Optimizar geometrías
-                    if (node.geometry) {
-                        // Eliminar atributos no utilizados para ahorrar memoria
-                        const geometry = node.geometry;
-                        if (!geometry.attributes.normal) {
-                            geometry.computeVertexNormals();
-                        }
-                        
-                        // Computar una sola vez
-                        geometry.computeBoundingSphere();
-                        geometry.computeBoundingBox();
-                    }
-                    
-                    // Optimizar materiales
-                    if (node.material) {
-                        // Convertir arrays de materiales a un solo material si es posible
-                        if (Array.isArray(node.material) && node.material.length === 1) {
-                            node.material = node.material[0];
-                        }
-                        
-                        // Procesar cada material (ya sea un array o un solo material)
-                        const materials = Array.isArray(node.material) ? node.material : [node.material];
-                        
-                        materials.forEach(material => {
-                            // Optimizar materiales
-                            material.needsUpdate = true;
-                            
-                            // Configuración básica para materiales
-                            if (material.metalness !== undefined) {
-                                material.metalness = Math.min(material.metalness, 0.4);
-                            }
-                            
-                            if (material.roughness !== undefined) {
-                                material.roughness = Math.max(material.roughness, 0.5);
-                            }
-                            
-                            // Configuración de sombras
-                            material.shadowSide = THREE.FrontSide;
-                            
-                            // Eliminar emisión para ahorrar cálculos
-                            if (material.emissive !== undefined) {
-                                material.emissive.setRGB(0, 0, 0);
-                            }
-                            
-                            // Reducir especularidad
-                            if (material.specular !== undefined) {
-                                material.specular.multiplyScalar(0.4);
-                            }
-                        });
-                    }
-                }
-            });
-            
-            console.log(`Modelo optimizado: ${meshCount} meshes, ${Math.round(triangleCount)} triángulos`);
-        }
+        // Esta función ya está definida arriba, eliminamos la duplicación
         
         // Función para animar la escena
         
         function animate(currentTime) {
             requestAnimationFrame(animate);
             
-            // Limitar FPS para ahorrar recursos
+            // Limitar FPS para ahorrar recursos según la calidad seleccionada
             const elapsed = currentTime - lastFrameTime;
             if (elapsed < frameInterval) return;
             lastFrameTime = currentTime - (elapsed % frameInterval);
             
             stats.begin();
             
-            // Actualizar controles solo si están activos
-            if (controls.enabled) {
+            // Actualizar controles solo si están activos y hay cambios
+            if (controls.enabled && (controls.autoRotate || controls.update())) {
                 controls.update();
             }
             
             // Rotar el modelo si está cargado y la rotación automática está activada
             if (model && controls.autoRotate) {
                 model.rotation.y += 0.002;
+                // Forzar actualización solo del modelo, no de toda la escena
+                renderer.shadowMap.needsUpdate = false;
             }
             
-            // Renderizar escena
-            renderer.render(scene, camera);
+            // Renderizar escena con optimizaciones
+            if (currentQuality === 'low') {
+                // En calidad baja, desactivar sombras temporalmente para el renderizado
+                const shadowMapEnabled = renderer.shadowMap.enabled;
+                renderer.shadowMap.enabled = false;
+                renderer.render(scene, camera);
+                renderer.shadowMap.enabled = shadowMapEnabled;
+            } else {
+                renderer.render(scene, camera);
+            }
             
             stats.end();
             
-            // Monitorear memoria cada 30 frames
-            if (Math.random() < 0.03) { // ~3% de probabilidad por frame
+            // Monitorear memoria con menos frecuencia según la calidad
+            const memoryCheckProbability = currentQuality === 'low' ? 0.01 : 0.03;
+            if (Math.random() < memoryCheckProbability) {
                 updateMemoryUsage();
+            }
+            
+            // Programar limpieza periódica de memoria
+            if (Math.random() < 0.001) { // 0.1% de probabilidad por frame
+                setTimeout(cleanupMemory, 100);
             }
         }
         
