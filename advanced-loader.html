@@ -573,148 +573,91 @@
             loader.setDRACOLoader(dracoLoader);
             
             // Implementar caché para el modelo
-            const modelUrl = `Modelo3DCafeColombiano.glb`;
+            // Cambiar a usar directamente GLTFLoader en lugar de fetch para archivos grandes
+            // Intentar cargar primero con el nombre correcto
+            const modelUrl = `Modelo3DCafeColombiana.glb`; // Cambiar a la versión con 'a' al final
             const modelCacheKey = `model-cache-${modelUrl}`;
             
-            // Intentar cargar desde caché primero
+            console.log("Archivo a cargar:", modelUrl);
+            
+            loadingText.textContent = "Iniciando carga del modelo...";
+            console.log("Iniciando carga del modelo con GLTFLoader directamente");
+            
+            // Cargar directamente con GLTFLoader en lugar de usar fetch
             try {
-                loadingText.textContent = "Verificando caché...";
+                console.log("Intentando cargar:", modelUrl);
                 
-                // Verificar si el modelo está en caché
-                if (window.localStorage && localStorage.getItem(modelCacheKey)) {
-                    loadingText.textContent = "Cargando desde caché...";
-                    console.log("Modelo encontrado en caché");
-                    
-                    try {
-                        // Cargar desde caché
-                        const cachedData = localStorage.getItem(modelCacheKey);
-                        const blob = dataURItoBlob(cachedData);
-                        loadModelFromBlob(blob);
-                        return; // Salir si se cargó desde caché
-                    } catch (cacheError) {
-                        console.warn("Error cargando desde caché:", cacheError);
-                        // Continuar con carga normal si hay error
-                    }
-                }
+                // Configurar un timeout para la carga
+                const loadingTimeout = setTimeout(() => {
+                    console.warn("Tiempo de carga excedido, posible problema con el archivo");
+                    showError("Tiempo de carga excedido. El archivo puede ser demasiado grande o estar corrupto.");
+                }, 60000); // 60 segundos de timeout
                 
-                // Si no está en caché, cargar normalmente
-                loadingText.textContent = "Iniciando carga del modelo...";
-                console.log("Iniciando carga del modelo con fetch");
-                
-                // Usar fetch con opciones optimizadas
-                console.log("Intentando fetch a:", modelUrl);
-                fetch(modelUrl, {
-                    method: 'GET',
-                    cache: 'force-cache', // Usar caché del navegador si está disponible
-                    priority: 'high' // Prioridad alta para la carga
-                })
-                    .then(response => {
-                        console.log("Respuesta recibida:", response);
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
+                // Cargar directamente con GLTFLoader
+                loader.load(
+                    modelUrl,
+                    // Callback de éxito
+                    (gltf) => {
+                        clearTimeout(loadingTimeout);
+                        console.log("Modelo cargado exitosamente con GLTFLoader");
+                        processLoadedModel(gltf);
+                    },
+                    // Callback de progreso
+                    (xhr) => {
+                        if (xhr.lengthComputable) {
+                            const percentComplete = xhr.loaded / xhr.total * 100;
+                            progressBar.style.width = percentComplete + '%';
+                            
+                            const loadedMB = (xhr.loaded / (1024 * 1024)).toFixed(2);
+                            const totalMB = (xhr.total / (1024 * 1024)).toFixed(2);
+                            loadingStats.textContent = `${loadedMB} MB de ${totalMB} MB (${Math.round(percentComplete)}%)`;
+                            
+                            loadingText.textContent = `Cargando modelo... ${Math.round(percentComplete)}%`;
                         }
-                        console.log("Respuesta OK, obteniendo content-length");
-                        
-                        const contentLength = response.headers.get('content-length');
-                        console.log("Content-Length:", contentLength);
-                        const totalBytes = parseInt(contentLength, 10);
-                        console.log("Total bytes a cargar:", totalBytes);
-                        let loadedBytes = 0;
-                        
-                        // Crear un lector de stream
-                        console.log("Creando lector de stream");
-                        const reader = response.body.getReader();
-                        const chunks = [];
-                        console.log("Iniciando lectura de chunks");
-                        
-                        // Función para leer chunks
-                        function readChunk() {
-                            console.log("Leyendo chunk...");
-                            return reader.read().then(({ done, value }) => {
-                                if (done) {
-                                    console.log("Lectura completada, procesando chunks");
-                                    // Combinar todos los chunks
-                                    console.log("Combinando chunks, total bytes:", loadedBytes);
-                                    let chunksAll;
-                                    try {
-                                        chunksAll = new Uint8Array(loadedBytes);
-                                        let position = 0;
-                                        for (const chunk of chunks) {
-                                            console.log("Procesando chunk de tamaño:", chunk.length);
-                                            chunksAll.set(chunk, position);
-                                            position += chunk.length;
-                                        }
-                                        console.log("Chunks combinados correctamente");
-                                    } catch (error) {
-                                        console.error("Error combinando chunks:", error);
-                                        showError(`Error combinando chunks: ${error.message}`);
-                                        return;
-                                    }
-                                    
-                                    loadingText.textContent = "Procesando modelo...";
-                                    
-                                    // Crear un blob y URL
-                                    const blob = new Blob([chunksAll], { type: 'model/gltf-binary' });
-                                    
-                                    // Liberar memoria
-                                    chunksAll = null;
-                                    
-                                    // Guardar en caché para futuras cargas
-                                    if (window.localStorage) {
-                                        try {
-                                            const reader = new FileReader();
-                                            reader.onload = function() {
-                                                try {
-                                                    localStorage.setItem(modelCacheKey, reader.result);
-                                                    console.log("Modelo guardado en caché");
-                                                } catch (e) {
-                                                    console.warn("No se pudo guardar en caché:", e);
-                                                }
-                                            };
-                                            reader.readAsDataURL(blob);
-                                        } catch (e) {
-                                            console.warn("Error al preparar caché:", e);
-                                        }
-                                    }
-                                    
-                                    loadModelFromBlob(blob, loader);
-                                    
-                                    return;
-                                }
-                                
-                                // Procesar este chunk
-                                loadedBytes += value.length;
-                                chunks.push(value);
-                                
-                                // Actualizar progreso
-                                const progress = (loadedBytes / totalBytes) * 100;
-                                progressBar.style.width = `${progress}%`;
-                                
-                                const loadedMB = (loadedBytes / (1024 * 1024)).toFixed(2);
-                                const totalMB = (totalBytes / (1024 * 1024)).toFixed(2);
-                                loadingStats.textContent = `${loadedMB} MB de ${totalMB} MB (${Math.round(progress)}%)`;
-                                
-                                loadingText.textContent = `Cargando modelo... ${Math.round(progress)}%`;
-                                
-                                // Leer el siguiente chunk
-                                return readChunk();
-                            });
-                        }
-                        
-                        // Iniciar lectura de chunks
-                        return readChunk();
-                    })
-                    .catch(error => {
-                        console.error('Error en fetch:', error);
+                    },
+                    // Callback de error
+                    (error) => {
+                        clearTimeout(loadingTimeout);
+                        console.error("Error cargando con GLTFLoader:", error);
                         showError(`Error cargando el modelo: ${error.message}`);
-                    });
+                        
+                        // Si falla, intentar con el otro nombre de archivo como fallback
+                        console.log("Intentando con nombre de archivo alternativo...");
+                        const alternativeUrl = "Modelo3DCafeColombiano.glb"; // Cambiar a la versión sin 'a' al final
+                        console.log("Intentando cargar archivo alternativo:", alternativeUrl);
+                        
+                        loader.load(
+                            alternativeUrl,
+                            (gltf) => {
+                                console.log("Modelo cargado exitosamente con nombre alternativo");
+                                processLoadedModel(gltf);
+                            },
+                            (xhr) => {
+                                if (xhr.lengthComputable) {
+                                    const percentComplete = xhr.loaded / xhr.total * 100;
+                                    progressBar.style.width = percentComplete + '%';
+                                    
+                                    const loadedMB = (xhr.loaded / (1024 * 1024)).toFixed(2);
+                                    const totalMB = (xhr.total / (1024 * 1024)).toFixed(2);
+                                    loadingStats.textContent = `${loadedMB} MB de ${totalMB} MB (${Math.round(percentComplete)}%)`;
+                                    
+                                    loadingText.textContent = `Cargando modelo alternativo... ${Math.round(percentComplete)}%`;
+                                }
+                            },
+                            (secondError) => {
+                                console.error("Error cargando con nombre alternativo:", secondError);
+                                showError(`Error cargando el modelo alternativo: ${secondError.message}`);
+                            }
+                        );
+                    }
+                );
             } catch (error) {
-                console.error('Error en carga:', error);
+                console.error('Error al iniciar la carga:', error);
                 showError(`Error inesperado: ${error.message}`);
             }
         }
         
-        // Esta función ya está definida arriba, eliminamos la duplicación
+        // Función para convertir dataURI a Blob (mantenemos esta función por si es útil en el futuro)
         
         // Función para convertir dataURI a Blob
         function dataURItoBlob(dataURI) {
@@ -728,26 +671,95 @@
             return new Blob([ab], {type: mimeString});
         }
         
-        // Función para cargar el modelo desde un blob con manejo mejorado de errores
-        function loadModelFromBlob(blob, loader) {
-            if (!blob || !(blob instanceof Blob)) {
-                console.error("Error: Se recibió un blob inválido", blob);
-                showError("Error: El archivo del modelo es inválido o está corrupto");
-                return;
+        // Función para procesar el modelo cargado
+        function processLoadedModel(gltf) {
+            // Limpiar modelo anterior si existe
+            if (model) {
+                disposeModel(model);
+                scene.remove(model);
             }
             
-            try {
-                const url = URL.createObjectURL(blob);
-                console.log("Blob URL creado:", url);
-                
-                // Verificar que el blob tenga un tamaño razonable
-                console.log("Tamaño del blob:", blob.size, "bytes");
-                if (blob.size < 1000) {
-                    console.warn("Advertencia: El blob es muy pequeño, podría estar incompleto");
+            console.log("Modelo cargado, analizando estructura...");
+            console.log("Estructura del modelo:", gltf);
+            
+            // Inspeccionar el modelo para diagnóstico
+            let uvSets = {};
+            let materialTypes = {};
+            let meshCount = 0;
+            
+            console.log("Recorriendo nodos del modelo...");
+            
+            gltf.scene.traverse((node) => {
+                if (node.isMesh) {
+                    meshCount++;
+                    console.log(`Mesh encontrado #${meshCount}:`, node.name || "Sin nombre");
+                    
+                    // Verificar UV sets
+                    if (node.geometry && node.geometry.attributes) {
+                        console.log(`Geometría del mesh #${meshCount}:`, Object.keys(node.geometry.attributes));
+                        for (let key in node.geometry.attributes) {
+                            if (key.startsWith('uv')) {
+                                uvSets[key] = (uvSets[key] || 0) + 1;
+                            }
+                        }
+                    }
+                    
+                    // Verificar materiales
+                    if (node.material) {
+                        console.log(`Material del mesh #${meshCount}:`, node.material);
+                        
+                        const materials = Array.isArray(node.material) ? node.material : [node.material];
+                        console.log(`Número de materiales: ${materials.length}`);
+                        
+                        materials.forEach((mat, index) => {
+                            const type = mat.type || 'Unknown';
+                            materialTypes[type] = (materialTypes[type] || 0) + 1;
+                            console.log(`Material #${index} tipo: ${type}`);
+                            
+                            // Verificar mapas de textura
+                            for (let mapName in mat) {
+                                if (mat[mapName] && mat[mapName].isTexture) {
+                                    console.log(`Material tiene ${mapName}`);
+                                }
+                            }
+                        });
+                    }
                 }
-                
-                // Cargar desde el blob URL con opciones optimizadas y mejor manejo de errores
-                loader.load(url,
+            });
+            
+            console.log("UV sets encontrados:", uvSets);
+            console.log("Tipos de materiales:", materialTypes);
+            console.log("Total de meshes encontrados:", meshCount);
+            
+            if (meshCount === 0) {
+                console.warn("¡ADVERTENCIA! No se encontraron meshes en el modelo. Esto puede indicar un problema con el archivo GLB.");
+            }
+            
+            model = gltf.scene;
+            console.log("Modelo asignado a la escena:", model);
+            
+            // Procesar el modelo cargado
+            console.log("Iniciando optimización del modelo...");
+            optimizeModel(model);
+            
+            console.log("Centrando modelo...");
+            centerModel(model);
+            
+            console.log("Posicionando cuadrícula al nivel del suelo...");
+            positionGridAtFloorLevel(model);
+            
+            console.log("Añadiendo texto flotante...");
+            addFloatingText(model);
+            
+            console.log("Procesamiento del modelo completado.");
+            
+            // Ocultar pantalla de carga
+            loadingContainer.style.opacity = 0;
+            setTimeout(() => {
+                loadingContainer.style.display = 'none';
+            }, 500);
+            
+            isLoading = false;
                 // Callback de éxito
                 (gltf) => {
                     // Limpiar modelo anterior si existe
@@ -1316,11 +1328,7 @@
                         showError(`Error procesando modelo: ${error.message}`);
                     }
                 }
-            );
-                } catch (error) {
-                    console.error("Error crítico al crear URL o cargar modelo:", error);
-                    showError(`Error crítico al cargar el modelo: ${error.message}`);
-                }
+            
         }
         
         function optimizeModel(model) {
@@ -1605,9 +1613,17 @@
             });
             
             // Ajustar ligeramente por debajo del punto más bajo para evitar z-fighting
-            const floorLevel = lowestPoint - 0.05;
+            let floorLevel = lowestPoint - 0.05;
             
-            console.log(`Nivel del suelo detectado: ${floorLevel}`);
+            console.log(`Nivel del suelo detectado (original): ${floorLevel}`);
+            
+            // Si el nivel del suelo es extremadamente bajo, ajustarlo a un valor razonable
+            if (floorLevel < -100) {
+                console.log("Nivel del suelo extremadamente bajo, ajustando a un valor razonable");
+                floorLevel = -1; // Valor más razonable
+            }
+            
+            console.log(`Nivel del suelo ajustado: ${floorLevel}`);
             
             // Posicionar la cuadrícula en el nivel del suelo y en el punto de origen personalizado
             gridHelper.position.set(originOffset.x, floorLevel, originOffset.z);
@@ -1638,22 +1654,30 @@
             const size = box.getSize(new THREE.Vector3());
             const maxDim = Math.max(size.x, size.y, size.z);
             
-            // Ajustar la escala - hacerlo más grande
-            // En lugar de reducir modelos grandes, aumentamos todos los modelos
-            const scale = 1.5; // Reducir un poco la escala para que no sea tan grande
+            // Ajustar la escala - hacerlo más pequeño para que quepa en la vista
+            const scale = 0.5; // Reducir la escala para que sea más visible
             model.scale.set(scale, scale, scale);
+            
+            // Elevar el modelo para que sea visible
+            model.position.y += 5; // Elevar el modelo 5 unidades
             
             console.log("Dimensiones del modelo:", size);
             console.log("Dimensión máxima:", maxDim);
             
-            // Ajustar la cámara para que esté más cerca
-            const distance = maxDim * 1.2; // Más cerca que antes
-            camera.position.set(distance * 0.5, distance * 0.3, distance * 0.5);
-            camera.lookAt(0, 0, 0);
+            // Ajustar la cámara para que vea el modelo completo
+            const distance = maxDim * 2; // Aumentar la distancia para ver todo el modelo
+            camera.position.set(distance * 0.5, distance * 0.5, distance * 0.5);
+            camera.lookAt(0, 5, 0); // Mirar hacia donde elevamos el modelo
             
             // Ajustar los límites de los controles
-            controls.minDistance = distance * 0.3; // Permitir acercarse más
-            controls.maxDistance = distance * 3;   // Permitir alejarse más
+            controls.minDistance = distance * 0.2; // Permitir acercarse más
+            controls.maxDistance = distance * 5;   // Permitir alejarse más
+            
+            // Mostrar información sobre las dimensiones y posición
+            console.log("Dimensiones del modelo:", size);
+            console.log("Dimensión máxima:", maxDim);
+            console.log("Posición del modelo después de centrar:", model.position);
+            console.log("Posición de la cámara:", camera.position);
             
             // Permitir mayor libertad de movimiento de cámara
             controls.minPolarAngle = Math.PI * 0.05; // Permitir vista más desde arriba
