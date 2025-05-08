@@ -4,7 +4,23 @@ services:
   portfolio-app:
     build: .
     ports:
-      - "8080:3000"  # Map container port 3000 to host port 8080
+      - "8080:8080"  # Map container port 8080 to host port 8080
     volumes:
       - ./:/app  # Mount current directory to /app in container for real-time changes
+      - /app/node_modules  # Don't override node_modules with host directory
     restart: unless-stopped
+    command: npm start
+    environment:
+      - NODE_ENV=production
+
+  # Development service with hot-reload
+  portfolio-dev:
+    build: .
+    ports:
+      - "8080:8080"  # Map container port 8080 to host port 8080
+    volumes:
+      - ./:/app  # Mount current directory to /app in container for real-time changes
+      - /app/node_modules  # Don't override node_modules with host directory
+    command: npm run dev
+    environment:
+      - NODE_ENV=development
