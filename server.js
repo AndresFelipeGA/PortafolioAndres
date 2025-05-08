@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = 3000;
+const PORT = 8080;
 
 const MIME_TYPES = {
     '.html': 'text/html',
@@ -27,7 +27,7 @@ const server = http.createServer((req, res) => {
     
     // Handle root URL
     let filePath = urlWithoutQuery === '/'
-        ? path.join(__dirname, 'index.html')
+        ? path.join(__dirname, 'fixed-advanced-loader.html')
         : path.join(__dirname, urlWithoutQuery);
     
     console.log(`Resolved file path: ${filePath}`);
@@ -117,5 +117,5 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}/`);
-    console.log(`Test model viewer: http://localhost:${PORT}/test-model.html`);
+    console.log(`3D model viewer: http://localhost:${PORT}/fixed-advanced-loader.html`);
 });
