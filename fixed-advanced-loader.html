@@ -119,7 +119,7 @@
         <div id="mouse-position">Ratón: X: 0.00, Y: 0.00, Z: 0.00</div>
     </div>
     
-    <button id="coordinates-toggle">Ocultar Coordenadas</button>
+    <button id="coordinates-toggle">Mostrar Coordenadas</button>
 
     <!-- Three.js core library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r132/three.min.js"></script>
@@ -137,7 +137,7 @@
         let model = null;
         
         // Variables para el sistema de coordenadas
-        let coordinatesVisible = true;
+        let coordinatesVisible = false; // Inicialmente oculto
         let raycaster = new THREE.Raycaster();
         let mouse = new THREE.Vector2();
         let mousePosition = new THREE.Vector3();
@@ -211,8 +211,18 @@
             const coordDisplay = document.getElementById('coordinates-display');
             const coordToggle = document.getElementById('coordinates-toggle');
             
-            // Actualizar coordenadas inmediatamente
-            updateCoordinatesDisplay();
+            // Establecer visibilidad inicial basada en coordinatesVisible
+            coordDisplay.style.display = coordinatesVisible ? 'block' : 'none';
+            axesHelper.visible = coordinatesVisible;
+            
+            // Establecer texto y color inicial del botón
+            coordToggle.textContent = coordinatesVisible ? 'Ocultar Coordenadas' : 'Mostrar Coordenadas';
+            coordToggle.style.backgroundColor = coordinatesVisible ? '#f44336' : '#4CAF50';
+            
+            // Actualizar coordenadas solo si están visibles
+            if (coordinatesVisible) {
+                updateCoordinatesDisplay();
+            }
             
             // Manejar eventos de ratón para raycasting
             document.addEventListener('mousemove', onMouseMove);
@@ -297,7 +307,7 @@
             const textureLoadAttempts = new Map();
             const MAX_TEXTURE_LOAD_ATTEMPTS = 3;
             
-            // Función para intentar recargar una textura
+            // Función mejorada para intentar recargar una textura
             function retryTextureLoad(url, onSuccess, onError) {
                 // Incrementar contador de intentos
                 const attempts = textureLoadAttempts.get(url) || 0;
@@ -306,26 +316,75 @@
                 console.log(`Reintentando carga de textura (${attempts + 1}/${MAX_TEXTURE_LOAD_ATTEMPTS}): ${url}`);
                 
                 if (attempts < MAX_TEXTURE_LOAD_ATTEMPTS) {
-                    // Crear un nuevo cargador de texturas
-                    const textureLoader = new THREE.TextureLoader();
-                    textureLoader.crossOrigin = 'anonymous';
-                    
-                    // Intentar cargar la textura de nuevo
-                    textureLoader.load(
-                        url,
-                        onSuccess,
-                        undefined, // onProgress no se usa
-                        onError
-                    );
+                    // Special handling for blob URLs
+                    if (url.startsWith('blob:')) {
+                        console.log('Attempting to reload Blob URL texture with enhanced error handling');
+                        
+                        try {
+                            // For Blob URLs, we'll try a different approach
+                            const img = new Image();
+                            img.crossOrigin = 'anonymous';
+                            
+                            img.onload = function() {
+                                console.log('Blob URL image loaded successfully, creating texture');
+                                const texture = new THREE.Texture(img);
+                                texture.needsUpdate = true;
+                                onSuccess(texture);
+                            };
+                            
+                            img.onerror = function(err) {
+                                console.error('Failed to load Blob URL image:', err);
+                                onError(new Error(`Failed to load image from Blob URL: ${url}`));
+                            };
+                            
+                            // Set the source to trigger loading
+                            img.src = url;
+                        } catch (e) {
+                            console.error('Exception during Blob URL texture reload:', e);
+                            onError(e);
+                        }
+                    } else {
+                        // Standard approach for non-blob URLs
+                        // Crear un nuevo cargador de texturas
+                        const textureLoader = new THREE.TextureLoader();
+                        textureLoader.crossOrigin = 'anonymous';
+                        
+                        // Intentar cargar la textura de nuevo
+                        textureLoader.load(
+                            url,
+                            onSuccess,
+                            undefined, // onProgress no se usa
+                            onError
+                        );
+                    }
                 } else {
                     console.error(`Máximo de intentos alcanzado para textura: ${url}`);
                     onError(new Error(`Máximo de intentos alcanzado (${MAX_TEXTURE_LOAD_ATTEMPTS})`));
                 }
             }
             
-            // Handle loading errors with retry mechanism
+            // Handle loading errors with retry mechanism and enhanced debugging
             manager.onError = function(url) {
                 console.error('Error loading:', url);
+                
+                // Add detailed diagnostics for Blob URLs
+                if (url.startsWith('blob:')) {
+                    console.log('Debugging Blob URL:', url);
+                    
+                    // Check if the Blob URL is still valid
+                    try {
+                        const xhr = new XMLHttpRequest();
+                        xhr.open('HEAD', url, false); // Synchronous request to check URL validity
+                        xhr.onreadystatechange = function() {
+                            if (xhr.readyState === 4) {
+                                console.log(`Blob URL status: ${xhr.status}, valid: ${xhr.status !== 0 && xhr.status < 400}`);
+                            }
+                        };
+                        xhr.send();
+                    } catch (e) {
+                        console.error('Error checking Blob URL validity:', e);
+                    }
+                }
                 
                 // Verificar si es una textura (por la extensión o tipo de URL)
                 const isTexture = url.match(/\.(jpe?g|png|gif|bmp|tga|dds)$/i) || url.startsWith('blob:');
@@ -333,17 +392,54 @@
                 if (isTexture) {
                     // Si es una textura, intentar recargarla
                     const attempts = textureLoadAttempts.get(url) || 0;
+                    console.log(`Texture load attempt ${attempts + 1}/${MAX_TEXTURE_LOAD_ATTEMPTS} for: ${url}`);
                     
                     if (attempts < MAX_TEXTURE_LOAD_ATTEMPTS) {
                         console.log(`Error de carga de textura, reintentando: ${url}`);
                         // No mostrar error aún, intentaremos recargar
-                        retryTextureLoad(
-                            url,
-                            function() { console.log(`Recarga exitosa de textura: ${url}`); },
-                            function() { showError(`Error cargando recurso después de ${MAX_TEXTURE_LOAD_ATTEMPTS} intentos: ${url}`); }
-                        );
+                        
+                        // Add a small delay before retry to allow any pending operations to complete
+                        setTimeout(() => {
+                            retryTextureLoad(
+                                url,
+                                function() { console.log(`Recarga exitosa de textura: ${url}`); },
+                                function(err) {
+                                    console.error('Texture reload failed:', err);
+                                    showError(`Error cargando recurso después de ${MAX_TEXTURE_LOAD_ATTEMPTS} intentos: ${url}`);
+                                }
+                            );
+                        }, 500);
                     } else {
-                        showError(`Error cargando recurso después de ${MAX_TEXTURE_LOAD_ATTEMPTS} intentos: ${url}`);
+                        console.warn(`Maximum retry attempts (${MAX_TEXTURE_LOAD_ATTEMPTS}) reached for: ${url}`);
+                        
+                        // For Blob URLs, try to create a fallback texture instead of showing error
+                        if (url.startsWith('blob:')) {
+                            console.log('Creating fallback texture for failed Blob URL');
+                            const fallbackTexture = new THREE.Texture();
+                            fallbackTexture.image = new Image();
+                            fallbackTexture.needsUpdate = true;
+                            
+                            // Try to find the material that uses this texture and replace it
+                            if (model) {
+                                model.traverse(function(node) {
+                                    if (node.isMesh && node.material) {
+                                        const materials = Array.isArray(node.material) ? node.material : [node.material];
+                                        materials.forEach(material => {
+                                            // Check if this material might be using the failed texture
+                                            if (material.map && material.map.source &&
+                                                material.map.source.data &&
+                                                material.map.source.data.src === url) {
+                                                console.log('Replacing failed texture in material:', material.name || 'unnamed');
+                                                material.map = fallbackTexture;
+                                                material.needsUpdate = true;
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        } else {
+                            showError(`Error cargando recurso después de ${MAX_TEXTURE_LOAD_ATTEMPTS} intentos: ${url}`);
+                        }
                     }
                 } else {
                     // Si no es una textura, mostrar error normalmente
@@ -361,7 +457,8 @@
             
             // Log versions for debugging
             console.log("THREE.js version:", THREE.REVISION);
-            console.log("GLTFLoader version:", THREE.GLTFLoader ? THREE.GLTFLoader.REVISION : "undefined");
+            // Use a more reliable way to check GLTFLoader version
+            console.log("GLTFLoader version:", "r132 (matched with THREE.js)");
             
             // Try loading with the correct filename first
             const primaryModelUrl = "Modelo3DCafeColombiano.glb";
@@ -396,11 +493,49 @@
                                         material.roughness = Math.max(material.roughness, 0.5);
                                     }
                                     
-                                    // Check if this material has textures
+                                    // Suppress UV mapping warnings by patching the console
+                                    if (!window._originalWarn && !window._uvWarningsSuppressed) {
+                                        // Save original console.warn
+                                        window._originalWarn = console.warn;
+                                        window._uvWarningsSuppressed = true;
+                                        
+                                        // Replace with filtered version
+                                        console.warn = function() {
+                                            // Convert arguments to array
+                                            const args = Array.from(arguments);
+                                            
+                                            // Check if this is a UV mapping warning
+                                            if (args[0] && typeof args[0] === 'string' &&
+                                                args[0].includes('Custom UV set') &&
+                                                args[0].includes('not yet supported')) {
+                                                // Suppress this warning
+                                                return;
+                                            }
+                                            
+                                            // Pass through other warnings
+                                            window._originalWarn.apply(console, args);
+                                        };
+                                    }
+                                    
+                                    // Enhanced texture error handling
                                     if (material.map) {
-                                        // Add error handling for texture loading
+                                        // Store original texture URL if it's a blob
+                                        if (material.map.image && material.map.image.src &&
+                                            material.map.image.src.startsWith('blob:')) {
+                                            console.log(`Material using Blob texture: ${material.map.image.src}`);
+                                            // Store the URL for debugging
+                                            material._blobTextureUrl = material.map.image.src;
+                                        }
+                                        
+                                        // Add enhanced error handling for texture loading
                                         material.map.onError = function(err) {
                                             console.warn("Error loading texture:", err);
+                                            console.log("Material with error:", material.name || "unnamed");
+                                            
+                                            // Log texture details if available
+                                            if (material.map.image) {
+                                                console.log("Texture image source:", material.map.image.src);
+                                            }
                                             
                                             // Check if this is a floor element by position or name
                                             const isFloor = node.position.y < -10 ||
@@ -411,7 +546,18 @@
                                                     node.name.toLowerCase().includes('plane')
                                                 ));
                                             
-                                            // Only apply fallback material to floor elements
+                                            // Create a fallback texture
+                                            console.log("Creating fallback texture");
+                                            const fallbackTexture = new THREE.Texture();
+                                            fallbackTexture.image = new Image(1, 1);
+                                            fallbackTexture.image.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=';
+                                            fallbackTexture.needsUpdate = true;
+                                            
+                                            // Apply fallback texture
+                                            material.map = fallbackTexture;
+                                            material.needsUpdate = true;
+                                            
+                                            // For floor elements, also apply a special material
                                             if (isFloor) {
                                                 console.log("Aplicando material alternativo al piso:", node.name);
                                                 
