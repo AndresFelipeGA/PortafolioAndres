@@ -17,7 +17,7 @@ services:
   portfolio-dev:
     build: .
     ports:
-      - "8080:8080"  # Map container port 8080 to host port 8080
+      - "8081:8080"  # Map container port 8080 to host port 8081
     volumes:
       - ./:/app  # Mount current directory to /app in container for real-time changes
       - /app/node_modules  # Don't override node_modules with host directory

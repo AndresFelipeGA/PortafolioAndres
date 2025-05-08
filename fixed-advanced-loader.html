@@ -143,6 +143,19 @@
         let mousePosition = new THREE.Vector3();
         let axesHelper; // Para visualizar los ejes X, Y, Z
         
+        // Variables para la animación de la cámara
+        let cameraAnimation = {
+            enabled: false,
+            duration: 10080, // Duración de la animación en milisegundos (10.08 segundos - 25% más rápido)
+            startTime: 0,
+            initialPosition: new THREE.Vector3(),
+            targetPosition: new THREE.Vector3(),
+            initialTarget: new THREE.Vector3(),
+            finalTarget: new THREE.Vector3(),
+            originalControlsEnabled: true,
+            waypoints: [] // Puntos intermedios para crear una trayectoria circular
+        };
+        
         // Punto de origen personalizado (offset para el sistema de coordenadas)
         const originOffset = new THREE.Vector3(-10.00, -14.10, -2.20);
         
@@ -608,11 +621,8 @@
                             loadingContainer.style.display = 'none';
                         }, 500);
                         
-                        // Update camera position
-                        const size = box.getSize(new THREE.Vector3());
-                        const maxDim = Math.max(size.x, size.y, size.z);
-                        camera.position.set(maxDim, maxDim * 0.5, maxDim);
-                        camera.lookAt(0, 0, 0);
+                        // Start camera animation instead of just setting a fixed position
+                        startCameraAnimation();
                         
                         // Update info
                         document.getElementById('info').innerHTML += `
@@ -798,16 +808,173 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
         
+        // Función para iniciar la animación de la cámara
+        function startCameraAnimation() {
+            // Coordenadas iniciales y finales (relativas al origen personalizado)
+            const startCameraPos = new THREE.Vector3(43.60, 34.42, -69.81);
+            const endCameraPos = new THREE.Vector3(-33.53, 21.07, 71.36);
+            const targetPos = new THREE.Vector3(10.00, 14.10, 2.20);
+            
+            // Convertir coordenadas relativas a absolutas (sumando el offset)
+            const absoluteStartPos = new THREE.Vector3().copy(startCameraPos).add(originOffset);
+            const absoluteEndPos = new THREE.Vector3().copy(endCameraPos).add(originOffset);
+            const absoluteTargetPos = new THREE.Vector3().copy(targetPos).add(originOffset);
+            
+            // Crear puntos intermedios para una trayectoria circular alrededor del objetivo
+            cameraAnimation.waypoints = [];
+            
+            // Añadir el punto inicial
+            cameraAnimation.waypoints.push(new THREE.Vector3().copy(absoluteStartPos));
+            
+            // Calcular el centro de la trayectoria circular (el objetivo)
+            const center = new THREE.Vector3().copy(absoluteTargetPos);
+            
+            // Calcular el radio aproximado (distancia desde el objetivo a la cámara)
+            const startRadius = absoluteStartPos.distanceTo(center);
+            const endRadius = absoluteEndPos.distanceTo(center);
+            
+            // Crear vector normalizado desde el objetivo hasta la posición inicial de la cámara
+            const startDirection = new THREE.Vector3().subVectors(absoluteStartPos, center).normalize();
+            
+            // Crear vector normalizado desde el objetivo hasta la posición final de la cámara
+            const endDirection = new THREE.Vector3().subVectors(absoluteEndPos, center).normalize();
+            
+            // Calcular el ángulo entre los vectores de dirección inicial y final
+            const startAngle = Math.atan2(startDirection.z, startDirection.x);
+            const endAngle = Math.atan2(endDirection.z, endDirection.x);
+            
+            // Asegurarse de que la rotación sea en sentido horario (hacia la derecha)
+            let angleDistance = endAngle - startAngle;
+            if (angleDistance > 0) {
+                angleDistance = angleDistance - 2 * Math.PI; // Forzar rotación en sentido horario
+            }
+            
+            // Número de puntos intermedios (más puntos = trayectoria más suave)
+            const numWaypoints = 24; // Aumentado para una trayectoria más suave
+            
+            // Crear puntos intermedios para una trayectoria circular
+            for (let i = 1; i < numWaypoints; i++) {
+                const t = i / numWaypoints;
+                
+                // Interpolar el ángulo para crear una rotación uniforme
+                const angle = startAngle + angleDistance * t;
+                
+                // Interpolar entre los radios inicial y final
+                const radius = startRadius * (1 - t) + endRadius * t;
+                
+                // Calcular la altura (interpolar entre las alturas inicial y final)
+                const height = absoluteStartPos.y * (1 - t) + absoluteEndPos.y * t;
+                
+                // Crear el punto intermedio usando coordenadas polares
+                const waypoint = new THREE.Vector3(
+                    center.x + radius * Math.cos(angle),
+                    height, // Altura interpolada
+                    center.z + radius * Math.sin(angle)
+                );
+                
+                // Añadir el punto a la trayectoria
+                cameraAnimation.waypoints.push(waypoint);
+            }
+            
+            // Añadir el punto final
+            cameraAnimation.waypoints.push(new THREE.Vector3().copy(absoluteEndPos));
+            
+            // Configurar la animación
+            cameraAnimation.enabled = true;
+            cameraAnimation.startTime = Date.now();
+            cameraAnimation.initialPosition.copy(absoluteStartPos);
+            cameraAnimation.targetPosition.copy(absoluteEndPos);
+            cameraAnimation.initialTarget.copy(absoluteTargetPos);
+            cameraAnimation.finalTarget.copy(absoluteTargetPos);
+            
+            // Guardar el estado original de los controles
+            cameraAnimation.originalControlsEnabled = controls.enabled;
+            
+            // Desactivar los controles durante la animación
+            controls.enabled = false;
+            
+            // Ocultar las coordenadas durante la animación
+            const coordDisplay = document.getElementById('coordinates-display');
+            coordDisplay.style.display = 'none';
+            
+            // Establecer la posición inicial de la cámara
+            camera.position.copy(absoluteStartPos);
+            controls.target.copy(absoluteTargetPos);
+            
+            console.log("Iniciando animación de cámara con trayectoria circular");
+            console.log("Posición inicial:", absoluteStartPos);
+            console.log("Posición final:", absoluteEndPos);
+            console.log("Objetivo:", absoluteTargetPos);
+            console.log("Puntos de trayectoria:", cameraAnimation.waypoints.length);
+        }
+        
         function animate() {
             requestAnimationFrame(animate);
-            controls.update();
+            
+            // Manejar la animación de la cámara si está activa
+            if (cameraAnimation.enabled) {
+                const elapsed = Date.now() - cameraAnimation.startTime;
+                const progress = Math.min(elapsed / cameraAnimation.duration, 1.0);
+                
+                if (progress < 1.0) {
+                    // Usar progreso lineal para velocidad uniforme (sin easing)
+                    const uniformProgress = progress;
+                    
+                    // Calcular la posición de la cámara usando la trayectoria de waypoints
+                    if (cameraAnimation.waypoints.length > 0) {
+                        // Calcular qué segmento de la trayectoria estamos recorriendo
+                        const numSegments = cameraAnimation.waypoints.length - 1;
+                        const segmentProgress = uniformProgress * numSegments;
+                        const segmentIndex = Math.min(Math.floor(segmentProgress), numSegments - 1);
+                        const segmentT = segmentProgress - segmentIndex; // Progreso dentro del segmento actual (0-1)
+                        
+                        // Obtener los puntos del segmento actual
+                        const p0 = cameraAnimation.waypoints[segmentIndex];
+                        const p1 = cameraAnimation.waypoints[segmentIndex + 1];
+                        
+                        // Interpolar entre los dos puntos del segmento
+                        camera.position.lerpVectors(p0, p1, segmentT);
+                    } else {
+                        // Fallback a interpolación directa si no hay waypoints
+                        camera.position.lerpVectors(
+                            cameraAnimation.initialPosition,
+                            cameraAnimation.targetPosition,
+                            uniformProgress
+                        );
+                    }
+                    
+                    // Asegurarse de que la cámara siempre mire al objetivo
+                    camera.lookAt(controls.target);
+                } else {
+                    // Animación completa
+                    cameraAnimation.enabled = false;
+                    
+                    // Restaurar los controles
+                    controls.enabled = cameraAnimation.originalControlsEnabled;
+                    
+                    // Mostrar las coordenadas si estaban visibles antes
+                    if (coordinatesVisible) {
+                        document.getElementById('coordinates-display').style.display = 'block';
+                    }
+                    
+                    console.log("Animación de cámara completada");
+                }
+            } else {
+                // Actualizar controles solo cuando no hay animación
+                controls.update();
+            }
             
             // Update coordinates display
-            if (coordinatesVisible) {
+            if (coordinatesVisible && !cameraAnimation.enabled) {
                 updateCoordinatesDisplay();
             }
             
             renderer.render(scene, camera);
+        }
+        
+        // Función de easing para suavizar la animación
+        function easeInOutCubic(t) {
+            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
         }
     </script>
 </body>
