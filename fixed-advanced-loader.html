@@ -33,42 +33,58 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
+            background-color: #000000;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 1000;
             transition: opacity 0.5s;
-        }
-        #progress-bar-container {
-            width: 80%;
-            max-width: 500px;
-            height: 30px;
-            background-color: #333;
-            border-radius: 15px;
             overflow: hidden;
-            margin: 20px 0;
         }
-        #progress-bar {
+        /* Estilos para el GIF de la taza de café */
+        .coffee-container {
+            position: relative;
+            width: 100%;
             height: 100%;
-            width: 0%;
-            background-color: #4CAF50;
-            transition: width 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000000;
+            overflow: hidden;
+        }
+        .coffee-gif {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            z-index: 10;
+            /* Filtros para eliminar el fondo #fff4cc y hacer el café de color café */
+            filter: brightness(1.1) contrast(1.5) invert(1) hue-rotate(180deg);
+            mix-blend-mode: exclusion;
+            transform: scale(0.75); /* Tamaño reducido */
+        }
+        /* Indicador de progreso de texto */
+        .progress-text {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: white;
+            font-size: 14px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+            z-index: 20;
         }
         #loading-text {
             font-size: 18px;
             margin-bottom: 10px;
+            color: #ffffff;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
         }
         #loading-stats {
             font-size: 14px;
             color: #aaa;
-        }
-        #error-message {
-            color: #ff5555;
-            text-align: center;
-            max-width: 80%;
-            display: none;
+            margin-top: 10px;
         }
         #coordinates-display {
             position: absolute;
@@ -98,13 +114,9 @@
 </head>
 <body>
     <div id="loading-container">
-        <h2>Cargando Modelo Colombiano</h2>
-        <div id="loading-text">Inicializando cargador...</div>
-        <div id="progress-bar-container">
-            <div id="progress-bar"></div>
+        <div class="coffee-container">
+            <img src="images/icons/coffeGif.gif" class="coffee-gif" alt="Cargando...">
         </div>
-        <div id="loading-stats">0 MB de 0 MB (0%)</div>
-        <div id="error-message"></div>
     </div>
 
     <div id="info">
@@ -161,10 +173,6 @@
         
         // Elementos DOM
         const loadingContainer = document.getElementById('loading-container');
-        const progressBar = document.getElementById('progress-bar');
-        const loadingText = document.getElementById('loading-text');
-        const loadingStats = document.getElementById('loading-stats');
-        const errorMessage = document.getElementById('error-message');
 
         // Inicializar la escena
         init();
@@ -298,21 +306,12 @@
         }
         
         function loadModel() {
-            loadingText.textContent = "Preparando carga del modelo...";
-            
             // Crear loading manager para seguimiento de progreso
             const manager = new THREE.LoadingManager();
             
             // Setup progress tracking
             manager.onProgress = function(url, loaded, total) {
-                const percent = (loaded / total) * 100;
-                progressBar.style.width = percent + '%';
-                
-                const loadedMB = (loaded / (1024 * 1024)).toFixed(2);
-                const totalMB = (total / (1024 * 1024)).toFixed(2);
-                loadingStats.textContent = `${loadedMB} MB de ${totalMB} MB (${Math.round(percent)}%)`;
-                
-                loadingText.textContent = `Cargando modelo... ${Math.round(percent)}%`;
+                // Solo seguimos el progreso sin mostrar texto
             };
             
             // Handle loading errors
@@ -418,7 +417,6 @@
                                 function() { console.log(`Recarga exitosa de textura: ${url}`); },
                                 function(err) {
                                     console.error('Texture reload failed:', err);
-                                    showError(`Error cargando recurso después de ${MAX_TEXTURE_LOAD_ATTEMPTS} intentos: ${url}`);
                                 }
                             );
                         }, 500);
@@ -450,14 +448,26 @@
                                     }
                                 });
                             }
-                        } else {
-                            showError(`Error cargando recurso después de ${MAX_TEXTURE_LOAD_ATTEMPTS} intentos: ${url}`);
                         }
                     }
-                } else {
-                    // Si no es una textura, mostrar error normalmente
-                    showError(`Error cargando recurso: ${url}`);
                 }
+            };
+            
+            // Función para mostrar errores - redefinida para no mostrar texto
+            function showError(message) {
+                console.error(message);
+                // No mostramos mensajes de error visualmente
+            }
+            
+            // Configurar evento de carga completa
+            manager.onLoad = function() {
+                // Ocultar pantalla de carga después de un breve retraso
+                setTimeout(function() {
+                    loadingContainer.style.opacity = '0';
+                    setTimeout(function() {
+                        loadingContainer.style.display = 'none';
+                    }, 500);
+                }, 1000);
             };
             
             // Create GLTF loader
@@ -634,7 +644,26 @@
                     function(xhr) {
                         if (xhr.lengthComputable) {
                             const percent = (xhr.loaded / xhr.total) * 100;
-                            progressBar.style.width = percent + '%';
+                            
+                            // Actualizar el nivel de llenado de la taza de café
+                            // Ajustar el porcentaje para que se vea mejor en la taza
+                            const adjustedPercent = Math.min(percent, 100); // Asegurar que no exceda el 100%
+                            
+                            // Usar una curva no lineal para el llenado para que se vea más natural
+                            // Esto hace que se llene más rápido al principio y más lento al final
+                            const fillHeight = Math.pow(adjustedPercent / 100, 0.8) * 100;
+                            
+                            // Limitar la altura máxima para que no sobrepase la taza
+                            coffeeFill.style.height = Math.min(fillHeight, 25) + '%';
+                            
+                            // Ajustar el ancho del café según el nivel de llenado para simular la forma de la taza
+                            // La taza es más ancha en la parte superior
+                            const widthAdjustment = 55 + (fillHeight / 10);
+                            coffeeFill.style.width = Math.min(widthAdjustment, 65) + '%';
+                            
+                            // Ajustar la opacidad para un efecto más realista
+                            const opacity = 0.7 + (fillHeight / 100) * 0.3;
+                            coffeeFill.style.opacity = opacity;
                             
                             const loadedMB = (xhr.loaded / (1024 * 1024)).toFixed(2);
                             const totalMB = (xhr.total / (1024 * 1024)).toFixed(2);
@@ -667,7 +696,13 @@
             console.error("ERROR:", message);
             errorMessage.textContent = message;
             errorMessage.style.display = 'block';
-            progressBar.style.backgroundColor = '#ff3333';
+            
+            // Cambiar el color del café a rojo para indicar error
+            if (coffeeFill) {
+                coffeeFill.style.backgroundColor = '#cc0000';
+                coffeeFill.style.height = '40%'; // Mostrar un nivel de café fijo para el error
+            }
+            
             loadingText.style.color = '#ff3333';
             
             // Add retry button
