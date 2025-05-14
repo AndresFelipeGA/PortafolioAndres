@@ -110,6 +110,46 @@
             cursor: pointer;
             z-index: 100;
         }
+        
+        /* Contenedor para los botones flotantes */
+        .floating-buttons-container {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none; /* Initially hidden */
+            gap: 20px; /* Espacio entre botones */
+            z-index: 2000;
+        }
+        
+        /* Estilo para los botones flotantes con iconos */
+        .floating-button {
+            width: 49px;
+            height: 49px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 15px rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .floating-button:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 20px rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px);
+        }
+        
+        .floating-button img {
+            width: 25px;
+            height: 25px;
+            object-fit: contain;
+            filter: brightness(2) invert(1); /* Hace que el icono sea blanco */
+        }
     </style>
 </head>
 <body>
@@ -132,6 +172,18 @@
     </div>
     
     <button id="coordinates-toggle">Mostrar Coordenadas</button>
+    
+    <!-- Contenedor de botones flotantes -->
+    <div class="floating-buttons-container">
+        <!-- Botón flotante con el icono personalizado -->
+        <div class="floating-button">
+            <img src="images/icons/iconMe.png" alt="Icono personalizado">
+        </div>
+        <!-- Botón flotante con el icono de carpeta -->
+        <div class="floating-button">
+            <img src="images/icons/CarpetaPNG.png" alt="Icono de carpeta">
+        </div>
+    </div>
 
     <!-- Three.js core library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r132/three.min.js"></script>
@@ -466,6 +518,8 @@
                     loadingContainer.style.opacity = '0';
                     setTimeout(function() {
                         loadingContainer.style.display = 'none';
+                        // Mostrar los botones flotantes cuando se oculta la pantalla de carga
+                        document.querySelector('.floating-buttons-container').style.display = 'flex';
                     }, 500);
                 }, 1000);
             };
