@@ -120,36 +120,46 @@
             display: none; /* Initially hidden */
             gap: 20px; /* Espacio entre botones */
             z-index: 2000;
+            /* Will be set to flex when visible */
         }
         
         /* Estilo para los botones flotantes con iconos */
         .floating-button {
-            width: 49px;
-            height: 49px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.2);
+            background-color: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(5px);
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 2px 15px rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 2px 15px rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.4);
             transition: all 0.3s ease;
             cursor: pointer;
         }
         
         .floating-button:hover {
-            background-color: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 4px 20px rgba(255, 255, 255, 0.3);
+            background-color: rgba(0, 0, 0, 0.8);
+            box-shadow: 0 4px 20px rgba(255, 255, 255, 0.4);
             transform: translateY(-3px);
         }
         
         .floating-button img {
-            width: 25px;
-            height: 25px;
+            width: 26px;
+            height: 26px;
             object-fit: contain;
-            filter: brightness(2) invert(1); /* Hace que el icono sea blanco */
+            filter: brightness(10) contrast(1.5) invert(1); /* Hace que el icono sea más blanco y visible */
         }
+        
+        /* Estilo específico para iconos que ya son blancos */
+        .floating-button img[src*="iconContact"],
+        .floating-button img[src*="iconClientes"],
+        .floating-button img[src*="iconServices"],
+        .floating-button img[src*="iconProducts"] {
+            filter: brightness(1.5) contrast(1.2); /* Sin invertir ya que la imagen ya es blanca */
+        }
+        
     </style>
 </head>
 <body>
@@ -182,6 +192,22 @@
         <!-- Botón flotante con el icono de carpeta -->
         <div class="floating-button">
             <img src="images/icons/CarpetaPNG.png" alt="Icono de carpeta">
+        </div>
+        <!-- Botón flotante con el icono de contacto -->
+        <div class="floating-button">
+            <img src="images/icons/iconContact.png" alt="Icono de contacto">
+        </div>
+        <!-- Botón flotante con el icono de clientes -->
+        <div class="floating-button">
+            <img src="images/icons/iconClientes.png?v=3" alt="Icono de clientes">
+        </div>
+        <!-- Botón flotante con el icono de servicios -->
+        <div class="floating-button">
+            <img src="images/icons/iconServices.png?v=2" alt="Icono de servicios">
+        </div>
+        <!-- Botón flotante con el icono de productos -->
+        <div class="floating-button">
+            <img src="images/icons/iconProducts.png" alt="Icono de productos">
         </div>
     </div>
 
@@ -519,7 +545,10 @@
                     setTimeout(function() {
                         loadingContainer.style.display = 'none';
                         // Mostrar los botones flotantes cuando se oculta la pantalla de carga
-                        document.querySelector('.floating-buttons-container').style.display = 'flex';
+                        const buttonsContainer = document.querySelector('.floating-buttons-container');
+                        buttonsContainer.style.display = 'flex';
+                        buttonsContainer.style.flexWrap = 'wrap';
+                        buttonsContainer.style.justifyContent = 'center';
                     }, 500);
                 }, 1000);
             };
