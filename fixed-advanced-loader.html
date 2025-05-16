@@ -220,6 +220,7 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.0/examples/js/loaders/GLTFLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.0/examples/js/loaders/FontLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.0/examples/js/geometries/TextGeometry.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.0/examples/js/renderers/CSS3DRenderer.js"></script>
 
     <script>
         // Configuración inicial
@@ -245,6 +246,10 @@
             originalControlsEnabled: true,
             waypoints: [] // Puntos intermedios para crear una trayectoria circular
         };
+        
+        // Variables para CSS3D y pantalla interactiva
+        let css3dScene, css3dRenderer;
+        let screenPlane; // Plano invisible para raycasting
         
         // Punto de origen personalizado (offset para el sistema de coordenadas)
         const originOffset = new THREE.Vector3(-10.00, -14.10, -2.20);
@@ -294,6 +299,9 @@
             
             // Iniciar bucle de animación
             animate();
+            
+            // Configurar pantalla interactiva
+            setupInteractiveScreen();
         }
         
         function setupCoordinateSystem() {
@@ -549,6 +557,18 @@
                         buttonsContainer.style.display = 'flex';
                         buttonsContainer.style.flexWrap = 'wrap';
                         buttonsContainer.style.justifyContent = 'center';
+                        
+                        // Añadir evento de clic al quinto botón (el botón de servicios)
+                        const buttons = document.querySelectorAll('.floating-button');
+                        if (buttons.length >= 5) {
+                            // El quinto botón es el que tiene el icono de servicios
+                            const serviceButton = buttons[4]; // Índice 4 (el quinto botón, contando desde 0)
+                            serviceButton.addEventListener('click', function() {
+                                // Iniciar la animación de la cámara hacia el punto específico
+                                startButtonCameraAnimation();
+                            });
+                            console.log("Evento de clic añadido al botón de servicios");
+                        }
                     }, 500);
                 }, 1000);
             };
@@ -924,6 +944,11 @@
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
+            
+            // Actualizar también el tamaño del CSS3DRenderer
+            if (css3dRenderer) {
+                css3dRenderer.setSize(window.innerWidth, window.innerHeight);
+            }
         }
         
         // Función para iniciar la animación de la cámara
@@ -1026,73 +1051,573 @@
             console.log("Puntos de trayectoria:", cameraAnimation.waypoints.length);
         }
         
-        function animate() {
-            requestAnimationFrame(animate);
+        // Función para iniciar la animación de la cámara hacia un punto específico cuando se hace clic en el botón
+        function startButtonCameraAnimation() {
+            // Coordenadas específicas a las que queremos mover la cámara (relativas al origen personalizado)
+            const targetCameraPos = new THREE.Vector3(0.58, 5.95, 10.61);
             
-            // Manejar la animación de la cámara si está activa
-            if (cameraAnimation.enabled) {
-                const elapsed = Date.now() - cameraAnimation.startTime;
-                const progress = Math.min(elapsed / cameraAnimation.duration, 1.0);
-                
-                if (progress < 1.0) {
-                    // Usar progreso lineal para velocidad uniforme (sin easing)
-                    const uniformProgress = progress;
-                    
-                    // Calcular la posición de la cámara usando la trayectoria de waypoints
-                    if (cameraAnimation.waypoints.length > 0) {
-                        // Calcular qué segmento de la trayectoria estamos recorriendo
-                        const numSegments = cameraAnimation.waypoints.length - 1;
-                        const segmentProgress = uniformProgress * numSegments;
-                        const segmentIndex = Math.min(Math.floor(segmentProgress), numSegments - 1);
-                        const segmentT = segmentProgress - segmentIndex; // Progreso dentro del segmento actual (0-1)
-                        
-                        // Obtener los puntos del segmento actual
-                        const p0 = cameraAnimation.waypoints[segmentIndex];
-                        const p1 = cameraAnimation.waypoints[segmentIndex + 1];
-                        
-                        // Interpolar entre los dos puntos del segmento
-                        camera.position.lerpVectors(p0, p1, segmentT);
-                    } else {
-                        // Fallback a interpolación directa si no hay waypoints
-                        camera.position.lerpVectors(
-                            cameraAnimation.initialPosition,
-                            cameraAnimation.targetPosition,
-                            uniformProgress
-                        );
-                    }
-                    
-                    // Asegurarse de que la cámara siempre mire al objetivo
-                    camera.lookAt(controls.target);
-                } else {
-                    // Animación completa
-                    cameraAnimation.enabled = false;
-                    
-                    // Restaurar los controles
-                    controls.enabled = cameraAnimation.originalControlsEnabled;
-                    
-                    // Mostrar las coordenadas si estaban visibles antes
-                    if (coordinatesVisible) {
-                        document.getElementById('coordinates-display').style.display = 'block';
-                    }
-                    
-                    console.log("Animación de cámara completada");
-                }
-            } else {
-                // Actualizar controles solo cuando no hay animación
-                controls.update();
+            // Convertir coordenadas relativas a absolutas (sumando el offset)
+            const absoluteTargetPos = new THREE.Vector3().copy(targetCameraPos).add(originOffset);
+            
+            // Posición actual de la cámara
+            const currentCameraPos = new THREE.Vector3().copy(camera.position);
+            
+            // Punto específico al que mirará la cámara (apuntando hacia la pantalla/tablet)
+            // Estas coordenadas apuntan hacia la pantalla que se muestra en la segunda imagen
+            // Ajustamos las coordenadas para mirar en la dirección correcta (hacia la pantalla)
+            const lookAtPoint = new THREE.Vector3(-9.42, -8.15, -5.0); // Coordenadas ajustadas para mirar hacia la pantalla
+            
+            console.log("Coordenadas objetivo (relativas):", targetCameraPos);
+            console.log("Coordenadas objetivo (absolutas):", absoluteTargetPos);
+            
+            // Configurar la animación
+            cameraAnimation.enabled = true;
+            cameraAnimation.startTime = Date.now();
+            cameraAnimation.duration = 5000; // 5 segundos (entre 4 y 6 segundos como solicitado)
+            cameraAnimation.initialPosition.copy(currentCameraPos);
+            cameraAnimation.targetPosition.copy(absoluteTargetPos);
+            cameraAnimation.initialTarget.copy(controls.target);
+            cameraAnimation.finalTarget.copy(lookAtPoint);
+            
+            // Crear una trayectoria directa entre la posición actual y la posición objetivo
+            cameraAnimation.waypoints = [];
+            cameraAnimation.waypoints.push(new THREE.Vector3().copy(currentCameraPos));
+            
+            // Número de puntos intermedios para una trayectoria suave
+            const numWaypoints = 20;
+            
+            for (let i = 1; i < numWaypoints; i++) {
+                const t = i / numWaypoints;
+                const waypoint = new THREE.Vector3().lerpVectors(currentCameraPos, absoluteTargetPos, t);
+                cameraAnimation.waypoints.push(waypoint);
             }
             
-            // Update coordinates display
-            if (coordinatesVisible && !cameraAnimation.enabled) {
-                updateCoordinatesDisplay();
-            }
+            // Asegurarse de que el último punto sea exactamente las coordenadas objetivo
+            cameraAnimation.waypoints.push(new THREE.Vector3().copy(absoluteTargetPos));
             
-            renderer.render(scene, camera);
+            // Guardar el estado original de los controles
+            cameraAnimation.originalControlsEnabled = controls.enabled;
+            
+            // Desactivar los controles durante la animación
+            controls.enabled = false;
+            
+            // Ocultar las coordenadas durante la animación
+            const coordDisplay = document.getElementById('coordinates-display');
+            coordDisplay.style.display = 'none';
+            
+            console.log("Iniciando animación de cámara hacia el punto específico");
+            console.log("Posición inicial:", currentCameraPos);
+            console.log("Posición final:", absoluteTargetPos);
+            console.log("Mirando hacia:", lookAtPoint);
         }
+        
+        function animate() {
+                    requestAnimationFrame(animate);
+                    
+                    // Manejar la animación de la cámara si está activa
+                    if (cameraAnimation.enabled) {
+                        const elapsed = Date.now() - cameraAnimation.startTime;
+                        const progress = Math.min(elapsed / cameraAnimation.duration, 1.0);
+                        
+                        if (progress < 1.0) {
+                            // Usar progreso lineal para velocidad uniforme (sin easing)
+                            const uniformProgress = progress;
+                            
+                            // Calcular la posición de la cámara usando la trayectoria de waypoints
+                            if (cameraAnimation.waypoints.length > 0) {
+                                // Calcular qué segmento de la trayectoria estamos recorriendo
+                                const numSegments = cameraAnimation.waypoints.length - 1;
+                                const segmentProgress = uniformProgress * numSegments;
+                                const segmentIndex = Math.min(Math.floor(segmentProgress), numSegments - 1);
+                                const segmentT = segmentProgress - segmentIndex; // Progreso dentro del segmento actual (0-1)
+                                
+                                // Obtener los puntos del segmento actual
+                                const p0 = cameraAnimation.waypoints[segmentIndex];
+                                const p1 = cameraAnimation.waypoints[segmentIndex + 1];
+                                
+                                // Interpolar entre los dos puntos del segmento
+                                camera.position.lerpVectors(p0, p1, segmentT);
+                            } else {
+                                // Fallback a interpolación directa si no hay waypoints
+                                camera.position.lerpVectors(
+                                    cameraAnimation.initialPosition,
+                                    cameraAnimation.targetPosition,
+                                    uniformProgress
+                                );
+                            }
+                            
+                            // Interpolar también el punto al que mira la cámara
+                            const currentTarget = new THREE.Vector3();
+                            currentTarget.lerpVectors(
+                                cameraAnimation.initialTarget,
+                                cameraAnimation.finalTarget,
+                                uniformProgress
+                            );
+                            
+                            // Actualizar el objetivo de los controles
+                            controls.target.copy(currentTarget);
+                            
+                            // Asegurarse de que la cámara siempre mire al objetivo
+                            camera.lookAt(currentTarget);
+                        } else {
+                            // Animación completa
+                            cameraAnimation.enabled = false;
+                            
+                            // Asegurarse de que la cámara esté exactamente en la posición objetivo
+                            camera.position.copy(cameraAnimation.targetPosition);
+                            
+                            // Restaurar los controles y asegurarse de que estén habilitados
+                            controls.enabled = true; // Siempre habilitar los controles al finalizar
+                            
+                            // Actualizar el objetivo final de los controles
+                            controls.target.copy(cameraAnimation.finalTarget);
+                            
+                            // Mostrar las coordenadas si estaban visibles antes
+                            if (coordinatesVisible) {
+                                document.getElementById('coordinates-display').style.display = 'block';
+                            }
+                            
+                            // Calcular las coordenadas relativas para verificar
+                            const adjustedCamPos = new THREE.Vector3().copy(camera.position).sub(originOffset);
+                            console.log("Animación de cámara completada");
+                            console.log("Posición final de la cámara (absoluta):", camera.position);
+                            console.log("Posición final de la cámara (relativa):", adjustedCamPos);
+                            console.log("Controles restaurados:", controls.enabled);
+                        }
+                    } else {
+                        // Actualizar controles solo cuando no hay animación
+                        controls.update();
+                    }
+                    
+                    // Update coordinates display
+                    if (coordinatesVisible && !cameraAnimation.enabled) {
+                        updateCoordinatesDisplay();
+                    }
+                    
+                    // Renderizar escena WebGL
+                    renderer.render(scene, camera);
+                    
+                    // Renderizar escena CSS3D con la misma cámara
+                    if (css3dRenderer) {
+                        css3dRenderer.render(css3dScene, camera);
+                    }
+                }
         
         // Función de easing para suavizar la animación
         function easeInOutCubic(t) {
             return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        }
+        
+        // Funciones para la pantalla interactiva
+        function setupInteractiveScreen() {
+            // Crear escena CSS3D
+            css3dScene = new THREE.Scene();
+            
+            // Configurar CSS3DRenderer
+            css3dRenderer = new THREE.CSS3DRenderer();
+            css3dRenderer.setSize(window.innerWidth, window.innerHeight);
+            css3dRenderer.domElement.style.position = 'absolute';
+            css3dRenderer.domElement.style.top = 0;
+            css3dRenderer.domElement.style.pointerEvents = 'none'; // Importante para que los eventos pasen al WebGLRenderer
+            document.body.appendChild(css3dRenderer.domElement);
+            
+            // Crear plano para raycasting en las coordenadas especificadas
+            const screenGeometry = createScreenGeometry();
+            const screenMaterial = new THREE.MeshBasicMaterial({
+                color: 0x000000,
+                opacity: 1.0, // Opaco para cubrir la pantalla blanca detrás
+                transparent: false,
+                side: THREE.DoubleSide
+            });
+            screenPlane = new THREE.Mesh(screenGeometry, screenMaterial);
+            // Empujar ligeramente hacia atrás para que se incruste mejor
+            screenPlane.position.z -= 0.05;
+            scene.add(screenPlane);
+            
+            // Crear y posicionar el elemento HTML
+            createScreenHTML();
+            
+            // Configurar raycasting para detectar clics en el plano
+            setupRaycasting();
+        }
+        
+        function createScreenGeometry() {
+            // Coordenadas proporcionadas
+            const topLeft = new THREE.Vector3(-0.54, 6.14, 8.57).add(originOffset);
+            const topRight = new THREE.Vector3(1.70, 6.14, 8.57).add(originOffset);
+            const bottomLeft = new THREE.Vector3(-0.54, 4.93, 9.17).add(originOffset);
+            const bottomRight = new THREE.Vector3(1.70, 4.93, 9.17).add(originOffset);
+            
+            // Crear geometría personalizada
+            const geometry = new THREE.BufferGeometry();
+            
+            // Definir vértices
+            const vertices = new Float32Array([
+                topLeft.x, topLeft.y, topLeft.z,
+                topRight.x, topRight.y, topRight.z,
+                bottomLeft.x, bottomLeft.y, bottomLeft.z,
+                
+                bottomLeft.x, bottomLeft.y, bottomLeft.z,
+                topRight.x, topRight.y, topRight.z,
+                bottomRight.x, bottomRight.y, bottomRight.z
+            ]);
+            
+            // Definir UVs para mapeo de textura
+            const uvs = new Float32Array([
+                0, 1,
+                1, 1,
+                0, 0,
+                
+                0, 0,
+                1, 1,
+                1, 0
+            ]);
+            
+            geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+            geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+            geometry.computeVertexNormals();
+            
+            return geometry;
+        }
+        
+        function createScreenHTML() {
+            // Crear elemento HTML
+            const screenElement = document.createElement('div');
+            screenElement.className = 'interactive-screen';
+            screenElement.style.width = '720px'; // Aumentado 5px más por lado
+            screenElement.style.height = '450px'; // Reducido más para que no se salga por arriba y por abajo
+            
+            // Aplicar estilos colombianos
+            screenElement.innerHTML = `
+                <style>
+                    .interactive-screen {
+                        background: linear-gradient(135deg, #003893 0%, #003893 33%, #FCD116 33%, #FCD116 66%, #CE1126 66%, #CE1126 100%);
+                        color: white;
+                        font-family: 'Arial', sans-serif;
+                        padding: 12px;
+                        border-radius: 8px;
+                        box-shadow: 0 0 20px rgba(0,0,0,0.5);
+                        overflow: hidden;
+                        position: relative;
+                        box-sizing: border-box;
+                    }
+                    
+                    .screen-header {
+                        text-align: center;
+                        margin-bottom: 20px;
+                        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+                    }
+                    
+                    .screen-header h1 {
+                        font-size: 32px;
+                        margin: 0;
+                        padding: 8px;
+                        background-color: rgba(0,0,0,0.7);
+                        border-radius: 5px;
+                    }
+                    
+                    .services-container {
+                        display: flex;
+                        flex-wrap: wrap;
+                        justify-content: space-around;
+                        gap: 15px;
+                    }
+                    
+                    .service-card {
+                        background-color: rgba(255,255,255,0.9);
+                        color: #333;
+                        padding: 10px;
+                        border-radius: 8px;
+                        width: 170px;
+                        cursor: pointer;
+                        transition: transform 0.3s, box-shadow 0.3s;
+                        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                        position: relative;
+                        overflow: hidden;
+                    }
+                    
+                    .service-card:hover {
+                        transform: translateY(-5px);
+                        box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+                    }
+                    
+                    .service-card h3 {
+                        margin-top: 0;
+                        color: #003893;
+                        font-size: 18px;
+                        border-bottom: 2px solid #FCD116;
+                        padding-bottom: 8px;
+                    }
+                    
+                    .service-card p {
+                        font-size: 14px;
+                        margin-bottom: 0;
+                    }
+                    
+                    .service-detail {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background-color: rgba(0,0,0,0.9);
+                        color: white;
+                        padding: 20px;
+                        box-sizing: border-box;
+                        transform: translateY(100%);
+                        transition: transform 0.5s;
+                        z-index: 10;
+                        overflow-y: auto;
+                    }
+                    
+                    .service-detail h2 {
+                        color: #FCD116;
+                        margin-top: 0;
+                    }
+                    
+                    .service-detail .close-btn {
+                        position: absolute;
+                        top: 10px;
+                        right: 10px;
+                        background: #CE1126;
+                        color: white;
+                        border: none;
+                        border-radius: 50%;
+                        width: 30px;
+                        height: 30px;
+                        cursor: pointer;
+                        font-weight: bold;
+                    }
+                    
+                    .green-accent {
+                        position: absolute;
+                        width: 150px;
+                        height: 150px;
+                        background-color: rgba(0,128,0,0.3);
+                        border-radius: 50%;
+                        z-index: -1;
+                    }
+                </style>
+                
+                <div class="screen-header">
+                    <h1>Servicios Profesionales</h1>
+                </div>
+                
+                <!-- Acentos verdes decorativos -->
+                <div class="green-accent" style="top: -50px; right: -50px;"></div>
+                <div class="green-accent" style="bottom: -50px; left: -50px;"></div>
+                
+                <div class="services-container">
+                    <div class="service-card" data-service="software-consulting">
+                        <h3>Software Consulting</h3>
+                        <p>Asesoría experta para optimizar sus proyectos de software</p>
+                        <div class="service-detail">
+                            <button class="close-btn">×</button>
+                            <h2>Software Consulting</h2>
+                            <p>Ofrezco servicios de consultoría especializada en:</p>
+                            <ul>
+                                <li>Arquitectura de software</li>
+                                <li>Optimización de procesos de desarrollo</li>
+                                <li>Evaluación y selección de tecnologías</li>
+                                <li>Auditoría de código y seguridad</li>
+                                <li>Estrategias de escalabilidad</li>
+                            </ul>
+                            <p>Con años de experiencia en la industria, puedo ayudarle a tomar las decisiones correctas para el éxito de su proyecto.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="service-card" data-service="fullstack">
+                        <h3>FullStack Engineer</h3>
+                        <p>Desarrollo completo de aplicaciones web y móviles</p>
+                        <div class="service-detail">
+                            <button class="close-btn">×</button>
+                            <h2>FullStack Engineer</h2>
+                            <p>Desarrollo soluciones completas utilizando:</p>
+                            <ul>
+                                <li>Frontend: React, Angular, Vue.js</li>
+                                <li>Backend: Node.js, Python, Java</li>
+                                <li>Bases de datos: SQL y NoSQL</li>
+                                <li>DevOps: Docker, Kubernetes, CI/CD</li>
+                                <li>Cloud: AWS, Azure, Google Cloud</li>
+                            </ul>
+                            <p>Puedo llevar su proyecto desde la concepción hasta la implementación con las mejores prácticas de la industria.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="service-card" data-service="data-engineer">
+                        <h3>Data Engineer</h3>
+                        <p>Diseño e implementación de soluciones de datos</p>
+                        <div class="service-detail">
+                            <button class="close-btn">×</button>
+                            <h2>Data Engineer</h2>
+                            <p>Especializado en:</p>
+                            <ul>
+                                <li>Diseño de pipelines de datos</li>
+                                <li>ETL y procesamiento de datos</li>
+                                <li>Data warehousing</li>
+                                <li>Big Data (Hadoop, Spark)</li>
+                                <li>Integración de fuentes de datos</li>
+                            </ul>
+                            <p>Transformo sus datos en activos valiosos mediante arquitecturas eficientes y escalables.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="service-card" data-service="ai-fullstack">
+                        <h3>AI Full-Stack Engineer</h3>
+                        <p>Integración de IA en aplicaciones web y móviles</p>
+                        <div class="service-detail">
+                            <button class="close-btn">×</button>
+                            <h2>AI Full-Stack Engineer</h2>
+                            <p>Combino desarrollo full-stack con IA:</p>
+                            <ul>
+                                <li>Integración de modelos de ML/DL en aplicaciones</li>
+                                <li>Desarrollo de APIs para servicios de IA</li>
+                                <li>Implementación de chatbots y asistentes virtuales</li>
+                                <li>Procesamiento de lenguaje natural</li>
+                                <li>Visión por computadora</li>
+                            </ul>
+                            <p>Potencio sus aplicaciones con capacidades de inteligencia artificial de vanguardia.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="service-card" data-service="prompt-engineer">
+                        <h3>Prompt Engineer</h3>
+                        <p>Optimización de prompts para modelos de IA generativa</p>
+                        <div class="service-detail">
+                            <button class="close-btn">×</button>
+                            <h2>Prompt Engineer</h2>
+                            <p>Especialista en:</p>
+                            <ul>
+                                <li>Diseño de prompts efectivos para LLMs</li>
+                                <li>Optimización de resultados de IA generativa</li>
+                                <li>Creación de sistemas de instrucciones</li>
+                                <li>Evaluación y mejora de respuestas de IA</li>
+                                <li>Integración de técnicas avanzadas como RAG</li>
+                            </ul>
+                            <p>Maximizo el potencial de los modelos de IA generativa para sus necesidades específicas.</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Añadir interactividad
+            const serviceCards = screenElement.querySelectorAll('.service-card');
+            serviceCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const detail = this.querySelector('.service-detail');
+                    detail.style.transform = 'translateY(0)';
+                });
+                
+                const closeBtn = card.querySelector('.close-btn');
+                closeBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const detail = this.closest('.service-detail');
+                    detail.style.transform = 'translateY(100%)';
+                });
+            });
+            
+            // Crear objeto CSS3D
+            const screenObject = new THREE.CSS3DObject(screenElement);
+            
+            // Calcular posición y rotación basadas en las coordenadas del plano
+            positionCSS3DObject(screenObject);
+            
+            // Añadir a la escena CSS3D
+            css3dScene.add(screenObject);
+        }
+        
+        function positionCSS3DObject(object) {
+            // Calcular el centro del plano
+            const topLeft = new THREE.Vector3(-0.54, 6.14, 8.57).add(originOffset);
+            const topRight = new THREE.Vector3(1.70, 6.14, 8.57).add(originOffset);
+            const bottomLeft = new THREE.Vector3(-0.54, 4.93, 9.17).add(originOffset);
+            const bottomRight = new THREE.Vector3(1.70, 4.93, 9.17).add(originOffset);
+            
+            // Calcular el centro
+            const center = new THREE.Vector3()
+                .add(topLeft)
+                .add(topRight)
+                .add(bottomLeft)
+                .add(bottomRight)
+                .multiplyScalar(0.25);
+            
+            // Calcular la orientación
+            const width = topLeft.distanceTo(topRight);
+            const height = topLeft.distanceTo(bottomLeft);
+            
+            // Vectores para orientación - invertimos X para corregir la orientación
+            const vX = new THREE.Vector3().subVectors(topLeft, topRight).normalize(); // Invertido
+            const vY = new THREE.Vector3().subVectors(bottomLeft, topLeft).normalize();
+            const vZ = new THREE.Vector3().crossVectors(vX, vY).normalize();
+            
+            // Crear matriz de rotación
+            const matrix = new THREE.Matrix4();
+            matrix.makeBasis(vX, vY, vZ);
+            
+            // Extraer rotación de la matriz
+            const rotation = new THREE.Euler().setFromRotationMatrix(matrix);
+            
+            // Aplicar posición y rotación
+            object.position.copy(center);
+            // Empujar ligeramente hacia atrás para que se incruste mejor en la pantalla
+            object.position.z -= 0.05;
+            object.rotation.copy(rotation);
+            
+            // Aplicar rotación adicional para corregir la orientación
+            object.rotation.z += Math.PI; // Girar 180 grados alrededor del eje Z
+            
+            // Escalar para ajustar al tamaño del plano
+            const scale = width / 720 * 0.99; // Ajustado para que se ajuste perfectamente al marco
+            object.scale.set(scale, scale, scale);
+            
+            console.log("Posición del objeto CSS3D:", object.position);
+            console.log("Rotación del objeto CSS3D:", object.rotation);
+        }
+        
+        function setupRaycasting() {
+            // Manejar clics en la escena
+            window.addEventListener('click', function(event) {
+                // Calcular posición normalizada del ratón
+                const clickMouse = new THREE.Vector2();
+                clickMouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                clickMouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+                
+                // Actualizar raycaster
+                const clickRaycaster = new THREE.Raycaster();
+                clickRaycaster.setFromCamera(clickMouse, camera);
+                
+                // Comprobar intersección con el plano
+                const intersects = clickRaycaster.intersectObject(screenPlane);
+                
+                if (intersects.length > 0) {
+                    // Convertir coordenadas de intersección a coordenadas UV
+                    const uv = intersects[0].uv;
+                    
+                    // Simular clic en el elemento HTML correspondiente
+                    simulateClickOnHTML(uv.x, uv.y);
+                }
+            });
+        }
+        
+        function simulateClickOnHTML(x, y) {
+            // Convertir coordenadas UV (0-1) a coordenadas de píxeles en el elemento HTML
+            const screenElement = document.querySelector('.interactive-screen');
+            if (!screenElement) return;
+            
+            const width = screenElement.offsetWidth;
+            const height = screenElement.offsetHeight;
+            
+            const pixelX = Math.floor(x * width);
+            const pixelY = Math.floor((1 - y) * height); // Invertir Y para coordenadas DOM
+            
+            // Encontrar el elemento en esas coordenadas
+            const elementAtPoint = document.elementFromPoint(pixelX, pixelY);
+            
+            // Simular clic si es un elemento interactivo
+            if (elementAtPoint && (elementAtPoint.classList.contains('service-card') ||
+                                  elementAtPoint.classList.contains('close-btn'))) {
+                elementAtPoint.click();
+            }
         }
     </script>
 </body>
