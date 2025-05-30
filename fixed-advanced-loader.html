@@ -170,8 +170,6 @@
     </div>
 
     <div id="info">
-        <h2>Modelo Colombiano</h2>
-        <p>Este visualizador está optimizado para cargar modelos 3D extremadamente grandes.</p>
     </div>
 
     <div id="coordinates-display">
@@ -737,11 +735,7 @@
                         // Start camera animation instead of just setting a fixed position
                         startCameraAnimation();
                         
-                        // Update info
-                        document.getElementById('info').innerHTML += `
-                            <p style="color: #4CAF50;">Modelo cargado correctamente</p>
-                            <p>Nombre del archivo: ${url}</p>
-                        `;
+                        // Info div is intentionally left empty
                     },
                     // Progress callback
                     function(xhr) {
@@ -1210,6 +1204,8 @@
         
         // Funciones para la pantalla interactiva
         function setupInteractiveScreen() {
+            // VOLVER A LA SOLUCIÓN ORIGINAL PERO CON AJUSTES PARA QUE NO SEA VISIBLE DESDE ATRÁS
+            
             // Crear escena CSS3D
             css3dScene = new THREE.Scene();
             
@@ -1221,71 +1217,69 @@
             css3dRenderer.domElement.style.pointerEvents = 'none'; // Importante para que los eventos pasen al WebGLRenderer
             document.body.appendChild(css3dRenderer.domElement);
             
-            // Crear plano para raycasting en las coordenadas especificadas
-            const screenGeometry = createScreenGeometry();
-            const screenMaterial = new THREE.MeshBasicMaterial({
-                color: 0x000000,
-                opacity: 1.0, // Opaco para cubrir la pantalla blanca detrás
-                transparent: false,
-                side: THREE.DoubleSide
-            });
-            screenPlane = new THREE.Mesh(screenGeometry, screenMaterial);
-            // Empujar ligeramente hacia atrás para que se incruste mejor
-            screenPlane.position.z -= 0.05;
-            scene.add(screenPlane);
+            // Eliminar el plano anterior
+            if (screenPlane) scene.remove(screenPlane);
             
-            // Crear y posicionar el elemento HTML
-            createScreenHTML();
-            
-            // Configurar raycasting para detectar clics en el plano
-            setupRaycasting();
-        }
-        
-        function createScreenGeometry() {
-            // Coordenadas proporcionadas
+            // Coordenadas de la pantalla
             const topLeft = new THREE.Vector3(-0.54, 6.14, 8.57).add(originOffset);
             const topRight = new THREE.Vector3(1.70, 6.14, 8.57).add(originOffset);
             const bottomLeft = new THREE.Vector3(-0.54, 4.93, 9.17).add(originOffset);
             const bottomRight = new THREE.Vector3(1.70, 4.93, 9.17).add(originOffset);
             
-            // Crear geometría personalizada
-            const geometry = new THREE.BufferGeometry();
+            // Calcular el centro
+            const center = new THREE.Vector3()
+                .add(topLeft)
+                .add(topRight)
+                .add(bottomLeft)
+                .add(bottomRight)
+                .multiplyScalar(0.25);
             
-            // Definir vértices
-            const vertices = new Float32Array([
-                topLeft.x, topLeft.y, topLeft.z,
-                topRight.x, topRight.y, topRight.z,
-                bottomLeft.x, bottomLeft.y, bottomLeft.z,
-                
-                bottomLeft.x, bottomLeft.y, bottomLeft.z,
-                topRight.x, topRight.y, topRight.z,
-                bottomRight.x, bottomRight.y, bottomRight.z
-            ]);
+            // Calcular la orientación
+            const vX = new THREE.Vector3().subVectors(topRight, topLeft).normalize();
+            const vY = new THREE.Vector3().subVectors(bottomLeft, topLeft).normalize();
+            const vZ = new THREE.Vector3().crossVectors(vX, vY).normalize();
             
-            // Definir UVs para mapeo de textura
-            const uvs = new Float32Array([
-                0, 1,
-                1, 1,
-                0, 0,
-                
-                0, 0,
-                1, 1,
-                1, 0
-            ]);
+            // Crear matriz de rotación
+            const matrix = new THREE.Matrix4();
+            matrix.makeBasis(vX, vY, vZ);
             
-            geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-            geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
-            geometry.computeVertexNormals();
+            // Extraer rotación de la matriz
+            const rotation = new THREE.Euler().setFromRotationMatrix(matrix);
             
-            return geometry;
-        }
-        
-        function createScreenHTML() {
+            // Reducir un poco más el tamaño del plano por arriba y abajo
+            const bigBlockerGeometry = new THREE.PlaneGeometry(2.3, 1.5); // Altura reducida un poco más
+            const bigBlockerMaterial = new THREE.MeshBasicMaterial({
+                color: 0x000000,
+                side: THREE.BackSide, // Solo visible desde atrás
+                transparent: false
+            });
+            
+            // Crear el mesh con la geometría y el material
+            screenPlane = new THREE.Mesh(bigBlockerGeometry, bigBlockerMaterial);
+            
+            // Posicionar y rotar el plano, ajustando la posición para moverlo hacia adelante
+            screenPlane.position.copy(center);
+            // Mover hacia adelante en el eje Z (mínimamente)
+            screenPlane.position.z += 0.01; // Adelantar el plano solo 0.01 unidades
+            screenPlane.rotation.copy(rotation);
+            
+            // Añadir a la escena
+            scene.add(screenPlane);
+            
+            // Eliminado el segundo plano (el "palito" flotante)
+            
+            // Eliminar el objeto CSS3D actual
+            if (css3dRenderer) {
+                document.body.removeChild(css3dRenderer.domElement);
+                css3dRenderer = null;
+                css3dScene = null;
+            }
+            
             // Crear elemento HTML
             const screenElement = document.createElement('div');
             screenElement.className = 'interactive-screen';
-            screenElement.style.width = '720px'; // Aumentado 5px más por lado
-            screenElement.style.height = '450px'; // Reducido más para que no se salga por arriba y por abajo
+            screenElement.style.width = '720px';
+            screenElement.style.height = '450px';
             
             // Aplicar estilos colombianos
             screenElement.innerHTML = `
@@ -1300,6 +1294,9 @@
                         overflow: hidden;
                         position: relative;
                         box-sizing: border-box;
+                        backface-visibility: hidden;
+                        -webkit-backface-visibility: hidden;
+                        transform: scaleX(-1); /* Aplicar espejo horizontal para corregir el texto al revés */
                     }
                     
                     .screen-header {
@@ -1335,290 +1332,63 @@
                         position: relative;
                         overflow: hidden;
                     }
-                    
-                    .service-card:hover {
-                        transform: translateY(-5px);
-                        box-shadow: 0 8px 16px rgba(0,0,0,0.3);
-                    }
-                    
-                    .service-card h3 {
-                        margin-top: 0;
-                        color: #003893;
-                        font-size: 18px;
-                        border-bottom: 2px solid #FCD116;
-                        padding-bottom: 8px;
-                    }
-                    
-                    .service-card p {
-                        font-size: 14px;
-                        margin-bottom: 0;
-                    }
-                    
-                    .service-detail {
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: rgba(0,0,0,0.9);
-                        color: white;
-                        padding: 20px;
-                        box-sizing: border-box;
-                        transform: translateY(100%);
-                        transition: transform 0.5s;
-                        z-index: 10;
-                        overflow-y: auto;
-                    }
-                    
-                    .service-detail h2 {
-                        color: #FCD116;
-                        margin-top: 0;
-                    }
-                    
-                    .service-detail .close-btn {
-                        position: absolute;
-                        top: 10px;
-                        right: 10px;
-                        background: #CE1126;
-                        color: white;
-                        border: none;
-                        border-radius: 50%;
-                        width: 30px;
-                        height: 30px;
-                        cursor: pointer;
-                        font-weight: bold;
-                    }
-                    
-                    .green-accent {
-                        position: absolute;
-                        width: 150px;
-                        height: 150px;
-                        background-color: rgba(0,128,0,0.3);
-                        border-radius: 50%;
-                        z-index: -1;
-                    }
                 </style>
                 
                 <div class="screen-header">
                     <h1>Servicios Profesionales</h1>
                 </div>
                 
-                <!-- Acentos verdes decorativos -->
-                <div class="green-accent" style="top: -50px; right: -50px;"></div>
-                <div class="green-accent" style="bottom: -50px; left: -50px;"></div>
-                
                 <div class="services-container">
-                    <div class="service-card" data-service="software-consulting">
+                    <div class="service-card">
                         <h3>Software Consulting</h3>
                         <p>Asesoría experta para optimizar sus proyectos de software</p>
-                        <div class="service-detail">
-                            <button class="close-btn">×</button>
-                            <h2>Software Consulting</h2>
-                            <p>Ofrezco servicios de consultoría especializada en:</p>
-                            <ul>
-                                <li>Arquitectura de software</li>
-                                <li>Optimización de procesos de desarrollo</li>
-                                <li>Evaluación y selección de tecnologías</li>
-                                <li>Auditoría de código y seguridad</li>
-                                <li>Estrategias de escalabilidad</li>
-                            </ul>
-                            <p>Con años de experiencia en la industria, puedo ayudarle a tomar las decisiones correctas para el éxito de su proyecto.</p>
-                        </div>
                     </div>
                     
-                    <div class="service-card" data-service="fullstack">
+                    <div class="service-card">
                         <h3>FullStack Engineer</h3>
                         <p>Desarrollo completo de aplicaciones web y móviles</p>
-                        <div class="service-detail">
-                            <button class="close-btn">×</button>
-                            <h2>FullStack Engineer</h2>
-                            <p>Desarrollo soluciones completas utilizando:</p>
-                            <ul>
-                                <li>Frontend: React, Angular, Vue.js</li>
-                                <li>Backend: Node.js, Python, Java</li>
-                                <li>Bases de datos: SQL y NoSQL</li>
-                                <li>DevOps: Docker, Kubernetes, CI/CD</li>
-                                <li>Cloud: AWS, Azure, Google Cloud</li>
-                            </ul>
-                            <p>Puedo llevar su proyecto desde la concepción hasta la implementación con las mejores prácticas de la industria.</p>
-                        </div>
                     </div>
                     
-                    <div class="service-card" data-service="data-engineer">
+                    <div class="service-card">
                         <h3>Data Engineer</h3>
                         <p>Diseño e implementación de soluciones de datos</p>
-                        <div class="service-detail">
-                            <button class="close-btn">×</button>
-                            <h2>Data Engineer</h2>
-                            <p>Especializado en:</p>
-                            <ul>
-                                <li>Diseño de pipelines de datos</li>
-                                <li>ETL y procesamiento de datos</li>
-                                <li>Data warehousing</li>
-                                <li>Big Data (Hadoop, Spark)</li>
-                                <li>Integración de fuentes de datos</li>
-                            </ul>
-                            <p>Transformo sus datos en activos valiosos mediante arquitecturas eficientes y escalables.</p>
-                        </div>
                     </div>
                     
-                    <div class="service-card" data-service="ai-fullstack">
-                        <h3>AI Full-Stack Engineer</h3>
+                    <div class="service-card">
+                        <h3>AI Full-Stack</h3>
                         <p>Integración de IA en aplicaciones web y móviles</p>
-                        <div class="service-detail">
-                            <button class="close-btn">×</button>
-                            <h2>AI Full-Stack Engineer</h2>
-                            <p>Combino desarrollo full-stack con IA:</p>
-                            <ul>
-                                <li>Integración de modelos de ML/DL en aplicaciones</li>
-                                <li>Desarrollo de APIs para servicios de IA</li>
-                                <li>Implementación de chatbots y asistentes virtuales</li>
-                                <li>Procesamiento de lenguaje natural</li>
-                                <li>Visión por computadora</li>
-                            </ul>
-                            <p>Potencio sus aplicaciones con capacidades de inteligencia artificial de vanguardia.</p>
-                        </div>
                     </div>
                     
-                    <div class="service-card" data-service="prompt-engineer">
+                    <div class="service-card">
                         <h3>Prompt Engineer</h3>
                         <p>Optimización de prompts para modelos de IA generativa</p>
-                        <div class="service-detail">
-                            <button class="close-btn">×</button>
-                            <h2>Prompt Engineer</h2>
-                            <p>Especialista en:</p>
-                            <ul>
-                                <li>Diseño de prompts efectivos para LLMs</li>
-                                <li>Optimización de resultados de IA generativa</li>
-                                <li>Creación de sistemas de instrucciones</li>
-                                <li>Evaluación y mejora de respuestas de IA</li>
-                                <li>Integración de técnicas avanzadas como RAG</li>
-                            </ul>
-                            <p>Maximizo el potencial de los modelos de IA generativa para sus necesidades específicas.</p>
-                        </div>
                     </div>
                 </div>
             `;
             
-            // Añadir interactividad
-            const serviceCards = screenElement.querySelectorAll('.service-card');
-            serviceCards.forEach(card => {
-                card.addEventListener('click', function() {
-                    const detail = this.querySelector('.service-detail');
-                    detail.style.transform = 'translateY(0)';
-                });
-                
-                const closeBtn = card.querySelector('.close-btn');
-                closeBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const detail = this.closest('.service-detail');
-                    detail.style.transform = 'translateY(100%)';
-                });
-            });
-            
             // Crear objeto CSS3D
             const screenObject = new THREE.CSS3DObject(screenElement);
             
-            // Calcular posición y rotación basadas en las coordenadas del plano
-            positionCSS3DObject(screenObject);
+            // Posicionar el objeto CSS3D
+            screenObject.position.copy(center);
+            screenObject.rotation.copy(rotation);
+            
+            // No añadir rotación adicional, ya que está causando que el texto se vea al revés
+            // screenObject.rotation.z += Math.PI; // Comentado para evitar la inversión del texto
+            
+            // Escalar para ajustar al tamaño del plano
+            const width = 2.24; // Ancho del plano
+            const scale = width / 720 * 0.99; // Ajustado para que se ajuste perfectamente al marco
+            screenObject.scale.set(scale, scale, scale);
             
             // Añadir a la escena CSS3D
             css3dScene.add(screenObject);
         }
         
-        function positionCSS3DObject(object) {
-            // Calcular el centro del plano
-            const topLeft = new THREE.Vector3(-0.54, 6.14, 8.57).add(originOffset);
-            const topRight = new THREE.Vector3(1.70, 6.14, 8.57).add(originOffset);
-            const bottomLeft = new THREE.Vector3(-0.54, 4.93, 9.17).add(originOffset);
-            const bottomRight = new THREE.Vector3(1.70, 4.93, 9.17).add(originOffset);
-            
-            // Calcular el centro
-            const center = new THREE.Vector3()
-                .add(topLeft)
-                .add(topRight)
-                .add(bottomLeft)
-                .add(bottomRight)
-                .multiplyScalar(0.25);
-            
-            // Calcular la orientación
-            const width = topLeft.distanceTo(topRight);
-            const height = topLeft.distanceTo(bottomLeft);
-            
-            // Vectores para orientación - invertimos X para corregir la orientación
-            const vX = new THREE.Vector3().subVectors(topLeft, topRight).normalize(); // Invertido
-            const vY = new THREE.Vector3().subVectors(bottomLeft, topLeft).normalize();
-            const vZ = new THREE.Vector3().crossVectors(vX, vY).normalize();
-            
-            // Crear matriz de rotación
-            const matrix = new THREE.Matrix4();
-            matrix.makeBasis(vX, vY, vZ);
-            
-            // Extraer rotación de la matriz
-            const rotation = new THREE.Euler().setFromRotationMatrix(matrix);
-            
-            // Aplicar posición y rotación
-            object.position.copy(center);
-            // Empujar ligeramente hacia atrás para que se incruste mejor en la pantalla
-            object.position.z -= 0.05;
-            object.rotation.copy(rotation);
-            
-            // Aplicar rotación adicional para corregir la orientación
-            object.rotation.z += Math.PI; // Girar 180 grados alrededor del eje Z
-            
-            // Escalar para ajustar al tamaño del plano
-            const scale = width / 720 * 0.99; // Ajustado para que se ajuste perfectamente al marco
-            object.scale.set(scale, scale, scale);
-            
-            console.log("Posición del objeto CSS3D:", object.position);
-            console.log("Rotación del objeto CSS3D:", object.rotation);
-        }
+        // Eliminamos la función createScreenGeometry que ya no es necesaria con nuestra solución radical
         
-        function setupRaycasting() {
-            // Manejar clics en la escena
-            window.addEventListener('click', function(event) {
-                // Calcular posición normalizada del ratón
-                const clickMouse = new THREE.Vector2();
-                clickMouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-                clickMouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-                
-                // Actualizar raycaster
-                const clickRaycaster = new THREE.Raycaster();
-                clickRaycaster.setFromCamera(clickMouse, camera);
-                
-                // Comprobar intersección con el plano
-                const intersects = clickRaycaster.intersectObject(screenPlane);
-                
-                if (intersects.length > 0) {
-                    // Convertir coordenadas de intersección a coordenadas UV
-                    const uv = intersects[0].uv;
-                    
-                    // Simular clic en el elemento HTML correspondiente
-                    simulateClickOnHTML(uv.x, uv.y);
-                }
-            });
-        }
-        
-        function simulateClickOnHTML(x, y) {
-            // Convertir coordenadas UV (0-1) a coordenadas de píxeles en el elemento HTML
-            const screenElement = document.querySelector('.interactive-screen');
-            if (!screenElement) return;
-            
-            const width = screenElement.offsetWidth;
-            const height = screenElement.offsetHeight;
-            
-            const pixelX = Math.floor(x * width);
-            const pixelY = Math.floor((1 - y) * height); // Invertir Y para coordenadas DOM
-            
-            // Encontrar el elemento en esas coordenadas
-            const elementAtPoint = document.elementFromPoint(pixelX, pixelY);
-            
-            // Simular clic si es un elemento interactivo
-            if (elementAtPoint && (elementAtPoint.classList.contains('service-card') ||
-                                  elementAtPoint.classList.contains('close-btn'))) {
-                elementAtPoint.click();
-            }
-        }
+        // Ya no necesitamos las funciones createScreenHTML, setupRaycasting y simulateClickOnHTML
+        // con nuestra solución radical que usa una textura estática
     </script>
 </body>
 </html>
