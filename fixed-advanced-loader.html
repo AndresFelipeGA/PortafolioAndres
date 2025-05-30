@@ -1246,10 +1246,16 @@
             // Extraer rotación de la matriz
             const rotation = new THREE.Euler().setFromRotationMatrix(matrix);
             
-            // Reducir un poco más el tamaño del plano por arriba y abajo
-            const bigBlockerGeometry = new THREE.PlaneGeometry(2.3, 1.5); // Altura reducida un poco más
+            // Volver al tamaño que tenía tres cambios atrás
+            const bigBlockerGeometry = new THREE.PlaneGeometry(2.3, 1.46); // Tamaño de tres cambios atrás
+            
+            // Cargar la imagen de fondo como textura
+            const textureLoader = new THREE.TextureLoader();
+            const backgroundTexture = textureLoader.load('images/icons/coffeDisplayBackground.jpg');
+            
+            // Crear material con la textura
             const bigBlockerMaterial = new THREE.MeshBasicMaterial({
-                color: 0x000000,
+                map: backgroundTexture,
                 side: THREE.BackSide, // Solo visible desde atrás
                 transparent: false
             });
@@ -1257,8 +1263,10 @@
             // Crear el mesh con la geometría y el material
             screenPlane = new THREE.Mesh(bigBlockerGeometry, bigBlockerMaterial);
             
-            // Posicionar y rotar el plano, ajustando la posición para moverlo hacia adelante
+            // Posicionar y rotar el plano, ajustando la posición para que la reducción afecte SOLO a la parte superior
             screenPlane.position.copy(center);
+            // Volver a la posición vertical que tenía tres cambios atrás
+            screenPlane.position.y -= 0.02; // Posición de tres cambios atrás (2px hacia abajo)
             // Mover hacia adelante en el eje Z (mínimamente)
             screenPlane.position.z += 0.01; // Adelantar el plano solo 0.01 unidades
             screenPlane.rotation.copy(rotation);
