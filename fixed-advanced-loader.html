@@ -1246,17 +1246,39 @@
             // Extraer rotación de la matriz
             const rotation = new THREE.Euler().setFromRotationMatrix(matrix);
             
-            // Volver al tamaño que tenía tres cambios atrás
-            const bigBlockerGeometry = new THREE.PlaneGeometry(2.3, 1.46); // Tamaño de tres cambios atrás
+            // Mantener el tamaño actual del plano
+            const bigBlockerGeometry = new THREE.PlaneGeometry(2.3, 1.46);
             
-            // Cargar la imagen de fondo como textura
-            const textureLoader = new THREE.TextureLoader();
-            const backgroundTexture = textureLoader.load('images/icons/coffeDisplayBackground.jpg');
+            // Crear un canvas para el diseño simple con patrón de café
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024;
+            canvas.height = 768;
+            const ctx = canvas.getContext('2d');
             
-            // Crear material con la textura
+            // Fondo beige claro
+            ctx.fillStyle = '#E6D2B5'; // Color beige claro
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Cargar y aplicar el patrón de granos de café
+            const coffeePattern = new Image();
+            coffeePattern.src = 'images/icons/coffeDisplayBackground.jpg';
+            
+            coffeePattern.onload = function() {
+                // Dibujar el patrón de café a tamaño completo
+                ctx.drawImage(coffeePattern, 0, 0, canvas.width, canvas.height);
+                
+                // Crear textura a partir del canvas
+                const screenTexture = new THREE.CanvasTexture(canvas);
+                
+                // Actualizar material con la textura
+                bigBlockerMaterial.map = screenTexture;
+                bigBlockerMaterial.needsUpdate = true;
+            };
+            
+            // Crear material con la textura (inicialmente vacía, se actualizará cuando cargue la imagen)
             const bigBlockerMaterial = new THREE.MeshBasicMaterial({
-                map: backgroundTexture,
-                side: THREE.BackSide, // Solo visible desde atrás
+                color: 0x6B4226, // Color café mientras carga
+                side: THREE.FrontSide, // IMPORTANTE: Visible desde el frente
                 transparent: false
             });
             
