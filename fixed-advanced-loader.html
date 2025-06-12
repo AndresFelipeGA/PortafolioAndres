@@ -1048,7 +1048,7 @@
         // Función para iniciar la animación de la cámara hacia un punto específico cuando se hace clic en el botón
         function startButtonCameraAnimation() {
             // Coordenadas específicas a las que queremos mover la cámara (relativas al origen personalizado)
-            const targetCameraPos = new THREE.Vector3(0.58, 5.95, 10.61);
+            const targetCameraPos = new THREE.Vector3(0.60, 6.32, 10.96);
             
             // Convertir coordenadas relativas a absolutas (sumando el offset)
             const absoluteTargetPos = new THREE.Vector3().copy(targetCameraPos).add(originOffset);
@@ -1059,7 +1059,7 @@
             // Punto específico al que mirará la cámara (apuntando hacia la pantalla/tablet)
             // Estas coordenadas apuntan hacia la pantalla que se muestra en la segunda imagen
             // Ajustamos las coordenadas para mirar en la dirección correcta (hacia la pantalla)
-            const lookAtPoint = new THREE.Vector3(-9.42, -8.15, -5.0); // Coordenadas ajustadas para mirar hacia la pantalla
+            const lookAtPoint = new THREE.Vector3(-9.42, -13.0, -5.0); // Coordenadas ajustadas para mirar hacia la pantalla (45 grados más abajo)
             
             console.log("Coordenadas objetivo (relativas):", targetCameraPos);
             console.log("Coordenadas objetivo (absolutas):", absoluteTargetPos);
@@ -1255,17 +1255,25 @@
             canvas.height = 768;
             const ctx = canvas.getContext('2d');
             
-            // Fondo beige claro
-            ctx.fillStyle = '#E6D2B5'; // Color beige claro
+            // Fondo blanco
+            ctx.fillStyle = '#FFFFFF'; // Color blanco
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Cargar y aplicar el patrón de granos de café
-            const coffeePattern = new Image();
-            coffeePattern.src = 'images/icons/coffeDisplayBackground.jpg';
+            // Cargar y aplicar la imagen de café en las esquinas
+            const coffeeDot = new Image();
+            coffeeDot.src = 'images/icons/coffeDot.jpg';
             
-            coffeePattern.onload = function() {
-                // Dibujar el patrón de café a tamaño completo
-                ctx.drawImage(coffeePattern, 0, 0, canvas.width, canvas.height);
+            coffeeDot.onload = function() {
+                // Tamaño pequeño para la imagen (12.7% del ancho del canvas - 15% más grande que antes)
+                const dotSize = Math.floor(canvas.width * 0.127);
+                
+                // Dibujar la imagen en la esquina superior izquierda
+                ctx.globalAlpha = 0.3; // Hacerla sutil con transparencia
+                ctx.drawImage(coffeeDot, 20, 20, dotSize, dotSize);
+                
+                // Dibujar la imagen en la esquina inferior derecha
+                ctx.drawImage(coffeeDot, canvas.width - dotSize - 20, canvas.height - dotSize - 20, dotSize, dotSize);
+                ctx.globalAlpha = 1.0; // Restaurar opacidad normal
                 
                 // Crear textura a partir del canvas
                 const screenTexture = new THREE.CanvasTexture(canvas);
@@ -1277,8 +1285,8 @@
             
             // Crear material con la textura (inicialmente vacía, se actualizará cuando cargue la imagen)
             const bigBlockerMaterial = new THREE.MeshBasicMaterial({
-                color: 0x6B4226, // Color café mientras carga
-                side: THREE.FrontSide, // IMPORTANTE: Visible desde el frente
+                color: 0xFFFFFF, // Color blanco mientras carga
+                side: THREE.DoubleSide, // IMPORTANTE: Visible desde ambos lados
                 transparent: false
             });
             
