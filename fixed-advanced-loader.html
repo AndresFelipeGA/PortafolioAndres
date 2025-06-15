@@ -741,32 +741,10 @@
                     function(xhr) {
                         if (xhr.lengthComputable) {
                             const percent = (xhr.loaded / xhr.total) * 100;
+                            console.log(`Cargando modelo: ${Math.round(percent)}%`);
                             
-                            // Actualizar el nivel de llenado de la taza de café
-                            // Ajustar el porcentaje para que se vea mejor en la taza
-                            const adjustedPercent = Math.min(percent, 100); // Asegurar que no exceda el 100%
-                            
-                            // Usar una curva no lineal para el llenado para que se vea más natural
-                            // Esto hace que se llene más rápido al principio y más lento al final
-                            const fillHeight = Math.pow(adjustedPercent / 100, 0.8) * 100;
-                            
-                            // Limitar la altura máxima para que no sobrepase la taza
-                            coffeeFill.style.height = Math.min(fillHeight, 25) + '%';
-                            
-                            // Ajustar el ancho del café según el nivel de llenado para simular la forma de la taza
-                            // La taza es más ancha en la parte superior
-                            const widthAdjustment = 55 + (fillHeight / 10);
-                            coffeeFill.style.width = Math.min(widthAdjustment, 65) + '%';
-                            
-                            // Ajustar la opacidad para un efecto más realista
-                            const opacity = 0.7 + (fillHeight / 100) * 0.3;
-                            coffeeFill.style.opacity = opacity;
-                            
-                            const loadedMB = (xhr.loaded / (1024 * 1024)).toFixed(2);
-                            const totalMB = (xhr.total / (1024 * 1024)).toFixed(2);
-                            loadingStats.textContent = `${loadedMB} MB de ${totalMB} MB (${Math.round(percent)}%)`;
-                            
-                            loadingText.textContent = `Cargando modelo... ${Math.round(percent)}%`;
+                            // No intentamos actualizar elementos que no existen
+                            // Solo mostramos el progreso en la consola
                         }
                     },
                     // Error callback
@@ -791,16 +769,28 @@
         
         function showError(message) {
             console.error("ERROR:", message);
-            errorMessage.textContent = message;
-            errorMessage.style.display = 'block';
             
-            // Cambiar el color del café a rojo para indicar error
-            if (coffeeFill) {
-                coffeeFill.style.backgroundColor = '#cc0000';
-                coffeeFill.style.height = '40%'; // Mostrar un nivel de café fijo para el error
+            // Crear un elemento de error si no existe
+            let errorDiv = document.getElementById('error-message');
+            if (!errorDiv) {
+                errorDiv = document.createElement('div');
+                errorDiv.id = 'error-message';
+                errorDiv.style.position = 'fixed';
+                errorDiv.style.top = '50%';
+                errorDiv.style.left = '50%';
+                errorDiv.style.transform = 'translate(-50%, -50%)';
+                errorDiv.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+                errorDiv.style.color = '#ff3333';
+                errorDiv.style.padding = '20px';
+                errorDiv.style.borderRadius = '10px';
+                errorDiv.style.zIndex = '2000';
+                errorDiv.style.textAlign = 'center';
+                document.body.appendChild(errorDiv);
             }
             
-            loadingText.style.color = '#ff3333';
+            // Mostrar el mensaje de error
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
             
             // Add retry button
             const retryButton = document.createElement('button');
@@ -817,7 +807,7 @@
                 location.reload();
             });
             
-            loadingContainer.appendChild(retryButton);
+            errorDiv.appendChild(retryButton);
         }
         
         function addFloatingText() {
@@ -1192,7 +1182,7 @@
                     renderer.render(scene, camera);
                     
                     // Renderizar escena CSS3D con la misma cámara
-                    if (css3dRenderer) {
+                    if (css3dRenderer && css3dScene) {
                         css3dRenderer.render(css3dScene, camera);
                     }
                 }
@@ -1206,16 +1196,29 @@
         function setupInteractiveScreen() {
             // VOLVER A LA SOLUCIÓN ORIGINAL PERO CON AJUSTES PARA QUE NO SEA VISIBLE DESDE ATRÁS
             
-            // Crear escena CSS3D
-            css3dScene = new THREE.Scene();
+            // Crear escena CSS3D si no existe
+            if (!css3dScene) {
+                css3dScene = new THREE.Scene();
+                console.log("CSS3D Scene created:", css3dScene);
+            } else {
+                console.log("Using existing CSS3D Scene:", css3dScene);
+                // Clear existing objects from the scene
+                while(css3dScene.children.length > 0) {
+                    css3dScene.remove(css3dScene.children[0]);
+                }
+            }
             
-            // Configurar CSS3DRenderer
-            css3dRenderer = new THREE.CSS3DRenderer();
-            css3dRenderer.setSize(window.innerWidth, window.innerHeight);
-            css3dRenderer.domElement.style.position = 'absolute';
-            css3dRenderer.domElement.style.top = 0;
-            css3dRenderer.domElement.style.pointerEvents = 'none'; // Importante para que los eventos pasen al WebGLRenderer
-            document.body.appendChild(css3dRenderer.domElement);
+            // Configurar CSS3DRenderer si no existe
+            if (!css3dRenderer) {
+                css3dRenderer = new THREE.CSS3DRenderer();
+                css3dRenderer.setSize(window.innerWidth, window.innerHeight);
+                css3dRenderer.domElement.style.position = 'absolute';
+                css3dRenderer.domElement.style.top = 0;
+                css3dRenderer.domElement.style.pointerEvents = 'none'; // Importante para que los eventos pasen al WebGLRenderer
+                css3dRenderer.domElement.style.zIndex = '1000'; // Asegurar que está por encima de otros elementos
+                document.body.appendChild(css3dRenderer.domElement);
+                console.log("CSS3D Renderer initialized:", css3dRenderer);
+            }
             
             // Eliminar el plano anterior
             if (screenPlane) scene.remove(screenPlane);
@@ -1249,6 +1252,13 @@
             // Mantener el tamaño actual del plano
             const bigBlockerGeometry = new THREE.PlaneGeometry(2.3, 1.46);
             
+            // Crear material primero para evitar el error de referencia
+            const bigBlockerMaterial = new THREE.MeshBasicMaterial({
+                color: 0xFFFFFF, // Color blanco mientras carga
+                side: THREE.DoubleSide, // IMPORTANTE: Visible desde ambos lados
+                transparent: false
+            });
+            
             // Crear un canvas para el diseño simple con patrón de café
             const canvas = document.createElement('canvas');
             canvas.width = 1024;
@@ -1256,39 +1266,145 @@
             const ctx = canvas.getContext('2d');
             
             // Fondo blanco
-            ctx.fillStyle = '#FFFFFF'; // Color blanco
+            ctx.fillStyle = '#F5F1E9'; // Color crema suave
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Cargar y aplicar la imagen de café en las esquinas
-            const coffeeDot = new Image();
-            coffeeDot.src = 'images/icons/coffeDot.jpg';
+            // Dibujar borde inferior (aparecerá como superior cuando se voltee)
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+            gradient.addColorStop(0, '#6F4E37');
+            gradient.addColorStop(0.5, '#B87333');
+            gradient.addColorStop(1, '#6F4E37');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, canvas.height - 8, canvas.width, 8);
             
-            coffeeDot.onload = function() {
-                // Tamaño pequeño para la imagen (12.7% del ancho del canvas - 15% más grande que antes)
-                const dotSize = Math.floor(canvas.width * 0.127);
-                
-                // Dibujar la imagen en la esquina superior izquierda
-                ctx.globalAlpha = 0.3; // Hacerla sutil con transparencia
-                ctx.drawImage(coffeeDot, 20, 20, dotSize, dotSize);
-                
-                // Dibujar la imagen en la esquina inferior derecha
-                ctx.drawImage(coffeeDot, canvas.width - dotSize - 20, canvas.height - dotSize - 20, dotSize, dotSize);
-                ctx.globalAlpha = 1.0; // Restaurar opacidad normal
-                
-                // Crear textura a partir del canvas
-                const screenTexture = new THREE.CanvasTexture(canvas);
-                
-                // Actualizar material con la textura
-                bigBlockerMaterial.map = screenTexture;
-                bigBlockerMaterial.needsUpdate = true;
-            };
+            // Dibujar título en la parte inferior (aparecerá en la parte superior cuando se voltee)
+            ctx.fillStyle = '#5D4037';
+            ctx.font = 'bold 28px Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Café Colombiano', canvas.width/2, canvas.height - 40);
             
-            // Crear material con la textura (inicialmente vacía, se actualizará cuando cargue la imagen)
-            const bigBlockerMaterial = new THREE.MeshBasicMaterial({
-                color: 0xFFFFFF, // Color blanco mientras carga
-                side: THREE.DoubleSide, // IMPORTANTE: Visible desde ambos lados
-                transparent: false
+            // Dibujar línea encima del título (aparecerá debajo cuando se voltee)
+            ctx.fillStyle = '#D7CCC8';
+            ctx.fillRect(canvas.width/4, canvas.height - 45, canvas.width/2, 2);
+            
+            // Cargar las imágenes de café - reorganizadas en una cuadrícula 3x2 invertida
+            const coffeeImages = [
+                // Fila 3 (aparecerá como fila 1 cuando se voltee)
+                { src: 'images/icons/typeOfCoffes/cafeNumeroCuatro.png', title: 'Servicios Freelance', desc: 'Desarrollo web, soporte técnico y MVPs', x: canvas.width/3, y: canvas.height - 440, badge: true },
+                { src: 'images/icons/typeOfCoffes/cafeNumeroUno.png', title: 'Software a Medida', desc: 'Sistemas web, móvil y escritorio', x: 2*canvas.width/3, y: canvas.height - 440 },
+                
+                // Fila 2
+                { src: 'images/icons/typeOfCoffes/cafeNumeroDos.png', title: 'Automatización', desc: 'Scripts y bots para su negocio', x: canvas.width/3, y: canvas.height - 280 },
+                { src: 'images/icons/typeOfCoffes/cafeNumeroTres.png', title: 'Consultoría Tech', desc: 'Asesoría en arquitectura y seguridad', x: 2*canvas.width/3, y: canvas.height - 280 },
+                
+                // Fila 1 (aparecerá como fila 3 cuando se voltee)
+                { src: 'images/icons/typeOfCoffes/cafeNumeroCinco.png', title: 'Web & E-commerce', desc: 'Sitios web con SEO e integraciones', x: canvas.width/3, y: canvas.height - 120 },
+                { src: 'images/icons/typeOfCoffes/cafeNumeroSeis.png', title: 'DevOps & Cloud', desc: 'Entornos escalables con CI/CD', x: 2*canvas.width/3, y: canvas.height - 120 }
+            ];
+            
+            // Función para dibujar un elemento de café - invertido para que aparezca correctamente cuando se voltee
+            function drawCoffeeItem(ctx, item, loaded) {
+                // Tamaño más pequeño para que quepan todos
+                const cardWidth = 180;
+                const cardHeight = 130;
+                
+                // Dibujar fondo del elemento
+                ctx.fillStyle = '#FFFFFF';
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+                ctx.shadowBlur = 10;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = -4; // Sombra hacia arriba en lugar de abajo
+                ctx.beginPath();
+                ctx.roundRect(item.x - cardWidth/2, item.y - cardHeight/2, cardWidth, cardHeight, 12);
+                ctx.fill();
+                ctx.shadowColor = 'transparent';
+                
+                if (loaded) {
+                    // Dibujar imagen
+                    ctx.drawImage(item.img, item.x - 35, item.y - 35, 70, 90);
+                    
+                    // Dibujar título
+                    ctx.fillStyle = '#5D4037';
+                    ctx.font = 'bold 14px Arial, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(item.title, item.x, item.y - 45);
+                    
+                    // Dibujar descripción
+                    ctx.fillStyle = '#7D5A50';
+                    ctx.font = '10px Arial, sans-serif';
+                    ctx.fillText(item.desc, item.x, item.y - 60);
+                    
+                    // Dibujar badge si es necesario
+                    if (item.badge) {
+                        ctx.fillStyle = '#C2185B';
+                        ctx.beginPath();
+                        ctx.roundRect(item.x + 60, item.y + 35, 25, 15, 10);
+                        ctx.fill();
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.font = 'bold 9px Arial, sans-serif';
+                        ctx.fillText('HOT', item.x + 72, item.y + 45);
+                    }
+                } else {
+                    // Dibujar placeholder
+                    ctx.fillStyle = '#EEEEEE';
+                    ctx.fillRect(item.x - 35, item.y - 35, 70, 90);
+                }
+            }
+            
+            // Dibujar placeholders para los elementos de café
+            coffeeImages.forEach(item => drawCoffeeItem(ctx, item, false));
+            
+            // Dibujar botones en la parte superior (aparecerán en la parte inferior cuando se voltee)
+            const buttonY = 70;
+            
+            // Botón Volver
+            ctx.fillStyle = '#E0E0E0';
+            ctx.beginPath();
+            ctx.roundRect(canvas.width/4 - 80, buttonY, 160, 40, 8);
+            ctx.fill();
+            
+            ctx.fillStyle = '#5D4037';
+            ctx.font = 'bold 16px Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('← Volver', canvas.width/4, buttonY + 25);
+            
+            // Botón de selección
+            const selectGradient = ctx.createLinearGradient(3*canvas.width/4 - 80, 0, 3*canvas.width/4 + 80, 0);
+            selectGradient.addColorStop(0, '#6F4E37');
+            selectGradient.addColorStop(1, '#A67C52');
+            ctx.fillStyle = selectGradient;
+            ctx.beginPath();
+            ctx.roundRect(3*canvas.width/4 - 80, buttonY, 160, 40, 8);
+            ctx.fill();
+            
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = 'bold 16px Arial, sans-serif';
+            ctx.fillText('Seleccionar café', 3*canvas.width/4, buttonY + 25);
+            
+            // Cargar las imágenes de café y actualizar el canvas cuando estén listas
+            let loadedImages = 0;
+            coffeeImages.forEach(item => {
+                item.img = new Image();
+                item.img.src = item.src;
+                item.img.onload = function() {
+                    loadedImages++;
+                    drawCoffeeItem(ctx, item, true);
+                    
+                    if (loadedImages === coffeeImages.length) {
+                        // Todas las imágenes cargadas, actualizar textura
+                        const screenTexture = new THREE.CanvasTexture(canvas);
+                        bigBlockerMaterial.map = screenTexture;
+                        bigBlockerMaterial.needsUpdate = true;
+                    }
+                };
             });
+            
+            // Crear textura inicial con los placeholders
+            const screenTexture = new THREE.CanvasTexture(canvas);
+            bigBlockerMaterial.map = screenTexture;
+            bigBlockerMaterial.needsUpdate = true;
+            
+            // El material ya está creado arriba, no necesitamos redeclararlo
             
             // Crear el mesh con la geometría y el material
             screenPlane = new THREE.Mesh(bigBlockerGeometry, bigBlockerMaterial);
@@ -1306,103 +1422,304 @@
             
             // Eliminado el segundo plano (el "palito" flotante)
             
-            // Eliminar el objeto CSS3D actual
-            if (css3dRenderer) {
-                document.body.removeChild(css3dRenderer.domElement);
-                css3dRenderer = null;
-                css3dScene = null;
-            }
+            // No eliminamos el CSS3D renderer, solo actualizamos su contenido
             
-            // Crear elemento HTML
+            // Crear elemento HTML con estilos inline para asegurar visibilidad
             const screenElement = document.createElement('div');
             screenElement.className = 'interactive-screen';
             screenElement.style.width = '720px';
             screenElement.style.height = '450px';
+            screenElement.style.backgroundColor = '#F5F1E9'; // Asegurar color de fondo
+            screenElement.style.color = '#4A2C2A'; // Asegurar color de texto
+            screenElement.style.padding = '15px';
+            screenElement.style.borderRadius = '12px';
+            screenElement.style.boxShadow = '0 0 25px rgba(0,0,0,0.3)';
+            screenElement.style.position = 'relative';
+            screenElement.style.zIndex = '1000'; // Asegurar que está por encima de otros elementos
             
-            // Aplicar estilos colombianos
-            screenElement.innerHTML = `
-                <style>
-                    .interactive-screen {
-                        background: linear-gradient(135deg, #003893 0%, #003893 33%, #FCD116 33%, #FCD116 66%, #CE1126 66%, #CE1126 100%);
-                        color: white;
-                        font-family: 'Arial', sans-serif;
-                        padding: 12px;
-                        border-radius: 8px;
-                        box-shadow: 0 0 20px rgba(0,0,0,0.5);
-                        overflow: hidden;
-                        position: relative;
-                        box-sizing: border-box;
-                        backface-visibility: hidden;
-                        -webkit-backface-visibility: hidden;
-                        transform: scaleX(-1); /* Aplicar espejo horizontal para corregir el texto al revés */
-                    }
-                    
-                    .screen-header {
-                        text-align: center;
-                        margin-bottom: 20px;
-                        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-                    }
-                    
-                    .screen-header h1 {
-                        font-size: 32px;
-                        margin: 0;
-                        padding: 8px;
-                        background-color: rgba(0,0,0,0.7);
-                        border-radius: 5px;
-                    }
-                    
-                    .services-container {
-                        display: flex;
-                        flex-wrap: wrap;
-                        justify-content: space-around;
-                        gap: 15px;
-                    }
-                    
-                    .service-card {
-                        background-color: rgba(255,255,255,0.9);
-                        color: #333;
-                        padding: 10px;
-                        border-radius: 8px;
-                        width: 170px;
-                        cursor: pointer;
-                        transition: transform 0.3s, box-shadow 0.3s;
-                        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-                        position: relative;
-                        overflow: hidden;
-                    }
-                </style>
+            // Crear estilos para la interfaz de cafetería colombiana
+            const style = document.createElement('style');
+            style.textContent = `
+                .interactive-screen {
+                    background: #F5F1E9; /* Fondo color crema suave */
+                    color: #4A2C2A; /* Color café oscuro para texto */
+                    font-family: 'Poppins', 'Segoe UI', sans-serif;
+                    padding: 15px;
+                    border-radius: 12px;
+                    box-shadow: 0 0 25px rgba(0,0,0,0.3);
+                    overflow: hidden;
+                    position: relative;
+                    box-sizing: border-box;
+                    backface-visibility: hidden;
+                    -webkit-backface-visibility: hidden;
+                    transform: scaleX(-1); /* Aplicar espejo horizontal para corregir el texto al revés */
+                }
                 
-                <div class="screen-header">
-                    <h1>Servicios Profesionales</h1>
-                </div>
+                .interactive-screen::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: 8px;
+                    background: linear-gradient(90deg, #6F4E37, #B87333, #6F4E37); /* Borde superior degradado café */
+                    z-index: 10;
+                }
                 
-                <div class="services-container">
-                    <div class="service-card">
-                        <h3>Software Consulting</h3>
-                        <p>Asesoría experta para optimizar sus proyectos de software</p>
-                    </div>
-                    
-                    <div class="service-card">
-                        <h3>FullStack Engineer</h3>
-                        <p>Desarrollo completo de aplicaciones web y móviles</p>
-                    </div>
-                    
-                    <div class="service-card">
-                        <h3>Data Engineer</h3>
-                        <p>Diseño e implementación de soluciones de datos</p>
-                    </div>
-                    
-                    <div class="service-card">
-                        <h3>AI Full-Stack</h3>
-                        <p>Integración de IA en aplicaciones web y móviles</p>
-                    </div>
-                    
-                    <div class="service-card">
-                        <h3>Prompt Engineer</h3>
-                        <p>Optimización de prompts para modelos de IA generativa</p>
-                    </div>
-                </div>
+                .screen-header {
+                    text-align: center;
+                    margin-bottom: 15px;
+                }
+                
+                .screen-header h1 {
+                    font-size: 28px;
+                    margin: 0;
+                    padding: 8px 0;
+                    color: #5D4037; /* Café oscuro */
+                    font-weight: 600;
+                    letter-spacing: 1px;
+                    border-bottom: 2px solid #D7CCC8; /* Borde sutil */
+                }
+                
+                .coffee-grid {
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 15px;
+                    margin-bottom: 15px;
+                }
+                
+                .coffee-item {
+                    background-color: #FFFFFF;
+                    border-radius: 12px;
+                    overflow: hidden;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                    transition: all 0.3s ease;
+                    cursor: pointer;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    padding: 12px;
+                    position: relative;
+                }
+                
+                .coffee-item:hover {
+                    transform: translateY(-5px);
+                    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+                }
+                
+                .coffee-item:active {
+                    transform: translateY(0px);
+                }
+                
+                .coffee-image {
+                    width: 80px;
+                    height: 100px;
+                    object-fit: contain;
+                    margin-bottom: 8px;
+                    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+                }
+                
+                .coffee-title {
+                    font-size: 14px;
+                    font-weight: 600;
+                    margin: 0 0 4px 0;
+                    color: #5D4037;
+                    text-align: center;
+                }
+                
+                .coffee-description {
+                    font-size: 11px;
+                    color: #7D5A50;
+                    text-align: center;
+                    margin: 0;
+                    line-height: 1.3;
+                }
+                
+                .coffee-badge {
+                    position: absolute;
+                    top: 8px;
+                    right: 8px;
+                    background: #C2185B;
+                    color: white;
+                    font-size: 10px;
+                    padding: 3px 6px;
+                    border-radius: 10px;
+                    font-weight: bold;
+                }
+                
+                .buttons-row {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-top: 10px;
+                }
+                
+                .back-button {
+                    background: #E0E0E0;
+                    color: #5D4037;
+                    border: none;
+                    padding: 8px 15px;
+                    border-radius: 8px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    font-size: 14px;
+                    transition: all 0.2s;
+                }
+                
+                .select-button {
+                    background: linear-gradient(135deg, #6F4E37, #A67C52);
+                    color: white;
+                    border: none;
+                    padding: 8px 15px;
+                    border-radius: 8px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    font-size: 14px;
+                    transition: all 0.2s;
+                }
+                
+                .back-button:hover, .select-button:hover {
+                    transform: scale(1.05);
+                }
+                
+                .back-button:active, .select-button:active {
+                    transform: scale(0.98);
+                }
+                
+                .back-icon {
+                    margin-right: 5px;
+                    font-size: 16px;
+                }
             `;
+            
+            screenElement.appendChild(style);
+            
+            // Crear el encabezado
+            const header = document.createElement('div');
+            header.className = 'screen-header';
+            const title = document.createElement('h1');
+            title.textContent = 'Café Colombiano';
+            header.appendChild(title);
+            screenElement.appendChild(header);
+            
+            // Crear la cuadrícula de café
+            const coffeeGrid = document.createElement('div');
+            coffeeGrid.className = 'coffee-grid';
+            
+            // Definir los servicios
+            const services = [
+                {
+                    id: 'freelance',
+                    image: 'images/icons/typeOfCoffes/cafeNumeroCuatro.png',
+                    title: 'Servicios Freelance',
+                    description: 'Desarrollo web, soporte técnico y creación de MVPs con trabajo remoto flexible.',
+                    badge: true
+                },
+                {
+                    id: 'software',
+                    image: 'images/icons/typeOfCoffes/cafeNumeroUno.png',
+                    title: 'Software a Medida',
+                    description: 'Sistemas personalizados web, móvil y escritorio con programación full-stack.'
+                },
+                {
+                    id: 'automation',
+                    image: 'images/icons/typeOfCoffes/cafeNumeroDos.png',
+                    title: 'Automatización',
+                    description: 'Optimización de tareas repetitivas mediante scripts y bots para su negocio.'
+                },
+                {
+                    id: 'consulting',
+                    image: 'images/icons/typeOfCoffes/cafeNumeroTres.png',
+                    title: 'Consultoría Tech',
+                    description: 'Asesoría experta en arquitectura, rendimiento y seguridad para decisiones estratégicas.'
+                },
+                {
+                    id: 'web',
+                    image: 'images/icons/typeOfCoffes/cafeNumeroCinco.png',
+                    title: 'Web & E-commerce',
+                    description: 'Creación de sitios web y tiendas online con SEO e integraciones de pago.'
+                },
+                {
+                    id: 'devops',
+                    image: 'images/icons/typeOfCoffes/cafeNumeroSeis.png',
+                    title: 'DevOps & Cloud',
+                    description: 'Configuración de entornos escalables con CI/CD, contenedores y optimización.'
+                }
+            ];
+            
+            // Crear elementos para cada servicio
+            services.forEach(service => {
+                const coffeeItem = document.createElement('div');
+                coffeeItem.className = 'coffee-item';
+                coffeeItem.dataset.service = service.id;
+                
+                if (service.badge) {
+                    const badge = document.createElement('span');
+                    badge.className = 'coffee-badge';
+                    badge.textContent = 'Popular';
+                    coffeeItem.appendChild(badge);
+                }
+                
+                const image = document.createElement('img');
+                image.src = service.image;
+                image.alt = 'Café ' + service.title;
+                image.className = 'coffee-image';
+                
+                const titleEl = document.createElement('h3');
+                titleEl.className = 'coffee-title';
+                titleEl.textContent = service.title;
+                
+                const description = document.createElement('p');
+                description.className = 'coffee-description';
+                description.textContent = service.description;
+                
+                coffeeItem.appendChild(image);
+                coffeeItem.appendChild(titleEl);
+                coffeeItem.appendChild(description);
+                
+                coffeeGrid.appendChild(coffeeItem);
+            });
+            
+            screenElement.appendChild(coffeeGrid);
+            
+            // Crear fila de botones
+            const buttonsRow = document.createElement('div');
+            buttonsRow.className = 'buttons-row';
+            
+            const backButton = document.createElement('button');
+            backButton.className = 'back-button';
+            backButton.innerHTML = '<span class="back-icon">←</span> Volver';
+            
+            const selectButton = document.createElement('button');
+            selectButton.className = 'select-button';
+            selectButton.textContent = 'Seleccionar café';
+            
+            buttonsRow.appendChild(backButton);
+            buttonsRow.appendChild(selectButton);
+            
+            screenElement.appendChild(buttonsRow);
+            
+            // Añadir interactividad
+            const script = document.createElement('script');
+            script.textContent = `
+                document.querySelectorAll('.coffee-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        // Quitar selección previa
+                        document.querySelectorAll('.coffee-item').forEach(el => {
+                            el.style.border = 'none';
+                        });
+                        
+                        // Marcar como seleccionado
+                        this.style.border = '2px solid #C2185B';
+                        
+                        // Actualizar texto del botón
+                        document.querySelector('.select-button').textContent = 'Seleccionar ' + this.querySelector('.coffee-title').textContent;
+                    });
+                });
+            `;
+            
+            screenElement.appendChild(script);
             
             // Crear objeto CSS3D
             const screenObject = new THREE.CSS3DObject(screenElement);
@@ -1419,8 +1736,21 @@
             const scale = width / 720 * 0.99; // Ajustado para que se ajuste perfectamente al marco
             screenObject.scale.set(scale, scale, scale);
             
+            // Asegurarse de que el objeto está correctamente posicionado
+            console.log("CSS3D Object Position:", screenObject.position);
+            console.log("CSS3D Object Rotation:", screenObject.rotation);
+            console.log("CSS3D Object Scale:", screenObject.scale);
+            
             // Añadir a la escena CSS3D
             css3dScene.add(screenObject);
+            
+            // Asegurarse de que el renderer CSS3D está activo
+            if (css3dRenderer) {
+                // Forzar un render inmediato para actualizar la vista
+                css3dRenderer.render(css3dScene, camera);
+            } else {
+                console.warn("CSS3D renderer not initialized, cannot render screen object");
+            }
         }
         
         // Eliminamos la función createScreenGeometry que ya no es necesaria con nuestra solución radical
