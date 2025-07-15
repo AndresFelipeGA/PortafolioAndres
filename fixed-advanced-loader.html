@@ -1728,8 +1728,11 @@
             screenObject.position.copy(center);
             screenObject.rotation.copy(rotation);
             
-            // No añadir rotación adicional, ya que está causando que el texto se vea al revés
-            // screenObject.rotation.z += Math.PI; // Comentado para evitar la inversión del texto
+            // CORRECCIÓN: Añadir rotaciones para arreglar el texto al revés y en espejo
+            // 1. Rotar 180 grados en Z para voltear verticalmente
+            screenObject.rotation.z += Math.PI;
+            // 2. Rotar 180 grados en Y para corregir el efecto espejo
+            screenObject.rotation.y += Math.PI;
             
             // Escalar para ajustar al tamaño del plano
             const width = 2.24; // Ancho del plano

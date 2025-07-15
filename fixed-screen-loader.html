@@ -553,13 +553,23 @@
             
             // Cargar el modelo
             loader.load(
-                'Modelo3DCafeColombiano.glb',
+                'Modelo3DCafeColombiana.glb',
                 function(gltf) {
                     model = gltf.scene;
                     
                     // Ajustar posición y escala
                     model.position.copy(originOffset);
                     model.scale.set(1, 1, 1);
+                    
+                    // Probar con rotación solo en Z
+                    
+                    // Primero, establecer la posición
+                    model.position.copy(originOffset);
+                    
+                    // Aplicar rotación solo en Z
+                    model.rotation.x = 0; // Sin rotación en X
+                    model.rotation.y = 0; // Sin rotación en Y
+                    model.rotation.z = Math.PI; // 180 grados en Z
                     
                     // Añadir a la escena
                     scene.add(model);
@@ -719,4 +729,95 @@
             // Configurar CSS3DRenderer
             css3dRenderer = new THREE.CSS3DRenderer();
             css3dRenderer.setSize(window.innerWidth, window.innerHeight);
-            css3dRenderer
+            css3dRenderer.domElement.style.position = 'absolute';
+            css3dRenderer.domElement.style.top = '0';
+            css3dRenderer.domElement.style.pointerEvents = 'none';
+            document.body.appendChild(css3dRenderer.domElement);
+            
+            // Coordenadas de la pantalla
+            const topLeft = new THREE.Vector3(-0.54, 6.14, 8.57).add(originOffset);
+            const topRight = new THREE.Vector3(1.70, 6.14, 8.57).add(originOffset);
+            const bottomLeft = new THREE.Vector3(-0.54, 4.93, 9.17).add(originOffset);
+            const bottomRight = new THREE.Vector3(1.70, 4.93, 9.17).add(originOffset);
+            
+            // Calcular el centro
+            const center = new THREE.Vector3()
+                .add(topLeft)
+                .add(topRight)
+                .add(bottomLeft)
+                .add(bottomRight)
+                .multiplyScalar(0.25);
+            
+            // Calcular la orientación
+            const vX = new THREE.Vector3().subVectors(topRight, topLeft).normalize();
+            const vY = new THREE.Vector3().subVectors(bottomLeft, topLeft).normalize();
+            const vZ = new THREE.Vector3().crossVectors(vX, vY).normalize();
+            
+            // Crear matriz de rotación
+            const matrix = new THREE.Matrix4();
+            matrix.makeBasis(vX, vY, vZ);
+            
+            // Extraer rotación de la matriz
+            const rotation = new THREE.Euler().setFromRotationMatrix(matrix);
+            
+            // Crear elemento HTML para la pantalla
+            const screenElement = document.createElement('div');
+            screenElement.className = 'interactive-screen';
+            screenElement.style.width = '720px';
+            screenElement.style.height = '450px';
+            screenElement.style.backgroundColor = '#F5F1E9';
+            screenElement.style.color = '#4A2C2A';
+            screenElement.style.padding = '15px';
+            screenElement.style.borderRadius = '12px';
+            screenElement.style.boxShadow = '0 0 25px rgba(0,0,0,0.3)';
+            screenElement.style.position = 'relative';
+            screenElement.style.zIndex = '1000';
+            
+            // Añadir contenido al elemento HTML (simplificado para este ejemplo)
+            screenElement.innerHTML = `
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h1 style="font-size: 28px; color: #4A2C2A;">Café Colombiano</h1>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                    <div style="background: white; padding: 15px; border-radius: 10px; text-align: center;">
+                        <h3>Café Tradicional</h3>
+                        <p>Aromático y con sabor intenso</p>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 10px; text-align: center;">
+                        <h3>Bebida a Mano</h3>
+                        <p>Con técnicas artesanales</p>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 10px; text-align: center;">
+                        <h3>Americano Soluble</h3>
+                        <p>Práctico y rápido</p>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 10px; text-align: center;">
+                        <h3>Café Molido</h3>
+                        <p>Recién molido para mayor frescura</p>
+                    </div>
+                </div>
+            `;
+            
+            // Crear objeto CSS3D
+            const screenObject = new THREE.CSS3DObject(screenElement);
+            
+            // Posicionar el objeto CSS3D
+            screenObject.position.copy(center);
+            
+            // Aplicar la rotación base
+            screenObject.rotation.copy(rotation);
+            
+            // CORRECCIÓN: Añadir rotaciones para arreglar el texto al revés y en espejo
+            // 1. Rotar 180 grados en Z para voltear verticalmente
+            screenObject.rotation.z += Math.PI;
+            // 2. Rotar 180 grados en Y para corregir el efecto espejo
+            screenObject.rotation.y += Math.PI;
+            
+            // Escalar para ajustar al tamaño del plano
+            const width = 2.24; // Ancho del plano
+            const scale = width / 720 * 0.99; // Ajustado para que se ajuste perfectamente al marco
+            screenObject.scale.set(scale, scale, scale);
+            
+            // Añadir a la escena CSS3D
+            css3dScene.add(screenObject);
+        }
