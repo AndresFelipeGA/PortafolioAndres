@@ -932,6 +932,7 @@
             // Actualizar también el tamaño del CSS3DRenderer
             if (css3dRenderer) {
                 css3dRenderer.setSize(window.innerWidth, window.innerHeight);
+                console.log("CSS3DRenderer redimensionado");
             }
         }
         
@@ -1053,6 +1054,13 @@
             
             console.log("Coordenadas objetivo (relativas):", targetCameraPos);
             console.log("Coordenadas objetivo (absolutas):", absoluteTargetPos);
+            
+            // Mostrar el iframe (encender la pantalla)
+            const iframes = document.querySelectorAll('iframe');
+            iframes.forEach(iframe => {
+                iframe.style.display = 'block';
+            });
+            console.log("Pantalla encendida - Mostrando menú de cafés");
             
             // Configurar la animación
             cameraAnimation.enabled = true;
@@ -1181,7 +1189,10 @@
                     // Renderizar escena WebGL
                     renderer.render(scene, camera);
                     
-                    // Ya no necesitamos renderizar la escena CSS3D
+                    // Renderizar escena CSS3D
+                    if (css3dRenderer && css3dScene) {
+                        css3dRenderer.render(css3dScene, camera);
+                    }
                 }
         
         // Función de easing para suavizar la animación
@@ -1193,22 +1204,27 @@
         function setupInteractiveScreen() {
             // ENFOQUE HÍBRIDO: Usar un plano con textura pero mantener la visibilidad correcta
             
-            // Eliminar CSS3DRenderer si existe para evitar conflictos
-            if (css3dRenderer) {
-                if (css3dRenderer.domElement && css3dRenderer.domElement.parentNode) {
-                    css3dRenderer.domElement.parentNode.removeChild(css3dRenderer.domElement);
-                }
-                css3dRenderer = null;
-                console.log("CSS3D Renderer removed");
+            // Inicializar CSS3DRenderer para mostrar HTML en 3D
+            if (!css3dRenderer) {
+                css3dRenderer = new THREE.CSS3DRenderer();
+                css3dRenderer.setSize(window.innerWidth, window.innerHeight);
+                css3dRenderer.domElement.style.position = 'absolute';
+                css3dRenderer.domElement.style.top = '0';
+                css3dRenderer.domElement.style.pointerEvents = 'none'; // Evitar que interfiera con los controles
+                document.body.appendChild(css3dRenderer.domElement);
+                console.log("CSS3D Renderer creado");
             }
             
-            // Limpiar escena CSS3D si existe
-            if (css3dScene) {
+            // Crear escena CSS3D si no existe
+            if (!css3dScene) {
+                css3dScene = new THREE.Scene();
+                console.log("CSS3D Scene creada");
+            } else {
+                // Limpiar escena CSS3D si existe
                 while(css3dScene.children.length > 0) {
                     css3dScene.remove(css3dScene.children[0]);
                 }
-                css3dScene = null;
-                console.log("CSS3D Scene cleared");
+                console.log("CSS3D Scene limpiada");
             }
             
             // Eliminar el plano anterior
@@ -1253,9 +1269,9 @@
                 function(texture) {
                     console.log("Textura cargada correctamente:", texture);
                     
-                    // Crear un material con la textura de imagen
+                    // Crear un material blanco sólido en lugar de usar la textura
                     const bigBlockerMaterial = new THREE.MeshBasicMaterial({
-                        map: texture, // Usar la textura cargada
+                        color: 0xFFFFFF, // Color blanco sólido
                         side: THREE.FrontSide, // IMPORTANTE: Visible solo desde el frente
                         transparent: false,
                         opacity: 1.0,
@@ -1278,9 +1294,9 @@
                 function(error) {
                     console.error("Error al cargar la textura:", error);
                     
-                    // En caso de error, usar un color sólido
+                    // En caso de error, usar un color blanco sólido
                     const fallbackMaterial = new THREE.MeshBasicMaterial({
-                        color: 0xFF5500, // Color naranja brillante para indicar error
+                        color: 0xFFFFFF, // Color blanco
                         side: THREE.FrontSide,
                         transparent: false,
                         opacity: 1.0,
@@ -1299,7 +1315,7 @@
             
             // Crear un material temporal mientras se carga la textura
             const bigBlockerMaterial = new THREE.MeshBasicMaterial({
-                color: 0x0000FF, // Color azul mientras se carga la textura
+                color: 0xFFFFFF, // Color blanco mientras se carga la textura
                 side: THREE.FrontSide, // IMPORTANTE: Visible solo desde el frente
                 transparent: false,
                 opacity: 1.0,
@@ -1331,7 +1347,7 @@
             const backPlane = new THREE.Mesh(
                 new THREE.PlaneGeometry(2.4, 1.5), // Ligeramente más grande que el plano frontal
                 new THREE.MeshBasicMaterial({
-                    color: 0x000000,
+                    color: 0xFFFFFF,
                     side: THREE.BackSide,
                     transparent: false,
                     opacity: 1.0,
@@ -1347,160 +1363,158 @@
             // Mover ligeramente hacia atrás para evitar z-fighting
             backPlane.position.z -= 0.001;
             
-            // Añadir el plano trasero a la escena
+            // Añadir el plano trasero a la escena (mantener el plano blanco de fondo)
             scene.add(backPlane);
             console.log("Plano trasero añadido a la escena:", backPlane);
             
-            // Añadir el plano frontal a la escena
-            scene.add(screenPlane);
-            console.log("Plano frontal añadido a la escena:", screenPlane);
+            // Crear un iframe para cargar el HTML del menú de cafés
+            const iframe = document.createElement('iframe');
+            iframe.style.width = '1000px';
+            iframe.style.height = '600px';
+            iframe.style.border = 'none';
+            iframe.style.transform = 'rotate(180deg)'; // Rotar el contenido del iframe 180 grados
+            iframe.style.display = 'none'; // Inicialmente oculto
+            iframe.src = 'cafe-menu.html';
             
-            // Eliminado el segundo plano (el "palito" flotante)
+            // Crear un elemento div para contener el iframe
+            const div = document.createElement('div');
+            div.style.width = '1000px';
+            div.style.height = '600px';
+            div.style.backgroundColor = 'transparent';
+            div.style.overflow = 'hidden';
+            div.appendChild(iframe);
             
-            // Eliminamos todo el código relacionado con CSS3D y elementos HTML
-            // Ya que estamos usando un enfoque basado en texturas para el plano frontal
+            // Crear un objeto CSS3D para el div
+            const cssObject = new THREE.CSS3DObject(div);
             
-            // Cargar una textura adicional para el menú de cafés
-            const menuTextureLoader = new THREE.TextureLoader();
-            menuTextureLoader.load(
-                'images/icons/typeOfCoffes/cafeNumeroUno.png', // Usar una imagen de café como textura
-                function(texture) {
-                    console.log("Textura del menú cargada correctamente");
+            // Escalar y posicionar el objeto CSS3D para que coincida con el plano
+            cssObject.scale.set(0.0023, 0.0023, 0.0023); // Ajustar escala según sea necesario
+            cssObject.position.copy(center);
+            
+            // Aplicar la rotación del plano pero con ajustes para corregir la orientación
+            cssObject.rotation.copy(rotation);
+            
+            // Rotar 180 grados en el eje Y para corregir la orientación invertida
+            cssObject.rotation.y += Math.PI;
+            
+            // Ajustar la posición para que coincida con el plano
+            cssObject.position.z += 0.01;
+            
+            // Añadir el objeto CSS3D a la escena CSS3D
+            css3dScene.add(cssObject);
+            console.log("Objeto CSS3D añadido a la escena");
+            
+            // Crear elementos para la pantalla interactiva
+            function createScreenHTML() {
+                    // Crear el elemento principal de la pantalla
+                    const screenElement = document.createElement('div');
+                    screenElement.className = 'interactive-screen';
                     
-                    // Crear un material con la textura del menú
-                    const menuMaterial = new THREE.MeshBasicMaterial({
-                        map: texture,
-                        side: THREE.FrontSide,
-                        transparent: true,
-                        opacity: 1.0
-                    });
+                    // Crear el elemento de estilo
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        .coffee-item:hover {
+                            transform: translateY(-5px);
+                            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+                        }
+                        
+                        .coffee-item:active {
+                            transform: translateY(0px);
+                        }
+                        
+                        .coffee-image {
+                            width: 80px;
+                            height: 100px;
+                            object-fit: contain;
+                            margin-bottom: 8px;
+                            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+                        }
+                        
+                        .coffee-title {
+                            font-size: 14px;
+                            font-weight: 600;
+                            margin: 0 0 4px 0;
+                            color: #5D4037;
+                            text-align: center;
+                        }
+                        
+                        .coffee-description {
+                            font-size: 11px;
+                            color: #7D5A50;
+                            text-align: center;
+                            margin: 0;
+                            line-height: 1.3;
+                        }
+                        
+                        .coffee-badge {
+                            position: absolute;
+                            top: 8px;
+                            right: 8px;
+                            background: #C2185B;
+                            color: white;
+                            font-size: 10px;
+                            padding: 3px 6px;
+                            border-radius: 10px;
+                            font-weight: bold;
+                        }
+                        
+                        .buttons-row {
+                            display: flex;
+                            justify-content: space-between;
+                            margin-top: 10px;
+                        }
+                        
+                        .back-button {
+                            background: #E0E0E0;
+                            color: #5D4037;
+                            border: none;
+                            padding: 8px 15px;
+                            border-radius: 8px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            font-size: 14px;
+                            transition: all 0.2s;
+                        }
+                        
+                        .select-button {
+                            background: linear-gradient(135deg, #6F4E37, #A67C52);
+                            color: white;
+                            border: none;
+                            padding: 8px 15px;
+                            border-radius: 8px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            font-size: 14px;
+                            transition: all 0.2s;
+                        }
+                        
+                        .back-button:hover, .select-button:hover {
+                            transform: scale(1.05);
+                        }
+                        
+                        .back-button:active, .select-button:active {
+                            transform: scale(0.98);
+                        }
+                        
+                        .back-icon {
+                            margin-right: 5px;
+                            font-size: 16px;
+                        }
+                    `;
                     
-                    // Crear un plano para el menú
-                    const menuPlane = new THREE.Mesh(
-                        new THREE.PlaneGeometry(1.0, 1.0),
-                        menuMaterial
-                    );
-                    
-                    // Posicionar el plano del menú ligeramente por delante del plano principal
-                    menuPlane.position.copy(screenPlane.position);
-                    menuPlane.rotation.copy(screenPlane.rotation);
-                    menuPlane.position.z += 0.02;
-                    
-                    // Añadir el plano del menú a la escena
-                    scene.add(menuPlane);
-                    console.log("Plano del menú añadido a la escena");
-                },
-                undefined,
-                function(error) {
-                    console.error("Error al cargar la textura del menú:", error);
-                }
-            );
-                }
-                
-                .coffee-item:hover {
-                    transform: translateY(-5px);
-                    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-                }
-                
-                .coffee-item:active {
-                    transform: translateY(0px);
-                }
-                
-                .coffee-image {
-                    width: 80px;
-                    height: 100px;
-                    object-fit: contain;
-                    margin-bottom: 8px;
-                    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
-                }
-                
-                .coffee-title {
-                    font-size: 14px;
-                    font-weight: 600;
-                    margin: 0 0 4px 0;
-                    color: #5D4037;
-                    text-align: center;
-                }
-                
-                .coffee-description {
-                    font-size: 11px;
-                    color: #7D5A50;
-                    text-align: center;
-                    margin: 0;
-                    line-height: 1.3;
-                }
-                
-                .coffee-badge {
-                    position: absolute;
-                    top: 8px;
-                    right: 8px;
-                    background: #C2185B;
-                    color: white;
-                    font-size: 10px;
-                    padding: 3px 6px;
-                    border-radius: 10px;
-                    font-weight: bold;
-                }
-                
-                .buttons-row {
-                    display: flex;
-                    justify-content: space-between;
-                    margin-top: 10px;
-                }
-                
-                .back-button {
-                    background: #E0E0E0;
-                    color: #5D4037;
-                    border: none;
-                    padding: 8px 15px;
-                    border-radius: 8px;
-                    font-weight: 600;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    font-size: 14px;
-                    transition: all 0.2s;
-                }
-                
-                .select-button {
-                    background: linear-gradient(135deg, #6F4E37, #A67C52);
-                    color: white;
-                    border: none;
-                    padding: 8px 15px;
-                    border-radius: 8px;
-                    font-weight: 600;
-                    cursor: pointer;
-                    font-size: 14px;
-                    transition: all 0.2s;
-                }
-                
-                .back-button:hover, .select-button:hover {
-                    transform: scale(1.05);
-                }
-                
-                .back-button:active, .select-button:active {
-                    transform: scale(0.98);
-                }
-                
-                .back-icon {
-                    margin-right: 5px;
-                    font-size: 16px;
-                }
-            `;
-            
-            screenElement.appendChild(style);
-            
-            // Crear el encabezado
-            const header = document.createElement('div');
-            header.className = 'screen-header';
-            const title = document.createElement('h1');
-            title.textContent = 'Café Colombiano';
-            header.appendChild(title);
-            screenElement.appendChild(header);
-            
-            // Crear la cuadrícula de café
-            const coffeeGrid = document.createElement('div');
-            coffeeGrid.className = 'coffee-grid';
+                            // Crear el encabezado
+                            const header = document.createElement('div');
+                            header.className = 'screen-header';
+                            const title = document.createElement('h1');
+                            title.textContent = 'Café Colombiano';
+                            header.appendChild(title);
+                            screenElement.appendChild(header);
+                            
+                            // Crear la cuadrícula de café
+                            const coffeeGrid = document.createElement('div');
+                            coffeeGrid.className = 'coffee-grid';
             
             // Definir los servicios
             const services = [
@@ -1543,82 +1557,85 @@
                 }
             ];
             
-            // Crear elementos para cada servicio
-            services.forEach(service => {
-                const coffeeItem = document.createElement('div');
-                coffeeItem.className = 'coffee-item';
-                coffeeItem.dataset.service = service.id;
-                
-                if (service.badge) {
-                    const badge = document.createElement('span');
-                    badge.className = 'coffee-badge';
-                    badge.textContent = 'Popular';
-                    coffeeItem.appendChild(badge);
+                    // Crear elementos para cada servicio
+                    services.forEach(service => {
+                        const coffeeItem = document.createElement('div');
+                        coffeeItem.className = 'coffee-item';
+                        coffeeItem.dataset.service = service.id;
+                        
+                        if (service.badge) {
+                            const badge = document.createElement('span');
+                            badge.className = 'coffee-badge';
+                            badge.textContent = 'Popular';
+                            coffeeItem.appendChild(badge);
+                        }
+                        
+                        const image = document.createElement('img');
+                        image.src = service.image;
+                        image.alt = 'Café ' + service.title;
+                        image.className = 'coffee-image';
+                        
+                        const titleEl = document.createElement('h3');
+                        titleEl.className = 'coffee-title';
+                        titleEl.textContent = service.title;
+                        
+                        const description = document.createElement('p');
+                        description.className = 'coffee-description';
+                        description.textContent = service.description;
+                        
+                        coffeeItem.appendChild(image);
+                        coffeeItem.appendChild(titleEl);
+                        coffeeItem.appendChild(description);
+                        
+                        coffeeGrid.appendChild(coffeeItem);
+                    });
+                    
+                    screenElement.appendChild(coffeeGrid);
+                    
+                    // Crear fila de botones
+                    const buttonsRow = document.createElement('div');
+                    buttonsRow.className = 'buttons-row';
+                    
+                    const backButton = document.createElement('button');
+                    backButton.className = 'back-button';
+                    backButton.innerHTML = '<span class="back-icon">←</span> Volver';
+                    
+                    const selectButton = document.createElement('button');
+                    selectButton.className = 'select-button';
+                    selectButton.textContent = 'Seleccionar café';
+                    
+                    buttonsRow.appendChild(backButton);
+                    buttonsRow.appendChild(selectButton);
+                    
+                    screenElement.appendChild(buttonsRow);
+                    
+                    // Añadir interactividad
+                    const script = document.createElement('script');
+                    script.textContent = `
+                        document.querySelectorAll('.coffee-item').forEach(item => {
+                            item.addEventListener('click', function() {
+                                // Quitar selección previa
+                                document.querySelectorAll('.coffee-item').forEach(el => {
+                                    el.style.border = 'none';
+                                });
+                                
+                                // Marcar como seleccionado
+                                this.style.border = '2px solid #C2185B';
+                                
+                                // Actualizar texto del botón
+                                document.querySelector('.select-button').textContent = 'Seleccionar ' + this.querySelector('.coffee-title').textContent;
+                            });
+                        });
+                    `;
+                    
+                    screenElement.appendChild(script);
+                    
+                    return screenElement;
                 }
                 
-                const image = document.createElement('img');
-                image.src = service.image;
-                image.alt = 'Café ' + service.title;
-                image.className = 'coffee-image';
-                
-                const titleEl = document.createElement('h3');
-                titleEl.className = 'coffee-title';
-                titleEl.textContent = service.title;
-                
-                const description = document.createElement('p');
-                description.className = 'coffee-description';
-                description.textContent = service.description;
-                
-                coffeeItem.appendChild(image);
-                coffeeItem.appendChild(titleEl);
-                coffeeItem.appendChild(description);
-                
-                coffeeGrid.appendChild(coffeeItem);
-            });
-            
-            screenElement.appendChild(coffeeGrid);
-            
-            // Crear fila de botones
-            const buttonsRow = document.createElement('div');
-            buttonsRow.className = 'buttons-row';
-            
-            const backButton = document.createElement('button');
-            backButton.className = 'back-button';
-            backButton.innerHTML = '<span class="back-icon">←</span> Volver';
-            
-            const selectButton = document.createElement('button');
-            selectButton.className = 'select-button';
-            selectButton.textContent = 'Seleccionar café';
-            
-            buttonsRow.appendChild(backButton);
-            buttonsRow.appendChild(selectButton);
-            
-            screenElement.appendChild(buttonsRow);
-            
-            // Añadir interactividad
-            const script = document.createElement('script');
-            script.textContent = `
-                document.querySelectorAll('.coffee-item').forEach(item => {
-                    item.addEventListener('click', function() {
-                        // Quitar selección previa
-                        document.querySelectorAll('.coffee-item').forEach(el => {
-                            el.style.border = 'none';
-                        });
-                        
-                        // Marcar como seleccionado
-                        this.style.border = '2px solid #C2185B';
-                        
-                        // Actualizar texto del botón
-                        document.querySelector('.select-button').textContent = 'Seleccionar ' + this.querySelector('.coffee-title').textContent;
-                    });
-                });
-            `;
-            
-            screenElement.appendChild(script);
-            
-            // Ya no necesitamos crear un objeto CSS3D ni añadirlo a la escena
-            console.log("Usando solución simplificada con plano estático");
-        }
+                // Ahora estamos usando un iframe para cargar el HTML desde un archivo externo
+                console.log("Usando iframe para cargar el menú de cafés desde cafe-menu.html");
+            }
         
         // Eliminamos la función createScreenGeometry que ya no es necesaria con nuestra solución radical
         

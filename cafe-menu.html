@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú de Cafés</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: white;
+            color: #333;
+            overflow: hidden;
+        }
+        
+        .interactive-screen {
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .screen-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .screen-header h1 {
+            margin: 0;
+            color: #5D4037;
+            font-size: 24px;
+        }
+        
+        .coffee-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .coffee-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .coffee-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+        
+        .coffee-item:active {
+            transform: translateY(0px);
+        }
+        
+        .coffee-image {
+            width: 80px;
+            height: 100px;
+            object-fit: contain;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+        }
+        
+        .coffee-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin: 0 0 4px 0;
+            color: #5D4037;
+            text-align: center;
+        }
+        
+        .coffee-description {
+            font-size: 11px;
+            color: #7D5A50;
+            text-align: center;
+            margin: 0;
+            line-height: 1.3;
+        }
+        
+        .coffee-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #C2185B;
+            color: white;
+            font-size: 10px;
+            padding: 3px 6px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        
+        .buttons-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        
+        .back-button {
+            background: #E0E0E0;
+            color: #5D4037;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .select-button {
+            background: linear-gradient(135deg, #6F4E37, #A67C52);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .back-button:hover, .select-button:hover {
+            transform: scale(1.05);
+        }
+        
+        .back-button:active, .select-button:active {
+            transform: scale(0.98);
+        }
+        
+        .back-icon {
+            margin-right: 5px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="interactive-screen">
+        <div class="screen-header">
+            <h1>Café Colombiano</h1>
+        </div>
+        
+        <div class="coffee-grid">
+            <!-- Café 1 -->
+            <div class="coffee-item" data-service="software">
+                <img src="images/icons/typeOfCoffes/cafeNumeroUno.png" alt="Café Software a Medida" class="coffee-image">
+                <h3 class="coffee-title">Software a Medida</h3>
+                <p class="coffee-description">Sistemas personalizados web, móvil y escritorio con programación full-stack.</p>
+            </div>
+            
+            <!-- Café 2 -->
+            <div class="coffee-item" data-service="automation">
+                <img src="images/icons/typeOfCoffes/cafeNumeroDos.png" alt="Café Automatización" class="coffee-image">
+                <h3 class="coffee-title">Automatización</h3>
+                <p class="coffee-description">Optimización de tareas repetitivas mediante scripts y bots para su negocio.</p>
+            </div>
+            
+            <!-- Café 3 -->
+            <div class="coffee-item" data-service="consulting">
+                <img src="images/icons/typeOfCoffes/cafeNumeroTres.png" alt="Café Consultoría Tech" class="coffee-image">
+                <h3 class="coffee-title">Consultoría Tech</h3>
+                <p class="coffee-description">Asesoría experta en arquitectura, rendimiento y seguridad para decisiones estratégicas.</p>
+            </div>
+            
+            <!-- Café 4 -->
+            <div class="coffee-item" data-service="freelance">
+                <span class="coffee-badge">Popular</span>
+                <img src="images/icons/typeOfCoffes/cafeNumeroCuatro.png" alt="Café Servicios Freelance" class="coffee-image">
+                <h3 class="coffee-title">Servicios Freelance</h3>
+                <p class="coffee-description">Desarrollo web, soporte técnico y creación de MVPs con trabajo remoto flexible.</p>
+            </div>
+            
+            <!-- Café 5 -->
+            <div class="coffee-item" data-service="web">
+                <img src="images/icons/typeOfCoffes/cafeNumeroCinco.png" alt="Café Web & E-commerce" class="coffee-image">
+                <h3 class="coffee-title">Web & E-commerce</h3>
+                <p class="coffee-description">Creación de sitios web y tiendas online con SEO e integraciones de pago.</p>
+            </div>
+            
+            <!-- Café 6 -->
+            <div class="coffee-item" data-service="devops">
+                <img src="images/icons/typeOfCoffes/cafeNumeroSeis.png" alt="Café DevOps & Cloud" class="coffee-image">
+                <h3 class="coffee-title">DevOps & Cloud</h3>
+                <p class="coffee-description">Configuración de entornos escalables con CI/CD, contenedores y optimización.</p>
+            </div>
+        </div>
+        
+        <div class="buttons-row">
+            <button class="back-button"><span class="back-icon">←</span> Volver</button>
+            <button class="select-button">Seleccionar café</button>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.coffee-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // Quitar selección previa
+                document.querySelectorAll('.coffee-item').forEach(el => {
+                    el.style.border = 'none';
+                });
+                
+                // Marcar como seleccionado
+                this.style.border = '2px solid #C2185B';
+                
+                // Actualizar texto del botón
+                document.querySelector('.select-button').textContent = 'Seleccionar ' + this.querySelector('.coffee-title').textContent;
+            });
+        });
+    </script>
+</body>
+</html>
