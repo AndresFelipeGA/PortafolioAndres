@@ -295,6 +295,45 @@
             // Manejar redimensionamiento de ventana
             window.addEventListener('resize', onWindowResize);
             
+            // Variable para rastrear si la pantalla está encendida
+            window.screenOn = false;
+            
+            // Añadir evento de clic al canvas para apagar la pantalla
+            renderer.domElement.addEventListener('click', function(event) {
+                // Solo procesar si la pantalla está encendida
+                if (window.screenOn) {
+                    // Obtener las coordenadas del clic normalizadas (-1 a +1)
+                    const mouse = new THREE.Vector2();
+                    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+                    
+                    // Configurar el raycaster
+                    const raycaster = new THREE.Raycaster();
+                    raycaster.setFromCamera(mouse, camera);
+                    
+                    // Verificar si el clic fue en la pantalla
+                    const intersects = raycaster.intersectObject(window.screenPlane);
+                    
+                    // Si el clic no fue en la pantalla, apagarla
+                    if (intersects.length === 0) {
+                        // Apagar la pantalla (cambiar a negro)
+                        window.screenMaterial.color.set(0x000000);
+                        window.screenMaterial.needsUpdate = true;
+                        
+                        // Ocultar el iframe
+                        const iframes = document.querySelectorAll('iframe');
+                        iframes.forEach(iframe => {
+                            iframe.style.display = 'none';
+                        });
+                        
+                        // Actualizar el estado
+                        window.screenOn = false;
+                        
+                        console.log("Pantalla apagada");
+                    }
+                }
+            });
+            
             // Iniciar bucle de animación
             animate();
             
@@ -1055,6 +1094,16 @@
             console.log("Coordenadas objetivo (relativas):", targetCameraPos);
             console.log("Coordenadas objetivo (absolutas):", absoluteTargetPos);
             
+            // Cambiar el color del plano trasero a blanco (encender la pantalla)
+            if (window.screenMaterial) {
+                window.screenMaterial.color.set(0xFFFFFF); // Cambiar a blanco
+                window.screenMaterial.needsUpdate = true;
+                
+                // Actualizar el estado de la pantalla
+                window.screenOn = true;
+                console.log("Pantalla encendida - Estado actualizado");
+            }
+            
             // Mostrar el iframe (encender la pantalla)
             const iframes = document.querySelectorAll('iframe');
             iframes.forEach(iframe => {
@@ -1328,6 +1377,9 @@
             // Crear el mesh con la geometría y el material
             screenPlane = new THREE.Mesh(bigBlockerGeometry, bigBlockerMaterial);
             
+            // Guardar referencia global para el raycasting
+            window.screenPlane = screenPlane;
+            
             // Posicionar y rotar el plano
             screenPlane.position.copy(center);
             screenPlane.position.y -= 0.02;
@@ -1344,17 +1396,22 @@
             screenPlane.material.needsUpdate = true;
             
             // Crear un plano trasero negro para bloquear la visibilidad desde atrás
+            const backPlaneMaterial = new THREE.MeshBasicMaterial({
+                color: 0x000000, // Negro inicialmente (pantalla apagada)
+                side: THREE.DoubleSide, // Visible desde ambos lados
+                transparent: false,
+                opacity: 1.0,
+                depthWrite: true,
+                depthTest: true
+            });
+            
             const backPlane = new THREE.Mesh(
                 new THREE.PlaneGeometry(2.4, 1.5), // Ligeramente más grande que el plano frontal
-                new THREE.MeshBasicMaterial({
-                    color: 0xFFFFFF,
-                    side: THREE.BackSide,
-                    transparent: false,
-                    opacity: 1.0,
-                    depthWrite: true,
-                    depthTest: true
-                })
+                backPlaneMaterial
             );
+            
+            // Guardar referencia al material para poder cambiarlo después
+            window.screenMaterial = backPlaneMaterial;
             
             // Posicionar el plano trasero exactamente en la misma posición que el plano frontal
             backPlane.position.copy(screenPlane.position);
