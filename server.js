@@ -105,7 +105,9 @@ const server = http.createServer((req, res) => {
             const headers = {
                 'Content-Type': contentType,
                 'Content-Length': stats.size,
-                'Cache-Control': 'public, max-age=31536000' // Cache for 1 year
+                'Cache-Control': 'no-cache, no-store, must-revalidate', // Disable caching
+                'Pragma': 'no-cache',
+                'Expires': '0'
             };
             
             // Add CORS headers

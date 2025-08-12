@@ -170,7 +170,7 @@
             <div class="coffee-item" data-service="consulting">
                 <img src="images/icons/typeOfCoffes/cafeNumeroTres.png" alt="Café Consultoría Tech" class="coffee-image">
                 <h3 class="coffee-title">Consultoría Tech</h3>
-                <p class="coffee-description">Asesoría experta en arquitectura, rendimiento y seguridad para decisiones estratégicas.</p>
+                <p class="coffee-description">Asesoría en arquitectura, desarrollo y rendimiento para decisiones estratégicas en proyectos tecnológicos.</p>
             </div>
             
             <!-- Café 4 -->
@@ -178,21 +178,21 @@
                 <span class="coffee-badge">Popular</span>
                 <img src="images/icons/typeOfCoffes/cafeNumeroCuatro.png" alt="Café Servicios Freelance" class="coffee-image">
                 <h3 class="coffee-title">Servicios Freelance</h3>
-                <p class="coffee-description">Desarrollo web, soporte técnico y creación de MVPs con trabajo remoto flexible.</p>
+                <p class="coffee-description">Desarrollo de soluciones de programación y servicios técnicos con trabajo remoto flexible.</p>
             </div>
             
             <!-- Café 5 -->
             <div class="coffee-item" data-service="web">
                 <img src="images/icons/typeOfCoffes/cafeNumeroCinco.png" alt="Café Web & E-commerce" class="coffee-image">
                 <h3 class="coffee-title">Web & E-commerce</h3>
-                <p class="coffee-description">Creación de sitios web y tiendas online con SEO e integraciones de pago.</p>
+                <p class="coffee-description">Desarrollo de todo tipo de sitios web y plataformas de comercio electrónico personalizadas.</p>
             </div>
             
             <!-- Café 6 -->
             <div class="coffee-item" data-service="devops">
-                <img src="images/icons/typeOfCoffes/cafeNumeroSeis.png" alt="Café DevOps & Cloud" class="coffee-image">
-                <h3 class="coffee-title">DevOps & Cloud</h3>
-                <p class="coffee-description">Configuración de entornos escalables con CI/CD, contenedores y optimización.</p>
+                <img src="images/icons/typeOfCoffes/cafeNumeroSeis.png" alt="Café Prompt Engineer" class="coffee-image">
+                <h3 class="coffee-title">Prompt Engineer</h3>
+                <p class="coffee-description">Desarrollo de sistemas y soluciones mediante ingeniería de prompts para inteligencia artificial.</p>
             </div>
         </div>
         
@@ -203,6 +203,10 @@
     </div>
 
     <script>
+        // Variable para almacenar el servicio seleccionado
+        let selectedService = null;
+        
+        // Asignar eventos a los elementos de café
         document.querySelectorAll('.coffee-item').forEach(item => {
             item.addEventListener('click', function() {
                 // Quitar selección previa
@@ -213,9 +217,50 @@
                 // Marcar como seleccionado
                 this.style.border = '2px solid #C2185B';
                 
+                // Guardar el servicio seleccionado
+                selectedService = this.getAttribute('data-service');
+                
                 // Actualizar texto del botón
                 document.querySelector('.select-button').textContent = 'Seleccionar ' + this.querySelector('.coffee-title').textContent;
             });
+        });
+        
+        // Asignar evento al botón de selección
+        document.querySelector('.select-button').addEventListener('click', function() {
+            if (selectedService) {
+                // Redirigir al formulario correspondiente según el servicio seleccionado
+                switch (selectedService) {
+                    case 'software':
+                        window.location.href = 'contact-form-software.html';
+                        break;
+                    case 'automation':
+                        window.location.href = 'contact-form-automation.html';
+                        break;
+                    case 'consulting':
+                        window.location.href = 'contact-form-consulting.html';
+                        break;
+                    case 'freelance':
+                        window.location.href = 'contact-form-freelance.html';
+                        break;
+                    case 'web':
+                        window.location.href = 'contact-form-web.html';
+                        break;
+                    case 'devops':
+                        window.location.href = 'contact-form-devops.html';
+                        break;
+                    default:
+                        alert('Por favor, seleccione un servicio primero.');
+                }
+            } else {
+                alert('Por favor, seleccione un servicio primero.');
+            }
+        });
+        
+        // Asignar evento al botón de volver
+        document.querySelector('.back-button').addEventListener('click', function() {
+            // Aquí se podría implementar la navegación hacia atrás
+            // Por ahora, solo mostramos un mensaje
+            alert('Función de volver no implementada en este prototipo.');
         });
     </script>
 </body>
