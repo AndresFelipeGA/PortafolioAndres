@@ -12,15 +12,37 @@
             background-color: white;
             color: #333;
             overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            transition: background-color 0.3s ease;
+        }
+        
+        body.dark-background {
+            background-color: #121212;
+            color: #f5f5f5;
         }
         
         .interactive-screen {
-            width: 100%;
-            height: 100%;
+            width: 80%;
+            max-width: 1000px;
+            height: 78%;
             padding: 20px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        
+        /* Cuando el fondo es negro, hacemos la interfaz más grande */
+        body.dark-background .interactive-screen {
+            width: 90%;
+            max-width: 1200px;
+            height: 88%;
         }
         
         .screen-header {
@@ -101,22 +123,8 @@
         
         .buttons-row {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             margin-top: 10px;
-        }
-        
-        .back-button {
-            background: #E0E0E0;
-            color: #5D4037;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            font-size: 14px;
-            transition: all 0.2s;
         }
         
         .select-button {
@@ -131,18 +139,14 @@
             transition: all 0.2s;
         }
         
-        .back-button:hover, .select-button:hover {
+        .select-button:hover {
             transform: scale(1.05);
         }
         
-        .back-button:active, .select-button:active {
+        .select-button:active {
             transform: scale(0.98);
         }
         
-        .back-icon {
-            margin-right: 5px;
-            font-size: 16px;
-        }
     </style>
 </head>
 <body>
@@ -197,12 +201,52 @@
         </div>
         
         <div class="buttons-row">
-            <button class="back-button"><span class="back-icon">←</span> Volver</button>
             <button class="select-button">Seleccionar café</button>
         </div>
+        
     </div>
 
     <script>
+        // Función para detectar el color de fondo y ajustar el tamaño
+        function adjustSizeBasedOnBackground() {
+            // Obtener el color de fondo computado
+            const bodyBackgroundColor = window.getComputedStyle(document.body).backgroundColor;
+            
+            // Convertir el color a valores RGB
+            const rgbValues = bodyBackgroundColor.match(/\d+/g);
+            
+            if (rgbValues) {
+                const [r, g, b] = rgbValues.map(Number);
+                // Calcular la luminosidad (fórmula simplificada)
+                const brightness = (r + g + b) / 3;
+                
+                // Si el fondo es oscuro (luminosidad baja)
+                if (brightness < 128) {
+                    document.body.classList.add('dark-background');
+                } else {
+                    document.body.classList.remove('dark-background');
+                }
+            }
+        }
+        
+        // Ejecutar al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            adjustSizeBasedOnBackground();
+        });
+        
+        // También ejecutar si cambia el color de fondo
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.attributeName === 'style' &&
+                    (mutation.target === document.body || mutation.target === document.documentElement)) {
+                    adjustSizeBasedOnBackground();
+                }
+            });
+        });
+        
+        observer.observe(document.body, { attributes: true, attributeFilter: ['style'] });
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
+        
         // Variable para almacenar el servicio seleccionado
         let selectedService = null;
         
@@ -254,13 +298,6 @@
             } else {
                 alert('Por favor, seleccione un servicio primero.');
             }
-        });
-        
-        // Asignar evento al botón de volver
-        document.querySelector('.back-button').addEventListener('click', function() {
-            // Aquí se podría implementar la navegación hacia atrás
-            // Por ahora, solo mostramos un mensaje
-            alert('Función de volver no implementada en este prototipo.');
         });
     </script>
 </body>

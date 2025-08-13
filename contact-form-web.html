@@ -11,9 +11,10 @@
             font-family: Arial, sans-serif;
             background-color: white;
             color: #333;
-            overflow: auto;
             height: 100vh;
-            scroll-behavior: smooth;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         
         .contact-container {
@@ -23,51 +24,7 @@
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            overflow-y: auto;
-            max-height: 100vh;
             position: relative;
-            scroll-behavior: smooth;
-        }
-        
-        /* Estilos para el scrollbar - más visible */
-        ::-webkit-scrollbar {
-            width: 12px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: #A67C52;
-            border-radius: 10px;
-            border: 2px solid #f1f1f1;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: #6F4E37;
-        }
-        
-        /* Indicador de desplazamiento */
-        .scroll-indicator {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            width: 40px;
-            height: 40px;
-            background-color: rgba(166, 124, 82, 0.8);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            animation: bounce 2s infinite;
-            z-index: 100;
-            pointer-events: none;
         }
         
         /* Botón de regreso en la esquina superior izquierda */
@@ -137,15 +94,23 @@
         }
         
         .contact-form {
-            max-width: 800px;
+            max-width: 1000px;
             width: 90%;
             margin: 0 auto;
             background: #f9f9f9;
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            overflow-y: auto;
-            max-height: calc(100vh - 200px);
+        }
+        
+        .form-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        
+        .form-column {
+            flex: 1;
         }
         
         .form-group {
@@ -207,6 +172,13 @@
             transition: all 0.2s;
         }
         
+        .submit-button:disabled {
+            background: #cccccc;
+            color: #666666;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
         .back-button:hover, .submit-button:hover {
             transform: scale(1.05);
         }
@@ -246,7 +218,6 @@
 <body>
     <div class="contact-container">
         <div class="back-corner-button" onclick="window.location.href='cafe-menu.html'">←</div>
-        <div class="scroll-indicator" id="scrollIndicator">↓</div>
         <div class="form-header">
             <h1>Formulario de Contacto</h1>
             <img src="images/icons/typeOfCoffes/cafeNumeroCinco.png" alt="Web & E-commerce" class="service-icon" id="serviceIcon">
@@ -255,36 +226,40 @@
         </div>
         
         <form class="contact-form" id="contactForm">
-            <!-- Campos esenciales -->
-            <div class="form-group">
-                <label for="nombre">Nombre Completo*</label>
-                <input type="text" id="nombre" name="nombre" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="email">Correo Electrónico*</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-            
-            <!-- Campos específicos para Web & E-commerce -->
-            <div class="service-specific-fields">
-                <div class="form-group">
-                    <label for="tipoProyecto">Tipo de Proyecto*</label>
-                    <select id="tipoProyecto" name="tipoProyecto" required>
-                        <option value="">Seleccione una opción</option>
-                        <option value="sitio">Sitio Web Informativo</option>
-                        <option value="landing">Landing Page</option>
-                        <option value="blog">Blog</option>
-                        <option value="ecommerce">Tienda Online (E-commerce)</option>
-                        <option value="marketplace">Marketplace</option>
-                        <option value="webapp">Aplicación Web</option>
-                        <option value="otro">Otro</option>
-                    </select>
+            <div class="form-row">
+                <div class="form-column">
+                    <!-- Columna izquierda -->
+                    <div class="form-group">
+                        <label for="nombre">Nombre Completo*</label>
+                        <input type="text" id="nombre" name="nombre" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tipoProyecto">Tipo de Proyecto*</label>
+                        <select id="tipoProyecto" name="tipoProyecto" required>
+                            <option value="">Seleccione una opción</option>
+                            <option value="sitio">Sitio Web Informativo</option>
+                            <option value="landing">Landing Page</option>
+                            <option value="blog">Blog</option>
+                            <option value="ecommerce">Tienda Online (E-commerce)</option>
+                            <option value="marketplace">Marketplace</option>
+                            <option value="webapp">Aplicación Web</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="descripcionProyecto">Descripción del Proyecto*</label>
-                    <textarea id="descripcionProyecto" name="descripcionProyecto" required placeholder="Describa su proyecto web o e-commerce, objetivos, público objetivo y cualquier referencia o ejemplo que le guste"></textarea>
+                <div class="form-column">
+                    <!-- Columna derecha -->
+                    <div class="form-group">
+                        <label for="email">Correo Electrónico*</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="descripcionProyecto">Descripción del Proyecto*</label>
+                        <textarea id="descripcionProyecto" name="descripcionProyecto" required placeholder="Describa su proyecto web o e-commerce, objetivos, público objetivo y cualquier referencia o ejemplo que le guste"></textarea>
+                    </div>
                 </div>
             </div>
             
@@ -298,56 +273,35 @@
     </div>
 
     <script>
-        // Función para manejar el desplazamiento
-        function handleScroll() {
-            const container = document.querySelector('.contact-container');
-            const scrollIndicator = document.getElementById('scrollIndicator');
+        // Función para validar el formulario y habilitar/deshabilitar el botón de envío
+        function validateForm() {
+            const form = document.getElementById('contactForm');
+            const submitButton = form.querySelector('.submit-button');
             
-            // Mostrar/ocultar el indicador de desplazamiento según sea necesario
-            if (container.scrollHeight > container.clientHeight) {
-                // Hay contenido que se puede desplazar
-                if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20) {
-                    // Estamos cerca del final, ocultar el indicador
-                    scrollIndicator.style.display = 'none';
-                } else {
-                    // Todavía hay contenido para desplazar, mostrar el indicador
-                    scrollIndicator.style.display = 'flex';
+            // Verificar si todos los campos requeridos tienen valor
+            const requiredFields = form.querySelectorAll('[required]');
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
                 }
-            } else {
-                // No hay suficiente contenido para desplazar
-                scrollIndicator.style.display = 'none';
-            }
+            });
+            
+            // Habilitar o deshabilitar el botón de envío
+            submitButton.disabled = !isValid;
         }
         
-        // Función para manejar eventos de rueda del mouse
-        function handleMouseWheel(event) {
-            const container = document.querySelector('.contact-container');
-            
-            // Prevenir el comportamiento predeterminado
-            event.preventDefault();
-            
-            // Desplazar el contenedor
-            container.scrollTop += event.deltaY;
-            
-            // Actualizar el indicador de desplazamiento
-            handleScroll();
-        }
-        
-        // Configurar el manejo de desplazamiento al cargar la página
+        // Configurar la página al cargar
         document.addEventListener('DOMContentLoaded', function() {
-            // Verificar si necesitamos mostrar el indicador de desplazamiento
-            handleScroll();
+            // Deshabilitar el botón de envío inicialmente
+            const submitButton = document.querySelector('.submit-button');
+            submitButton.disabled = true;
             
-            // Agregar evento de desplazamiento
-            const container = document.querySelector('.contact-container');
-            container.addEventListener('scroll', handleScroll);
-            
-            // Agregar evento de rueda del mouse para el desplazamiento
-            container.addEventListener('wheel', handleMouseWheel, { passive: false });
-            
-            // Agregar evento de clic al indicador de desplazamiento
-            document.getElementById('scrollIndicator').addEventListener('click', function() {
-                container.scrollTop += 100; // Desplazar hacia abajo al hacer clic en el indicador
+            // Agregar eventos de input a todos los campos requeridos
+            const requiredFields = document.querySelectorAll('[required]');
+            requiredFields.forEach(field => {
+                field.addEventListener('input', validateForm);
             });
         });
         
