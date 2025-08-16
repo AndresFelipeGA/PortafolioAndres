@@ -595,9 +595,17 @@
                         buttonsContainer.style.flexWrap = 'wrap';
                         buttonsContainer.style.justifyContent = 'center';
                         
-                        // Añadir evento de clic al quinto botón (el botón de servicios)
+                        // Añadir eventos de clic a los botones
                         const buttons = document.querySelectorAll('.floating-button');
                         if (buttons.length >= 5) {
+                            // El primer botón (icono personalizado)
+                            const firstButton = buttons[0]; // Índice 0 (el primer botón)
+                            firstButton.addEventListener('click', function() {
+                                // Iniciar la animación de la cámara hacia el punto específico para el primer botón
+                                startFirstButtonCameraAnimation();
+                            });
+                            console.log("Evento de clic añadido al primer botón");
+                            
                             // El quinto botón es el que tiene el icono de servicios
                             const serviceButton = buttons[4]; // Índice 4 (el quinto botón, contando desde 0)
                             serviceButton.addEventListener('click', function() {
@@ -1114,7 +1122,7 @@
             // Configurar la animación
             cameraAnimation.enabled = true;
             cameraAnimation.startTime = Date.now();
-            cameraAnimation.duration = 5000; // 5 segundos (entre 4 y 6 segundos como solicitado)
+            cameraAnimation.duration = 1798; // 1.798 segundos (25% más lento que 1.438s, pero aún 64% más rápido que el original)
             cameraAnimation.initialPosition.copy(currentCameraPos);
             cameraAnimation.targetPosition.copy(absoluteTargetPos);
             cameraAnimation.initialTarget.copy(controls.target);
@@ -1147,6 +1155,82 @@
             coordDisplay.style.display = 'none';
             
             console.log("Iniciando animación de cámara hacia el punto específico");
+            console.log("Posición inicial:", currentCameraPos);
+            console.log("Posición final:", absoluteTargetPos);
+            console.log("Mirando hacia:", lookAtPoint);
+        }
+        
+        // Función para iniciar la animación de la cámara hacia un punto específico cuando se hace clic en el primer botón
+        function startFirstButtonCameraAnimation() {
+            // Coordenadas específicas a las que queremos mover la cámara (relativas al origen personalizado)
+            const targetCameraPos = new THREE.Vector3(-4.88, 5.24, 6.32);
+            
+            // Convertir coordenadas relativas a absolutas (sumando el offset)
+            const absoluteTargetPos = new THREE.Vector3().copy(targetCameraPos).add(originOffset);
+            
+            // Posición actual de la cámara
+            const currentCameraPos = new THREE.Vector3().copy(camera.position);
+            
+            // Punto específico al que mirará la cámara
+            // Usamos las coordenadas exactas proporcionadas
+            const lookAtPoint = new THREE.Vector3(-8.29, 4.35, 10.20).add(originOffset);
+            
+            console.log("Coordenadas objetivo para primer botón (relativas):", targetCameraPos);
+            console.log("Coordenadas objetivo para primer botón (absolutas):", absoluteTargetPos);
+            
+            // Cambiar el color del plano trasero a blanco (encender la pantalla)
+            if (window.screenMaterial) {
+                window.screenMaterial.color.set(0xFFFFFF); // Cambiar a blanco
+                window.screenMaterial.needsUpdate = true;
+                
+                // Actualizar el estado de la pantalla
+                window.screenOn = true;
+                console.log("Pantalla encendida - Estado actualizado");
+            }
+            
+            // Mostrar el iframe (encender la pantalla)
+            const iframes = document.querySelectorAll('iframe');
+            iframes.forEach(iframe => {
+                iframe.style.display = 'block';
+            });
+            console.log("Pantalla encendida - Mostrando menú de cafés");
+            
+            // Configurar la animación
+            cameraAnimation.enabled = true;
+            cameraAnimation.startTime = Date.now();
+            cameraAnimation.duration = 1798; // Usar la misma duración que la animación del botón de servicios
+            cameraAnimation.initialPosition.copy(currentCameraPos);
+            cameraAnimation.targetPosition.copy(absoluteTargetPos);
+            cameraAnimation.initialTarget.copy(controls.target);
+            cameraAnimation.finalTarget.copy(lookAtPoint);
+            
+            // Crear una trayectoria directa entre la posición actual y la posición objetivo
+            cameraAnimation.waypoints = [];
+            cameraAnimation.waypoints.push(new THREE.Vector3().copy(currentCameraPos));
+            
+            // Número de puntos intermedios para una trayectoria suave
+            const numWaypoints = 20;
+            
+            for (let i = 1; i < numWaypoints; i++) {
+                const t = i / numWaypoints;
+                const waypoint = new THREE.Vector3().lerpVectors(currentCameraPos, absoluteTargetPos, t);
+                cameraAnimation.waypoints.push(waypoint);
+            }
+            
+            // Asegurarse de que el último punto sea exactamente las coordenadas objetivo
+            cameraAnimation.waypoints.push(new THREE.Vector3().copy(absoluteTargetPos));
+            
+            // Guardar el estado original de los controles
+            cameraAnimation.originalControlsEnabled = controls.enabled;
+            
+            // Desactivar los controles durante la animación
+            controls.enabled = false;
+            
+            // Ocultar las coordenadas durante la animación
+            const coordDisplay = document.getElementById('coordinates-display');
+            coordDisplay.style.display = 'none';
+            
+            console.log("Iniciando animación de cámara hacia el punto específico para el primer botón");
             console.log("Posición inicial:", currentCameraPos);
             console.log("Posición final:", absoluteTargetPos);
             console.log("Mirando hacia:", lookAtPoint);

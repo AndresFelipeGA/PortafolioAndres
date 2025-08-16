@@ -1,8 +1,17 @@
 const http = require('http');
+const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const querystring = require('querystring');
 
 const PORT = 8080;
+const EMAIL_RECIPIENT = 'andresfgonzalezaristizabal@outlook.com';
+
+// SendGrid API configuration
+// Note: You'll need to sign up for SendGrid and get an API key
+const SENDGRID_API_KEY = 'YOUR_SENDGRID_API_KEY'; // Replace with your actual API key
+const SENDGRID_API_URL = 'api.sendgrid.com';
+const SENDGRID_API_PATH = '/v3/mail/send';
 
 const MIME_TYPES = {
     '.html': 'text/html',
@@ -25,7 +34,7 @@ const activeRequests = new Map();
 // Add CORS headers to response
 function addCorsHeaders(res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, HEAD, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Range');
     
     // Use less restrictive CORS policies to allow external resources like Google Fonts
@@ -36,6 +45,144 @@ function addCorsHeaders(res) {
     
     // Keep COOP for security but don't enforce COEP
     res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+}
+
+// Function to send email using SendGrid API
+function sendEmail(to, subject, content) {
+    return new Promise((resolve, reject) => {
+        // Prepare the email data according to SendGrid API v3
+        const emailData = {
+            personalizations: [
+                {
+                    to: [{ email: to }],
+                    subject: subject
+                }
+            ],
+            from: { email: 'noreply@yourwebsite.com', name: 'Formulario de Contacto' },
+            content: [
+                {
+                    type: 'text/plain',
+                    value: content
+                }
+            ]
+        };
+        
+        // Convert the data to JSON
+        const jsonData = JSON.stringify(emailData);
+        
+        // Set up the request options
+        const options = {
+            hostname: SENDGRID_API_URL,
+            path: SENDGRID_API_PATH,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${SENDGRID_API_KEY}`,
+                'Content-Length': Buffer.byteLength(jsonData)
+            }
+        };
+        
+        // Create the request
+        const req = https.request(options, (res) => {
+            let responseData = '';
+            
+            // Collect response data
+            res.on('data', (chunk) => {
+                responseData += chunk;
+            });
+            
+            // Process the complete response
+            res.on('end', () => {
+                if (res.statusCode >= 200 && res.statusCode < 300) {
+                    console.log('Email sent successfully');
+                    resolve({ success: true });
+                } else {
+                    console.error(`SendGrid API error: ${res.statusCode}`);
+                    console.error(responseData);
+                    reject(new Error(`SendGrid API error: ${res.statusCode}`));
+                }
+            });
+        });
+        
+        // Handle request errors
+        req.on('error', (error) => {
+            console.error('Error sending email:', error);
+            reject(error);
+        });
+        
+        // Send the request
+        req.write(jsonData);
+        req.end();
+    });
+}
+
+// Function to handle form submissions
+function handleFormSubmission(req, res) {
+    let body = '';
+    
+    // Collect data chunks
+    req.on('data', chunk => {
+        body += chunk.toString();
+    });
+    
+    // Process the complete request body
+    req.on('end', async () => {
+        try {
+            // Parse form data
+            const formData = querystring.parse(body);
+            
+            // Determine which form was submitted
+            const formType = req.url.split('/').pop().replace('.html', '');
+            
+            // Create email content
+            let emailSubject = `Nuevo formulario de contacto: ${formType}`;
+            let emailText = `Se ha recibido un nuevo formulario de contacto:\n\n`;
+            
+            // Add all form fields to email
+            for (const [key, value] of Object.entries(formData)) {
+                emailText += `${key}: ${value}\n`;
+            }
+            
+            // Log the form data
+            console.log('========== FORM SUBMISSION ==========');
+            console.log(`To: ${EMAIL_RECIPIENT}`);
+            console.log(`Subject: ${emailSubject}`);
+            console.log('Content:');
+            console.log(emailText);
+            console.log('====================================');
+            
+            try {
+                // Send the email using SendGrid
+                await sendEmail(EMAIL_RECIPIENT, emailSubject, emailText);
+                
+                // Send success response
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    success: true,
+                    message: 'Formulario enviado correctamente a ' + EMAIL_RECIPIENT
+                }));
+            } catch (emailError) {
+                console.error('Error sending email:', emailError);
+                
+                // Send error response
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    success: false,
+                    message: 'Error al enviar el correo electrónico. Por favor, inténtelo de nuevo más tarde.'
+                }));
+            }
+            
+        } catch (error) {
+            console.error('Error processing form submission:', error);
+            
+            // Send error response
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                message: 'Error al procesar el formulario'
+            }));
+        }
+    });
 }
 
 const server = http.createServer((req, res) => {
@@ -57,6 +204,15 @@ const server = http.createServer((req, res) => {
         addCorsHeaders(res);
         res.writeHead(204);
         res.end();
+        activeRequests.delete(requestId);
+        return;
+    }
+    
+    // Handle form submissions (POST requests)
+    if (req.method === 'POST' && req.url.includes('contact-form')) {
+        console.log(`[${requestId}] Handling form submission: ${req.url}`);
+        addCorsHeaders(res);
+        handleFormSubmission(req, res);
         activeRequests.delete(requestId);
         return;
     }

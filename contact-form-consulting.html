@@ -225,7 +225,13 @@
             <p class="service-description" id="serviceDescription">Asesoría en arquitectura, desarrollo y rendimiento para decisiones estratégicas en proyectos tecnológicos.</p>
         </div>
         
-        <form class="contact-form" id="contactForm">
+        <form class="contact-form" id="contactForm" action="https://api.staticforms.xyz/submit" method="POST">
+            <!-- Static Forms Configuration -->
+            <input type="hidden" name="accessKey" value="sf_0eh8kk35hfj689nf30hhdnm9">
+            <input type="hidden" name="subject" value="Nuevo formulario de contacto: Consultoría Tech">
+            <input type="hidden" name="replyTo" value="andresfgonzalezaristizabal@outlook.com">
+            <input type="hidden" name="redirectTo" value="cafe-menu.html">
+            <input type="hidden" name="servicio" value="Consultoría Tech">
             <div class="form-row">
                 <div class="form-column">
                     <!-- Columna izquierda -->
@@ -304,17 +310,8 @@
             });
         });
         
-        // Manejar el envío del formulario
-        document.getElementById('contactForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Aquí iría la lógica para procesar el formulario
-            // Por ahora, solo mostraremos un mensaje de éxito
-            alert('¡Gracias por su interés en nuestro servicio de Consultoría Tech! Su solicitud ha sido enviada correctamente.');
-            
-            // Redirigir al menú principal
-            window.location.href = 'cafe-menu.html';
-        });
+        // FormSubmit manejará el envío del formulario automáticamente
+        // Solo mantenemos la validación del formulario
     </script>
 </body>
 </html>
