@@ -25,7 +25,8 @@ const MIME_TYPES = {
     '.svg': 'image/svg+xml',
     '.ico': 'image/x-icon',
     '.glb': 'model/gltf-binary',
-    '.gltf': 'model/gltf+json'
+    '.gltf': 'model/gltf+json',
+    '.mp3': 'audio/mpeg'
 };
 
 // Track active requests for debugging

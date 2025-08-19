@@ -25,7 +25,7 @@ ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 // Cargar y aplicar el patrón de granos de café
 const coffeePattern = new Image();
-coffeePattern.src = 'images/icons/coffeDisplayBackground.jpg';
+coffeePattern.src = 'media/icons/coffeDisplayBackground.jpg';
 
 coffeePattern.onload = function() {
     // Dibujar el patrón de café a tamaño completo

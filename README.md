@@ -55,7 +55,7 @@ npm run dev
 - `server.js` - Node.js HTTP server
 - `fixed-advanced-loader.html` - Main 3D viewer page
 - `Modelo3DCafeColombiano.glb` - 3D model file
-- `images/` - Image assets
+- `media/` - Image assets
 
 ## Docker Configuration
 
