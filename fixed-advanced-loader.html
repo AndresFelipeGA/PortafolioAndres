@@ -801,19 +801,19 @@
             // Variable para rastrear si la pantalla está encendida
             window.screenOn = false;
             
-            // Añadir evento de clic al canvas para apagar la pantalla
+            // Añadir evento de clic al canvas para apagar las pantallas
             renderer.domElement.addEventListener('click', function(event) {
-                // Solo procesar si la pantalla está encendida
+                // Obtener las coordenadas del clic normalizadas (-1 a +1)
+                const mouse = new THREE.Vector2();
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+                
+                // Configurar el raycaster
+                const raycaster = new THREE.Raycaster();
+                raycaster.setFromCamera(mouse, camera);
+                
+                // Procesar la pantalla del menú de cafés
                 if (window.screenOn) {
-                    // Obtener las coordenadas del clic normalizadas (-1 a +1)
-                    const mouse = new THREE.Vector2();
-                    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-                    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-                    
-                    // Configurar el raycaster
-                    const raycaster = new THREE.Raycaster();
-                    raycaster.setFromCamera(mouse, camera);
-                    
                     // Verificar si el clic fue en la pantalla
                     const intersects = raycaster.intersectObject(window.screenPlane);
                     
@@ -824,7 +824,7 @@
                         window.screenMaterial.needsUpdate = true;
                         
                         // Ocultar el iframe
-                        const iframes = document.querySelectorAll('iframe');
+                        const iframes = document.querySelectorAll('iframe[src="cafe-menu.html"]');
                         iframes.forEach(iframe => {
                             iframe.style.display = 'none';
                         });
@@ -832,7 +832,31 @@
                         // Actualizar el estado
                         window.screenOn = false;
                         
-                        console.log("Pantalla apagada");
+                        console.log("Pantalla de menú de cafés apagada");
+                    }
+                }
+                
+                // Procesar la pantalla de información personal
+                if (window.personalScreenOn) {
+                    // Verificar si el clic fue en la pantalla personal
+                    const personalIntersects = raycaster.intersectObject(window.personalScreenPlane);
+                    
+                    // Si el clic no fue en la pantalla personal, apagarla
+                    if (personalIntersects.length === 0) {
+                        // Apagar la pantalla personal (cambiar a negro)
+                        window.personalScreenMaterial.color.set(0x000000);
+                        window.personalScreenMaterial.needsUpdate = true;
+                        
+                        // Ocultar el iframe personal
+                        const personalIframes = document.querySelectorAll('iframe[src="personal-info.html"]');
+                        personalIframes.forEach(iframe => {
+                            iframe.style.display = 'none';
+                        });
+                        
+                        // Actualizar el estado
+                        window.personalScreenOn = false;
+                        
+                        console.log("Pantalla de información personal apagada");
                     }
                 }
             });
@@ -1690,8 +1714,22 @@
             console.log("Coordenadas objetivo para primer botón (relativas):", targetCameraPos);
             console.log("Coordenadas objetivo para primer botón (absolutas):", absoluteTargetPos);
             
-            // No encendemos la pantalla ni mostramos el menú de cafés para el primer botón
-            // El menú de cafés solo debe mostrarse cuando se presiona el botón de engranajes (quinto botón)
+            // Cambiar el color del plano trasero a blanco (encender la pantalla personal)
+            if (window.personalScreenMaterial) {
+                window.personalScreenMaterial.color.set(0xFFFFFF); // Cambiar a blanco
+                window.personalScreenMaterial.needsUpdate = true;
+                
+                // Actualizar el estado de la pantalla personal
+                window.personalScreenOn = true;
+                console.log("Pantalla personal encendida - Estado actualizado");
+            }
+            
+            // Mostrar el iframe personal (encender la pantalla)
+            const personalIframes = document.querySelectorAll('iframe[src="personal-info.html"]');
+            personalIframes.forEach(iframe => {
+                iframe.style.display = 'block';
+            });
+            console.log("Pantalla personal encendida - Mostrando información personal");
             
             // Configurar la animación
             cameraAnimation.enabled = true;
@@ -1820,9 +1858,14 @@
                     // Renderizar escena WebGL
                     renderer.render(scene, camera);
                     
-                    // Renderizar escena CSS3D
+                    // Renderizar escena CSS3D para el menú de cafés
                     if (css3dRenderer && css3dScene) {
                         css3dRenderer.render(css3dScene, camera);
+                    }
+                    
+                    // Renderizar escena CSS3D para la información personal
+                    if (css3dRenderer && window.personalCss3dScene) {
+                        css3dRenderer.render(window.personalCss3dScene, camera);
                     }
                 }
         
@@ -2275,6 +2318,172 @@
                 // Ahora estamos usando un iframe para cargar el HTML desde un archivo externo
                 console.log("Usando iframe para cargar el menú de cafés desde cafe-menu.html");
             }
+            
+        // Función para configurar la pantalla de información personal
+        function setupPersonalInfoScreen() {
+            // Inicializar CSS3DRenderer para mostrar HTML en 3D si no existe
+            if (!css3dRenderer) {
+                css3dRenderer = new THREE.CSS3DRenderer();
+                css3dRenderer.setSize(window.innerWidth, window.innerHeight);
+                css3dRenderer.domElement.style.position = 'absolute';
+                css3dRenderer.domElement.style.top = '0';
+                css3dRenderer.domElement.style.pointerEvents = 'none'; // Evitar que interfiera con los controles
+                document.body.appendChild(css3dRenderer.domElement);
+                console.log("CSS3D Renderer creado para pantalla personal");
+            }
+            
+            // Crear escena CSS3D para la pantalla personal si no existe
+            if (!window.personalCss3dScene) {
+                window.personalCss3dScene = new THREE.Scene();
+                console.log("CSS3D Scene creada para pantalla personal");
+            } else {
+                // Limpiar escena CSS3D si existe
+                while(window.personalCss3dScene.children.length > 0) {
+                    window.personalCss3dScene.remove(window.personalCss3dScene.children[0]);
+                }
+                console.log("CSS3D Scene limpiada para pantalla personal");
+            }
+            
+            // Eliminar el plano anterior si existe
+            if (window.personalScreenPlane) scene.remove(window.personalScreenPlane);
+            
+            // Coordenadas de la pantalla personal (proporcionadas por el usuario)
+            const topLeft = new THREE.Vector3(-5.42, 5.51, 7.59).add(originOffset);
+            const topRight = new THREE.Vector3(-6.07, 5.51, 7.02).add(originOffset);
+            const bottomLeft = new THREE.Vector3(-5.28, 4.68, 7.42).add(originOffset);
+            const bottomRight = new THREE.Vector3(-5.93, 4.68, 6.86).add(originOffset);
+            
+            // Calcular el centro
+            const center = new THREE.Vector3()
+                .add(topLeft)
+                .add(topRight)
+                .add(bottomLeft)
+                .add(bottomRight)
+                .multiplyScalar(0.25);
+            
+            // Calcular la orientación
+            const vX = new THREE.Vector3().subVectors(topRight, topLeft).normalize();
+            const vY = new THREE.Vector3().subVectors(bottomLeft, topLeft).normalize();
+            const vZ = new THREE.Vector3().crossVectors(vX, vY).normalize();
+            
+            // Crear matriz de rotación
+            const matrix = new THREE.Matrix4();
+            matrix.makeBasis(vX, vY, vZ);
+            
+            // Extraer rotación de la matriz
+            const rotation = new THREE.Euler().setFromRotationMatrix(matrix);
+            
+            // Calcular dimensiones del plano
+            const width = topLeft.distanceTo(topRight);
+            const height = topLeft.distanceTo(bottomLeft);
+            
+            // Crear geometría para el plano
+            const personalPlaneGeometry = new THREE.PlaneGeometry(width, height);
+            
+            // Crear material para el plano
+            const personalPlaneMaterial = new THREE.MeshBasicMaterial({
+                color: 0xFFFFFF, // Color blanco
+                side: THREE.FrontSide, // Visible solo desde el frente
+                transparent: false,
+                opacity: 1.0,
+                depthWrite: true,
+                depthTest: true
+            });
+            
+            // Crear el mesh con la geometría y el material
+            window.personalScreenPlane = new THREE.Mesh(personalPlaneGeometry, personalPlaneMaterial);
+            
+            // Posicionar y rotar el plano
+            window.personalScreenPlane.position.copy(center);
+            window.personalScreenPlane.rotation.copy(rotation);
+            
+            // Asegurarse de que la normal del plano esté orientada correctamente
+            window.personalScreenPlane.geometry.computeVertexNormals();
+            
+            // Configurar renderOrder para asegurar que se renderice correctamente
+            window.personalScreenPlane.renderOrder = 1;
+            
+            // Asegurarse de que el material se actualice
+            window.personalScreenPlane.material.needsUpdate = true;
+            
+            // Crear un plano trasero negro para bloquear la visibilidad desde atrás
+            const personalBackPlaneMaterial = new THREE.MeshBasicMaterial({
+                color: 0x000000, // Negro inicialmente (pantalla apagada)
+                side: THREE.DoubleSide, // Visible desde ambos lados
+                transparent: false,
+                opacity: 1.0,
+                depthWrite: true,
+                depthTest: true
+            });
+            
+            const personalBackPlane = new THREE.Mesh(
+                new THREE.PlaneGeometry(width + 0.1, height + 0.1), // Ligeramente más grande que el plano frontal
+                personalBackPlaneMaterial
+            );
+            
+            // Guardar referencia al material para poder cambiarlo después
+            window.personalScreenMaterial = personalBackPlaneMaterial;
+            
+            // Posicionar el plano trasero exactamente en la misma posición que el plano frontal
+            personalBackPlane.position.copy(window.personalScreenPlane.position);
+            personalBackPlane.rotation.copy(window.personalScreenPlane.rotation);
+            
+            // Mover ligeramente hacia atrás para evitar z-fighting
+            personalBackPlane.position.z -= 0.001;
+            
+            // Añadir los planos a la escena
+            scene.add(window.personalScreenPlane);
+            scene.add(personalBackPlane);
+            console.log("Planos para pantalla personal añadidos a la escena");
+            
+            // Crear un iframe para cargar el HTML de información personal
+            const iframe = document.createElement('iframe');
+            iframe.style.width = '1000px';
+            iframe.style.height = '600px';
+            iframe.style.border = 'none';
+            iframe.style.transform = 'rotate(180deg)'; // Rotar el contenido del iframe 180 grados
+            iframe.style.display = 'none'; // Inicialmente oculto
+            iframe.src = 'personal-info.html';
+            
+            // Crear un elemento div para contener el iframe
+            const div = document.createElement('div');
+            div.style.width = '1000px';
+            div.style.height = '600px';
+            div.style.backgroundColor = 'transparent';
+            div.style.overflow = 'hidden';
+            div.appendChild(iframe);
+            
+            // Crear un objeto CSS3D para el div
+            const cssObject = new THREE.CSS3DObject(div);
+            
+            // Escalar y posicionar el objeto CSS3D para que coincida con el plano
+            // Ajustar la escala según las dimensiones del plano
+            const scaleX = width / 1000;
+            const scaleY = height / 600;
+            const scale = Math.min(scaleX, scaleY);
+            cssObject.scale.set(scale, scale, scale);
+            
+            cssObject.position.copy(center);
+            
+            // Aplicar la rotación del plano pero con ajustes para corregir la orientación
+            cssObject.rotation.copy(rotation);
+            
+            // Rotar 180 grados en el eje Y para corregir la orientación invertida
+            cssObject.rotation.y += Math.PI;
+            
+            // Ajustar la posición para que coincida con el plano
+            cssObject.position.z += 0.01;
+            
+            // Añadir el objeto CSS3D a la escena CSS3D personal
+            window.personalCss3dScene.add(cssObject);
+            console.log("Objeto CSS3D para pantalla personal añadido a la escena");
+            
+            // Inicializar el estado de la pantalla personal
+            window.personalScreenOn = false;
+        }
+        
+        // Llamar a la función para configurar la pantalla personal al iniciar
+        setupPersonalInfoScreen();
         
         // Eliminamos la función createScreenGeometry que ya no es necesaria con nuestra solución radical
         
