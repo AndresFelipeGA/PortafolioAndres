@@ -16,97 +16,83 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            transition: background-color 0.3s ease;
-        }
-        
-        body.dark-background {
-            background-color: #121212;
-            color: #f5f5f5;
         }
         
         .interactive-screen {
-            width: 80%;
-            max-width: 1000px;
-            height: 78%;
-            padding: 20px;
+            width: 100%;
+            height: 100%;
+            padding: 0;
             box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 50% 50%;
+            grid-template-rows: 100%;
             background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
         }
         
-        /* Cuando el fondo es negro, hacemos la interfaz más grande */
-        body.dark-background .interactive-screen {
-            width: 90%;
-            max-width: 1200px;
-            height: 88%;
+        .content-side {
+            display: flex;
+            flex-direction: column;
+            padding: 30px;
+            overflow-y: auto;
         }
         
         .screen-header {
-            text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }
         
         .screen-header h1 {
             margin: 0;
             color: #2C3E50;
-            font-size: 24px;
+            font-size: 28px;
         }
         
-        .profile-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .profile-image-container {
+        .photo-side {
+            position: relative;
             width: 100%;
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
+            height: 100%;
+            overflow: hidden;
         }
         
-        .profile-image-gallery {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            max-width: 800px;
+        .carousel-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        .carousel-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+        
+        .carousel-slide.active {
+            opacity: 1;
         }
         
         .profile-image {
-            width: 150px;
-            height: 150px;
+            width: 100%;
+            height: 100%;
             object-fit: cover;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-        
-        .profile-image:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
         }
         
         .bio-container {
-            text-align: center;
-            max-width: 800px;
-            margin: 0 auto;
+            text-align: left;
+            margin-bottom: 30px;
         }
         
         .bio-title {
-            font-size: 18px;
+            font-size: 22px;
             font-weight: 600;
             color: #2C3E50;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
         
         .bio-text {
-            font-size: 14px;
+            font-size: 16px;
             line-height: 1.6;
             color: #34495E;
             text-align: justify;
@@ -114,30 +100,28 @@
         
         .skills-container {
             margin-top: 20px;
-            text-align: center;
         }
         
         .skills-title {
-            font-size: 18px;
+            font-size: 22px;
             font-weight: 600;
             color: #2C3E50;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
         
         .skills-list {
             display: flex;
             flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
+            gap: 12px;
+            margin-top: 15px;
         }
         
         .skill-tag {
             background: linear-gradient(135deg, #3498DB, #2980B9);
             color: white;
-            padding: 5px 10px;
+            padding: 6px 12px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 500;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
@@ -151,19 +135,9 @@
 </head>
 <body>
     <div class="interactive-screen">
-        <div class="screen-header">
-            <h1>Andrés Felipe González Aristizábal</h1>
-        </div>
-        
-        <div class="profile-container">
-            <div class="profile-image-container">
-                <div class="profile-image-gallery">
-                    <img src="media/pictures/picturesOfMe/IMG_0162.JPEG" alt="Foto de Andrés" class="profile-image">
-                    <img src="media/pictures/picturesOfMe/IMG_2400.JPEG" alt="Foto de Andrés" class="profile-image">
-                    <img src="media/pictures/picturesOfMe/IMG_5636.JPEG" alt="Foto de Andrés" class="profile-image">
-                    <img src="media/pictures/picturesOfMe/IMG_6116.JPEG" alt="Foto de Andrés" class="profile-image">
-                    <img src="media/pictures/picturesOfMe/IMG_7328.JPEG" alt="Foto de Andrés" class="profile-image">
-                </div>
+        <div class="content-side">
+            <div class="screen-header">
+                <h1>Andrés Felipe González Aristizábal</h1>
             </div>
             
             <div class="bio-container">
@@ -202,48 +176,52 @@
                 </div>
             </div>
         </div>
+        
+        <div class="photo-side">
+            <div class="carousel-container">
+                <div class="carousel-slide active">
+                    <img src="media/pictures/picturesOfMe/IMG_0162.JPEG" alt="Foto de Andrés" class="profile-image">
+                </div>
+                <div class="carousel-slide">
+                    <img src="media/pictures/picturesOfMe/IMG_2400.JPEG" alt="Foto de Andrés" class="profile-image">
+                </div>
+                <div class="carousel-slide">
+                    <img src="media/pictures/picturesOfMe/IMG_5636.JPEG" alt="Foto de Andrés" class="profile-image">
+                </div>
+                <div class="carousel-slide">
+                    <img src="media/pictures/picturesOfMe/IMG_6116.JPEG" alt="Foto de Andrés" class="profile-image">
+                </div>
+                <div class="carousel-slide">
+                    <img src="media/pictures/picturesOfMe/IMG_7328.JPEG" alt="Foto de Andrés" class="profile-image">
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Función para detectar el color de fondo y ajustar el tamaño
-        function adjustSizeBasedOnBackground() {
-            // Obtener el color de fondo computado
-            const bodyBackgroundColor = window.getComputedStyle(document.body).backgroundColor;
-            
-            // Convertir el color a valores RGB
-            const rgbValues = bodyBackgroundColor.match(/\d+/g);
-            
-            if (rgbValues) {
-                const [r, g, b] = rgbValues.map(Number);
-                // Calcular la luminosidad (fórmula simplificada)
-                const brightness = (r + g + b) / 3;
-                
-                // Si el fondo es oscuro (luminosidad baja)
-                if (brightness < 128) {
-                    document.body.classList.add('dark-background');
-                } else {
-                    document.body.classList.remove('dark-background');
-                }
-            }
-        }
-        
-        // Ejecutar al cargar la página
+        // Carousel functionality
         document.addEventListener('DOMContentLoaded', function() {
-            adjustSizeBasedOnBackground();
+            const slides = document.querySelectorAll('.carousel-slide');
+            let currentSlide = 0;
+            
+            function showSlide(index) {
+                // Remove active class from all slides
+                slides.forEach(slide => {
+                    slide.classList.remove('active');
+                });
+                
+                // Add active class to current slide
+                slides[index].classList.add('active');
+            }
+            
+            function nextSlide() {
+                currentSlide = (currentSlide + 1) % slides.length;
+                showSlide(currentSlide);
+            }
+            
+            // Auto-advance slides every 10 seconds
+            setInterval(nextSlide, 10000);
         });
-        
-        // También ejecutar si cambia el color de fondo
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (mutation.attributeName === 'style' &&
-                    (mutation.target === document.body || mutation.target === document.documentElement)) {
-                    adjustSizeBasedOnBackground();
-                }
-            });
-        });
-        
-        observer.observe(document.body, { attributes: true, attributeFilter: ['style'] });
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
     </script>
 </body>
 </html>

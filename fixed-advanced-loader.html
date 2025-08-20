@@ -2377,12 +2377,12 @@
             const width = topLeft.distanceTo(topRight);
             const height = topLeft.distanceTo(bottomLeft);
             
-            // Crear geometría para el plano
+            // Crear un único plano para la pantalla personal
             const personalPlaneGeometry = new THREE.PlaneGeometry(width, height);
             
-            // Crear material para el plano
+            // Crear material para el plano (inicialmente negro - pantalla apagada)
             const personalPlaneMaterial = new THREE.MeshBasicMaterial({
-                color: 0xFFFFFF, // Color blanco
+                color: 0x000000, // Negro inicialmente (pantalla apagada)
                 side: THREE.FrontSide, // Visible solo desde el frente
                 transparent: false,
                 opacity: 1.0,
@@ -2403,8 +2403,8 @@
             // Configurar renderOrder para asegurar que se renderice correctamente
             window.personalScreenPlane.renderOrder = 1;
             
-            // Asegurarse de que el material se actualice
-            window.personalScreenPlane.material.needsUpdate = true;
+            // Guardar referencia al material para poder cambiarlo después
+            window.personalScreenMaterial = personalPlaneMaterial;
             
             // Crear un plano trasero negro para bloquear la visibilidad desde atrás
             const personalBackPlaneMaterial = new THREE.MeshBasicMaterial({
@@ -2441,7 +2441,8 @@
             iframe.style.width = '1000px';
             iframe.style.height = '600px';
             iframe.style.border = 'none';
-            iframe.style.transform = 'rotate(180deg)'; // Rotar el contenido del iframe 180 grados
+            // Rotar el iframe 180 grados y aplicar espejo horizontal para corregir la orientación
+            iframe.style.transform = 'rotate(180deg) scaleX(-1)';
             iframe.style.display = 'none'; // Inicialmente oculto
             iframe.src = 'personal-info.html';
             
@@ -2453,30 +2454,27 @@
             div.style.overflow = 'hidden';
             div.appendChild(iframe);
             
-            // Crear un objeto CSS3D para el div
+            // Crear un objeto CSS3D para el div que se ajuste perfectamente al plano
             const cssObject = new THREE.CSS3DObject(div);
             
-            // Escalar y posicionar el objeto CSS3D para que coincida con el plano
-            // Ajustar la escala según las dimensiones del plano
+            // Calcular dimensiones exactas para que coincida perfectamente con el plano
             const scaleX = width / 1000;
             const scaleY = height / 600;
             const scale = Math.min(scaleX, scaleY);
             cssObject.scale.set(scale, scale, scale);
             
-            cssObject.position.copy(center);
+            // Posicionar exactamente en el mismo lugar que el plano trasero
+            cssObject.position.copy(personalBackPlane.position);
             
-            // Aplicar la rotación del plano pero con ajustes para corregir la orientación
-            cssObject.rotation.copy(rotation);
+            // Usar exactamente la misma rotación que el plano trasero
+            cssObject.rotation.copy(personalBackPlane.rotation);
             
-            // Rotar 180 grados en el eje Y para corregir la orientación invertida
-            cssObject.rotation.y += Math.PI;
-            
-            // Ajustar la posición para que coincida con el plano
-            cssObject.position.z += 0.01;
+            // Ajustar ligeramente la posición para que esté justo delante del plano trasero
+            cssObject.position.z += 0.002;
             
             // Añadir el objeto CSS3D a la escena CSS3D personal
             window.personalCss3dScene.add(cssObject);
-            console.log("Objeto CSS3D para pantalla personal añadido a la escena");
+            console.log("Objeto CSS3D integrado con el plano personal");
             
             // Inicializar el estado de la pantalla personal
             window.personalScreenOn = false;
