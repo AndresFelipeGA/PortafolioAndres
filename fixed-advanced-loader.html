@@ -69,8 +69,8 @@
         /* Estilos para el botón de control de música en la esquina superior derecha */
         .music-control-button {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 10px;
+            right: 10px;
             background-color: transparent;
             color: white;
             border: 1px solid rgba(255, 255, 255, 0.3);
@@ -86,6 +86,85 @@
             -webkit-backdrop-filter: blur(5px);
             opacity: 0.7;
             z-index: 1100;
+        }
+        
+        /* Contenedor para el botón y el control de volumen */
+        .music-control-container {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1100;
+        }
+        
+        /* Estilos para el control deslizante de volumen */
+        .volume-slider-container {
+            position: absolute;
+            top: 49px; /* Ajustado 1mm hacia abajo */
+            right: 15px; /* Ajustado un poco más hacia la izquierda */
+            width: 20px;
+            height: 100px;
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 0;
+            opacity: 0;
+            transform: translateY(-20px);
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Mostrar el control de volumen al pasar el mouse sobre el contenedor */
+        .music-control-container:hover .volume-slider-container {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        
+        /* Estilo para el slider vertical */
+        .volume-slider {
+            -webkit-appearance: none;
+            width: 80px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            outline: none;
+            transform: rotate(270deg);
+            transform-origin: center;
+            position: relative;
+            top: 40px;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .volume-slider::-moz-range-thumb {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            border: none;
+        }
+        
+        /* Valor del volumen */
+        .volume-value {
+            color: white;
+            font-size: 10px;
+            margin-top: 5px;
+            position: absolute;
+            bottom: 10px;
+            font-family: Arial, sans-serif;
         }
         
         .music-control-button:hover {
@@ -452,7 +531,9 @@
                     console.log('YouTube video silenciado');
                 } else {
                     iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
-                    console.log('YouTube video activado');
+                    // Set volume to 0.01 (1%)
+                    iframe.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[1]}', '*');
+                    console.log('YouTube video activado con volumen al 1%');
                 }
             }
         }
@@ -464,10 +545,7 @@
             // Crear y añadir los controles de música dinámicamente
             const postLoadingControls = document.createElement('div');
             postLoadingControls.id = 'post-loading-controls';
-            postLoadingControls.style.position = 'absolute';
-            postLoadingControls.style.top = '20px';
-            postLoadingControls.style.right = '20px';
-            postLoadingControls.style.zIndex = '2000';
+            postLoadingControls.className = 'music-control-container';
             
             // Crear el botón de control de música
             const musicControlBtn = document.createElement('button');
@@ -491,8 +569,33 @@
             musicIcon.style.filter = 'brightness(0) invert(1)'; // Hacer el icono blanco
             musicControlBtn.appendChild(musicIcon);
             
-            // Añadir solo el botón de control de música al DOM
+            // Crear el contenedor del control deslizante de volumen
+            const volumeSliderContainer = document.createElement('div');
+            volumeSliderContainer.className = 'volume-slider-container';
+            
+            // Crear el control deslizante de volumen
+            const volumeSlider = document.createElement('input');
+            volumeSlider.type = 'range';
+            volumeSlider.min = '0';
+            volumeSlider.max = '100';
+            volumeSlider.value = musicMuted ? '0' : '1'; // 1% por defecto si no está muteado
+            volumeSlider.className = 'volume-slider';
+            volumeSlider.id = 'volume-slider';
+            
+            // Crear el elemento para mostrar el valor del volumen
+            const volumeValue = document.createElement('div');
+            volumeValue.className = 'volume-value';
+            volumeValue.textContent = musicMuted ? '0%' : '1%';
+            
+            // Añadir el slider y el valor al contenedor
+            volumeSliderContainer.appendChild(volumeSlider);
+            volumeSliderContainer.appendChild(volumeValue);
+            
+            // Añadir el botón y el control deslizante al contenedor principal
             postLoadingControls.appendChild(musicControlBtn);
+            postLoadingControls.appendChild(volumeSliderContainer);
+            
+            // Añadir el contenedor principal al DOM
             document.body.appendChild(postLoadingControls);
             
             // Configurar el evento de clic para el botón
@@ -514,17 +617,48 @@
                     if (!musicButtonClicked) {
                         musicButtonClicked = true;
                         
-                        // Si el video ya está cargado, intentar desmutearlo
+                        // Si el video ya está cargado, intentar desmutearlo y ajustar volumen
                         if (musicPlayed) {
                             const iframe = document.querySelector('#youtube-container iframe');
                             if (iframe && iframe.contentWindow) {
                                 iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
-                                console.log('Música activada desde el botón de control');
+                                // Set volume to 0.01 (1%)
+                                iframe.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[1]}', '*');
+                                console.log('Música activada desde el botón de control con volumen al 1%');
                             }
                         } else {
                             // Si el video aún no está cargado, cargar y reproducir
                             playYouTubeVideo();
                         }
+                    }
+                }
+            });
+            
+            // Configurar el evento de cambio para el control deslizante
+            volumeSlider.addEventListener('input', function() {
+                const volumeLevel = parseInt(this.value);
+                volumeValue.textContent = volumeLevel + '%';
+                
+                // Si el volumen es 0, mutear el audio
+                if (volumeLevel === 0) {
+                    musicMuted = true;
+                    musicControlBtn.classList.remove('music-on');
+                    musicControlBtn.classList.add('music-off');
+                    controlAudio(true);
+                } else {
+                    // Si estaba muteado y ahora no, actualizar la UI
+                    if (musicMuted) {
+                        musicMuted = false;
+                        musicControlBtn.classList.remove('music-off');
+                        musicControlBtn.classList.add('music-on');
+                    }
+                    
+                    // Ajustar el volumen del video de YouTube
+                    const iframe = document.querySelector('#youtube-container iframe');
+                    if (iframe && iframe.contentWindow) {
+                        iframe.contentWindow.postMessage(`{"event":"command","func":"unMute","args":""}`, '*');
+                        iframe.contentWindow.postMessage(`{"event":"command","func":"setVolume","args":[${volumeLevel}]}`, '*');
+                        console.log(`Volumen ajustado al ${volumeLevel}%`);
                     }
                 }
             });
@@ -568,7 +702,7 @@
                     
                     // Solo desmuteamos si el usuario ha activado explícitamente la música
                     if (musicButtonClicked && !musicMuted) {
-                        // Try to unmute the video after a delay (may not work due to browser restrictions)
+                        // Try to unmute the video and set volume to 0.5 (50%) after a delay
                         setTimeout(() => {
                             try {
                                 // Try to find the iframe and postMessage to it
@@ -577,9 +711,13 @@
                                     // Try to unmute
                                     iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
                                     console.log('Attempted to unmute YouTube video');
+                                    
+                                    // Set volume to 0.01 (1%)
+                                    iframe.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[1]}', '*');
+                                    console.log('Set YouTube video volume to 1%');
                                 }
                             } catch (e) {
-                                console.error('Error trying to unmute video:', e);
+                                console.error('Error trying to unmute video or set volume:', e);
                             }
                         }, 2000);
                     }
@@ -1537,7 +1675,7 @@
         // Función para iniciar la animación de la cámara hacia un punto específico cuando se hace clic en el primer botón
         function startFirstButtonCameraAnimation() {
             // Coordenadas específicas a las que queremos mover la cámara (relativas al origen personalizado)
-            const targetCameraPos = new THREE.Vector3(-4.88, 5.24, 6.32);
+            const targetCameraPos = new THREE.Vector3(-4.88, 5.26, 6.33);
             
             // Convertir coordenadas relativas a absolutas (sumando el offset)
             const absoluteTargetPos = new THREE.Vector3().copy(targetCameraPos).add(originOffset);
@@ -1547,27 +1685,13 @@
             
             // Punto específico al que mirará la cámara
             // Usamos las coordenadas exactas proporcionadas
-            const lookAtPoint = new THREE.Vector3(-8.29, 4.35, 10.20).add(originOffset);
+            const lookAtPoint = new THREE.Vector3(-8.28, 4.37, 10.21).add(originOffset);
             
             console.log("Coordenadas objetivo para primer botón (relativas):", targetCameraPos);
             console.log("Coordenadas objetivo para primer botón (absolutas):", absoluteTargetPos);
             
-            // Cambiar el color del plano trasero a blanco (encender la pantalla)
-            if (window.screenMaterial) {
-                window.screenMaterial.color.set(0xFFFFFF); // Cambiar a blanco
-                window.screenMaterial.needsUpdate = true;
-                
-                // Actualizar el estado de la pantalla
-                window.screenOn = true;
-                console.log("Pantalla encendida - Estado actualizado");
-            }
-            
-            // Mostrar el iframe (encender la pantalla)
-            const iframes = document.querySelectorAll('iframe');
-            iframes.forEach(iframe => {
-                iframe.style.display = 'block';
-            });
-            console.log("Pantalla encendida - Mostrando menú de cafés");
+            // No encendemos la pantalla ni mostramos el menú de cafés para el primer botón
+            // El menú de cafés solo debe mostrarse cuando se presiona el botón de engranajes (quinto botón)
             
             // Configurar la animación
             cameraAnimation.enabled = true;
