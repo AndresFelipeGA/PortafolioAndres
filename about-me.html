@@ -11,7 +11,7 @@
             width: 100%;
             height: 100%;
             font-family: Arial, sans-serif;
-            background-color: #8B4513; /* Exact brown color to match the plane */
+            background-color: #D2B48C; /* Much lighter brown color (tan) */
             color: white; /* White text for better contrast */
             overflow: hidden;
         }
@@ -31,12 +31,12 @@
         .interactive-screen {
             width: 100%;
             height: 100%;
-            padding: 20px;
+            padding: 0; /* Remove padding to allow photo to touch the very edge */
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
             margin: 0;
-            background-color: #8B4513; /* Exact brown color to match the plane */
+            background-color: #D2B48C; /* Much lighter brown color (tan) */
             border-radius: 0;
             box-shadow: none;
             position: absolute;
@@ -49,14 +49,16 @@
         /* Photo gallery styles */
         .photo-gallery {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 45%;
-            height: 45%;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
+            top: 0;
+            right: 0;
+            width: 50%; /* Keep the same width */
+            height: 60%; /* Increase height by 10% more */
+            background-color: rgba(255, 255, 255, 0.3); /* More visible background for the photo gallery */
+            border-radius: 0 0 0 10px; /* Only round the bottom-left corner */
             overflow: hidden;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            margin: 0; /* Ensure no margin */
+            padding: 0; /* Ensure no padding */
         }
         
         .photo-container {
@@ -107,7 +109,7 @@
             border-radius: 50%;
             object-fit: cover;
             margin-bottom: 15px;
-            border: 3px solid #8B4513;
+            border: 3px solid #A67C52; /* Medium brown border */
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
         
@@ -120,13 +122,13 @@
         
         .profile-title {
             font-size: 16px;
-            color: #8B4513;
+            color: #A67C52; /* Medium brown text */
             margin: 0 0 15px 0;
             font-style: italic;
         }
         
         .about-section {
-            background-color: rgba(255, 255, 255, 0.2); /* Semi-transparent white */
+            background-color: rgba(255, 255, 255, 0.4); /* More visible semi-transparent white */
             border-radius: 10px;
             padding: 20px;
             margin-bottom: 20px;
@@ -149,53 +151,22 @@
             text-align: justify;
         }
         
-        .skills-section {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .skill-item {
-            background: rgba(255, 255, 255, 0.2); /* Semi-transparent white */
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-            transition: all 0.3s ease;
-        }
-        
-        .skill-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-        }
-        
-        .skill-icon {
-            width: 50px;
-            height: 50px;
-            object-fit: contain;
-            margin-bottom: 10px;
-        }
-        
-        .skill-name {
-            font-size: 14px;
-            font-weight: 600;
-            margin: 0;
-            color: #ffffff; /* White text for better contrast */
-            text-align: center;
+        /* Content section styles */
+        .content-section {
+            width: 45%; /* Take up less width to avoid overlapping with photos */
+            margin-left: 20px;
+            margin-top: 70px; /* Move content further down to avoid overlapping with taller photo */
         }
         
         .buttons-row {
             display: flex;
-            justify-content: center;
-            margin-top: auto;
+            justify-content: flex-start;
+            margin-top: 20px;
+            margin-left: 20px;
         }
         
         .contact-button {
-            background: linear-gradient(135deg, #6F4E37, #A67C52);
+            background: linear-gradient(135deg, #A67C52, #D2B48C); /* Lighter brown gradient */
             color: white;
             border: none;
             padding: 10px 20px;
@@ -217,7 +188,7 @@
 </head>
 <body>
     <div class="interactive-screen">
-        <!-- Photo gallery in top-right corner -->
+        <!-- Photo gallery in top-right corner, touching the top edge -->
         <div class="photo-gallery">
             <div class="photo-container">
                 <img src="media/pictures/picturesOfMe/IMG_0162.JPEG" alt="Foto de Andrés 1" class="photo active">
@@ -228,60 +199,24 @@
             </div>
         </div>
         
-        <div class="screen-header">
-            <h1>Acerca de Mí</h1>
-        </div>
-        
-        <div class="profile-container">
-            <h2 class="profile-name">Andrés Felipe González</h2>
-            <p class="profile-title">Desarrollador Full Stack & Ingeniero de Prompts</p>
-        </div>
-        
-        <div class="about-section">
-            <h2>Biografía</h2>
-            <p class="about-text">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est bibendum non venenatis nisl tempor. Suspendisse dictum feugiat nisl ut dapibus. Mauris iaculis porttitor posuere. Praesent id metus massa, ut blandit odio.
-            </p>
-            <p class="about-text">
-                Proin quis tortor orci. Etiam at risus et justo dignissim congue. Donec congue lacinia dui, a porttitor lectus condimentum laoreet. Nunc eu ullamcorper orci. Quisque eget odio ac lectus vestibulum faucibus eget in metus. In pellentesque faucibus vestibulum. Nulla at nulla justo, eget luctus tortor.
-            </p>
-        </div>
-        
-        <div class="skills-section">
-            <!-- Habilidad 1 -->
-            <div class="skill-item">
-                <img src="media/icons/typeOfCoffes/cafeNumeroUno.png" alt="Desarrollo Web" class="skill-icon">
-                <h3 class="skill-name">Desarrollo Web</h3>
+        <div class="content-section">
+            <div class="screen-header">
+                <h1>Acerca de Mí</h1>
             </div>
             
-            <!-- Habilidad 2 -->
-            <div class="skill-item">
-                <img src="media/icons/typeOfCoffes/cafeNumeroDos.png" alt="Inteligencia Artificial" class="skill-icon">
-                <h3 class="skill-name">Inteligencia Artificial</h3>
+            <div class="profile-container">
+                <h2 class="profile-name">Andrés Felipe González</h2>
+                <p class="profile-title">Desarrollador Full Stack & Ingeniero de Prompts</p>
             </div>
             
-            <!-- Habilidad 3 -->
-            <div class="skill-item">
-                <img src="media/icons/typeOfCoffes/cafeNumeroTres.png" alt="Bases de Datos" class="skill-icon">
-                <h3 class="skill-name">Bases de Datos</h3>
-            </div>
-            
-            <!-- Habilidad 4 -->
-            <div class="skill-item">
-                <img src="media/icons/typeOfCoffes/cafeNumeroCuatro.png" alt="Cloud Computing" class="skill-icon">
-                <h3 class="skill-name">Cloud Computing</h3>
-            </div>
-            
-            <!-- Habilidad 5 -->
-            <div class="skill-item">
-                <img src="media/icons/typeOfCoffes/cafeNumeroCinco.png" alt="DevOps" class="skill-icon">
-                <h3 class="skill-name">DevOps</h3>
-            </div>
-            
-            <!-- Habilidad 6 -->
-            <div class="skill-item">
-                <img src="media/icons/typeOfCoffes/cafeNumeroSeis.png" alt="Prompt Engineering" class="skill-icon">
-                <h3 class="skill-name">Prompt Engineering</h3>
+            <div class="about-section">
+                <h2>Biografía</h2>
+                <p class="about-text">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est bibendum non venenatis nisl tempor. Suspendisse dictum feugiat nisl ut dapibus. Mauris iaculis porttitor posuere. Praesent id metus massa, ut blandit odio.
+                </p>
+                <p class="about-text">
+                    Proin quis tortor orci. Etiam at risus et justo dignissim congue. Donec congue lacinia dui, a porttitor lectus condimentum laoreet. Nunc eu ullamcorper orci. Quisque eget odio ac lectus vestibulum faucibus eget in metus. In pellentesque faucibus vestibulum. Nulla at nulla justo, eget luctus tortor.
+                </p>
             </div>
         </div>
         
@@ -316,8 +251,8 @@
                 photos[currentPhotoIndex].classList.add('active');
             }
             
-            // Change photo every 3 seconds
-            setInterval(showNextPhoto, 3000);
+            // Change photo every 20 seconds (as requested)
+            setInterval(showNextPhoto, 20000);
         });
     </script>
 </body>
