@@ -2309,8 +2309,7 @@
                 console.log("CSS3D Scene para About Me limpiada");
             }
             
-            // Coordenadas del plano café (relativas al origen personalizado)
-            // Usando exactamente las coordenadas proporcionadas por el usuario
+            // COORDENADAS EXACTAS proporcionadas por el usuario
             const topLeft = new THREE.Vector3(-5.42, 5.51, 7.59);
             const topRight = new THREE.Vector3(-6.07, 5.51, 7.02);
             const bottomLeft = new THREE.Vector3(-5.28, 4.68, 7.42);
@@ -2322,6 +2321,12 @@
             const absoluteBottomLeft = new THREE.Vector3().copy(bottomLeft).add(originOffset);
             const absoluteBottomRight = new THREE.Vector3().copy(bottomRight).add(originOffset);
             
+            console.log("Coordenadas absolutas:");
+            console.log("Top Left:", absoluteTopLeft);
+            console.log("Top Right:", absoluteTopRight);
+            console.log("Bottom Left:", absoluteBottomLeft);
+            console.log("Bottom Right:", absoluteBottomRight);
+            
             // Calcular el centro del plano
             const center = new THREE.Vector3()
                 .add(absoluteTopLeft)
@@ -2330,7 +2335,7 @@
                 .add(absoluteBottomRight)
                 .multiplyScalar(0.25);
             
-            // Calcular la orientación del plano
+            // Calcular vectores para la orientación
             const vX = new THREE.Vector3().subVectors(absoluteTopRight, absoluteTopLeft).normalize();
             const vY = new THREE.Vector3().subVectors(absoluteBottomLeft, absoluteTopLeft).normalize();
             const vZ = new THREE.Vector3().crossVectors(vX, vY).normalize();
@@ -2346,13 +2351,15 @@
             const width = absoluteTopLeft.distanceTo(absoluteTopRight);
             const height = absoluteTopLeft.distanceTo(absoluteBottomLeft);
             
+            console.log("Dimensiones del plano:", width, height);
+            
             // Crear geometría del plano
             const planeGeometry = new THREE.PlaneGeometry(width, height);
             
             // Crear material café para el plano
             const planeMaterial = new THREE.MeshBasicMaterial({
                 color: 0x8B4513, // Color café (SaddleBrown)
-                side: THREE.DoubleSide, // Visible desde ambos lados
+                side: THREE.DoubleSide,
                 transparent: false,
                 opacity: 1.0,
                 depthWrite: true,
@@ -2362,7 +2369,7 @@
             // Crear el mesh con la geometría y el material
             const brownPlane = new THREE.Mesh(planeGeometry, planeMaterial);
             
-            // Posicionar y rotar el plano
+            // Posicionar y rotar el plano EXACTAMENTE según las coordenadas
             brownPlane.position.copy(center);
             brownPlane.rotation.copy(rotation);
             
@@ -2377,16 +2384,16 @@
             
             // Crear un iframe para cargar el HTML del about me
             const iframe = document.createElement('iframe');
-            iframe.style.width = '800px'; // Ajustado para mejor proporción
+            iframe.style.width = '800px';
             iframe.style.height = '600px';
             iframe.style.border = 'none';
             iframe.style.overflow = 'hidden';
-            iframe.style.display = 'block'; // Mostrar inmediatamente
+            iframe.style.display = 'block';
             iframe.src = 'about-me.html';
             
             // Crear un elemento div para contener el iframe
             const div = document.createElement('div');
-            div.style.width = '800px'; // Ajustado para mejor proporción
+            div.style.width = '800px';
             div.style.height = '600px';
             div.style.backgroundColor = 'transparent';
             div.style.overflow = 'hidden';
@@ -2396,14 +2403,12 @@
             const cssObject = new THREE.CSS3DObject(div);
             
             // Calcular la escala adecuada basada en el tamaño real del plano
-            // El ancho y alto del plano en unidades 3D
-            const planeWidth = width;
-            const planeHeight = height;
+            const scaleX = width / 800;
+            const scaleY = height / 600;
+            const scale = Math.min(scaleX, scaleY);
             
-            // Calcular la escala para que el contenido se ajuste perfectamente al plano
-            const scaleX = planeWidth / 800; // 800px es el ancho del div
-            const scaleY = planeHeight / 600; // 600px es el alto del div
-            const scale = Math.min(scaleX, scaleY) * 0.95; // Usar el menor y dejar un pequeño margen
+            console.log("Factores de escala:", scaleX, scaleY);
+            console.log("Escala final:", scale);
             
             // Aplicar la escala calculada
             cssObject.scale.set(scale, scale, scale);
@@ -2415,7 +2420,10 @@
             cssObject.rotation.copy(rotation);
             
             // Ajustar la posición para que coincida con el plano
-            cssObject.position.z += 0.01;
+            cssObject.position.z += 0.001; // Pequeño offset para evitar z-fighting
+            
+            console.log("Posición del objeto CSS3D:", cssObject.position);
+            console.log("Rotación del objeto CSS3D:", cssObject.rotation);
             
             // Añadir el objeto CSS3D a la escena CSS3D
             window.aboutMeScene.add(cssObject);
@@ -2431,7 +2439,7 @@
             return brownPlane;
         }
         
-        // Función para crear el plano café con las coordenadas especificadas
+        // Function to create the brown HTML plane with the specified coordinates
         function createWhitePlane() {
             // Inicializar CSS3DRenderer si no existe
             if (!css3dRenderer) {
@@ -2458,12 +2466,12 @@
                 const raycaster = new THREE.Raycaster();
                 raycaster.setFromCamera(mouse, camera);
                 
-                // Verificar si el clic fue en el plano café
+                // Check if the click was on the brown plane (now the HTML content)
                 const intersects = raycaster.intersectObject(brownPlane);
                 
                 if (intersects.length > 0) {
-                    console.log("Clic en el plano café");
-                    // Aquí puedes añadir más interactividad si lo deseas
+                    console.log("Click on the brown HTML plane");
+                    // You can add more interactivity here if desired
                 }
             });
         }
