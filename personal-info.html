@@ -5,55 +5,95 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acerca de Mí</title>
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: white;
-            color: #333;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            height: 100%;
+            width: 100%;
             overflow: hidden;
+            font-family: Arial, sans-serif;
+            color: #34495E;
+        }
+        
+        .main-container {
+            width: 100%;
+            height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            background-color: transparent;
         }
         
-        .interactive-screen {
+        .content-wrapper {
             width: 100%;
             height: 100%;
-            padding: 0;
-            box-sizing: border-box;
+            max-width: 900px;
+            background-color: white;
             display: grid;
             grid-template-columns: 50% 50%;
-            grid-template-rows: 100%;
-            background-color: white;
         }
         
-        .content-side {
-            display: flex;
-            flex-direction: column;
+        .text-side {
             padding: 30px;
-            overflow-y: auto;
-        }
-        
-        .screen-header {
-            margin-bottom: 30px;
-        }
-        
-        .screen-header h1 {
-            margin: 0;
-            color: #2C3E50;
-            font-size: 28px;
-        }
-        
-        .photo-side {
-            position: relative;
-            width: 100%;
             height: 100%;
             overflow: hidden;
         }
         
-        .carousel-container {
+        .photo-side {
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .name-header {
+            font-size: 32px;
+            color: #2C3E50;
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 26px;
+            font-weight: 600;
+            color: #2C3E50;
+            margin-bottom: 20px;
+            margin-top: 30px;
+        }
+        
+        .bio-text {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        
+        .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .skill-tag {
+            background: linear-gradient(135deg, #3498DB, #2980B9);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .skill-tag:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .carousel {
             width: 100%;
             height: 100%;
             position: relative;
@@ -77,71 +117,17 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-        }
-        
-        .bio-container {
-            text-align: left;
-            margin-bottom: 30px;
-        }
-        
-        .bio-title {
-            font-size: 22px;
-            font-weight: 600;
-            color: #2C3E50;
-            margin-bottom: 15px;
-        }
-        
-        .bio-text {
-            font-size: 16px;
-            line-height: 1.6;
-            color: #34495E;
-            text-align: justify;
-        }
-        
-        .skills-container {
-            margin-top: 20px;
-        }
-        
-        .skills-title {
-            font-size: 22px;
-            font-weight: 600;
-            color: #2C3E50;
-            margin-bottom: 15px;
-        }
-        
-        .skills-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 15px;
-        }
-        
-        .skill-tag {
-            background: linear-gradient(135deg, #3498DB, #2980B9);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 500;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-        
-        .skill-tag:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            object-position: center;
         }
     </style>
 </head>
 <body>
-    <div class="interactive-screen">
-        <div class="content-side">
-            <div class="screen-header">
-                <h1>Andrés Felipe González Aristizábal</h1>
-            </div>
-            
-            <div class="bio-container">
-                <h2 class="bio-title">Sobre Mí</h2>
+    <div class="main-container">
+        <div class="content-wrapper">
+            <div class="text-side">
+                <h1 class="name-header">Andrés Felipe González Aristizábal</h1>
+                
+                <h2 class="section-title">Sobre Mí</h2>
                 <p class="bio-text">
                     Soy un apasionado ingeniero de software con experiencia en desarrollo full-stack, ingeniería de datos y soluciones de IA. 
                     Me encanta resolver problemas complejos y crear soluciones tecnológicas innovadoras que generen un impacto positivo.
@@ -152,10 +138,8 @@
                     y soluciones basadas en inteligencia artificial. Me apasiona aprender nuevas tecnologías y metodologías para mantenerme a la vanguardia
                     en un campo tan dinámico como el desarrollo de software.
                 </p>
-            </div>
-            
-            <div class="skills-container">
-                <h2 class="skills-title">Habilidades Técnicas</h2>
+                
+                <h2 class="section-title">Habilidades Técnicas</h2>
                 <div class="skills-list">
                     <span class="skill-tag">JavaScript</span>
                     <span class="skill-tag">TypeScript</span>
@@ -175,42 +159,39 @@
                     <span class="skill-tag">Three.js</span>
                 </div>
             </div>
-        </div>
-        
-        <div class="photo-side">
-            <div class="carousel-container">
-                <div class="carousel-slide active">
-                    <img src="media/pictures/picturesOfMe/IMG_0162.JPEG" alt="Foto de Andrés" class="profile-image">
-                </div>
-                <div class="carousel-slide">
-                    <img src="media/pictures/picturesOfMe/IMG_2400.JPEG" alt="Foto de Andrés" class="profile-image">
-                </div>
-                <div class="carousel-slide">
-                    <img src="media/pictures/picturesOfMe/IMG_5636.JPEG" alt="Foto de Andrés" class="profile-image">
-                </div>
-                <div class="carousel-slide">
-                    <img src="media/pictures/picturesOfMe/IMG_6116.JPEG" alt="Foto de Andrés" class="profile-image">
-                </div>
-                <div class="carousel-slide">
-                    <img src="media/pictures/picturesOfMe/IMG_7328.JPEG" alt="Foto de Andrés" class="profile-image">
+            
+            <div class="photo-side">
+                <div class="carousel">
+                    <div class="carousel-slide active">
+                        <img src="media/pictures/picturesOfMe/IMG_0162.JPEG" alt="Foto de Andrés" class="profile-image">
+                    </div>
+                    <div class="carousel-slide">
+                        <img src="media/pictures/picturesOfMe/IMG_2400.JPEG" alt="Foto de Andrés" class="profile-image">
+                    </div>
+                    <div class="carousel-slide">
+                        <img src="media/pictures/picturesOfMe/IMG_5636.JPEG" alt="Foto de Andrés" class="profile-image">
+                    </div>
+                    <div class="carousel-slide">
+                        <img src="media/pictures/picturesOfMe/IMG_6116.JPEG" alt="Foto de Andrés" class="profile-image">
+                    </div>
+                    <div class="carousel-slide">
+                        <img src="media/pictures/picturesOfMe/IMG_7328.JPEG" alt="Foto de Andrés" class="profile-image">
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Carousel functionality
         document.addEventListener('DOMContentLoaded', function() {
             const slides = document.querySelectorAll('.carousel-slide');
             let currentSlide = 0;
             
             function showSlide(index) {
-                // Remove active class from all slides
                 slides.forEach(slide => {
                     slide.classList.remove('active');
                 });
                 
-                // Add active class to current slide
                 slides[index].classList.add('active');
             }
             
@@ -219,7 +200,6 @@
                 showSlide(currentSlide);
             }
             
-            // Auto-advance slides every 10 seconds
             setInterval(nextSlide, 10000);
         });
     </script>
