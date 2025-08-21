@@ -2382,7 +2382,7 @@
             // Añadir el plano a la escena
             scene.add(brownPlane);
             
-            // Crear un iframe para cargar el HTML del about me
+            // Enfoque simple sin rotaciones en el iframe o div
             const iframe = document.createElement('iframe');
             iframe.style.width = '800px';
             iframe.style.height = '600px';
@@ -2416,8 +2416,14 @@
             // Posicionar el objeto CSS3D para que coincida con el plano
             cssObject.position.copy(center);
             
-            // Aplicar la rotación del plano
+            // Enfoque simple - solo aplicar la rotación base del plano
             cssObject.rotation.copy(rotation);
+            
+            // Ajustar la posición para que coincida con el plano
+            cssObject.position.z += 0.001; // Pequeño offset para evitar z-fighting
+            
+            console.log("Posición final:", cssObject.position);
+            console.log("Rotación final:", cssObject.rotation);
             
             // Ajustar la posición para que coincida con el plano
             cssObject.position.z += 0.001; // Pequeño offset para evitar z-fighting

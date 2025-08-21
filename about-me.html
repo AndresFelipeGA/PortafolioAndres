@@ -246,11 +246,15 @@
     </div>
 
     <script>
-        // We no longer need the background detection since we're using a fixed brown background
-        
-        // Add event to contact button
-        document.querySelector('.contact-button').addEventListener('click', function() {
-            alert('¡Gracias por tu interés! Pronto podrás contactarme a través de este botón.');
+        // Rotate and flip horizontally to fix the mirror effect
+        document.addEventListener('DOMContentLoaded', function() {
+            // Rotate 180 degrees and flip horizontally (scaleX(-1))
+            document.body.style.transform = 'rotate(180deg) scaleX(-1)';
+            
+            // Add event to contact button
+            document.querySelector('.contact-button').addEventListener('click', function() {
+                alert('¡Gracias por tu interés! Pronto podrás contactarme a través de este botón.');
+            });
         });
     </script>
 </body>
