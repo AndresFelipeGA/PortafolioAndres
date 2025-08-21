@@ -1830,6 +1830,11 @@
                         css3dRenderer.render(css3dScene, camera);
                     }
                     
+                    // Renderizar escena CSS3D para el about me
+                    if (css3dRenderer && window.aboutMeScene) {
+                        css3dRenderer.render(window.aboutMeScene, camera);
+                    }
+                    
                     // El código para renderizar la escena CSS3D de información personal ha sido eliminado
                 }
         
@@ -2290,14 +2295,26 @@
         // Ya no necesitamos las funciones createScreenHTML, setupRaycasting y simulateClickOnHTML
         // con nuestra solución radical que usa una textura estática
         
-        // Función para crear el plano blanco con las coordenadas especificadas
-        function createWhitePlane() {
-            // Coordenadas del plano blanco (relativas al origen personalizado)
-            // Estas son las coordenadas proporcionadas por el usuario
+        // Función para configurar el plano café como una pantalla interactiva
+        function setupAboutMeScreen() {
+            // Crear una escena CSS3D para el plano café si no existe
+            if (!window.aboutMeScene) {
+                window.aboutMeScene = new THREE.Scene();
+                console.log("CSS3D Scene para About Me creada");
+            } else {
+                // Limpiar escena CSS3D si existe
+                while(window.aboutMeScene.children.length > 0) {
+                    window.aboutMeScene.remove(window.aboutMeScene.children[0]);
+                }
+                console.log("CSS3D Scene para About Me limpiada");
+            }
+            
+            // Coordenadas del plano café (relativas al origen personalizado)
+            // Usando exactamente las coordenadas proporcionadas por el usuario
             const topLeft = new THREE.Vector3(-5.42, 5.51, 7.59);
             const topRight = new THREE.Vector3(-6.07, 5.51, 7.02);
-            const bottomLeft = new THREE.Vector3(-5.27, 4.67, 7.42);
-            const bottomRight = new THREE.Vector3(-5.93, 4.67, 6.86);
+            const bottomLeft = new THREE.Vector3(-5.28, 4.68, 7.42);
+            const bottomRight = new THREE.Vector3(-5.93, 4.68, 6.86);
             
             // Convertir coordenadas relativas a absolutas (sumando el offset)
             const absoluteTopLeft = new THREE.Vector3().copy(topLeft).add(originOffset);
@@ -2343,24 +2360,112 @@
             });
             
             // Crear el mesh con la geometría y el material
-            const whitePlane = new THREE.Mesh(planeGeometry, planeMaterial);
+            const brownPlane = new THREE.Mesh(planeGeometry, planeMaterial);
             
             // Posicionar y rotar el plano
-            whitePlane.position.copy(center);
-            whitePlane.rotation.copy(rotation);
+            brownPlane.position.copy(center);
+            brownPlane.rotation.copy(rotation);
             
             // Asegurarse de que la normal del plano esté orientada correctamente
-            whitePlane.geometry.computeVertexNormals();
+            brownPlane.geometry.computeVertexNormals();
             
             // Guardar referencia global para el raycasting
-            window.whitePlane = whitePlane;
+            window.brownPlane = brownPlane;
             
             // Añadir el plano a la escena
-            scene.add(whitePlane);
+            scene.add(brownPlane);
             
-            console.log("Plano blanco creado con las coordenadas especificadas");
+            // Crear un iframe para cargar el HTML del about me
+            const iframe = document.createElement('iframe');
+            iframe.style.width = '800px'; // Ajustado para mejor proporción
+            iframe.style.height = '600px';
+            iframe.style.border = 'none';
+            iframe.style.overflow = 'hidden';
+            iframe.style.display = 'block'; // Mostrar inmediatamente
+            iframe.src = 'about-me.html';
+            
+            // Crear un elemento div para contener el iframe
+            const div = document.createElement('div');
+            div.style.width = '800px'; // Ajustado para mejor proporción
+            div.style.height = '600px';
+            div.style.backgroundColor = 'transparent';
+            div.style.overflow = 'hidden';
+            div.appendChild(iframe);
+            
+            // Crear un objeto CSS3D para el div
+            const cssObject = new THREE.CSS3DObject(div);
+            
+            // Calcular la escala adecuada basada en el tamaño real del plano
+            // El ancho y alto del plano en unidades 3D
+            const planeWidth = width;
+            const planeHeight = height;
+            
+            // Calcular la escala para que el contenido se ajuste perfectamente al plano
+            const scaleX = planeWidth / 800; // 800px es el ancho del div
+            const scaleY = planeHeight / 600; // 600px es el alto del div
+            const scale = Math.min(scaleX, scaleY) * 0.95; // Usar el menor y dejar un pequeño margen
+            
+            // Aplicar la escala calculada
+            cssObject.scale.set(scale, scale, scale);
+            
+            // Posicionar el objeto CSS3D para que coincida con el plano
+            cssObject.position.copy(center);
+            
+            // Aplicar la rotación del plano
+            cssObject.rotation.copy(rotation);
+            
+            // Ajustar la posición para que coincida con el plano
+            cssObject.position.z += 0.01;
+            
+            // Añadir el objeto CSS3D a la escena CSS3D
+            window.aboutMeScene.add(cssObject);
+            console.log("Objeto CSS3D para About Me añadido a la escena");
+            
+            // Configurar evento de clic para el plano
+            brownPlane.userData.clickable = true;
+            
+            console.log("Plano café interactivo creado con las coordenadas especificadas");
             console.log("Posición del plano:", center);
             console.log("Rotación del plano:", rotation);
+            
+            return brownPlane;
+        }
+        
+        // Función para crear el plano café con las coordenadas especificadas
+        function createWhitePlane() {
+            // Inicializar CSS3DRenderer si no existe
+            if (!css3dRenderer) {
+                css3dRenderer = new THREE.CSS3DRenderer();
+                css3dRenderer.setSize(window.innerWidth, window.innerHeight);
+                css3dRenderer.domElement.style.position = 'absolute';
+                css3dRenderer.domElement.style.top = '0';
+                css3dRenderer.domElement.style.pointerEvents = 'none'; // Evitar que interfiera con los controles
+                document.body.appendChild(css3dRenderer.domElement);
+                console.log("CSS3D Renderer creado para el plano café");
+            }
+            
+            // Configurar el plano café como una pantalla interactiva
+            const brownPlane = setupAboutMeScreen();
+            
+            // Añadir evento de clic al canvas para interactuar con el plano
+            renderer.domElement.addEventListener('click', function(event) {
+                // Obtener las coordenadas del clic normalizadas (-1 a +1)
+                const mouse = new THREE.Vector2();
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+                
+                // Configurar el raycaster
+                const raycaster = new THREE.Raycaster();
+                raycaster.setFromCamera(mouse, camera);
+                
+                // Verificar si el clic fue en el plano café
+                const intersects = raycaster.intersectObject(brownPlane);
+                
+                if (intersects.length > 0) {
+                    console.log("Clic en el plano café");
+                    // Aquí puedes añadir más interactividad si lo deseas
+                }
+            });
         }
     </script>
 </body>
