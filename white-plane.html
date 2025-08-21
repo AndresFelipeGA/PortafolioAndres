@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>White Plane</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 400px;
+            z-index: 100;
+        }
+        #coordinates-display {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            color: white;
+            z-index: 100;
+            font-family: monospace;
+        }
+        #coordinates-toggle {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h3>White Plane</h3>
+        <p>This is a white plane that will be used for future content.</p>
+    </div>
+
+    <div id="coordinates-display">
+        <h3>Sistema de Coordenadas</h3>
+        <div id="camera-position">Cámara: X: 0.00, Y: 0.00, Z: 0.00</div>
+        <div id="camera-target">Objetivo: X: 0.00, Y: 0.00, Z: 0.00</div>
+        <div id="mouse-position">Ratón: X: 0.00, Y: 0.00, Z: 0.00</div>
+    </div>
+    
+    <button id="coordinates-toggle">Mostrar Coordenadas</button>
+
+    <!-- Three.js core library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r132/three.min.js"></script>
+    
+    <!-- Three.js components - using same version and ensuring proper load order -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.0/examples/js/loaders/DRACOLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.0/examples/js/loaders/GLTFLoader.js"></script>
+
+    <script>
+        // Configuración inicial
+        let camera, scene, renderer, controls;
+        let whitePlane;
+        
+        // Punto de origen personalizado (mismo que en fixed-advanced-loader.html)
+        const originOffset = new THREE.Vector3(-10.00, -14.10, -2.20);
+        
+        // Variables para el sistema de coordenadas
+        let coordinatesVisible = false; // Inicialmente oculto
+        let raycaster = new THREE.Raycaster();
+        let mouse = new THREE.Vector2();
+        let mousePosition = new THREE.Vector3();
+        let axesHelper; // Para visualizar los ejes X, Y, Z
+        
+        // Inicializar la escena
+        init();
+        
+        function init() {
+            // Crear escena con fondo negro
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x000000);
+            
+            // Crear cámara
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 5, 10);
+            
+            // Crear renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            document.body.appendChild(renderer.domElement);
+            
+            // Controles de órbita
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            
+            // Iluminación
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
+            directionalLight.position.set(5, 10, 5);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+            
+            // Configurar sistema de coordenadas
+            setupCoordinateSystem();
+            
+            // Crear el plano blanco con las coordenadas especificadas
+            createWhitePlane();
+            
+            // Manejar redimensionamiento de ventana
+            window.addEventListener('resize', onWindowResize);
+            
+            // Iniciar bucle de animación
+            animate();
+        }
+        
+        function setupCoordinateSystem() {
+            // Crear ejes X, Y, Z (rojo, verde, azul)
+            axesHelper = new THREE.AxesHelper(5); // Tamaño de 5 unidades para cada eje
+            
+            // Posicionar los ejes en el punto de origen personalizado
+            axesHelper.position.copy(originOffset);
+            
+            // Añadir los ejes a la escena
+            scene.add(axesHelper);
+            
+            // Configurar elementos de la UI
+            const coordDisplay = document.getElementById('coordinates-display');
+            const coordToggle = document.getElementById('coordinates-toggle');
+            
+            // Establecer visibilidad inicial basada en coordinatesVisible
+            coordDisplay.style.display = coordinatesVisible ? 'block' : 'none';
+            axesHelper.visible = coordinatesVisible;
+            
+            // Establecer texto y color inicial del botón
+            coordToggle.textContent = coordinatesVisible ? 'Ocultar Coordenadas' : 'Mostrar Coordenadas';
+            coordToggle.style.backgroundColor = coordinatesVisible ? '#f44336' : '#4CAF50';
+            
+            // Actualizar coordenadas solo si están visibles
+            if (coordinatesVisible) {
+                updateCoordinatesDisplay();
+            }
+            
+            // Manejar eventos de ratón para raycasting
+            document.addEventListener('mousemove', onMouseMove);
+            
+            // Configurar botón para mostrar/ocultar coordenadas
+            coordToggle.addEventListener('click', function() {
+                coordinatesVisible = !coordinatesVisible;
+                
+                // Actualizar visibilidad del display y los ejes
+                coordDisplay.style.display = coordinatesVisible ? 'block' : 'none';
+                axesHelper.visible = coordinatesVisible;
+                
+                // Actualizar texto del botón
+                this.textContent = coordinatesVisible ? 'Ocultar Coordenadas' : 'Mostrar Coordenadas';
+                this.style.backgroundColor = coordinatesVisible ? '#f44336' : '#4CAF50';
+            });
+        }
+        
+        function createWhitePlane() {
+            // Coordenadas del plano blanco (relativas al origen personalizado)
+            // Estas son las coordenadas proporcionadas por el usuario
+            const topLeft = new THREE.Vector3(-5.42, 5.51, 7.59);
+            const topRight = new THREE.Vector3(-6.07, 5.51, 7.02);
+            const bottomLeft = new THREE.Vector3(-5.27, 4.67, 7.42);
+            const bottomRight = new THREE.Vector3(-5.93, 4.67, 6.86);
+            
+            // Convertir coordenadas relativas a absolutas (sumando el offset)
+            const absoluteTopLeft = new THREE.Vector3().copy(topLeft).add(originOffset);
+            const absoluteTopRight = new THREE.Vector3().copy(topRight).add(originOffset);
+            const absoluteBottomLeft = new THREE.Vector3().copy(bottomLeft).add(originOffset);
+            const absoluteBottomRight = new THREE.Vector3().copy(bottomRight).add(originOffset);
+            
+            // Calcular el centro del plano
+            const center = new THREE.Vector3()
+                .add(absoluteTopLeft)
+                .add(absoluteTopRight)
+                .add(absoluteBottomLeft)
+                .add(absoluteBottomRight)
+                .multiplyScalar(0.25);
+            
+            // Calcular la orientación del plano
+            const vX = new THREE.Vector3().subVectors(absoluteTopRight, absoluteTopLeft).normalize();
+            const vY = new THREE.Vector3().subVectors(absoluteBottomLeft, absoluteTopLeft).normalize();
+            const vZ = new THREE.Vector3().crossVectors(vX, vY).normalize();
+            
+            // Crear matriz de rotación
+            const matrix = new THREE.Matrix4();
+            matrix.makeBasis(vX, vY, vZ);
+            
+            // Extraer rotación de la matriz
+            const rotation = new THREE.Euler().setFromRotationMatrix(matrix);
+            
+            // Calcular el ancho y alto del plano
+            const width = absoluteTopLeft.distanceTo(absoluteTopRight);
+            const height = absoluteTopLeft.distanceTo(absoluteBottomLeft);
+            
+            // Crear geometría del plano
+            const planeGeometry = new THREE.PlaneGeometry(width, height);
+            
+            // Crear material blanco para el plano
+            const planeMaterial = new THREE.MeshBasicMaterial({
+                color: 0xFFFFFF, // Color blanco
+                side: THREE.DoubleSide, // Visible desde ambos lados
+                transparent: false,
+                opacity: 1.0,
+                depthWrite: true,
+                depthTest: true
+            });
+            
+            // Crear el mesh con la geometría y el material
+            whitePlane = new THREE.Mesh(planeGeometry, planeMaterial);
+            
+            // Posicionar y rotar el plano
+            whitePlane.position.copy(center);
+            whitePlane.rotation.copy(rotation);
+            
+            // Asegurarse de que la normal del plano esté orientada correctamente
+            whitePlane.geometry.computeVertexNormals();
+            
+            // Añadir el plano a la escena
+            scene.add(whitePlane);
+            
+            console.log("Plano blanco creado con las coordenadas especificadas");
+            console.log("Posición del plano:", center);
+            console.log("Rotación del plano:", rotation);
+        }
+        
+        // Función para calcular posición 3D del ratón mediante raycasting
+        function onMouseMove(event) {
+            if (!coordinatesVisible) return;
+            
+            // Calcular posición normalizada del ratón (-1 a +1)
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            
+            // Actualizar raycaster
+            raycaster.setFromCamera(mouse, camera);
+            
+            // Calcular intersecciones con toda la escena, no solo el modelo
+            const intersects = raycaster.intersectObjects(scene.children, true);
+            
+            // Si hay intersección, actualizar posición del ratón en 3D
+            if (intersects.length > 0) {
+                mousePosition.copy(intersects[0].point);
+                // Actualizar inmediatamente las coordenadas
+                updateCoordinatesDisplay();
+            }
+        }
+        
+        // Función para actualizar la visualización de coordenadas
+        function updateCoordinatesDisplay() {
+            if (!coordinatesVisible) return;
+            
+            const camPos = camera.position;
+            const target = controls.target;
+            
+            // Crear copias de los vectores para aplicar el offset
+            const adjustedCamPos = new THREE.Vector3().copy(camPos).sub(originOffset);
+            const adjustedTarget = new THREE.Vector3().copy(target).sub(originOffset);
+            const adjustedMousePos = new THREE.Vector3().copy(mousePosition).sub(originOffset);
+            
+            // Formatear coordenadas con 2 decimales
+            const formatCoord = (vec) => `X: ${vec.x.toFixed(2)}, Y: ${vec.y.toFixed(2)}, Z: ${vec.z.toFixed(2)}`;
+            
+            // Actualizar texto en la UI con coordenadas relativas al nuevo origen
+            document.getElementById('camera-position').textContent = `Cámara: ${formatCoord(adjustedCamPos)}`;
+            document.getElementById('camera-target').textContent = `Objetivo: ${formatCoord(adjustedTarget)}`;
+            document.getElementById('mouse-position').textContent = `Ratón: ${formatCoord(adjustedMousePos)}`;
+        }
+        
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Actualizar controles
+            controls.update();
+            
+            // Update coordinates display
+            if (coordinatesVisible) {
+                updateCoordinatesDisplay();
+            }
+            
+            // Renderizar escena
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>
