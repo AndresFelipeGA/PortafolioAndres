@@ -46,6 +46,41 @@
             bottom: 0;
         }
         
+        /* Photo gallery styles */
+        .photo-gallery {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 45%;
+            height: 45%;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .photo-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+        
+        .photo.active {
+            opacity: 1;
+        }
+        
         /* Removed dark background adjustment since we're using brown background */
         
         .screen-header {
@@ -182,12 +217,22 @@
 </head>
 <body>
     <div class="interactive-screen">
+        <!-- Photo gallery in top-right corner -->
+        <div class="photo-gallery">
+            <div class="photo-container">
+                <img src="media/pictures/picturesOfMe/IMG_0162.JPEG" alt="Foto de Andrés 1" class="photo active">
+                <img src="media/pictures/picturesOfMe/IMG_2400.JPEG" alt="Foto de Andrés 2" class="photo">
+                <img src="media/pictures/picturesOfMe/IMG_5636.JPEG" alt="Foto de Andrés 3" class="photo">
+                <img src="media/pictures/picturesOfMe/IMG_6116.JPEG" alt="Foto de Andrés 4" class="photo">
+                <img src="media/pictures/picturesOfMe/IMG_7328.JPEG" alt="Foto de Andrés 5" class="photo">
+            </div>
+        </div>
+        
         <div class="screen-header">
             <h1>Acerca de Mí</h1>
         </div>
         
         <div class="profile-container">
-            <img src="media/icons/iconMe.png" alt="Foto de Perfil" class="profile-image">
             <h2 class="profile-name">Andrés Felipe González</h2>
             <p class="profile-title">Desarrollador Full Stack & Ingeniero de Prompts</p>
         </div>
@@ -255,6 +300,24 @@
             document.querySelector('.contact-button').addEventListener('click', function() {
                 alert('¡Gracias por tu interés! Pronto podrás contactarme a través de este botón.');
             });
+            
+            // Photo slideshow functionality
+            const photos = document.querySelectorAll('.photo');
+            let currentPhotoIndex = 0;
+            
+            function showNextPhoto() {
+                // Hide current photo
+                photos[currentPhotoIndex].classList.remove('active');
+                
+                // Move to next photo (loop back to first if at the end)
+                currentPhotoIndex = (currentPhotoIndex + 1) % photos.length;
+                
+                // Show new current photo
+                photos[currentPhotoIndex].classList.add('active');
+            }
+            
+            // Change photo every 3 seconds
+            setInterval(showNextPhoto, 3000);
         });
     </script>
 </body>
