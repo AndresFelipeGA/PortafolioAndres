@@ -33,8 +33,7 @@
             height: 100%;
             padding: 0; /* Remove padding to allow photo to touch the very edge */
             box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
+            display: block; /* Changed from flex to block for better text flow */
             margin: 0;
             background-color: #D2B48C; /* Much lighter brown color (tan) */
             border-radius: 0;
@@ -44,21 +43,23 @@
             left: 0;
             right: 0;
             bottom: 0;
+            overflow: hidden;
         }
         
         /* Photo gallery styles */
         .photo-gallery {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 50%; /* Keep the same width */
-            height: 60%; /* Slightly reduced height */
-            background-color: rgba(255, 255, 255, 0.3); /* More visible background for the photo gallery */
-            border-radius: 0 0 0 10px; /* Only round the bottom-left corner */
+            position: absolute; /* Absolute positioning */
+            top: 80px; /* Position from top - moved down to avoid header */
+            right: 20px; /* Position from right */
+            width: 35%; /* Reduced width */
+            height: 45%; /* Reduced height */
             overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            margin: 0; /* Ensure no margin */
-            padding: 0; /* Ensure no padding */
+            margin: 0; /* No margin */
+            padding: 0; /* No padding */
+            z-index: 10; /* Ensure it's above other content */
+            background: none; /* No background */
+            box-shadow: none; /* No shadow */
+            border-radius: 0; /* No rounded corners */
         }
         
         .photo-container {
@@ -71,7 +72,7 @@
         .photo {
             width: 100%;
             height: 100%;
-            object-fit: contain; /* Changed from cover to contain to prevent stretching */
+            object-fit: cover; /* Changed back to cover for better appearance */
             position: absolute;
             top: 0;
             left: 0;
@@ -86,8 +87,9 @@
         /* Removed dark background adjustment since we're using brown background */
         
         .screen-header {
-            text-align: center;
-            margin-bottom: 20px;
+            text-align: left;
+            margin-bottom: 15px;
+            margin-left: 20px;
         }
         
         .screen-header h1 {
@@ -97,10 +99,9 @@
         }
         
         .profile-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 20px;
+            display: block;
+            margin-bottom: 15px;
+            margin-left: 20px;
         }
         
         .profile-image {
@@ -128,13 +129,14 @@
         }
         
         .about-section {
-            background-color: rgba(255, 255, 255, 0.4); /* More visible semi-transparent white */
-            border-radius: 10px;
-            padding: 15px; /* Reduced padding */
-            margin-bottom: 20px; /* Reduced margin */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            max-height: 300px; /* Fixed height */
-            overflow-y: auto; /* Add scrolling if content is too long */
+            background: none; /* No background */
+            padding: 0; /* No padding */
+            margin: 0 20px 20px 20px; /* Add margin on sides and bottom */
+            box-shadow: none; /* No shadow */
+            overflow: visible; /* No scrolling */
+            position: relative; /* For positioning */
+            width: 45%; /* Reduced width to avoid overlap */
+            border-radius: 0; /* No rounded corners */
         }
         
         .about-section h2 {
@@ -143,7 +145,8 @@
             font-size: 16px; /* Slightly smaller */
             border-bottom: 1px solid #ffffff; /* Thinner border */
             padding-bottom: 3px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            max-width: 100%; /* Ensure it doesn't overflow */
         }
         
         .about-text {
@@ -151,46 +154,21 @@
             line-height: 1.5; /* Tighter line height */
             color: #ffffff; /* White text for better contrast */
             text-align: justify;
-            margin-bottom: 10px; /* Reduced space between paragraphs */
+            margin-bottom: 15px; /* Space between paragraphs */
+            text-wrap: balance; /* Better text wrapping */
+            max-width: 100%; /* Ensure text doesn't overflow */
         }
         
         /* Content section styles */
         .content-section {
-            width: 45%; /* Keep the same width */
-            margin-left: 20px;
-            margin-top: 40px; /* Moved up slightly */
-            height: 80%; /* Slightly reduced height */
-            display: flex;
-            flex-direction: column;
+            width: 90%; /* Reduced width */
+            margin: 20px; /* Margin all around */
+            height: auto; /* Auto height */
+            display: block; /* Block display */
+            position: relative; /* For positioning */
         }
         
-        .buttons-row {
-            display: flex;
-            justify-content: flex-start;
-            margin-top: 30px; /* Increased top margin */
-            margin-left: 20px;
-            margin-bottom: 20px; /* Added bottom margin */
-        }
-        
-        .contact-button {
-            background: linear-gradient(135deg, #A67C52, #D2B48C); /* Lighter brown gradient */
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
-        
-        .contact-button:hover {
-            transform: scale(1.05);
-        }
-        
-        .contact-button:active {
-            transform: scale(0.98);
-        }
+        /* Remove buttons-row and contact-button styles */
     </style>
 </head>
 <body>
@@ -224,11 +202,10 @@
                 <p class="about-text">
                     Proin quis tortor orci. Etiam at risus et justo dignissim congue. Donec congue lacinia dui, a porttitor lectus condimentum laoreet. Nunc eu ullamcorper orci. Quisque eget odio ac lectus vestibulum faucibus eget in metus. In pellentesque faucibus vestibulum. Nulla at nulla justo, eget luctus tortor.
                 </p>
+                <p class="about-text">
+                    Donec congue lacinia dui, a porttitor lectus condimentum laoreet. Nunc eu ullamcorper orci. Quisque eget odio ac lectus vestibulum faucibus eget in metus. In pellentesque faucibus vestibulum. Nulla at nulla justo, eget luctus tortor. Proin quis tortor orci. Etiam at risus et justo dignissim congue.
+                </p>
             </div>
-        </div>
-        
-        <div class="buttons-row">
-            <button class="contact-button">Contactar</button>
         </div>
     </div>
 
@@ -238,10 +215,7 @@
             // Rotate 180 degrees and flip horizontally (scaleX(-1))
             document.body.style.transform = 'rotate(180deg) scaleX(-1)';
             
-            // Add event to contact button
-            document.querySelector('.contact-button').addEventListener('click', function() {
-                alert('¡Gracias por tu interés! Pronto podrás contactarme a través de este botón.');
-            });
+            // Remove contact button event listener
             
             // Photo slideshow functionality
             const photos = document.querySelectorAll('.photo');
