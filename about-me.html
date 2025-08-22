@@ -11,8 +11,8 @@
             width: 100%;
             height: 100%;
             font-family: Arial, sans-serif;
-            background-color: #D2B48C; /* Much lighter brown color (tan) */
-            color: white; /* White text for better contrast */
+            background-color: #FFFFFF; /* Fondo blanco */
+            color: #000000; /* Texto negro */
             overflow: hidden;
         }
         
@@ -35,7 +35,7 @@
             box-sizing: border-box;
             display: block; /* Changed from flex to block for better text flow */
             margin: 0;
-            background-color: #D2B48C; /* Much lighter brown color (tan) */
+            background-color: #FFFFFF; /* Fondo blanco */
             border-radius: 0;
             box-shadow: none;
             position: absolute;
@@ -94,7 +94,7 @@
         
         .screen-header h1 {
             margin: 0;
-            color: #ffffff; /* White text for better contrast on brown background */
+            color: #000000; /* Texto negro */
             font-size: 22px; /* Slightly smaller */
         }
         
@@ -117,13 +117,13 @@
         .profile-name {
             font-size: 20px; /* Slightly smaller */
             font-weight: 700;
-            color: #ffffff; /* White text for better contrast on brown background */
+            color: #000000; /* Texto negro */
             margin: 0 0 3px 0;
         }
         
         .profile-title {
             font-size: 14px; /* Slightly smaller */
-            color: #A67C52; /* Medium brown text */
+            color: #555555; /* Gris oscuro para el subtítulo */
             margin: 0 0 10px 0;
             font-style: italic;
         }
@@ -135,15 +135,15 @@
             box-shadow: none; /* No shadow */
             overflow: visible; /* No scrolling */
             position: relative; /* For positioning */
-            width: 45%; /* Reduced width to avoid overlap */
+            width: calc(100% - 40px); /* Full width minus margins */
             border-radius: 0; /* No rounded corners */
         }
         
         .about-section h2 {
-            color: #ffffff; /* White text for better contrast */
+            color: #000000; /* Texto negro */
             margin-top: 0;
             font-size: 16px; /* Slightly smaller */
-            border-bottom: 1px solid #ffffff; /* Thinner border */
+            border-bottom: 1px solid #000000; /* Borde negro */
             padding-bottom: 3px;
             margin-bottom: 15px;
             max-width: 100%; /* Ensure it doesn't overflow */
@@ -152,11 +152,40 @@
         .about-text {
             font-size: 13px; /* Smaller text */
             line-height: 1.5; /* Tighter line height */
-            color: #ffffff; /* White text for better contrast */
+            color: #000000; /* Texto negro */
             text-align: justify;
             margin-bottom: 15px; /* Space between paragraphs */
             text-wrap: balance; /* Better text wrapping */
             max-width: 100%; /* Ensure text doesn't overflow */
+        }
+        
+        /* Estilo para el texto que fluye alrededor de la imagen */
+        .about-section {
+            position: relative;
+            z-index: 1; /* Asegura que esté por debajo de la imagen */
+        }
+        
+        /* Primer párrafo - a la izquierda de la imagen */
+        .about-section p:nth-of-type(1) {
+            width: 60%;
+            margin-right: 40%;
+        }
+        
+        /* Segundo párrafo - a la izquierda de la imagen */
+        .about-section p:nth-of-type(2) {
+            width: 60%;
+            margin-right: 40%;
+        }
+        
+        /* Tercer párrafo - continuación sin espacio */
+        .about-section p:nth-of-type(3) {
+            width: 100%;
+            margin-top: 0; /* Sin espacio adicional */
+        }
+        
+        /* Asegura que la imagen esté por encima del texto */
+        .photo-gallery {
+            z-index: 5;
         }
         
         /* Content section styles */
@@ -195,15 +224,15 @@
             </div>
             
             <div class="about-section">
-                <h2>Biografía</h2>
+                <h2>Biography</h2>
                 <p class="about-text">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est bibendum non venenatis nisl tempor. Suspendisse dictum feugiat nisl ut dapibus. Mauris iaculis porttitor posuere. Praesent id metus massa, ut blandit odio.
+                    Welcome to my portfolio! In case you haven't noticed from the vibrant colors and warm atmosphere, I'm Colombian and proud of it. My journey in technology has been as rich and diverse as the landscapes of my beautiful country. With a passion for innovation and problem-solving, I've developed expertise across multiple domains of software engineering.
                 </p>
                 <p class="about-text">
-                    Proin quis tortor orci. Etiam at risus et justo dignissim congue. Donec congue lacinia dui, a porttitor lectus condimentum laoreet. Nunc eu ullamcorper orci. Quisque eget odio ac lectus vestibulum faucibus eget in metus. In pellentesque faucibus vestibulum. Nulla at nulla justo, eget luctus tortor.
+                    As a Full Stack Developer, I create seamless experiences from front-end to back-end. But what truly sets me apart is my specialization as a Prompt Engineer and AI Software Engineer. I bridge the gap between human creativity and artificial intelligence, crafting precise prompts that unlock the full potential of AI systems. My work involves designing intelligent solutions that enhance productivity and create new possibilities.
                 </p>
                 <p class="about-text">
-                    Donec congue lacinia dui, a porttitor lectus condimentum laoreet. Nunc eu ullamcorper orci. Quisque eget odio ac lectus vestibulum faucibus eget in metus. In pellentesque faucibus vestibulum. Nulla at nulla justo, eget luctus tortor. Proin quis tortor orci. Etiam at risus et justo dignissim congue.
+                    When I'm not coding or fine-tuning AI models, you'll find me exploring coffee shops, hiking through Colombia's diverse terrain, or experimenting with new technologies. I believe in continuous learning and staying at the cutting edge of tech innovation. My approach combines technical excellence with a friendly, collaborative spirit – bringing both expertise and enthusiasm to every project I undertake.
                 </p>
             </div>
         </div>
