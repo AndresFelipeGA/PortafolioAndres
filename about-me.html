@@ -11,7 +11,10 @@
             width: 100%;
             height: 100%;
             font-family: Arial, sans-serif;
-            background-color: #FFFFFF; /* Fondo blanco */
+            background-image: url('media/pictures/picturesOfSometingElse/vibrant-abstract-painting-inspired-by-600nw-2441172959.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             color: #000000; /* Texto negro */
             overflow: hidden;
         }
@@ -35,7 +38,7 @@
             box-sizing: border-box;
             display: block; /* Changed from flex to block for better text flow */
             margin: 0;
-            background-color: #FFFFFF; /* Fondo blanco */
+            background-color: rgba(255, 255, 255, 0.7); /* Fondo blanco con opacidad */
             border-radius: 0;
             box-shadow: none;
             position: absolute;
@@ -129,14 +132,14 @@
         }
         
         .about-section {
-            background: none; /* No background */
-            padding: 0; /* No padding */
+            background: rgba(255, 255, 255, 0.8); /* Fondo blanco semi-transparente */
+            padding: 15px; /* Añadir padding */
             margin: 0 20px 20px 20px; /* Add margin on sides and bottom */
-            box-shadow: none; /* No shadow */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Sombra sutil */
             overflow: visible; /* No scrolling */
             position: relative; /* For positioning */
             width: calc(100% - 40px); /* Full width minus margins */
-            border-radius: 0; /* No rounded corners */
+            border-radius: 8px; /* Esquinas redondeadas */
         }
         
         .about-section h2 {
@@ -195,6 +198,9 @@
             height: auto; /* Auto height */
             display: block; /* Block display */
             position: relative; /* For positioning */
+            background-color: rgba(255, 255, 255, 0.7); /* Fondo blanco con opacidad */
+            padding: 20px;
+            border-radius: 10px;
         }
         
         /* Remove buttons-row and contact-button styles */
