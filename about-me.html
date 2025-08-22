@@ -52,7 +52,7 @@
             top: 0;
             right: 0;
             width: 50%; /* Keep the same width */
-            height: 60%; /* Increase height by 10% more */
+            height: 65%; /* Increase height to use more vertical space */
             background-color: rgba(255, 255, 255, 0.3); /* More visible background for the photo gallery */
             border-radius: 0 0 0 10px; /* Only round the bottom-left corner */
             overflow: hidden;
@@ -131,8 +131,10 @@
             background-color: rgba(255, 255, 255, 0.4); /* More visible semi-transparent white */
             border-radius: 10px;
             padding: 20px;
-            margin-bottom: 20px;
+            margin-bottom: 30px; /* Increased bottom margin */
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            max-height: 65%; /* Limit height to prevent overflow */
+            overflow-y: auto; /* Add scrolling if content is too long */
         }
         
         .about-section h2 {
@@ -145,24 +147,29 @@
         }
         
         .about-text {
-            font-size: 14px;
-            line-height: 1.6;
+            font-size: 16px; /* Slightly larger text */
+            line-height: 1.7; /* Increased line height for better readability */
             color: #ffffff; /* White text for better contrast */
             text-align: justify;
+            margin-bottom: 15px; /* Add space between paragraphs */
         }
         
         /* Content section styles */
         .content-section {
             width: 45%; /* Take up less width to avoid overlapping with photos */
             margin-left: 20px;
-            margin-top: 70px; /* Move content further down to avoid overlapping with taller photo */
+            margin-top: 50px; /* Moved up slightly to use more vertical space */
+            height: 85%; /* Use more vertical space */
+            display: flex;
+            flex-direction: column;
         }
         
         .buttons-row {
             display: flex;
             justify-content: flex-start;
-            margin-top: 20px;
+            margin-top: 30px; /* Increased top margin */
             margin-left: 20px;
+            margin-bottom: 20px; /* Added bottom margin */
         }
         
         .contact-button {

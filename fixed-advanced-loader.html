@@ -2297,136 +2297,130 @@
         
         // Función para configurar el plano café como una pantalla interactiva
         function setupAboutMeScreen() {
-            // Crear una escena CSS3D para el plano café si no existe
-            if (!window.aboutMeScene) {
-                window.aboutMeScene = new THREE.Scene();
-                console.log("CSS3D Scene para About Me creada");
-            } else {
-                // Limpiar escena CSS3D si existe
-                while(window.aboutMeScene.children.length > 0) {
-                    window.aboutMeScene.remove(window.aboutMeScene.children[0]);
-                }
-                console.log("CSS3D Scene para About Me limpiada");
-            }
+                    // Crear una escena CSS3D para el plano café si no existe
+                    if (!window.aboutMeScene) {
+                        window.aboutMeScene = new THREE.Scene();
+                        console.log("CSS3D Scene para About Me creada");
+                    } else {
+                        // Limpiar escena CSS3D si existe
+                        while(window.aboutMeScene.children.length > 0) {
+                            window.aboutMeScene.remove(window.aboutMeScene.children[0]);
+                        }
+                        console.log("CSS3D Scene para About Me limpiada");
+                    }
+                    
+                    // COORDENADAS EXACTAS proporcionadas por el usuario
+                    const topLeft = new THREE.Vector3(-5.42, 5.51, 7.59);
+                    const topRight = new THREE.Vector3(-6.07, 5.51, 7.02);
+                    const bottomLeft = new THREE.Vector3(-5.28, 4.68, 7.42);
+                    const bottomRight = new THREE.Vector3(-5.93, 4.68, 6.86);
+                    
+                    // Convertir coordenadas relativas a absolutas (sumando el offset)
+                    const absoluteTopLeft = new THREE.Vector3().copy(topLeft).add(originOffset);
+                    const absoluteTopRight = new THREE.Vector3().copy(topRight).add(originOffset);
+                    const absoluteBottomLeft = new THREE.Vector3().copy(bottomLeft).add(originOffset);
+                    const absoluteBottomRight = new THREE.Vector3().copy(bottomRight).add(originOffset);
+                    
+                    console.log("Coordenadas absolutas:");
+                    console.log("Top Left:", absoluteTopLeft);
+                    console.log("Top Right:", absoluteTopRight);
+                    console.log("Bottom Left:", absoluteBottomLeft);
+                    console.log("Bottom Right:", absoluteBottomRight);
+                    
+                    // Calcular el centro del plano
+                    const center = new THREE.Vector3()
+                        .add(absoluteTopLeft)
+                        .add(absoluteTopRight)
+                        .add(absoluteBottomLeft)
+                        .add(absoluteBottomRight)
+                        .multiplyScalar(0.25);
+                    
+                    // Calcular vectores para la orientación
+                    const vX = new THREE.Vector3().subVectors(absoluteTopRight, absoluteTopLeft).normalize();
+                    const vY = new THREE.Vector3().subVectors(absoluteBottomLeft, absoluteTopLeft).normalize();
+                    const vZ = new THREE.Vector3().crossVectors(vX, vY).normalize();
+                    
+                    // Crear matriz de rotación
+                    const matrix = new THREE.Matrix4();
+                    matrix.makeBasis(vX, vY, vZ);
+                    
+                    // Extraer rotación de la matriz
+                    const rotation = new THREE.Euler().setFromRotationMatrix(matrix);
+                    
+                    // Calcular el ancho y alto del plano
+                    const width = absoluteTopLeft.distanceTo(absoluteTopRight);
+                    const height = absoluteTopLeft.distanceTo(absoluteBottomLeft);
+                    
+                    console.log("Dimensiones del plano:", width, height);
+                    
+                    // Crear un objeto invisible para raycasting
+                    const invisiblePlane = new THREE.Mesh(
+                        new THREE.PlaneGeometry(width, height),
+                        new THREE.MeshBasicMaterial({
+                            color: 0xFFFFFF,
+                            transparent: true,
+                            opacity: 0.0,
+                            side: THREE.DoubleSide,
+                            depthWrite: false
+                        })
+                    );
+                    
+                    // Posicionar y rotar el plano invisible
+                    invisiblePlane.position.copy(center);
+                    invisiblePlane.rotation.copy(rotation);
+                    
+                    // Guardar referencia global para el raycasting
+                    window.brownPlane = invisiblePlane;
+                    
+                    // Añadir el plano invisible a la escena (solo para raycasting)
+                    scene.add(invisiblePlane);
+                    
+                    // Crear un iframe con el tamaño original
+                    const iframe = document.createElement('iframe');
+                    iframe.style.width = '800px';
+                    iframe.style.height = '606px'; // Aumentado un 1.1% verticalmente (600 * 1.011 = 606) - reducido un 18.9% del 20% original
+                    iframe.style.border = 'none';
+                    iframe.style.overflow = 'hidden';
+                    iframe.style.display = 'block';
+                    iframe.src = 'about-me.html';
+                    
+                    // Crear un elemento div para contener el iframe
+                    const div = document.createElement('div');
+                    div.style.width = '800px';
+                    div.style.height = '606px'; // Aumentado un 1.1% verticalmente
+                    div.style.backgroundColor = 'transparent';
+                    div.style.overflow = 'hidden';
+                    div.appendChild(iframe);
+                    
+                    // Crear un objeto CSS3D para el div
+                    const cssObject = new THREE.CSS3DObject(div);
+                    
+                    // Calcular la escala adecuada basada en el tamaño real del plano
+                    const scaleX = width / 800;
+                    const scaleY = height / 606; // Ajustado para la nueva altura
+                    
+                    // Aumentar la escala vertical en un 1.1% adicional para cubrir los huecos
+                    const verticalScaleAdjustment = 1.011; // Reducido de 1.015 a 1.011 (quitando un 0.4% adicional)
+                    
+                    console.log("Factores de escala:", scaleX, scaleY);
+                    
+                    // Aplicar la escala calculada con el ajuste vertical
+                    cssObject.scale.set(scaleX, scaleY * verticalScaleAdjustment, 1);
+                    
+                    // Posicionar el objeto CSS3D para que coincida con el plano
+                    cssObject.position.copy(center);
+                    
+                    // Aplicar la rotación del plano
+                    cssObject.rotation.copy(rotation);
+                    
+                    // Ajustar la posición para que coincida con el plano
+                    cssObject.position.z += 0.001; // Pequeño offset para evitar z-fighting
+                    
+                    // Ajustar la posición vertical para centrar el contenido extendido
+                    cssObject.position.y -= 0.003; // Ajuste mínimo para compensar la menor extensión vertical
             
-            // COORDENADAS EXACTAS proporcionadas por el usuario
-            const topLeft = new THREE.Vector3(-5.42, 5.51, 7.59);
-            const topRight = new THREE.Vector3(-6.07, 5.51, 7.02);
-            const bottomLeft = new THREE.Vector3(-5.28, 4.68, 7.42);
-            const bottomRight = new THREE.Vector3(-5.93, 4.68, 6.86);
-            
-            // Convertir coordenadas relativas a absolutas (sumando el offset)
-            const absoluteTopLeft = new THREE.Vector3().copy(topLeft).add(originOffset);
-            const absoluteTopRight = new THREE.Vector3().copy(topRight).add(originOffset);
-            const absoluteBottomLeft = new THREE.Vector3().copy(bottomLeft).add(originOffset);
-            const absoluteBottomRight = new THREE.Vector3().copy(bottomRight).add(originOffset);
-            
-            console.log("Coordenadas absolutas:");
-            console.log("Top Left:", absoluteTopLeft);
-            console.log("Top Right:", absoluteTopRight);
-            console.log("Bottom Left:", absoluteBottomLeft);
-            console.log("Bottom Right:", absoluteBottomRight);
-            
-            // Calcular el centro del plano
-            const center = new THREE.Vector3()
-                .add(absoluteTopLeft)
-                .add(absoluteTopRight)
-                .add(absoluteBottomLeft)
-                .add(absoluteBottomRight)
-                .multiplyScalar(0.25);
-            
-            // Calcular vectores para la orientación
-            const vX = new THREE.Vector3().subVectors(absoluteTopRight, absoluteTopLeft).normalize();
-            const vY = new THREE.Vector3().subVectors(absoluteBottomLeft, absoluteTopLeft).normalize();
-            const vZ = new THREE.Vector3().crossVectors(vX, vY).normalize();
-            
-            // Crear matriz de rotación
-            const matrix = new THREE.Matrix4();
-            matrix.makeBasis(vX, vY, vZ);
-            
-            // Extraer rotación de la matriz
-            const rotation = new THREE.Euler().setFromRotationMatrix(matrix);
-            
-            // Calcular el ancho y alto del plano
-            const width = absoluteTopLeft.distanceTo(absoluteTopRight);
-            const height = absoluteTopLeft.distanceTo(absoluteBottomLeft);
-            
-            console.log("Dimensiones del plano:", width, height);
-            
-            // Crear geometría del plano
-            const planeGeometry = new THREE.PlaneGeometry(width, height);
-            
-            // Crear material café claro para el plano
-            const planeMaterial = new THREE.MeshBasicMaterial({
-                color: 0xD2B48C, // Color café mucho más claro (Tan)
-                side: THREE.DoubleSide,
-                transparent: false,
-                opacity: 1.0,
-                depthWrite: true,
-                depthTest: true
-            });
-            
-            // Crear el mesh con la geometría y el material
-            const brownPlane = new THREE.Mesh(planeGeometry, planeMaterial);
-            
-            // Posicionar y rotar el plano EXACTAMENTE según las coordenadas
-            brownPlane.position.copy(center);
-            brownPlane.rotation.copy(rotation);
-            
-            // Asegurarse de que la normal del plano esté orientada correctamente
-            brownPlane.geometry.computeVertexNormals();
-            
-            // Guardar referencia global para el raycasting
-            window.brownPlane = brownPlane;
-            
-            // Añadir el plano a la escena
-            scene.add(brownPlane);
-            
-            // Enfoque simple sin rotaciones en el iframe o div
-            const iframe = document.createElement('iframe');
-            iframe.style.width = '800px';
-            iframe.style.height = '600px';
-            iframe.style.border = 'none';
-            iframe.style.overflow = 'hidden';
-            iframe.style.display = 'block';
-            iframe.src = 'about-me.html';
-            
-            // Crear un elemento div para contener el iframe
-            const div = document.createElement('div');
-            div.style.width = '800px';
-            div.style.height = '600px';
-            div.style.backgroundColor = 'transparent';
-            div.style.overflow = 'hidden';
-            div.appendChild(iframe);
-            
-            // Crear un objeto CSS3D para el div
-            const cssObject = new THREE.CSS3DObject(div);
-            
-            // Calcular la escala adecuada basada en el tamaño real del plano
-            const scaleX = width / 800;
-            const scaleY = height / 600;
-            const scale = Math.min(scaleX, scaleY);
-            
-            console.log("Factores de escala:", scaleX, scaleY);
-            console.log("Escala final:", scale);
-            
-            // Aplicar la escala calculada
-            cssObject.scale.set(scale, scale, scale);
-            
-            // Posicionar el objeto CSS3D para que coincida con el plano
-            cssObject.position.copy(center);
-            
-            // Enfoque simple - solo aplicar la rotación base del plano
-            cssObject.rotation.copy(rotation);
-            
-            // Ajustar la posición para que coincida con el plano
-            cssObject.position.z += 0.001; // Pequeño offset para evitar z-fighting
-            
-            console.log("Posición final:", cssObject.position);
-            console.log("Rotación final:", cssObject.rotation);
-            
-            // Ajustar la posición para que coincida con el plano
-            cssObject.position.z += 0.001; // Pequeño offset para evitar z-fighting
+            console.log("Posición final del CSS3D:", cssObject.position);
+            console.log("Rotación final del CSS3D:", cssObject.rotation);
             
             console.log("Posición del objeto CSS3D:", cssObject.position);
             console.log("Rotación del objeto CSS3D:", cssObject.rotation);
@@ -2442,7 +2436,7 @@
             console.log("Posición del plano:", center);
             console.log("Rotación del plano:", rotation);
             
-            return brownPlane;
+            return invisiblePlane;
         }
         
         // Function to create the brown HTML plane with the specified coordinates
@@ -2458,8 +2452,8 @@
                 console.log("CSS3D Renderer creado para el plano café");
             }
             
-            // Configurar el plano café como una pantalla interactiva
-            const brownPlane = setupAboutMeScreen();
+            // Configurar el plano invisible para la pantalla interactiva
+            const invisiblePlane = setupAboutMeScreen();
             
             // Añadir evento de clic al canvas para interactuar con el plano
             renderer.domElement.addEventListener('click', function(event) {
@@ -2472,11 +2466,11 @@
                 const raycaster = new THREE.Raycaster();
                 raycaster.setFromCamera(mouse, camera);
                 
-                // Check if the click was on the brown plane (now the HTML content)
-                const intersects = raycaster.intersectObject(brownPlane);
+                // Check if the click was on the invisible plane (for HTML content interaction)
+                const intersects = raycaster.intersectObject(invisiblePlane);
                 
                 if (intersects.length > 0) {
-                    console.log("Click on the brown HTML plane");
+                    console.log("Click on the HTML content plane");
                     // You can add more interactivity here if desired
                 }
             });
