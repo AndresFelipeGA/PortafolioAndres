@@ -62,7 +62,7 @@
             z-index: 10; /* Ensure it's above other content */
             background: none; /* No background */
             box-shadow: none; /* No shadow */
-            border-radius: 0; /* No rounded corners */
+            border-radius: 15px; /* Rounded corners */
         }
         
         .photo-container {
@@ -70,6 +70,7 @@
             height: 100%;
             position: relative;
             overflow: hidden;
+            border-radius: 15px; /* Rounded corners for container */
         }
         
         .photo {
@@ -81,6 +82,7 @@
             left: 0;
             opacity: 0;
             transition: opacity 1s ease-in-out;
+            border-radius: 15px; /* Rounded corners for images */
         }
         
         .photo.active {
