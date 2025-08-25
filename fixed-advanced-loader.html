@@ -499,6 +499,140 @@
         // YouTube video ID from the provided URL
         const youtubeVideoId = 'uALnlDC4yug';
         
+        // Variables para rastrear el estado de la pantalla about-me
+        let aboutMeIframeReady = false;
+        let aboutMeScreenOn = false;
+        let aboutMeIframe = null;
+        let aboutMePlane = null;
+        
+        // Escuchar mensajes de los iframes
+        window.addEventListener('message', function(event) {
+            console.log("Mensaje recibido en fixed-advanced-loader:", event.data);
+            
+            // Verificar si es el mensaje de que about-me.html está listo
+            if (event.data && event.data.action === 'aboutMeReady') {
+                console.log("Iframe de about-me.html está listo");
+                aboutMeIframeReady = true;
+                
+                // Buscar el iframe de about-me.html
+                const iframes = document.querySelectorAll('iframe');
+                iframes.forEach(iframe => {
+                    if (iframe.src && iframe.src.includes('about-me.html')) {
+                        console.log("Encontrado iframe de about-me.html en el evento aboutMeReady");
+                        aboutMeIframe = iframe;
+                    }
+                });
+            }
+            
+            // Recibir confirmación de que la pantalla se encendió
+            if (event.data && event.data.action === 'aboutMeScreenTurnedOn') {
+                console.log("Recibida confirmación de que la pantalla de about-me se encendió");
+                aboutMeScreenOn = true;
+            }
+            
+            // Recibir confirmación de que la pantalla se apagó
+            if (event.data && event.data.action === 'aboutMeScreenTurnedOff') {
+                console.log("Recibida confirmación de que la pantalla de about-me se apagó");
+                aboutMeScreenOn = false;
+            }
+            
+            // Recibir confirmación de que la pantalla se encendió por clic
+            if (event.data && event.data.action === 'aboutMeScreenTurnedOnByClick') {
+                console.log("Recibida confirmación de que la pantalla de about-me se encendió por clic");
+                aboutMeScreenOn = true;
+            }
+        });
+        
+        // Función para enviar mensaje al iframe de about-me.html
+        function sendMessageToAboutMe(action) {
+            console.log(`Intentando enviar mensaje a about-me.html: ${action}`);
+            console.log("Estado del iframe:", aboutMeIframe ? "Encontrado" : "No encontrado");
+            
+            // Si no tenemos el iframe guardado, intentar buscarlo de nuevo
+            if (!aboutMeIframe) {
+                console.log("Buscando iframe de about-me.html...");
+                const iframes = document.querySelectorAll('iframe');
+                console.log("Total de iframes encontrados:", iframes.length);
+                
+                iframes.forEach((iframe, index) => {
+                    console.log(`Iframe ${index}:`, iframe.src || "sin src");
+                    if (iframe.src && iframe.src.includes('about-me.html')) {
+                        console.log("Encontrado iframe de about-me.html:", iframe);
+                        aboutMeIframe = iframe;
+                    }
+                });
+            }
+            
+            if (aboutMeIframe && aboutMeIframe.contentWindow) {
+                try {
+                    // Asegurarse de que el iframe esté completamente cargado
+                    if (aboutMeIframe.contentDocument && aboutMeIframe.contentDocument.readyState === 'complete') {
+                        aboutMeIframe.contentWindow.postMessage({ action: action }, '*');
+                        console.log(`Mensaje enviado a about-me.html: ${action}`);
+                        
+                        if (action === 'turnOnScreen') {
+                            aboutMeScreenOn = true;
+                            console.log("Pantalla de about-me marcada como ENCENDIDA");
+                        } else if (action === 'turnOffScreen') {
+                            aboutMeScreenOn = false;
+                            console.log("Pantalla de about-me marcada como APAGADA");
+                        }
+                    } else {
+                        console.warn("El iframe no está completamente cargado, esperando...");
+                        // Intentar de nuevo después de un breve retraso
+                        setTimeout(() => sendMessageToAboutMe(action), 500);
+                    }
+                } catch (e) {
+                    console.error("Error al enviar mensaje al iframe:", e);
+                }
+            } else {
+                console.warn("No se encontró el iframe de about-me.html o su contentWindow");
+                if (aboutMeIframe) {
+                    console.log("iframe encontrado pero sin contentWindow");
+                }
+            }
+        }
+        
+        // Función para verificar si un punto está dentro del plano de about-me
+        function isPointInAboutMePlane(point) {
+            // Si no tenemos referencia al plano, no podemos verificar
+            if (!window.brownPlane) {
+                return false;
+            }
+            
+            // Guardar referencia al plano de about-me
+            aboutMePlane = window.brownPlane;
+            
+            // Crear un raycaster desde la cámara hasta el punto del clic
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(point, camera);
+            
+            // Verificar si el rayo intersecta con el plano de about-me
+            const intersects = raycaster.intersectObject(aboutMePlane);
+            
+            // Si hay intersecciones, el clic fue en el plano
+            return intersects.length > 0;
+        }
+        
+        // Event listener para detectar clics en cualquier parte de la página
+        document.addEventListener('click', function(event) {
+            // Solo procesar si la pantalla de about-me está encendida
+            if (!aboutMeScreenOn) {
+                return;
+            }
+            
+            // Convertir las coordenadas del clic a coordenadas normalizadas (-1 a 1)
+            const mouse = new THREE.Vector2();
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            
+            // Verificar si el clic fue en el plano de about-me
+            if (!isPointInAboutMePlane(mouse)) {
+                console.log("Clic fuera del plano de about-me, apagando pantalla");
+                sendMessageToAboutMe('turnOffScreen');
+            }
+        });
+        
         // Configurar el botón de activar música
         const musicButton = document.getElementById('music-activate-btn');
         musicButton.addEventListener('click', function() {
@@ -1696,7 +1830,19 @@
             console.log("Coordenadas objetivo para primer botón (relativas):", targetCameraPos);
             console.log("Coordenadas objetivo para primer botón (absolutas):", absoluteTargetPos);
             
-            // El código para activar la pantalla personal ha sido eliminado
+            // Activar la pantalla personal (about-me.html)
+            console.log("Enviando mensaje para activar pantalla de about-me desde startFirstButtonCameraAnimation");
+            
+            // Esperar un momento para asegurarse de que el iframe esté listo
+            setTimeout(function() {
+                sendMessageToAboutMe('turnOnScreen');
+                
+                // Intentar de nuevo después de un breve retraso por si acaso
+                setTimeout(function() {
+                    console.log("Enviando mensaje de activación de pantalla de nuevo (por si acaso)");
+                    sendMessageToAboutMe('turnOnScreen');
+                }, 1000);
+            }, 500);
             
             // Configurar la animación
             cameraAnimation.enabled = true;
