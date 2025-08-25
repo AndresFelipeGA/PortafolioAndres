@@ -19,21 +19,7 @@
             overflow: hidden;
         }
         
-        /* Black cover for screen-off mode */
-        #black-cover {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #000000;
-            z-index: 2000;
-            display: flex; /* Visible by default */
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.5s;
-            overflow: hidden;
-        }
+        /* Black cover removed - now handled by the 3D plane in the main scene */
         
         body {
             display: flex;
@@ -225,10 +211,7 @@
     </style>
 </head>
 <body>
-    <!-- Black cover container -->
-    <div id="black-cover">
-        <!-- You can add a small logo or text here if needed -->
-    </div>
+    <!-- Black cover removed - now handled by the 3D plane in the main scene -->
     
     <div class="interactive-screen">
         <!-- Photo gallery in top-right corner, touching the top edge -->
@@ -291,32 +274,8 @@
             // Change photo every 20 seconds (as requested)
             setInterval(showNextPhoto, 20000);
             
-            // Black cover functionality
-            const blackCover = document.getElementById('black-cover');
+            // Screen control is now handled by the 3D plane in the main scene
             let isActive = false;
-            const inactivityTimeout = 30000; // 30 seconds of inactivity before showing black cover
-            
-            // Function to show black cover (turn screen OFF)
-            function showBlackCover() {
-                blackCover.style.opacity = '1';
-                isActive = false;
-                console.log("Screen turned OFF (black cover shown)");
-            }
-            
-            // Function to hide black cover (turn screen ON)
-            function hideBlackCover() {
-                blackCover.style.opacity = '0';
-                isActive = true;
-                console.log("Screen turned ON (black cover hidden)");
-                
-                // Start timer to show black cover after inactivity
-                clearTimeout(window.inactivityTimer);
-                window.inactivityTimer = setTimeout(function() {
-                    if (isActive) {
-                        showBlackCover();
-                    }
-                }, inactivityTimeout);
-            }
             
             // Check if page is in an iframe (which means it was loaded by clicking the button)
             function isInIframe() {
@@ -331,12 +290,12 @@
             window.addEventListener('message', function(event) {
                 console.log("Message received in about-me.html:", event.data);
                 console.log("Message source:", event.source);
-                console.log("Current black cover state:", isActive ? "ACTIVE (content shown)" : "INACTIVE (black cover shown)");
+                console.log("Current screen state:", isActive ? "ACTIVE (content shown)" : "INACTIVE (screen off)");
                 
                 // Check if the message is to turn on the screen
                 if (event.data && event.data.action === 'turnOnScreen') {
                     console.log("Received message to turn on screen");
-                    hideBlackCover();
+                    isActive = true;
                     
                     // Send confirmation back to parent
                     try {
@@ -350,7 +309,7 @@
                 // Check if the message is to turn off the screen
                 if (event.data && event.data.action === 'turnOffScreen') {
                     console.log("Received message to turn off screen");
-                    showBlackCover();
+                    isActive = false;
                     
                     // Send confirmation back to parent
                     try {
@@ -359,49 +318,6 @@
                     } catch (e) {
                         console.error("Error sending confirmation to parent:", e);
                     }
-                }
-            });
-            
-            // Click on black cover to remove it
-            blackCover.addEventListener('click', function(e) {
-                console.log("Click on black cover detected");
-                hideBlackCover();
-                
-                // Send message to parent that screen was turned on by click
-                try {
-                    window.parent.postMessage({ action: 'aboutMeScreenTurnedOnByClick' }, '*');
-                    console.log("Sent message that screen was turned on by click");
-                } catch (e) {
-                    console.error("Error sending message to parent:", e);
-                }
-            });
-            
-            // IMPORTANT: Do NOT automatically hide the black cover when loaded
-            // The screen should start OFF (black) and only turn ON when the button is clicked
-            
-            // Make sure the black cover is visible by default
-            showBlackCover();
-            console.log("Black cover shown by default on page load");
-            
-            // Add event listeners for user activity to reset the inactivity timer
-            // but ONLY if the screen is already active
-            document.addEventListener('mousemove', function() {
-                if (isActive) {
-                    // Just reset the timer if screen is already active
-                    clearTimeout(window.inactivityTimer);
-                    window.inactivityTimer = setTimeout(showBlackCover, inactivityTimeout);
-                }
-            });
-            
-            document.addEventListener('click', function(e) {
-                // Only respond to clicks on the black cover itself
-                // This prevents other clicks from activating the screen
-                if (e.target === blackCover) {
-                    hideBlackCover();
-                } else if (isActive) {
-                    // If screen is already active, just reset the timer
-                    clearTimeout(window.inactivityTimer);
-                    window.inactivityTimer = setTimeout(showBlackCover, inactivityTimeout);
                 }
             });
             

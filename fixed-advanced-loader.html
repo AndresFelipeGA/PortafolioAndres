@@ -504,6 +504,7 @@
         let aboutMeScreenOn = false;
         let aboutMeIframe = null;
         let aboutMePlane = null;
+        let aboutMeButtonClicked = false; // Nueva variable para rastrear si se ha hecho clic en el botón
         
         // Escuchar mensajes de los iframes
         window.addEventListener('message', function(event) {
@@ -528,18 +529,60 @@
             if (event.data && event.data.action === 'aboutMeScreenTurnedOn') {
                 console.log("Recibida confirmación de que la pantalla de about-me se encendió");
                 aboutMeScreenOn = true;
+                
+                // Solo hacer transparente el plano negro si el botón ha sido clickeado
+                if (aboutMeButtonClicked && window.aboutMeScreenMaterial) {
+                    window.aboutMeScreenMaterial.transparent = true;
+                    window.aboutMeScreenMaterial.opacity = 0.0;
+                    window.aboutMeScreenMaterial.needsUpdate = true;
+                }
+                
+                // Solo mostrar el contenido HTML si el botón ha sido clickeado y estamos viendo desde el frente
+                if (aboutMeButtonClicked && window.aboutMeCssObject && window.aboutMeCssObject.element && isAboutMePlaneVisibleFromFront()) {
+                    window.aboutMeCssObject.element.style.visibility = 'visible';
+                    window.aboutMeCssObject.element.style.pointerEvents = 'auto';
+                }
             }
             
             // Recibir confirmación de que la pantalla se apagó
             if (event.data && event.data.action === 'aboutMeScreenTurnedOff') {
                 console.log("Recibida confirmación de que la pantalla de about-me se apagó");
                 aboutMeScreenOn = false;
+                
+                // Forzar que el cover negro sea visible cuando se apaga la pantalla
+                if (window.aboutMeScreenMaterial && window.aboutMeBackPlane) {
+                    window.aboutMeScreenMaterial.color.set(0x000000); // Asegurar color negro
+                    window.aboutMeScreenMaterial.transparent = false;
+                    window.aboutMeScreenMaterial.opacity = 1.0;
+                    window.aboutMeScreenMaterial.needsUpdate = true;
+                    window.aboutMeBackPlane.visible = true;
+                    console.log("Cover negro forzado a visible al apagar pantalla");
+                }
+                
+                // Ocultar el contenido HTML
+                if (window.aboutMeCssObject && window.aboutMeCssObject.element) {
+                    window.aboutMeCssObject.element.style.visibility = 'hidden';
+                    window.aboutMeCssObject.element.style.pointerEvents = 'none';
+                }
             }
             
             // Recibir confirmación de que la pantalla se encendió por clic
             if (event.data && event.data.action === 'aboutMeScreenTurnedOnByClick') {
                 console.log("Recibida confirmación de que la pantalla de about-me se encendió por clic");
                 aboutMeScreenOn = true;
+                
+                // Solo hacer transparente el plano negro si el botón ha sido clickeado
+                if (aboutMeButtonClicked && window.aboutMeScreenMaterial) {
+                    window.aboutMeScreenMaterial.transparent = true;
+                    window.aboutMeScreenMaterial.opacity = 0.0;
+                    window.aboutMeScreenMaterial.needsUpdate = true;
+                }
+                
+                // Solo mostrar el contenido HTML si el botón ha sido clickeado y estamos viendo desde el frente
+                if (aboutMeButtonClicked && window.aboutMeCssObject && window.aboutMeCssObject.element && isAboutMePlaneVisibleFromFront()) {
+                    window.aboutMeCssObject.element.style.visibility = 'visible';
+                    window.aboutMeCssObject.element.style.pointerEvents = 'auto';
+                }
             }
         });
         
@@ -614,6 +657,79 @@
             return intersects.length > 0;
         }
         
+        // Función para verificar si la cámara está viendo el plano de about-me desde el frente
+        function isAboutMePlaneVisibleFromFront() {
+            if (!window.brownPlane || !camera) {
+                return false;
+            }
+            
+            // Obtener la normal del plano (dirección hacia donde "mira" el plano)
+            // Invertimos la normal para que apunte hacia el lado correcto
+            const planeNormal = new THREE.Vector3(0, 0, -1); // Normal invertida
+            planeNormal.applyQuaternion(window.brownPlane.quaternion); // Aplicar rotación del plano
+            
+            // Obtener la dirección desde el plano hacia la cámara
+            const cameraDirection = new THREE.Vector3();
+            cameraDirection.subVectors(camera.position, window.brownPlane.position).normalize();
+            
+            // Calcular el ángulo entre la normal del plano y la dirección de la cámara
+            const dotProduct = planeNormal.dot(cameraDirection);
+            
+            // Si el producto punto es positivo, la cámara está viendo el frente del plano
+            // Usamos un umbral para dar un poco de tolerancia en el ángulo
+            const threshold = 0.1; // Permite hasta ~84 grados de ángulo
+            return dotProduct > threshold;
+        }
+        
+        // Función para actualizar la visibilidad del about-me basada en la orientación
+        function updateAboutMeVisibility() {
+            if (!window.aboutMeScreenMaterial || !window.aboutMeBackPlane) {
+                return;
+            }
+            
+            const isVisibleFromFront = isAboutMePlaneVisibleFromFront();
+            
+            // Siempre mostrar/ocultar el plano completo basado en la orientación
+            if (isVisibleFromFront) {
+                window.aboutMeBackPlane.visible = true;
+                
+                // LÓGICA DEL COVER NEGRO
+                if (!aboutMeButtonClicked) {
+                    // Botón NO clickeado: mostrar cover negro SIEMPRE
+                    window.aboutMeScreenMaterial.color.set(0x000000); // Negro
+                    window.aboutMeScreenMaterial.transparent = false;
+                    window.aboutMeScreenMaterial.opacity = 1.0;
+                } else if (aboutMeScreenOn) {
+                    // Botón clickeado Y pantalla encendida: ocultar cover negro
+                    window.aboutMeScreenMaterial.transparent = true;
+                    window.aboutMeScreenMaterial.opacity = 0.0;
+                } else {
+                    // Botón clickeado PERO pantalla apagada: mostrar cover negro
+                    window.aboutMeScreenMaterial.color.set(0x000000); // Negro
+                    window.aboutMeScreenMaterial.transparent = false;
+                    window.aboutMeScreenMaterial.opacity = 1.0;
+                }
+            } else {
+                // No visible desde el frente: ocultar todo
+                window.aboutMeBackPlane.visible = false;
+            }
+            
+            // LÓGICA DEL CONTENIDO HTML
+            if (window.aboutMeCssObject && window.aboutMeCssObject.element) {
+                if (isVisibleFromFront && aboutMeButtonClicked && aboutMeScreenOn) {
+                    // Solo mostrar contenido si: visto desde frente Y botón clickeado Y pantalla encendida
+                    window.aboutMeCssObject.element.style.visibility = 'visible';
+                    window.aboutMeCssObject.element.style.pointerEvents = 'auto';
+                } else {
+                    // En cualquier otro caso: ocultar contenido
+                    window.aboutMeCssObject.element.style.visibility = 'hidden';
+                    window.aboutMeCssObject.element.style.pointerEvents = 'none';
+                }
+            }
+            
+            window.aboutMeScreenMaterial.needsUpdate = true;
+        }
+        
         // Event listener para detectar clics en cualquier parte de la página
         document.addEventListener('click', function(event) {
             // Solo procesar si la pantalla de about-me está encendida
@@ -629,6 +745,28 @@
             // Verificar si el clic fue en el plano de about-me
             if (!isPointInAboutMePlane(mouse)) {
                 console.log("Clic fuera del plano de about-me, apagando pantalla");
+                
+                // Cambiar el plano negro de about-me de vuelta a opaco (apagar la pantalla)
+                if (window.aboutMeScreenMaterial) {
+                    // Solo hacer opaco si estamos viendo desde el frente
+                    if (isAboutMePlaneVisibleFromFront()) {
+                        window.aboutMeScreenMaterial.transparent = false;
+                        window.aboutMeScreenMaterial.opacity = 1.0; // Hacer opaco
+                    } else {
+                        // Si no estamos viendo desde el frente, mantener transparente
+                        window.aboutMeScreenMaterial.transparent = true;
+                        window.aboutMeScreenMaterial.opacity = 0.0;
+                    }
+                    window.aboutMeScreenMaterial.needsUpdate = true;
+                    console.log("Plano negro de about-me actualizado - Pantalla apagada");
+                }
+                
+                // Ocultar el contenido HTML
+                if (window.aboutMeCssObject && window.aboutMeCssObject.element) {
+                    window.aboutMeCssObject.element.style.visibility = 'hidden';
+                    window.aboutMeCssObject.element.style.pointerEvents = 'none';
+                }
+                
                 sendMessageToAboutMe('turnOffScreen');
             }
         });
@@ -1830,8 +1968,27 @@
             console.log("Coordenadas objetivo para primer botón (relativas):", targetCameraPos);
             console.log("Coordenadas objetivo para primer botón (absolutas):", absoluteTargetPos);
             
+            // Marcar que el botón de about-me ha sido clickeado
+            aboutMeButtonClicked = true;
+            console.log("Botón de about-me clickeado - Cover negro se quitará cuando se active la pantalla");
+            
             // Activar la pantalla personal (about-me.html)
             console.log("Enviando mensaje para activar pantalla de about-me desde startFirstButtonCameraAnimation");
+            
+            // Cambiar el color del plano negro de about-me a transparente (encender la pantalla)
+            // Solo si el botón ha sido clickeado (que ya se marcó arriba)
+            if (aboutMeButtonClicked && window.aboutMeScreenMaterial) {
+                window.aboutMeScreenMaterial.transparent = true;
+                window.aboutMeScreenMaterial.opacity = 0.0; // Hacer transparente
+                window.aboutMeScreenMaterial.needsUpdate = true;
+                console.log("Plano negro de about-me hecho transparente - Pantalla encendida");
+            }
+            
+            // Asegurar que el contenido HTML sea visible si estamos viendo desde el frente
+            if (aboutMeButtonClicked && window.aboutMeCssObject && window.aboutMeCssObject.element && isAboutMePlaneVisibleFromFront()) {
+                window.aboutMeCssObject.element.style.visibility = 'visible';
+                window.aboutMeCssObject.element.style.pointerEvents = 'auto';
+            }
             
             // Esperar un momento para asegurarse de que el iframe esté listo
             setTimeout(function() {
@@ -1967,6 +2124,9 @@
                     if (coordinatesVisible && !cameraAnimation.enabled) {
                         updateCoordinatesDisplay();
                     }
+                    
+                    // Actualizar visibilidad del about-me basada en la orientación de la cámara
+                    updateAboutMeVisibility();
                     
                     // Renderizar escena WebGL
                     renderer.render(scene, camera);
@@ -2506,7 +2666,7 @@
                             color: 0xFFFFFF,
                             transparent: true,
                             opacity: 0.0,
-                            side: THREE.DoubleSide,
+                            side: THREE.FrontSide, // IMPORTANTE: Visible solo desde el frente
                             depthWrite: false
                         })
                     );
@@ -2520,6 +2680,42 @@
                     
                     // Añadir el plano invisible a la escena (solo para raycasting)
                     scene.add(invisiblePlane);
+                    
+                    // Crear un plano negro de fondo similar al del menú de cafés
+                    const aboutMeBackPlaneMaterial = new THREE.MeshBasicMaterial({
+                        color: 0x000000, // Negro inicialmente (pantalla apagada)
+                        side: THREE.DoubleSide, // Cambiado a DoubleSide para asegurar visibilidad
+                        transparent: false, // Inicialmente NO transparente
+                        opacity: 1.0, // Opacidad completa
+                        depthWrite: true,
+                        depthTest: false // Desactivar depth test para que siempre sea visible
+                    });
+                    
+                    const aboutMeBackPlane = new THREE.Mesh(
+                        new THREE.PlaneGeometry(width, height), // Usar el tamaño exacto calculado, no más grande
+                        aboutMeBackPlaneMaterial
+                    );
+                    
+                    // Guardar referencia al material para poder cambiarlo después
+                    window.aboutMeScreenMaterial = aboutMeBackPlaneMaterial;
+                    window.aboutMeBackPlane = aboutMeBackPlane; // Guardar referencia al plano también
+                    
+                    // Posicionar el plano negro exactamente en la misma posición que el plano invisible
+                    aboutMeBackPlane.position.copy(center);
+                    aboutMeBackPlane.rotation.copy(rotation);
+                    
+                    // Mover más hacia adelante para asegurar que esté por encima
+                    aboutMeBackPlane.position.z += 0.005; // Aumentado el offset
+                    
+                    // Configurar renderOrder para asegurar que se renderice por encima del contenido
+                    aboutMeBackPlane.renderOrder = 999; // Alto valor para renderizar por encima
+                    
+                    // Añadir el plano negro a la escena
+                    scene.add(aboutMeBackPlane);
+                    console.log("Plano negro de fondo para about-me añadido a la escena:", aboutMeBackPlane);
+                    
+                    // Forzar que el cover negro sea visible inicialmente
+                    console.log("Forzando cover negro inicial visible");
                     
                     // Crear un iframe con el tamaño original
                     const iframe = document.createElement('iframe');
@@ -2575,6 +2771,9 @@
             window.aboutMeScene.add(cssObject);
             console.log("Objeto CSS3D para About Me añadido a la escena");
             
+            // Guardar referencia al objeto CSS3D para control de visibilidad
+            window.aboutMeCssObject = cssObject;
+            
             // Configurar evento de clic para el plano
             brownPlane.userData.clickable = true;
             
@@ -2600,6 +2799,30 @@
             
             // Configurar el plano invisible para la pantalla interactiva
             const invisiblePlane = setupAboutMeScreen();
+            
+            // Asegurar que el cover negro esté visible inicialmente - múltiples intentos
+            setTimeout(function() {
+                if (window.aboutMeScreenMaterial && window.aboutMeBackPlane) {
+                    window.aboutMeScreenMaterial.color.set(0x000000); // Asegurar color negro
+                    window.aboutMeScreenMaterial.transparent = false;
+                    window.aboutMeScreenMaterial.opacity = 1.0;
+                    window.aboutMeScreenMaterial.needsUpdate = true;
+                    window.aboutMeBackPlane.visible = true;
+                    console.log("Cover negro inicializado como visible - primer intento");
+                }
+            }, 100);
+            
+            // Segundo intento por si acaso
+            setTimeout(function() {
+                if (window.aboutMeScreenMaterial && window.aboutMeBackPlane) {
+                    window.aboutMeScreenMaterial.color.set(0x000000);
+                    window.aboutMeScreenMaterial.transparent = false;
+                    window.aboutMeScreenMaterial.opacity = 1.0;
+                    window.aboutMeScreenMaterial.needsUpdate = true;
+                    window.aboutMeBackPlane.visible = true;
+                    console.log("Cover negro inicializado como visible - segundo intento");
+                }
+            }, 500);
             
             // Añadir evento de clic al canvas para interactuar con el plano
             renderer.domElement.addEventListener('click', function(event) {
