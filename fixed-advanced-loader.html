@@ -2687,12 +2687,12 @@
                         side: THREE.DoubleSide, // Cambiado a DoubleSide para asegurar visibilidad
                         transparent: false, // Inicialmente NO transparente
                         opacity: 1.0, // Opacidad completa
-                        depthWrite: true,
-                        depthTest: false // Desactivar depth test para que siempre sea visible
+                        depthWrite: true, // Reactivar depthWrite
+                        depthTest: true // Reactivar depthTest para que respete la profundidad
                     });
                     
                     const aboutMeBackPlane = new THREE.Mesh(
-                        new THREE.PlaneGeometry(width, height), // Usar el tamaño exacto calculado, no más grande
+                        new THREE.PlaneGeometry(width * 0.98, height * 0.98), // Ligeramente más pequeño para mejor ajuste
                         aboutMeBackPlaneMaterial
                     );
                     
@@ -2704,11 +2704,15 @@
                     aboutMeBackPlane.position.copy(center);
                     aboutMeBackPlane.rotation.copy(rotation);
                     
-                    // Mover más hacia adelante para asegurar que esté por encima
-                    aboutMeBackPlane.position.z += 0.005; // Aumentado el offset
+                    // Ajustar ligeramente la posición para mejor alineación
+                    aboutMeBackPlane.position.x += 0.01; // Pequeño ajuste en X
+                    aboutMeBackPlane.position.y -= 0.01; // Pequeño ajuste en Y
                     
-                    // Configurar renderOrder para asegurar que se renderice por encima del contenido
-                    aboutMeBackPlane.renderOrder = 999; // Alto valor para renderizar por encima
+                    // Mover muy ligeramente hacia adelante para que esté justo por encima del contenido
+                    aboutMeBackPlane.position.z += 0.001; // Reducido el offset para estar más cerca
+                    
+                    // Configurar renderOrder para asegurar que se renderice por encima del contenido HTML
+                    aboutMeBackPlane.renderOrder = 10; // Valor moderado, no tan alto
                     
                     // Añadir el plano negro a la escena
                     scene.add(aboutMeBackPlane);
