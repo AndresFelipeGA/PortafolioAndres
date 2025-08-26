@@ -506,6 +506,14 @@
         let aboutMePlane = null;
         let aboutMeButtonClicked = false; // Nueva variable para rastrear si se ha hecho clic en el botón
         
+        // Variables para el segundo plano About Me duplicado
+        let aboutMe2IframeReady = false;
+        let projectsScreenOn = false; // Cambié de aboutMe2 a projects
+        let projectsIframe = null; // Cambié de aboutMe2 a projects
+        let projectsPlane = null; // Cambié de aboutMe2 a projects
+        let projectsButtonClicked = false; // Cambié de aboutMe2 a projects
+        let projectsIframeReady = false; // Variable para rastrear si el iframe de projects está listo
+        
         // Escuchar mensajes de los iframes
         window.addEventListener('message', function(event) {
             console.log("Mensaje recibido en fixed-advanced-loader:", event.data);
@@ -566,6 +574,66 @@
                 }
             }
             
+            // ==========================================================
+            // EVENT LISTENERS PARA EL SEGUNDO PLANO ABOUT ME DUPLICADO
+            // ==========================================================
+            
+            // Verificar si es el mensaje de que projects.html está listo
+            if (event.data && event.data.action === 'projectsReady') {
+                console.log("Iframe de projects.html está listo");
+                aboutMe2IframeReady = true; // Mantengo esta variable por compatibilidad
+                
+                // Buscar el iframe de projects.html
+                const iframes = document.querySelectorAll('iframe');
+                iframes.forEach(iframe => {
+                    if (iframe.src && iframe.src.includes('projects.html')) {
+                        console.log("Encontrado iframe de projects.html en el evento projectsReady");
+                        projectsIframe = iframe;
+                    }
+                });
+            }
+            
+            // Recibir confirmación de que la pantalla de projects se encendió
+            if (event.data && event.data.action === 'projectsScreenTurnedOn') {
+                console.log("Recibida confirmación de que la pantalla de projects se encendió");
+                projectsScreenOn = true;
+                
+                // Solo hacer transparente el plano negro si el botón ha sido clickeado
+                if (projectsButtonClicked && window.aboutMe2ScreenMaterial) {
+                    window.aboutMe2ScreenMaterial.transparent = true;
+                    window.aboutMe2ScreenMaterial.opacity = 0.0;
+                    window.aboutMe2ScreenMaterial.needsUpdate = true;
+                }
+                
+                // Solo mostrar el contenido HTML si el botón ha sido clickeado y estamos viendo desde el frente
+                if (projectsButtonClicked && window.aboutMe2CssObject && window.aboutMe2CssObject.element && isAboutMe2PlaneVisibleFromFront()) {
+                    window.aboutMe2CssObject.element.style.visibility = 'visible';
+                    window.aboutMe2CssObject.element.style.pointerEvents = 'auto';
+                }
+            }
+            
+            // Recibir confirmación de que la pantalla de projects se apagó
+            if (event.data && event.data.action === 'projectsScreenTurnedOff') {
+                console.log("Recibida confirmación de que la pantalla de projects se apagó");
+                projectsScreenOn = false;
+                
+                // Forzar que el cover negro sea visible cuando se apaga la pantalla
+                if (window.aboutMe2ScreenMaterial && window.aboutMe2BackPlane) {
+                    window.aboutMe2ScreenMaterial.color.set(0x000000); // Asegurar color negro
+                    window.aboutMe2ScreenMaterial.transparent = false;
+                    window.aboutMe2ScreenMaterial.opacity = 1.0;
+                    window.aboutMe2ScreenMaterial.needsUpdate = true;
+                    window.aboutMe2BackPlane.visible = true;
+                    console.log("Cover negro forzado a visible al apagar pantalla de projects");
+                }
+                
+                // Ocultar el contenido HTML
+                if (window.aboutMe2CssObject && window.aboutMe2CssObject.element) {
+                    window.aboutMe2CssObject.element.style.visibility = 'hidden';
+                    window.aboutMe2CssObject.element.style.pointerEvents = 'none';
+                }
+            }
+            
             // Recibir confirmación de que la pantalla se encendió por clic
             if (event.data && event.data.action === 'aboutMeScreenTurnedOnByClick') {
                 console.log("Recibida confirmación de que la pantalla de about-me se encendió por clic");
@@ -582,6 +650,66 @@
                 if (aboutMeButtonClicked && window.aboutMeCssObject && window.aboutMeCssObject.element && isAboutMePlaneVisibleFromFront()) {
                     window.aboutMeCssObject.element.style.visibility = 'visible';
                     window.aboutMeCssObject.element.style.pointerEvents = 'auto';
+                }
+            }
+            
+            // ===============================================
+            // EVENT LISTENERS PARA EL SISTEMA DE PROJECTS
+            // ===============================================
+            
+            // Verificar si es el mensaje de que projects.html está listo
+            if (event.data && event.data.action === 'projectsReady') {
+                console.log("Iframe de projects.html está listo");
+                projectsIframeReady = true;
+                
+                // Buscar el iframe de projects.html
+                const iframes = document.querySelectorAll('iframe');
+                iframes.forEach(iframe => {
+                    if (iframe.src && iframe.src.includes('projects.html')) {
+                        console.log("Encontrado iframe de projects.html en el evento projectsReady");
+                        projectsIframe = iframe;
+                    }
+                });
+            }
+            
+            // Recibir confirmación de que la pantalla de proyectos se encendió
+            if (event.data && event.data.action === 'projectsScreenTurnedOn') {
+                console.log("Recibida confirmación de que la pantalla de projects se encendió");
+                projectsScreenOn = true;
+                
+                // Solo hacer transparente el plano negro si el botón ha sido clickeado
+                if (projectsButtonClicked && window.projectsScreenMaterial) {
+                    window.projectsScreenMaterial.transparent = true;
+                    window.projectsScreenMaterial.opacity = 0.0;
+                    window.projectsScreenMaterial.needsUpdate = true;
+                }
+                
+                // Solo mostrar el contenido HTML si el botón ha sido clickeado y estamos viendo desde el frente
+                if (projectsButtonClicked && window.projectsCssObject && window.projectsCssObject.element && isProjectsPlaneVisibleFromFront()) {
+                    window.projectsCssObject.element.style.visibility = 'visible';
+                    window.projectsCssObject.element.style.pointerEvents = 'auto';
+                }
+            }
+            
+            // Recibir confirmación de que la pantalla de proyectos se apagó
+            if (event.data && event.data.action === 'projectsScreenTurnedOff') {
+                console.log("Recibida confirmación de que la pantalla de projects se apagó");
+                projectsScreenOn = false;
+                
+                // Forzar que el cover negro sea visible cuando se apaga la pantalla
+                if (window.projectsScreenMaterial && window.projectsBackPlane) {
+                    window.projectsScreenMaterial.color.set(0x000000); // Asegurar color negro
+                    window.projectsScreenMaterial.transparent = false;
+                    window.projectsScreenMaterial.opacity = 1.0;
+                    window.projectsScreenMaterial.needsUpdate = true;
+                    window.projectsBackPlane.visible = true;
+                    console.log("Cover negro forzado a visible al apagar pantalla de projects");
+                }
+                
+                // Ocultar el contenido HTML
+                if (window.projectsCssObject && window.projectsCssObject.element) {
+                    window.projectsCssObject.element.style.visibility = 'hidden';
+                    window.projectsCssObject.element.style.pointerEvents = 'none';
                 }
             }
         });
@@ -636,6 +764,106 @@
             }
         }
         
+        // Función para enviar mensaje al iframe de about-me2.html (DUPLICADO)
+        function sendMessageToProjects(action) {
+            console.log(`Intentando enviar mensaje a projects.html: ${action}`);
+            console.log("Estado del iframe de projects:", projectsIframe ? "Encontrado" : "No encontrado");
+            
+            // Si no tenemos el iframe guardado, intentar buscarlo de nuevo
+            if (!projectsIframe) {
+                console.log("Buscando iframe de projects.html...");
+                const iframes = document.querySelectorAll('iframe');
+                console.log("Total de iframes encontrados:", iframes.length);
+                
+                iframes.forEach((iframe, index) => {
+                    console.log(`Iframe ${index}:`, iframe.src || "sin src");
+                    if (iframe.src && iframe.src.includes('projects.html')) {
+                        console.log("Encontrado iframe de projects.html:", iframe);
+                        projectsIframe = iframe;
+                    }
+                });
+            }
+            
+            if (projectsIframe && projectsIframe.contentWindow) {
+                try {
+                    // Asegurarse de que el iframe esté completamente cargado
+                    if (aboutMe2Iframe.contentDocument && aboutMe2Iframe.contentDocument.readyState === 'complete') {
+                        aboutMe2Iframe.contentWindow.postMessage({ action: action }, '*');
+                        console.log(`Mensaje enviado a about-me2.html: ${action}`);
+                        
+                        if (action === 'turnOnScreen') {
+                            aboutMe2ScreenOn = true;
+                            console.log("Pantalla de about-me2 marcada como ENCENDIDA");
+                        } else if (action === 'turnOffScreen') {
+                            aboutMe2ScreenOn = false;
+                            console.log("Pantalla de about-me2 marcada como APAGADA");
+                        }
+                    } else {
+                        console.warn("El iframe de about-me2 no está completamente cargado, esperando...");
+                        // Intentar de nuevo después de un breve retraso
+                        setTimeout(() => sendMessageToAboutMe2(action), 500);
+                    }
+                } catch (e) {
+                    console.error("Error al enviar mensaje al iframe de about-me2:", e);
+                }
+            } else {
+                console.warn("No se encontró el iframe de about-me2.html o su contentWindow");
+                if (aboutMe2Iframe) {
+                    console.log("iframe de about-me2 encontrado pero sin contentWindow");
+                }
+            }
+        }
+        
+        // Función para enviar mensaje al iframe de projects.html (Sistema Projects)
+        function sendMessageToProjects(action) {
+            console.log(`Intentando enviar mensaje a projects.html: ${action}`);
+            console.log("Estado del iframe de projects:", projectsIframe ? "Encontrado" : "No encontrado");
+            
+            // Si no tenemos el iframe guardado, intentar buscarlo de nuevo
+            if (!projectsIframe) {
+                console.log("Buscando iframe de projects.html...");
+                const iframes = document.querySelectorAll('iframe');
+                console.log("Total de iframes encontrados:", iframes.length);
+                
+                iframes.forEach((iframe, index) => {
+                    console.log(`Iframe ${index}:`, iframe.src || "sin src");
+                    if (iframe.src && iframe.src.includes('projects.html')) {
+                        console.log("Encontrado iframe de projects.html:", iframe);
+                        projectsIframe = iframe;
+                    }
+                });
+            }
+            
+            if (projectsIframe && projectsIframe.contentWindow) {
+                try {
+                    // Asegurarse de que el iframe esté completamente cargado
+                    if (projectsIframe.contentDocument && projectsIframe.contentDocument.readyState === 'complete') {
+                        projectsIframe.contentWindow.postMessage({ action: action }, '*');
+                        console.log(`Mensaje enviado a projects.html: ${action}`);
+                        
+                        if (action === 'turnOnScreen') {
+                            projectsScreenOn = true;
+                            console.log("Pantalla de projects marcada como ENCENDIDA");
+                        } else if (action === 'turnOffScreen') {
+                            projectsScreenOn = false;
+                            console.log("Pantalla de projects marcada como APAGADA");
+                        }
+                    } else {
+                        console.warn("El iframe de projects no está completamente cargado, esperando...");
+                        // Intentar de nuevo después de un breve retraso
+                        setTimeout(() => sendMessageToProjects(action), 500);
+                    }
+                } catch (e) {
+                    console.error("Error al enviar mensaje al iframe de projects:", e);
+                }
+            } else {
+                console.warn("No se encontró el iframe de projects.html o su contentWindow");
+                if (projectsIframe) {
+                    console.log("iframe de projects encontrado pero sin contentWindow");
+                }
+            }
+        }
+        
         // Función para verificar si un punto está dentro del plano de about-me
         function isPointInAboutMePlane(point) {
             // Si no tenemos referencia al plano, no podemos verificar
@@ -679,6 +907,222 @@
             // Usamos un umbral para dar un poco de tolerancia en el ángulo
             const threshold = 0.1; // Permite hasta ~84 grados de ángulo
             return dotProduct > threshold;
+        }
+        
+        // =============================================
+        // FUNCIONES DUPLICADAS PARA EL SEGUNDO PLANO 
+        // =============================================
+        
+        // Función para verificar si un punto está dentro del plano de about-me2
+        function isPointInAboutMe2Plane(point) {
+            // Si no tenemos referencia al plano, no podemos verificar
+            if (!window.brownPlane2) {
+                return false;
+            }
+            
+            // Guardar referencia al plano de about-me2
+            aboutMe2Plane = window.brownPlane2;
+            
+            // Crear un raycaster desde la cámara hasta el punto del clic
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(point, camera);
+            
+            // Verificar si el rayo intersecta con el plano de about-me2
+            const intersects = raycaster.intersectObject(aboutMe2Plane);
+            
+            // Si hay intersecciones, el clic fue en el plano
+            return intersects.length > 0;
+        }
+        
+        // Función para verificar si la cámara está viendo el plano de about-me2 desde el frente
+        function isAboutMe2PlaneVisibleFromFront() {
+            if (!window.brownPlane2 || !camera) {
+                return false;
+            }
+            
+            // Obtener la normal del plano (dirección hacia donde "mira" el plano)
+            // Invertimos la normal para que apunte hacia el lado correcto
+            const planeNormal = new THREE.Vector3(0, 0, -1); // Normal invertida
+            planeNormal.applyQuaternion(window.brownPlane2.quaternion); // Aplicar rotación del plano
+            
+            // Obtener la dirección desde el plano hacia la cámara
+            const cameraDirection = new THREE.Vector3();
+            cameraDirection.subVectors(camera.position, window.brownPlane2.position).normalize();
+            
+            // Calcular el ángulo entre la normal del plano y la dirección de la cámara
+            const dotProduct = planeNormal.dot(cameraDirection);
+            
+            // Si el producto punto es positivo, la cámara está viendo el frente del plano
+            // Usamos un umbral para dar un poco de tolerancia en el ángulo
+            const threshold = 0.1; // Permite hasta ~84 grados de ángulo
+            return dotProduct > threshold;
+        }
+        
+        // Función para actualizar la visibilidad del about-me2 basada en la orientación
+        function updateAboutMe2Visibility() {
+            if (!window.aboutMe2ScreenMaterial || !window.aboutMe2BackPlane) {
+                return;
+            }
+            
+            const isVisibleFromFront = isAboutMe2PlaneVisibleFromFront();
+            
+            // Siempre mostrar/ocultar el plano completo basado en la orientación
+            if (isVisibleFromFront) {
+                window.aboutMe2BackPlane.visible = true;
+                
+                // LÓGICA DEL COVER NEGRO
+                if (!aboutMe2ButtonClicked) {
+                    // Si el botón NO ha sido clickeado, mantener el cover negro visible
+                    window.aboutMe2ScreenMaterial.color.set(0x000000); // Negro
+                    window.aboutMe2ScreenMaterial.transparent = false;
+                    window.aboutMe2ScreenMaterial.opacity = 1.0;
+                    window.aboutMe2ScreenMaterial.needsUpdate = true;
+                    console.log("Cover negro visible (botón NO clickeado) - about-me2");
+                } else {
+                    // Si el botón SÍ ha sido clickeado, hacer transparente el cover
+                    window.aboutMe2ScreenMaterial.transparent = true;
+                    window.aboutMe2ScreenMaterial.opacity = 0.0;
+                    window.aboutMe2ScreenMaterial.needsUpdate = true;
+                    console.log("Cover negro transparente (botón SÍ clickeado) - about-me2");
+                }
+                
+                // LÓGICA DEL CONTENIDO HTML
+                if (aboutMe2ButtonClicked && window.aboutMe2CssObject && window.aboutMe2CssObject.element && isAboutMe2PlaneVisibleFromFront()) {
+                    window.aboutMe2CssObject.element.style.visibility = 'visible';
+                    window.aboutMe2CssObject.element.style.pointerEvents = 'auto';
+                    console.log("Contenido HTML visible (botón clickeado y visible desde frente) - about-me2");
+                } else {
+                    if (window.aboutMe2CssObject && window.aboutMe2CssObject.element) {
+                        window.aboutMe2CssObject.element.style.visibility = 'hidden';
+                        window.aboutMe2CssObject.element.style.pointerEvents = 'none';
+                        console.log("Contenido HTML oculto - about-me2");
+                    }
+                }
+                
+                // Si la pantalla se puede ver desde el frente Y el botón ha sido clickeado Y la pantalla está encendida
+                if (isVisibleFromFront && aboutMe2ButtonClicked && aboutMe2ScreenOn) {
+                    console.log("Plano about-me2 completamente activo y visible desde el frente");
+                }
+            } else {
+                // No visible desde el frente - ocultar todo
+                window.aboutMe2BackPlane.visible = false;
+                if (window.aboutMe2CssObject && window.aboutMe2CssObject.element) {
+                    window.aboutMe2CssObject.element.style.visibility = 'hidden';
+                    window.aboutMe2CssObject.element.style.pointerEvents = 'none';
+                }
+                console.log("Plano about-me2 no visible desde el frente - oculto");
+            }
+        }
+        
+        // =============================================
+        // FUNCIONES PARA EL SISTEMA DE PROJECTS
+        // =============================================
+        
+        // Función para verificar si un punto está dentro del plano de projects
+        function isPointInProjectsPlane(point) {
+            // Si no tenemos referencia al plano, no podemos verificar
+            if (!window.projectsPlane) {
+                return false;
+            }
+            
+            // Crear un raycaster desde la cámara hasta el punto del clic
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(point, camera);
+            
+            // Verificar si el rayo intersecta con el plano de projects
+            const intersects = raycaster.intersectObject(window.projectsPlane);
+            
+            // Si hay intersecciones, el clic fue en el plano
+            return intersects.length > 0;
+        }
+        
+        // Función para verificar si la cámara está viendo el plano de projects desde el frente
+        function isProjectsPlaneVisibleFromFront() {
+            if (!window.projectsPlane || !camera) {
+                return false;
+            }
+            
+            // Obtener la normal del plano (dirección hacia donde "mira" el plano)
+            // Invertimos la normal para que apunte hacia el lado correcto
+            const planeNormal = new THREE.Vector3(0, 0, -1); // Normal invertida
+            planeNormal.applyQuaternion(window.projectsPlane.quaternion); // Aplicar rotación del plano
+            
+            // Obtener la dirección desde el plano hacia la cámara
+            const cameraDirection = new THREE.Vector3();
+            cameraDirection.subVectors(camera.position, window.projectsPlane.position).normalize();
+            
+            // Calcular el ángulo entre la normal del plano y la dirección de la cámara
+            const dotProduct = planeNormal.dot(cameraDirection);
+            
+            // Si el producto punto es positivo, la cámara está viendo el frente del plano
+            // Usamos un umbral para dar un poco de tolerancia en el ángulo
+            const threshold = 0.1; // Permite hasta ~84 grados de ángulo
+            return dotProduct > threshold;
+        }
+        
+        // Función para actualizar la visibilidad del projects basada en la orientación
+        function updateProjectsVisibility() {
+            if (!window.projectsScreenMaterial || !window.projectsBackPlane) {
+                return;
+            }
+            
+            const isVisibleFromFront = isProjectsPlaneVisibleFromFront();
+            
+            // Siempre mostrar/ocultar el plano completo basado en la orientación
+            if (isVisibleFromFront) {
+                window.projectsBackPlane.visible = true;
+                
+                // LÓGICA DEL COVER NEGRO
+                if (!projectsButtonClicked) {
+                    // Si el botón NO ha sido clickeado, mantener el cover negro visible
+                    window.projectsScreenMaterial.color.set(0x000000); // Negro
+                    window.projectsScreenMaterial.transparent = false;
+                    window.projectsScreenMaterial.opacity = 1.0;
+                    window.projectsScreenMaterial.needsUpdate = true;
+                    console.log("Cover negro visible (botón NO clickeado) - projects");
+                } else {
+                    // Si el botón SÍ ha sido clickeado, hacer transparente el cover
+                    window.projectsScreenMaterial.transparent = true;
+                    window.projectsScreenMaterial.opacity = 0.0;
+                    window.projectsScreenMaterial.needsUpdate = true;
+                    console.log("Cover negro transparente (botón SÍ clickeado) - projects");
+                }
+                
+                // LÓGICA DEL CONTENIDO HTML
+                if (projectsButtonClicked && window.projectsCssObject && window.projectsCssObject.element && isProjectsPlaneVisibleFromFront()) {
+                    window.projectsCssObject.element.style.visibility = 'visible';
+                    window.projectsCssObject.element.style.pointerEvents = 'auto';
+                    console.log("Contenido HTML visible (botón clickeado y visible desde frente) - projects");
+                } else {
+                    if (window.projectsCssObject && window.projectsCssObject.element) {
+                        window.projectsCssObject.element.style.visibility = 'hidden';
+                        window.projectsCssObject.element.style.pointerEvents = 'none';
+                        console.log("Contenido HTML oculto - projects");
+                    }
+                }
+                
+                // Si la pantalla se puede ver desde el frente Y el botón ha sido clickeado Y la pantalla está encendida
+                if (isVisibleFromFront && projectsButtonClicked && projectsScreenOn) {
+                    console.log("Plano projects completamente activo y visible desde el frente");
+                }
+            } else {
+                // No visible desde el frente - pero mantener el cover negro visible
+                // Solo ocultar el contenido HTML, no el plano negro
+                if (window.projectsCssObject && window.projectsCssObject.element) {
+                    window.projectsCssObject.element.style.visibility = 'hidden';
+                    window.projectsCssObject.element.style.pointerEvents = 'none';
+                }
+                
+                // Mantener el cover negro visible pero asegurar que esté negro
+                if (window.projectsBackPlane && window.projectsScreenMaterial) {
+                    window.projectsBackPlane.visible = true; // Mantener visible
+                    window.projectsScreenMaterial.color.set(0x000000); // Asegurar que esté negro
+                    window.projectsScreenMaterial.transparent = false;
+                    window.projectsScreenMaterial.opacity = 1.0;
+                    window.projectsScreenMaterial.needsUpdate = true;
+                }
+                console.log("Plano projects no visible desde el frente - contenido HTML oculto pero cover negro mantenido");
+            }
         }
         
         // Función para actualizar la visibilidad del about-me basada en la orientación
@@ -1110,6 +1554,39 @@
                 
                 // Procesar la pantalla de información personal
                 // El código para desactivar la pantalla personal ha sido eliminado
+                
+                // ===============================================
+                // PROCESAR EL SISTEMA DE PROJECTS
+                // ===============================================
+                
+                // Verificar si el clic fue en el plano de projects
+                let clickedOnProjects = false;
+                if (window.projectsPlane) {
+                    const projectsIntersects = raycaster.intersectObject(window.projectsPlane);
+                    if (projectsIntersects.length > 0) {
+                        clickedOnProjects = true;
+                        console.log("Click detectado en el plano de projects");
+                        
+                        // Toggle del estado del botón de projects
+                        projectsButtonClicked = !projectsButtonClicked;
+                        console.log("Projects button toggled:", projectsButtonClicked ? "ACTIVADO" : "DESACTIVADO");
+                        
+                        if (projectsButtonClicked) {
+                            // Activar la pantalla de projects
+                            activateProjectsScreen();
+                        } else {
+                            // Desactivar la pantalla de projects
+                            deactivateProjectsScreen();
+                        }
+                    }
+                }
+                
+                // Si el clic no fue en el plano de projects y la pantalla está activa, desactivarla
+                if (!clickedOnProjects && projectsButtonClicked) {
+                    console.log("Click fuera del plano de projects - desactivando pantalla");
+                    projectsButtonClicked = false;
+                    deactivateProjectsScreen();
+                }
             });
             
             // Iniciar bucle de animación
@@ -1120,6 +1597,55 @@
             
             // Crear el plano blanco con las coordenadas especificadas
             createWhitePlane();
+            
+            // Crear el plano de Projects (anteriormente about-me2)
+            createProjectsPlane();
+            
+            // Asegurar que el estado inicial de projects esté correcto
+            setTimeout(function() {
+                console.log("Inicializando estado predeterminado de projects con cover negro");
+                if (window.aboutMe2ScreenMaterial && window.aboutMe2BackPlane) {
+                    // Forzar el estado inicial: cover negro visible, contenido oculto
+                    window.aboutMe2ScreenMaterial.color.set(0x000000);
+                    window.aboutMe2ScreenMaterial.transparent = false;
+                    window.aboutMe2ScreenMaterial.opacity = 1.0;
+                    window.aboutMe2ScreenMaterial.needsUpdate = true;
+                    window.aboutMe2BackPlane.visible = true;
+                    
+                    // Asegurar que el contenido HTML esté oculto inicialmente
+                    if (window.aboutMe2CssObject && window.aboutMe2CssObject.element) {
+                        window.aboutMe2CssObject.element.style.visibility = 'hidden';
+                        window.aboutMe2CssObject.element.style.pointerEvents = 'none';
+                    }
+                    
+                    console.log("Estado inicial de projects configurado: cover negro visible");
+                }
+            }, 1500); // Dar tiempo suficiente para que todo se inicialice
+            
+            // Activar automáticamente el segundo plano después de 3 segundos (opcional)
+            setTimeout(function() {
+                console.log("Activando automáticamente el segundo plano About Me");
+                aboutMe2ButtonClicked = true;
+                
+                // Hacer transparente el cover negro del segundo plano
+                if (window.aboutMe2ScreenMaterial) {
+                    window.aboutMe2ScreenMaterial.transparent = true;
+                    window.aboutMe2ScreenMaterial.opacity = 0.0;
+                    window.aboutMe2ScreenMaterial.needsUpdate = true;
+                    console.log("Cover negro del segundo plano hecho transparente automáticamente");
+                }
+                
+                // Activar contenido HTML si es visible desde el frente
+                if (window.aboutMe2CssObject && window.aboutMe2CssObject.element && isAboutMe2PlaneVisibleFromFront()) {
+                    window.aboutMe2CssObject.element.style.visibility = 'visible';
+                    window.aboutMe2CssObject.element.style.pointerEvents = 'auto';
+                }
+                
+                // Enviar mensaje al iframe para encender la pantalla
+                setTimeout(function() {
+                    sendMessageToProjects('turnOnScreen');
+                }, 500);
+            }, 3000);
         }
         
         function setupCoordinateSystem() {
@@ -1389,6 +1915,14 @@
                                 startFirstButtonCameraAnimation();
                             });
                             console.log("Evento de clic añadido al primer botón");
+                            
+                            // El segundo botón es el de carpeta (projects)
+                            const projectsButton = buttons[1]; // Índice 1 (el segundo botón - carpeta)
+                            projectsButton.addEventListener('click', function() {
+                                // Iniciar la animación de la cámara hacia el punto específico para projects
+                                startProjectsButtonCameraAnimation();
+                            });
+                            console.log("Evento de clic añadido al botón de projects");
                             
                             // El quinto botón es el que tiene el icono de servicios
                             const serviceButton = buttons[4]; // Índice 4 (el quinto botón, contando desde 0)
@@ -2042,6 +2576,195 @@
             console.log("Mirando hacia:", lookAtPoint);
         }
         
+        // Función para iniciar la animación de la cámara hacia el punto específico cuando se hace clic en el botón de projects (carpetas)
+        function startProjectsButtonCameraAnimation() {
+            // Coordenadas específicas a las que queremos mover la cámara (relativas al origen personalizado)
+            // Coordenadas proporcionadas: Cámara: X: -1.94, Y: 6.09, Z: 5.46
+            const targetCameraPos = new THREE.Vector3(-1.94, 6.09, 5.46);
+            
+            // Convertir coordenadas relativas a absolutas (sumando el offset)
+            const absoluteTargetPos = new THREE.Vector3().copy(targetCameraPos).add(originOffset);
+            
+            // Posición actual de la cámara
+            const currentCameraPos = new THREE.Vector3().copy(camera.position);
+            
+            // Punto específico al que mirará la cámara
+            // Coordenadas proporcionadas: Objetivo: X: -5.43, Y: 5.69, Z: 12.08
+            const lookAtPoint = new THREE.Vector3(-5.43, 5.69, 12.08).add(originOffset);
+            
+            console.log("Coordenadas objetivo para botón de projects (relativas):", targetCameraPos);
+            console.log("Coordenadas objetivo para botón de projects (absolutas):", absoluteTargetPos);
+            
+            // Marcar que el botón de projects ha sido clickeado
+            projectsButtonClicked = true;
+            console.log("Botón de projects clickeado - Cover negro se quitará cuando se active la pantalla");
+            
+            // Activar la pantalla de projects
+            console.log("Enviando mensaje para activar pantalla de projects desde startProjectsButtonCameraAnimation");
+            
+            // Cambiar el color del plano negro de projects a transparente (encender la pantalla)
+            // Solo si el botón ha sido clickeado (que ya se marcó arriba)
+            if (projectsButtonClicked && window.aboutMe2ScreenMaterial) {
+                window.aboutMe2ScreenMaterial.transparent = true;
+                window.aboutMe2ScreenMaterial.opacity = 0.0;
+                window.aboutMe2ScreenMaterial.needsUpdate = true;
+                console.log("Cover negro de projects hecho transparente inmediatamente por clic del botón");
+            }
+            
+            // Mostrar el contenido HTML si está visible desde el frente
+            if (projectsButtonClicked && window.aboutMe2CssObject && window.aboutMe2CssObject.element && isAboutMe2PlaneVisibleFromFront()) {
+                window.aboutMe2CssObject.element.style.visibility = 'visible';
+                window.aboutMe2CssObject.element.style.pointerEvents = 'auto';
+                console.log("Contenido HTML de projects activado por clic del botón");
+            }
+            
+            // Enviar mensaje para activar la pantalla después de un pequeño retraso
+            setTimeout(function() {
+                console.log("Enviando mensaje para activar pantalla de projects");
+                sendMessageToProjects('turnOnScreen');
+                
+                // Intentar de nuevo después de un breve retraso por si acaso
+                setTimeout(function() {
+                    console.log("Enviando mensaje de activación de pantalla de projects de nuevo (por si acaso)");
+                    sendMessageToProjects('turnOnScreen');
+                }, 1000);
+            }, 500);
+            
+            // Configurar la animación
+            cameraAnimation.enabled = true;
+            cameraAnimation.startTime = Date.now();
+            cameraAnimation.duration = 1798; // Usar la misma duración que las otras animaciones
+            cameraAnimation.initialPosition.copy(currentCameraPos);
+            cameraAnimation.targetPosition.copy(absoluteTargetPos);
+            cameraAnimation.initialTarget.copy(controls.target);
+            cameraAnimation.finalTarget.copy(lookAtPoint);
+            
+            // Crear una trayectoria directa entre la posición actual y la posición objetivo
+            cameraAnimation.waypoints = [];
+            cameraAnimation.waypoints.push(new THREE.Vector3().copy(currentCameraPos));
+            
+            // Número de puntos intermedios para una trayectoria suave
+            const numWaypoints = 20;
+            
+            for (let i = 1; i < numWaypoints; i++) {
+                const t = i / numWaypoints;
+                const waypoint = new THREE.Vector3().lerpVectors(currentCameraPos, absoluteTargetPos, t);
+                cameraAnimation.waypoints.push(waypoint);
+            }
+            
+            // Asegurarse de que el último punto sea exactamente las coordenadas objetivo
+            cameraAnimation.waypoints.push(new THREE.Vector3().copy(absoluteTargetPos));
+            
+            // Guardar el estado original de los controles
+            cameraAnimation.originalControlsEnabled = controls.enabled;
+            
+            // Desactivar los controles durante la animación
+            controls.enabled = false;
+            
+            // Ocultar las coordenadas durante la animación
+            const coordDisplay = document.getElementById('coordinates-display');
+            coordDisplay.style.display = 'none';
+            
+            console.log("Iniciando animación de cámara hacia el punto específico para el botón de projects");
+            console.log("Posición inicial:", currentCameraPos);
+            console.log("Posición final:", absoluteTargetPos);
+            console.log("Mirando hacia:", lookAtPoint);
+        }
+        
+        // ===============================================
+        // FUNCIÓN DUPLICADA PARA EL SEGUNDO ABOUT ME
+        // ===============================================
+        
+        function startSecondAboutMeCameraAnimation() {
+            // Coordenadas específicas para el segundo plano About Me (solo como ejemplo, puedes usar las mismas o diferentes)
+            const targetCameraPos = new THREE.Vector3(-4.88, 5.26, 6.33); // Puedes cambiar estas coordenadas si quieres una vista diferente
+            
+            // Convertir coordenadas relativas a absolutas (sumando el offset)
+            const absoluteTargetPos = new THREE.Vector3().copy(targetCameraPos).add(originOffset);
+            
+            // Posición actual de la cámara
+            const currentCameraPos = new THREE.Vector3().copy(camera.position);
+            
+            // Punto específico al que mirará la cámara para el segundo plano
+            const lookAtPoint = new THREE.Vector3(-3.075, 5.995, 7.66).add(originOffset); // Centro aproximado del segundo plano
+            
+            console.log("Coordenadas objetivo para segundo about-me (relativas):", targetCameraPos);
+            console.log("Coordenadas objetivo para segundo about-me (absolutas):", absoluteTargetPos);
+            
+            // Marcar que el botón de about-me2 ha sido clickeado
+            aboutMe2ButtonClicked = true;
+            console.log("Segundo about-me activado - Cover negro se quitará cuando se active la pantalla");
+            
+            // Activar la segunda pantalla personal (about-me2.html)
+            console.log("Enviando mensaje para activar segunda pantalla de about-me desde startSecondAboutMeCameraAnimation");
+            
+            // Cambiar el color del plano negro de about-me2 a transparente (encender la pantalla)
+            // Solo si el botón ha sido clickeado (que ya se marcó arriba)
+            if (aboutMe2ButtonClicked && window.aboutMe2ScreenMaterial) {
+                window.aboutMe2ScreenMaterial.transparent = true;
+                window.aboutMe2ScreenMaterial.opacity = 0.0; // Hacer transparente
+                window.aboutMe2ScreenMaterial.needsUpdate = true;
+                console.log("Plano negro de about-me2 hecho transparente - Segunda pantalla encendida");
+            }
+            
+            // Asegurar que el contenido HTML sea visible si estamos viendo desde el frente
+            if (aboutMe2ButtonClicked && window.aboutMe2CssObject && window.aboutMe2CssObject.element && isAboutMe2PlaneVisibleFromFront()) {
+                window.aboutMe2CssObject.element.style.visibility = 'visible';
+                window.aboutMe2CssObject.element.style.pointerEvents = 'auto';
+            }
+            
+            // Esperar un momento para asegurarse de que el iframe esté listo
+            setTimeout(function() {
+                sendMessageToProjects('turnOnScreen');
+                
+                // Intentar de nuevo después de un breve retraso por si acaso
+                setTimeout(function() {
+                    console.log("Enviando mensaje de activación de projects de nuevo (por si acaso)");
+                    sendMessageToProjects('turnOnScreen');
+                }, 1000);
+            }, 500);
+            
+            // Configurar la animación hacia el segundo plano
+            cameraAnimation.enabled = true;
+            cameraAnimation.startTime = Date.now();
+            cameraAnimation.duration = 1798; // Usar la misma duración que la animación del botón de servicios
+            cameraAnimation.initialPosition.copy(currentCameraPos);
+            cameraAnimation.targetPosition.copy(absoluteTargetPos);
+            cameraAnimation.initialTarget.copy(controls.target);
+            cameraAnimation.finalTarget.copy(lookAtPoint);
+            
+            // Crear una trayectoria directa entre la posición actual y la posición objetivo
+            cameraAnimation.waypoints = [];
+            cameraAnimation.waypoints.push(new THREE.Vector3().copy(currentCameraPos));
+            
+            // Número de puntos intermedios para una trayectoria suave
+            const numWaypoints = 20;
+            
+            for (let i = 1; i < numWaypoints; i++) {
+                const t = i / numWaypoints;
+                const waypoint = new THREE.Vector3().lerpVectors(currentCameraPos, absoluteTargetPos, t);
+                cameraAnimation.waypoints.push(waypoint);
+            }
+            
+            // Asegurarse de que el último punto sea exactamente las coordenadas objetivo
+            cameraAnimation.waypoints.push(new THREE.Vector3().copy(absoluteTargetPos));
+            
+            // Guardar el estado original de los controles
+            cameraAnimation.originalControlsEnabled = controls.enabled;
+            
+            // Desactivar los controles durante la animación
+            controls.enabled = false;
+            
+            // Ocultar las coordenadas durante la animación
+            const coordDisplay = document.getElementById('coordinates-display');
+            coordDisplay.style.display = 'none';
+            
+            console.log("Iniciando animación de cámara hacia el segundo plano about-me");
+            console.log("Posición inicial:", currentCameraPos);
+            console.log("Posición final:", absoluteTargetPos);
+            console.log("Mirando hacia:", lookAtPoint);
+        }
+        
         function animate() {
                     requestAnimationFrame(animate);
                     
@@ -2128,6 +2851,12 @@
                     // Actualizar visibilidad del about-me basada en la orientación de la cámara
                     updateAboutMeVisibility();
                     
+                    // Actualizar visibilidad del segundo about-me basada en la orientación de la cámara
+                    updateAboutMe2Visibility();
+                    
+                    // Actualizar visibilidad del projects basada en la orientación de la cámara
+                    updateProjectsVisibility();
+                    
                     // Renderizar escena WebGL
                     renderer.render(scene, camera);
                     
@@ -2139,6 +2868,16 @@
                     // Renderizar escena CSS3D para el about me
                     if (css3dRenderer && window.aboutMeScene) {
                         css3dRenderer.render(window.aboutMeScene, camera);
+                    }
+                    
+                    // Renderizar escena CSS3D para el segundo about me
+                    if (css3dRenderer && window.aboutMe2Scene) {
+                        css3dRenderer.render(window.aboutMe2Scene, camera);
+                    }
+                    
+                    // Renderizar escena CSS3D para el projects
+                    if (css3dRenderer && window.projectsScene) {
+                        css3dRenderer.render(window.projectsScene, camera);
                     }
                     
                     // El código para renderizar la escena CSS3D de información personal ha sido eliminado
@@ -2847,6 +3586,543 @@
                     // You can add more interactivity here if desired
                 }
             });
+        }
+        
+        // ===============================================
+        // FUNCIÓN PARA CREAR EL SEGUNDO PLANO ABOUT ME
+        // ===============================================
+        
+        // Función para configurar el plano de projects como una pantalla interactiva
+        function setupProjectsScreen() {
+                    // Crear una escena CSS3D para el segundo plano café si no existe
+                    if (!window.aboutMe2Scene) {
+                        window.aboutMe2Scene = new THREE.Scene();
+                        console.log("CSS3D Scene para About Me 2 creada");
+                    } else {
+                        // Limpiar escena CSS3D si existe
+                        while(window.aboutMe2Scene.children.length > 0) {
+                            window.aboutMe2Scene.remove(window.aboutMe2Scene.children[0]);
+                        }
+                        console.log("CSS3D Scene para About Me 2 limpiada");
+                    }
+                    
+                    // COORDENADAS EXACTAS proporcionadas por el usuario para el segundo plano
+                    const topLeft = new THREE.Vector3(-1.94, 6.87, 8.25);
+                    const topRight = new THREE.Vector3(-4.21, 6.87, 7.07);
+                    const bottomLeft = new THREE.Vector3(-1.94, 5.12, 8.25);
+                    const bottomRight = new THREE.Vector3(-4.21, 5.12, 7.07);
+                    
+                    // Convertir coordenadas relativas a absolutas (sumando el offset)
+                    const absoluteTopLeft = new THREE.Vector3().copy(topLeft).add(originOffset);
+                    const absoluteTopRight = new THREE.Vector3().copy(topRight).add(originOffset);
+                    const absoluteBottomLeft = new THREE.Vector3().copy(bottomLeft).add(originOffset);
+                    const absoluteBottomRight = new THREE.Vector3().copy(bottomRight).add(originOffset);
+                    
+                    console.log("Coordenadas absolutas para About Me 2:");
+                    console.log("Top Left:", absoluteTopLeft);
+                    console.log("Top Right:", absoluteTopRight);
+                    console.log("Bottom Left:", absoluteBottomLeft);
+                    console.log("Bottom Right:", absoluteBottomRight);
+                    
+                    // Calcular el centro del plano
+                    const center = new THREE.Vector3()
+                        .add(absoluteTopLeft)
+                        .add(absoluteTopRight)
+                        .add(absoluteBottomLeft)
+                        .add(absoluteBottomRight)
+                        .multiplyScalar(0.25);
+                    
+                    // Calcular vectores para la orientación
+                    const vX = new THREE.Vector3().subVectors(absoluteTopRight, absoluteTopLeft).normalize();
+                    const vY = new THREE.Vector3().subVectors(absoluteBottomLeft, absoluteTopLeft).normalize();
+                    const vZ = new THREE.Vector3().crossVectors(vX, vY).normalize();
+                    
+                    // Crear matriz de rotación
+                    const matrix = new THREE.Matrix4();
+                    matrix.makeBasis(vX, vY, vZ);
+                    
+                    // Extraer rotación de la matriz
+                    const rotation = new THREE.Euler().setFromRotationMatrix(matrix);
+                    
+                    // Calcular el ancho y alto del plano
+                    const width = absoluteTopLeft.distanceTo(absoluteTopRight);
+                    const height = absoluteTopLeft.distanceTo(absoluteBottomLeft);
+                    
+                    console.log("Dimensiones del segundo plano:", width, height);
+                    
+                    // Crear un objeto invisible para raycasting
+                    const invisiblePlane = new THREE.Mesh(
+                        new THREE.PlaneGeometry(width, height),
+                        new THREE.MeshBasicMaterial({
+                            color: 0xFFFFFF,
+                            transparent: true,
+                            opacity: 0.0,
+                            side: THREE.FrontSide, // IMPORTANTE: Visible solo desde el frente
+                            depthWrite: false
+                        })
+                    );
+                    
+                    // Posicionar y rotar el plano invisible
+                    invisiblePlane.position.copy(center);
+                    invisiblePlane.rotation.copy(rotation);
+                    
+                    // Guardar referencia global para el raycasting
+                    window.brownPlane2 = invisiblePlane;
+                    
+                    // Añadir el plano invisible a la escena (solo para raycasting)
+                    scene.add(invisiblePlane);
+                    
+                    // Crear un plano negro de fondo similar al del menú de cafés
+                    const aboutMe2BackPlaneMaterial = new THREE.MeshBasicMaterial({
+                        color: 0x000000, // Negro inicialmente (pantalla apagada)
+                        side: THREE.DoubleSide, // Cambiado a DoubleSide para asegurar visibilidad
+                        transparent: false, // Inicialmente NO transparente
+                        opacity: 1.0, // Opacidad completa
+                        depthWrite: true, // Reactivar depthWrite
+                        depthTest: true // Reactivar depthTest para que respete la profundidad
+                    });
+                    
+                    const aboutMe2BackPlane = new THREE.Mesh(
+                        new THREE.PlaneGeometry(width * 0.98, height * 0.98), // Ligeramente más pequeño para mejor ajuste
+                        aboutMe2BackPlaneMaterial
+                    );
+                    
+                    // Guardar referencia al material para poder cambiarlo después
+                    window.aboutMe2ScreenMaterial = aboutMe2BackPlaneMaterial;
+                    window.aboutMe2BackPlane = aboutMe2BackPlane; // Guardar referencia al plano también
+                    
+                    // Posicionar el plano negro exactamente en la misma posición que el plano invisible
+                    aboutMe2BackPlane.position.copy(center);
+                    aboutMe2BackPlane.rotation.copy(rotation);
+                    
+                    // Ajustar ligeramente la posición para mejor alineación
+                    aboutMe2BackPlane.position.x += 0.01; // Pequeño ajuste en X
+                    aboutMe2BackPlane.position.y -= 0.01; // Pequeño ajuste en Y
+                    
+                    // Mover muy ligeramente hacia adelante para que esté justo por encima del contenido
+                    aboutMe2BackPlane.position.z += 0.001; // Reducido el offset para estar más cerca
+                    
+                    // Configurar renderOrder para asegurar que se renderice por encima del contenido HTML
+                    aboutMe2BackPlane.renderOrder = 10; // Valor moderado, no tan alto
+                    
+                    // Añadir el plano negro a la escena
+                    scene.add(aboutMe2BackPlane);
+                    console.log("Plano negro de fondo para about-me2 añadido a la escena:", aboutMe2BackPlane);
+                    
+                    // Forzar que el cover negro sea visible inicialmente
+                    console.log("Forzando cover negro inicial visible para about-me2");
+                    
+                    // Crear un iframe con el tamaño original
+                    const iframe = document.createElement('iframe');
+                    iframe.style.width = '800px';
+                    iframe.style.height = '606px'; // Aumentado un 1.1% verticalmente (600 * 1.011 = 606) - reducido un 18.9% del 20% original
+                    iframe.style.border = 'none';
+                    iframe.style.overflow = 'hidden';
+                    iframe.style.display = 'block';
+                    iframe.src = 'projects.html'; // Cambié de about-me2.html a projects.html
+                    
+                    // Crear un elemento div para contener el iframe
+                    const div = document.createElement('div');
+                    div.style.width = '800px';
+                    div.style.height = '606px'; // Aumentado un 1.1% verticalmente
+                    div.style.backgroundColor = 'transparent';
+                    div.style.overflow = 'hidden';
+                    div.appendChild(iframe);
+                    
+                    // Crear un objeto CSS3D para el div
+                    const cssObject = new THREE.CSS3DObject(div);
+                    
+                    // Calcular la escala adecuada basada en el tamaño real del plano
+                    const scaleX = width / 800;
+                    const scaleY = height / 606; // Ajustado para la nueva altura
+                    
+                    // Aumentar la escala vertical en un 1.1% adicional para cubrir los huecos
+                    const verticalScaleAdjustment = 1.011; // Reducido de 1.015 a 1.011 (quitando un 0.4% adicional)
+                    
+                    console.log("Factores de escala para about-me2:", scaleX, scaleY);
+                    
+                    // Aplicar la escala calculada con el ajuste vertical
+                    cssObject.scale.set(scaleX, scaleY * verticalScaleAdjustment, 1);
+                    
+                    // Posicionar el objeto CSS3D para que coincida con el plano
+                    cssObject.position.copy(center);
+                    
+                    // Aplicar la rotación del plano
+                    cssObject.rotation.copy(rotation);
+                    
+                    // Ajustar la posición para que coincida con el plano
+                    cssObject.position.z += 0.001; // Pequeño offset para evitar z-fighting
+                    
+                    // Ajustar la posición vertical para centrar el contenido extendido
+                    cssObject.position.y -= 0.003; // Ajuste mínimo para compensar la menor extensión vertical
+            
+            console.log("Posición final del CSS3D para about-me2:", cssObject.position);
+            console.log("Rotación final del CSS3D para about-me2:", cssObject.rotation);
+            
+            console.log("Posición del objeto CSS3D para about-me2:", cssObject.position);
+            console.log("Rotación del objeto CSS3D para about-me2:", cssObject.rotation);
+            
+            // Añadir el objeto CSS3D a la escena CSS3D del segundo plano
+            window.aboutMe2Scene.add(cssObject);
+            console.log("Objeto CSS3D para About Me 2 añadido a la escena");
+            
+            // Guardar referencia al objeto CSS3D para control de visibilidad
+            window.aboutMe2CssObject = cssObject;
+            
+            // Configurar evento de clic para el plano
+            invisiblePlane.userData.clickable = true;
+            
+            console.log("Segundo plano café interactivo creado con las coordenadas especificadas");
+            console.log("Posición del segundo plano:", center);
+            console.log("Rotación del segundo plano:", rotation);
+            
+            return invisiblePlane;
+        }
+        
+        // Function to create the projects HTML plane (formerly second about me)
+        function createProjectsPlane() {
+            // Inicializar CSS3DRenderer si no existe
+            if (!css3dRenderer) {
+                css3dRenderer = new THREE.CSS3DRenderer();
+                css3dRenderer.setSize(window.innerWidth, window.innerHeight);
+                css3dRenderer.domElement.style.position = 'absolute';
+                css3dRenderer.domElement.style.top = '0';
+                css3dRenderer.domElement.style.pointerEvents = 'none'; // Evitar que interfiera con los controles
+                document.body.appendChild(css3dRenderer.domElement);
+                console.log("CSS3D Renderer creado para el segundo plano café");
+            }
+            
+            // Configurar el plano invisible para la pantalla interactiva
+            const invisiblePlane = setupProjectsScreen(); // Cambié de setupAboutMe2Screen
+            
+            // Asegurar que el cover negro esté visible inicialmente - múltiples intentos
+            setTimeout(function() {
+                if (window.aboutMe2ScreenMaterial && window.aboutMe2BackPlane) {
+                    window.aboutMe2ScreenMaterial.color.set(0x000000); // Asegurar color negro
+                    window.aboutMe2ScreenMaterial.transparent = false;
+                    window.aboutMe2ScreenMaterial.opacity = 1.0;
+                    window.aboutMe2ScreenMaterial.needsUpdate = true;
+                    window.aboutMe2BackPlane.visible = true;
+                    console.log("Cover negro inicializado como visible para about-me2 - primer intento");
+                }
+            }, 100);
+            
+            // Segundo intento por si acaso
+            setTimeout(function() {
+                if (window.aboutMe2ScreenMaterial && window.aboutMe2BackPlane) {
+                    window.aboutMe2ScreenMaterial.color.set(0x000000);
+                    window.aboutMe2ScreenMaterial.transparent = false;
+                    window.aboutMe2ScreenMaterial.opacity = 1.0;
+                    window.aboutMe2ScreenMaterial.needsUpdate = true;
+                    window.aboutMe2BackPlane.visible = true;
+                    console.log("Cover negro inicializado como visible para about-me2 - segundo intento");
+                }
+            }, 500);
+            
+            // Añadir evento de clic al canvas para interactuar con el plano
+            renderer.domElement.addEventListener('click', function(event) {
+                // Obtener las coordenadas del clic normalizadas (-1 a +1)
+                const mouse = new THREE.Vector2();
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+                
+                // Configurar el raycaster
+                const raycaster = new THREE.Raycaster();
+                raycaster.setFromCamera(mouse, camera);
+                
+                // Check if the click was on the invisible plane (for HTML content interaction)
+                const intersects = raycaster.intersectObject(invisiblePlane);
+                
+                if (intersects.length > 0) {
+                    console.log("Click on the second HTML content plane (about-me2)");
+                    // You can add more interactivity here if desired
+                }
+            });
+        }
+        
+        // ===============================================
+        // FUNCIÓN PARA CREAR EL PLANO DE PROJECTS
+        // ===============================================
+        
+        // Función para configurar el plano de projects como una pantalla interactiva
+        function setupProjectsScreen() {
+                    // Crear una escena CSS3D para el plano de projects si no existe
+                    if (!window.projectsScene) {
+                        window.projectsScene = new THREE.Scene();
+                        console.log("CSS3D Scene para Projects creada");
+                    } else {
+                        // Limpiar escena CSS3D si existe
+                        while(window.projectsScene.children.length > 0) {
+                            window.projectsScene.remove(window.projectsScene.children[0]);
+                        }
+                        console.log("CSS3D Scene para Projects limpiada");
+                    }
+                    
+                    // COORDENADAS PARA EL PLANO DE PROJECTS (CORREGIDO - agrandando correctamente)
+                    const topLeft = new THREE.Vector3(-1.906, 6.8861, 8.25); // Esquina superior izquierda (menos negativo = más a la derecha)
+                    const topRight = new THREE.Vector3(-4.244, 6.8561, 7.06); // Esquina superior derecha (más negativo = más a la izquierda) 
+                    const bottomLeft = new THREE.Vector3(-1.906, 5.1061, 8.25); // Esquina inferior izquierda
+                    const bottomRight = new THREE.Vector3(-4.244, 5.1061, 7.06); // Esquina inferior derecha
+                    
+                    // Convertir coordenadas relativas a absolutas (sumando el offset)
+                    const absoluteTopLeft = new THREE.Vector3().copy(topLeft).add(originOffset);
+                    const absoluteTopRight = new THREE.Vector3().copy(topRight).add(originOffset);
+                    const absoluteBottomLeft = new THREE.Vector3().copy(bottomLeft).add(originOffset);
+                    const absoluteBottomRight = new THREE.Vector3().copy(bottomRight).add(originOffset);
+                    
+                    console.log("Coordenadas absolutas para Projects:");
+                    console.log("Top Left:", absoluteTopLeft);
+                    console.log("Top Right:", absoluteTopRight);
+                    console.log("Bottom Left:", absoluteBottomLeft);
+                    console.log("Bottom Right:", absoluteBottomRight);
+                    
+                    // Calcular el centro del plano
+                    const center = new THREE.Vector3()
+                        .add(absoluteTopLeft)
+                        .add(absoluteTopRight)
+                        .add(absoluteBottomLeft)
+                        .add(absoluteBottomRight)
+                        .multiplyScalar(0.25);
+                    
+                    // Calcular vectores para la orientación
+                    const vX = new THREE.Vector3().subVectors(absoluteTopRight, absoluteTopLeft).normalize();
+                    const vY = new THREE.Vector3().subVectors(absoluteBottomLeft, absoluteTopLeft).normalize();
+                    const vZ = new THREE.Vector3().crossVectors(vX, vY).normalize();
+                    
+                    // Crear matriz de rotación
+                    const matrix = new THREE.Matrix4();
+                    matrix.makeBasis(vX, vY, vZ);
+                    
+                    // Extraer rotación de la matriz
+                    const rotation = new THREE.Euler().setFromRotationMatrix(matrix);
+                    
+                    // Calcular el ancho y alto del plano
+                    const width = absoluteTopLeft.distanceTo(absoluteTopRight);
+                    const height = absoluteTopLeft.distanceTo(absoluteBottomLeft);
+                    
+                    console.log("Dimensiones del plano de projects:", width, height);
+                    
+                    // Crear un objeto invisible para raycasting
+                    const invisiblePlane = new THREE.Mesh(
+                        new THREE.PlaneGeometry(width, height),
+                        new THREE.MeshBasicMaterial({
+                            color: 0xFFFFFF,
+                            transparent: true,
+                            opacity: 0.0,
+                            side: THREE.FrontSide, // IMPORTANTE: Visible solo desde el frente
+                            depthWrite: false
+                        })
+                    );
+                    
+                    // Posicionar y rotar el plano invisible
+                    invisiblePlane.position.copy(center);
+                    invisiblePlane.rotation.copy(rotation);
+                    
+                    // Guardar referencia global para el raycasting
+                    window.projectsPlane = invisiblePlane;
+                    
+                    // Añadir el plano invisible a la escena (solo para raycasting)
+                    scene.add(invisiblePlane);
+                    
+                    // Crear un plano negro de fondo (cover negro inicial)
+                    const projectsBackPlaneMaterial = new THREE.MeshBasicMaterial({
+                        color: 0x000000, // Negro inicialmente (pantalla apagada)
+                        side: THREE.DoubleSide, // Cambiado a DoubleSide para asegurar visibilidad
+                        transparent: false, // Inicialmente NO transparente
+                        opacity: 1.0, // Opacidad completa
+                        depthWrite: true, // Reactivar depthWrite
+                        depthTest: true // Reactivar depthTest para que respete la profundidad
+                    });
+                    
+                    const projectsBackPlane = new THREE.Mesh(
+                        new THREE.PlaneGeometry(width, height), // Mismo tamaño exacto que el plano invisible
+                        projectsBackPlaneMaterial
+                    );
+                    
+                    // Guardar referencia al material para poder cambiarlo después
+                    window.projectsScreenMaterial = projectsBackPlaneMaterial;
+                    window.projectsBackPlane = projectsBackPlane; // Guardar referencia al plano también
+                    
+                    // Posicionar el plano negro exactamente en la misma posición que el plano invisible
+                    projectsBackPlane.position.copy(center);
+                    projectsBackPlane.rotation.copy(rotation);
+                    
+                    // Mover muy ligeramente hacia adelante para que esté justo por encima del contenido
+                    projectsBackPlane.position.z += 0.001; // Reducido el offset para estar más cerca
+                    
+                    // Configurar renderOrder para asegurar que se renderice por encima del contenido HTML
+                    projectsBackPlane.renderOrder = 10; // Valor moderado, no tan alto
+                    
+                    // Añadir el plano negro a la escena
+                    scene.add(projectsBackPlane);
+                    console.log("Plano negro de fondo para projects añadido a la escena:", projectsBackPlane);
+                    
+                    // Forzar que el cover negro sea visible inicialmente
+                    console.log("Forzando cover negro inicial visible para projects");
+                    
+                    // Crear un iframe con el tamaño original
+                    const iframe = document.createElement('iframe');
+                    iframe.style.width = '800px';
+                    iframe.style.height = '606px';
+                    iframe.style.border = 'none';
+                    iframe.style.overflow = 'hidden';
+                    iframe.style.display = 'block';
+                    iframe.src = 'projects.html';
+                    
+                    // Crear un elemento div para contener el iframe
+                    const div = document.createElement('div');
+                    div.style.width = '800px';
+                    div.style.height = '606px';
+                    div.style.backgroundColor = 'transparent';
+                    div.style.overflow = 'hidden';
+                    div.appendChild(iframe);
+                    
+                    // Crear un objeto CSS3D para el div
+                    const cssObject = new THREE.CSS3DObject(div);
+                    
+                    // Calcular la escala adecuada basada en el tamaño real del plano
+                    const scaleX = width / 800;
+                    const scaleY = height / 606;
+                    
+                    // Aumentar la escala vertical en un 1.1% adicional para cubrir los huecos
+                    const verticalScaleAdjustment = 1.011;
+                    
+                    console.log("Factores de escala para projects:", scaleX, scaleY);
+                    
+                    // Aplicar la escala calculada con el ajuste vertical
+                    cssObject.scale.set(scaleX, scaleY * verticalScaleAdjustment, 1);
+                    
+                    // Posicionar el objeto CSS3D para que coincida con el plano
+                    cssObject.position.copy(center);
+                    
+                    // Aplicar la rotación del plano
+                    cssObject.rotation.copy(rotation);
+                    
+                    // Ajustar la posición para que coincida con el plano
+                    cssObject.position.z += 0.001; // Pequeño offset para evitar z-fighting
+                    
+                    // Ajustar la posición vertical para centrar el contenido extendido
+                    cssObject.position.y -= 0.003; // Ajuste mínimo para compensar la menor extensión vertical
+            
+            console.log("Posición final del CSS3D para projects:", cssObject.position);
+            console.log("Rotación final del CSS3D para projects:", cssObject.rotation);
+            
+            // Añadir el objeto CSS3D a la escena CSS3D del plano de projects
+            window.projectsScene.add(cssObject);
+            console.log("Objeto CSS3D para Projects añadido a la escena");
+            
+            // Guardar referencia al objeto CSS3D para control de visibilidad
+            window.projectsCssObject = cssObject;
+            
+            // Configurar evento de clic para el plano
+            invisiblePlane.userData.clickable = true;
+            
+            console.log("Plano de projects interactivo creado con las coordenadas especificadas");
+            console.log("Posición del plano de projects:", center);
+            console.log("Rotación del plano de projects:", rotation);
+            
+            return invisiblePlane;
+        }
+        
+        // Function to create the projects HTML plane
+        function createProjectsPlane() {
+            // Inicializar CSS3DRenderer si no existe
+            if (!css3dRenderer) {
+                css3dRenderer = new THREE.CSS3DRenderer();
+                css3dRenderer.setSize(window.innerWidth, window.innerHeight);
+                css3dRenderer.domElement.style.position = 'absolute';
+                css3dRenderer.domElement.style.top = '0';
+                css3dRenderer.domElement.style.pointerEvents = 'none'; // Evitar que interfiera con los controles
+                document.body.appendChild(css3dRenderer.domElement);
+                console.log("CSS3D Renderer creado para el plano de projects");
+            }
+            
+            // Configurar el plano invisible para la pantalla interactiva
+            const invisiblePlane = setupProjectsScreen();
+            
+            // Asegurar que el cover negro esté visible inicialmente
+            setTimeout(function() {
+                if (window.projectsScreenMaterial && window.projectsBackPlane) {
+                    window.projectsScreenMaterial.color.set(0x000000); // Asegurar color negro
+                    window.projectsScreenMaterial.transparent = false;
+                    window.projectsScreenMaterial.opacity = 1.0;
+                    window.projectsScreenMaterial.needsUpdate = true;
+                    window.projectsBackPlane.visible = true;
+                    console.log("Cover negro inicializado como visible para projects - primer intento");
+                }
+            }, 100);
+            
+            // Segundo intento por si acaso
+            setTimeout(function() {
+                if (window.projectsScreenMaterial && window.projectsBackPlane) {
+                    window.projectsScreenMaterial.color.set(0x000000);
+                    window.projectsScreenMaterial.transparent = false;
+                    window.projectsScreenMaterial.opacity = 1.0;
+                    window.projectsScreenMaterial.needsUpdate = true;
+                    window.projectsBackPlane.visible = true;
+                    console.log("Cover negro inicializado como visible para projects - segundo intento");
+                }
+            }, 500);
+            
+            // Forzar la actualización de la visibilidad inicial después de la configuración
+            setTimeout(function() {
+                console.log("Forzando actualización inicial de visibilidad para projects");
+                updateProjectsVisibility();
+            }, 1000);
+            
+            return invisiblePlane;
+        }
+        
+        // Función para activar la pantalla de projects (buenas prácticas)
+        function activateProjectsScreen() {
+            console.log("Activando pantalla de projects...");
+            
+            // Hacer transparente el cover negro
+            if (window.projectsScreenMaterial) {
+                window.projectsScreenMaterial.transparent = true;
+                window.projectsScreenMaterial.opacity = 0.0;
+                window.projectsScreenMaterial.needsUpdate = true;
+                console.log("Cover negro de projects hecho transparente");
+            }
+            
+            // Mostrar contenido HTML si es visible desde el frente
+            if (window.projectsCssObject && window.projectsCssObject.element && isProjectsPlaneVisibleFromFront()) {
+                window.projectsCssObject.element.style.visibility = 'visible';
+                window.projectsCssObject.element.style.pointerEvents = 'auto';
+                console.log("Contenido HTML de projects mostrado");
+            }
+            
+            // Enviar mensaje al iframe para encender la pantalla
+            setTimeout(function() {
+                sendMessageToProjects('turnOnScreen');
+            }, 100);
+        }
+        
+        // Función para desactivar la pantalla de projects (buenas prácticas)
+        function deactivateProjectsScreen() {
+            console.log("Desactivando pantalla de projects...");
+            
+            // Mostrar el cover negro
+            if (window.projectsScreenMaterial && window.projectsBackPlane) {
+                window.projectsScreenMaterial.color.set(0x000000);
+                window.projectsScreenMaterial.transparent = false;
+                window.projectsScreenMaterial.opacity = 1.0;
+                window.projectsScreenMaterial.needsUpdate = true;
+                window.projectsBackPlane.visible = true;
+                console.log("Cover negro de projects restaurado");
+            }
+            
+            // Ocultar contenido HTML
+            if (window.projectsCssObject && window.projectsCssObject.element) {
+                window.projectsCssObject.element.style.visibility = 'hidden';
+                window.projectsCssObject.element.style.pointerEvents = 'none';
+                console.log("Contenido HTML de projects oculto");
+            }
+            
+            // Enviar mensaje al iframe para apagar la pantalla
+            setTimeout(function() {
+                sendMessageToProjects('turnOffScreen');
+            }, 100);
         }
     </script>
 </body>

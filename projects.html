@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Proyectos</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            overflow: hidden;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 0;
+        }
+        
+        .interactive-screen {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            box-sizing: border-box;
+            display: block;
+            margin: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 0;
+            box-shadow: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+        }
+        
+        .content-section {
+            width: 90%;
+            margin: 10px auto;
+            height: auto;
+            display: block;
+            position: relative;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .screen-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .screen-header h1 {
+            margin: 0;
+            color: #ffffff;
+            font-size: 32px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .project-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .project-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+        
+        .project-description {
+            font-size: 14px;
+            color: #e0e0e0;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .project-tech {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .tech-tag {
+            background: rgba(102, 126, 234, 0.8);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .project-links {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .project-link {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 12px;
+            transition: background 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .project-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .filter-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: rgba(102, 126, 234, 0.8);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="interactive-screen">
+        <div class="content-section">
+            <div class="screen-header">
+                <h1>Mis Proyectos</h1>
+            </div>
+            
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">Todos</button>
+                <button class="filter-btn" data-filter="web">Web</button>
+                <button class="filter-btn" data-filter="ai">IA & ML</button>
+                <button class="filter-btn" data-filter="mobile">Mobile</button>
+                <button class="filter-btn" data-filter="automation">Automatización</button>
+            </div>
+            
+            <div class="projects-grid">
+                <div class="project-card" data-category="web">
+                    <div class="project-title">Portfolio 3D Interactivo</div>
+                    <div class="project-description">
+                        Un portfolio inmersivo en 3D desarrollado con Three.js que muestra mis habilidades de manera interactiva. Incluye modelos 3D, animaciones fluidas y un sistema de navegación intuitivo.
+                    </div>
+                    <div class="project-tech">
+                        <span class="tech-tag">Three.js</span>
+                        <span class="tech-tag">WebGL</span>
+                        <span class="tech-tag">CSS3D</span>
+                        <span class="tech-tag">JavaScript</span>
+                    </div>
+                    <div class="project-links">
+                        <a href="#" class="project-link">Ver Demo</a>
+                        <a href="#" class="project-link">Código</a>
+                    </div>
+                </div>
+                
+                <div class="project-card" data-category="ai">
+                    <div class="project-title">Sistema de Prompt Engineering</div>
+                    <div class="project-description">
+                        Framework avanzado para el diseño y optimización de prompts de IA. Incluye técnicas de few-shot learning, chain-of-thought reasoning y fine-tuning de modelos.
+                    </div>
+                    <div class="project-tech">
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">OpenAI API</span>
+                        <span class="tech-tag">LangChain</span>
+                        <span class="tech-tag">TensorFlow</span>
+                    </div>
+                    <div class="project-links">
+                        <a href="#" class="project-link">Ver Proyecto</a>
+                        <a href="#" class="project-link">Documentación</a>
+                    </div>
+                </div>
+                
+                <div class="project-card" data-category="web">
+                    <div class="project-title">E-commerce Full Stack</div>
+                    <div class="project-description">
+                        Plataforma de comercio electrónico completa con React, Node.js y MongoDB. Incluye sistema de pagos, gestión de inventario y panel de administración.
+                    </div>
+                    <div class="project-tech">
+                        <span class="tech-tag">React</span>
+                        <span class="tech-tag">Node.js</span>
+                        <span class="tech-tag">MongoDB</span>
+                        <span class="tech-tag">Stripe</span>
+                    </div>
+                    <div class="project-links">
+                        <a href="#" class="project-link">Ver Demo</a>
+                        <a href="#" class="project-link">GitHub</a>
+                    </div>
+                </div>
+                
+                <div class="project-card" data-category="automation">
+                    <div class="project-title">Bot de Trading Automatizado</div>
+                    <div class="project-description">
+                        Sistema de trading algorítmico que utiliza machine learning para analizar patrones de mercado y ejecutar operaciones automáticamente.
+                    </div>
+                    <div class="project-tech">
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">Pandas</span>
+                        <span class="tech-tag">Scikit-learn</span>
+                        <span class="tech-tag">APIs</span>
+                    </div>
+                    <div class="project-links">
+                        <a href="#" class="project-link">Ver Resultados</a>
+                        <a href="#" class="project-link">Código</a>
+                    </div>
+                </div>
+                
+                <div class="project-card" data-category="mobile">
+                    <div class="project-title">App de Productividad</div>
+                    <div class="project-description">
+                        Aplicación móvil cross-platform para gestión de tareas y productividad personal con sincronización en tiempo real y notificaciones inteligentes.
+                    </div>
+                    <div class="project-tech">
+                        <span class="tech-tag">React Native</span>
+                        <span class="tech-tag">Firebase</span>
+                        <span class="tech-tag">Redux</span>
+                        <span class="tech-tag">TypeScript</span>
+                    </div>
+                    <div class="project-links">
+                        <a href="#" class="project-link">App Store</a>
+                        <a href="#" class="project-link">Play Store</a>
+                    </div>
+                </div>
+                
+                <div class="project-card" data-category="ai">
+                    <div class="project-title">Chatbot Conversacional</div>
+                    <div class="project-description">
+                        Asistente virtual inteligente con procesamiento de lenguaje natural avanzado, capaz de mantener conversaciones contextuales y realizar tareas específicas.
+                    </div>
+                    <div class="project-tech">
+                        <span class="tech-tag">NLP</span>
+                        <span class="tech-tag">Transformers</span>
+                        <span class="tech-tag">BERT</span>
+                        <span class="tech-tag">FastAPI</span>
+                    </div>
+                    <div class="project-links">
+                        <a href="#" class="project-link">Probar Bot</a>
+                        <a href="#" class="project-link">Documentación</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Rotate 180 degrees and flip horizontally (scaleX(-1))
+            document.body.style.transform = 'rotate(180deg) scaleX(-1)';
+            
+            // Filter functionality
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const projectCards = document.querySelectorAll('.project-card');
+            
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remove active class from all buttons
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    // Add active class to clicked button
+                    button.classList.add('active');
+                    
+                    const filter = button.getAttribute('data-filter');
+                    
+                    projectCards.forEach(card => {
+                        if (filter === 'all' || card.getAttribute('data-category') === filter) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            });
+            
+            // Screen control is now handled by the 3D plane in the main scene
+            let isActive = false;
+            
+            // Check if page is in an iframe
+            function isInIframe() {
+                try {
+                    return window.self !== window.top;
+                } catch (e) {
+                    return true;
+                }
+            }
+            
+            // Listen for messages from the parent window
+            window.addEventListener('message', function(event) {
+                console.log("Message received in projects.html:", event.data);
+                
+                if (event.data && event.data.action === 'turnOnScreen') {
+                    console.log("Received message to turn on projects screen");
+                    isActive = true;
+                    
+                    // Send confirmation back to parent
+                    try {
+                        window.parent.postMessage({ action: 'projectsScreenTurnedOn' }, '*');
+                        console.log("Sent confirmation that projects screen was turned on");
+                    } catch (e) {
+                        console.error("Error sending confirmation to parent:", e);
+                    }
+                }
+                
+                if (event.data && event.data.action === 'turnOffScreen') {
+                    console.log("Received message to turn off projects screen");
+                    isActive = false;
+                    
+                    // Send confirmation back to parent
+                    try {
+                        window.parent.postMessage({ action: 'projectsScreenTurnedOff' }, '*');
+                        console.log("Sent confirmation that projects screen was turned off");
+                    } catch (e) {
+                        console.error("Error sending confirmation to parent:", e);
+                    }
+                }
+            });
+            
+            // Send ready message to parent
+            if (isInIframe()) {
+                try {
+                    window.parent.postMessage({ action: 'projectsReady' }, '*');
+                    console.log("Sent ready message to parent");
+                } catch (e) {
+                    console.error("Error sending message to parent:", e);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
