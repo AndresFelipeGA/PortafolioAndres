@@ -2014,6 +2014,14 @@
                             });
                             console.log("Evento de clic añadido al botón de projects");
                             
+                            // El tercer botón es el de mensajes/contacto
+                            const messagesButton = buttons[2]; // Índice 2 (el tercer botón - mensajes)
+                            messagesButton.addEventListener('click', function() {
+                                // Iniciar la animación de la cámara hacia el punto específico para mensajes
+                                startMessagesButtonCameraAnimation();
+                            });
+                            console.log("Evento de clic añadido al botón de mensajes");
+                            
                             // El quinto botón es el que tiene el icono de servicios
                             const serviceButton = buttons[4]; // Índice 4 (el quinto botón, contando desde 0)
                             serviceButton.addEventListener('click', function() {
@@ -2756,6 +2764,66 @@
             coordDisplay.style.display = 'none';
             
             console.log("Iniciando animación de cámara hacia el punto específico para el botón de projects");
+            console.log("Posición inicial:", currentCameraPos);
+            console.log("Posición final:", absoluteTargetPos);
+            console.log("Mirando hacia:", lookAtPoint);
+        }
+        
+        // Función para iniciar la animación de la cámara hacia el punto específico cuando se hace clic en el botón de mensajes (tercer botón)
+        function startMessagesButtonCameraAnimation() {
+            // Coordenadas específicas a las que queremos mover la cámara (relativas al origen personalizado)
+            // Coordenadas actualizadas: Cámara: X: 0.55, Y: 6.99, Z: 5.60
+            const targetCameraPos = new THREE.Vector3(0.55, 6.99, 5.60);
+            
+            // Convertir coordenadas relativas a absolutas (sumando el offset)
+            const absoluteTargetPos = new THREE.Vector3().copy(targetCameraPos).add(originOffset);
+            
+            // Posición actual de la cámara
+            const currentCameraPos = new THREE.Vector3().copy(camera.position);
+            
+            // Punto específico al que mirará la cámara
+            // Coordenadas actualizadas: Objetivo: X: 0.58, Y: 4.08, Z: 12.51
+            const lookAtPoint = new THREE.Vector3(0.58, 4.08, 12.51).add(originOffset);
+            
+            console.log("Coordenadas objetivo para botón de mensajes (relativas):", targetCameraPos);
+            console.log("Coordenadas objetivo para botón de mensajes (absolutas):", absoluteTargetPos);
+            
+            // Configurar la animación
+            cameraAnimation.enabled = true;
+            cameraAnimation.startTime = Date.now();
+            cameraAnimation.duration = 1798; // Usar la misma duración que las otras animaciones
+            cameraAnimation.initialPosition.copy(currentCameraPos);
+            cameraAnimation.targetPosition.copy(absoluteTargetPos);
+            cameraAnimation.initialTarget.copy(controls.target);
+            cameraAnimation.finalTarget.copy(lookAtPoint);
+            
+            // Crear una trayectoria directa entre la posición actual y la posición objetivo
+            cameraAnimation.waypoints = [];
+            cameraAnimation.waypoints.push(new THREE.Vector3().copy(currentCameraPos));
+            
+            // Número de puntos intermedios para una trayectoria suave
+            const numWaypoints = 20;
+            
+            for (let i = 1; i < numWaypoints; i++) {
+                const t = i / numWaypoints;
+                const waypoint = new THREE.Vector3().lerpVectors(currentCameraPos, absoluteTargetPos, t);
+                cameraAnimation.waypoints.push(waypoint);
+            }
+            
+            // Asegurarse de que el último punto sea exactamente las coordenadas objetivo
+            cameraAnimation.waypoints.push(new THREE.Vector3().copy(absoluteTargetPos));
+            
+            // Guardar el estado original de los controles
+            cameraAnimation.originalControlsEnabled = controls.enabled;
+            
+            // Desactivar los controles durante la animación
+            controls.enabled = false;
+            
+            // Ocultar las coordenadas durante la animación
+            const coordDisplay = document.getElementById('coordinates-display');
+            coordDisplay.style.display = 'none';
+            
+            console.log("Iniciando animación de cámara hacia el punto específico para el botón de mensajes");
             console.log("Posición inicial:", currentCameraPos);
             console.log("Posición final:", absoluteTargetPos);
             console.log("Mirando hacia:", lookAtPoint);
