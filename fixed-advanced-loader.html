@@ -1061,12 +1061,31 @@
         }
         
         // Función para actualizar la visibilidad del projects basada en la orientación
+        // Variables para optimizar updateProjectsVisibility
+        let lastProjectsVisibleFromFront = null;
+        let lastProjectsButtonClickedState = null;
+        let lastProjectsScreenOnState = null;
+
         function updateProjectsVisibility() {
             if (!window.projectsScreenMaterial || !window.projectsBackPlane) {
                 return;
             }
             
             const isVisibleFromFront = isProjectsPlaneVisibleFromFront();
+            
+            // OPTIMIZACIÓN: Solo hacer cambios cuando el estado realmente cambie
+            const stateChanged = (lastProjectsVisibleFromFront !== isVisibleFromFront || 
+                                lastProjectsButtonClickedState !== projectsButtonClicked ||
+                                lastProjectsScreenOnState !== projectsScreenOn);
+            
+            if (!stateChanged) {
+                return; // No hacer nada si el estado no ha cambiado
+            }
+            
+            // Actualizar el estado guardado
+            lastProjectsVisibleFromFront = isVisibleFromFront;
+            lastProjectsButtonClickedState = projectsButtonClicked;
+            lastProjectsScreenOnState = projectsScreenOn;
             
             // Siempre mostrar/ocultar el plano completo basado en la orientación
             if (isVisibleFromFront) {
@@ -1079,31 +1098,31 @@
                     window.projectsScreenMaterial.transparent = false;
                     window.projectsScreenMaterial.opacity = 1.0;
                     window.projectsScreenMaterial.needsUpdate = true;
-                    console.log("Cover negro visible (botón NO clickeado) - projects");
+                    console.log("✅ Cover negro visible (botón NO clickeado) - projects");
                 } else {
                     // Si el botón SÍ ha sido clickeado, hacer transparente el cover
                     window.projectsScreenMaterial.transparent = true;
                     window.projectsScreenMaterial.opacity = 0.0;
                     window.projectsScreenMaterial.needsUpdate = true;
-                    console.log("Cover negro transparente (botón SÍ clickeado) - projects");
+                    console.log("✅ Cover negro transparente (botón SÍ clickeado) - projects");
                 }
                 
                 // LÓGICA DEL CONTENIDO HTML
                 if (projectsButtonClicked && window.projectsCssObject && window.projectsCssObject.element && isProjectsPlaneVisibleFromFront()) {
                     window.projectsCssObject.element.style.visibility = 'visible';
                     window.projectsCssObject.element.style.pointerEvents = 'auto';
-                    console.log("Contenido HTML visible (botón clickeado y visible desde frente) - projects");
+                    console.log("✅ Contenido HTML visible (botón clickeado y visible desde frente) - projects");
                 } else {
                     if (window.projectsCssObject && window.projectsCssObject.element) {
                         window.projectsCssObject.element.style.visibility = 'hidden';
                         window.projectsCssObject.element.style.pointerEvents = 'none';
-                        console.log("Contenido HTML oculto - projects");
+                        console.log("✅ Contenido HTML oculto - projects");
                     }
                 }
                 
                 // Si la pantalla se puede ver desde el frente Y el botón ha sido clickeado Y la pantalla está encendida
                 if (isVisibleFromFront && projectsButtonClicked && projectsScreenOn) {
-                    console.log("Plano projects completamente activo y visible desde el frente");
+                    console.log("✅ Plano projects completamente activo y visible desde el frente");
                 }
             } else {
                 // No visible desde el frente - pero mantener el cover negro visible
@@ -1519,6 +1538,76 @@
             
             // Añadir evento de clic al canvas para apagar las pantallas
             renderer.domElement.addEventListener('click', function(event) {
+                // SOLUCIÓN DEFINITIVA: Ignorar completamente eventos que NO sean del canvas
+                // Si el evento no viene directamente del canvas, no procesarlo
+                if (event.target !== renderer.domElement) {
+                    console.log("🚫 Evento ignorado - no proviene del canvas 3D");
+                    return;
+                }
+                
+                // Verificar si hay algún iframe visible que pueda estar interfiriendo
+                const visibleIframes = document.querySelectorAll('iframe');
+                
+                for (let iframe of visibleIframes) {
+                    if (iframe.style.visibility !== 'hidden' && iframe.style.display !== 'none') {
+                        const rect = iframe.getBoundingClientRect();
+                        if (event.clientX >= rect.left && event.clientX <= rect.right && 
+                            event.clientY >= rect.top && event.clientY <= rect.bottom) {
+                            // CAMBIO: Solo bloquear si es el iframe de projects Y el botón NO está clickeado
+                            if (iframe.src && iframe.src.includes('projects.html')) {
+                                if (!projectsButtonClicked) {
+                                    console.log("🚫 Click en iframe de projects pero botón no activo - ignorando");
+                                    return; // Salir completamente
+                                } else {
+                                    console.log("🔥🔥🔥 NUEVA VERSION - Click en iframe de projects con botón activo - FORWARDING click to iframe [v2.0] 🔥🔥🔥");
+                                    
+                                    // Forwardear el click manualmente al iframe
+                                    try {
+                                        // Calcular las coordenadas relativas al iframe
+                                        const relativeX = event.clientX - rect.left;
+                                        const relativeY = event.clientY - rect.top;
+                                        
+                                        console.log(`🎯 Forwarding click at relative position: ${relativeX}, ${relativeY}`);
+                                        
+                                        // Enviar el evento de click al iframe
+                                        if (iframe.contentWindow && iframe.contentDocument) {
+                                            const iframeEvent = new MouseEvent('click', {
+                                                bubbles: true,
+                                                cancelable: true,
+                                                clientX: relativeX,
+                                                clientY: relativeY,
+                                                button: event.button,
+                                                buttons: event.buttons
+                                            });
+                                            
+                                            // Buscar el elemento bajo las coordenadas
+                                            const elementAtPoint = iframe.contentDocument.elementFromPoint(relativeX, relativeY);
+                                            console.log("🎯 Element at point:", elementAtPoint);
+                                            
+                                            if (elementAtPoint) {
+                                                elementAtPoint.dispatchEvent(iframeEvent);
+                                                console.log("🎯 Click dispatched to:", elementAtPoint.tagName, elementAtPoint.className);
+                                            } else {
+                                                iframe.contentDocument.dispatchEvent(iframeEvent);
+                                                console.log("🎯 Click dispatched to document");
+                                            }
+                                        }
+                                    } catch (error) {
+                                        console.error("❌ Error forwarding click to iframe:", error);
+                                    }
+                                    
+                                    return; // Salir completamente del event listener
+                                }
+                            } else {
+                                console.log("🚫 Click está sobre un iframe visible - ignorando");
+                                return; // Salir completamente
+                            }
+                        }
+                    }
+                }
+                
+                console.log("✅ Procesando click del canvas 3D");
+                
                 // Obtener las coordenadas del clic normalizadas (-1 a +1)
                 const mouse = new THREE.Vector2();
                 mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -1582,6 +1671,7 @@
                 }
                 
                 // Si el clic no fue en el plano de projects y la pantalla está activa, desactivarla
+                // SOLO si fue un click genuino en el canvas 3D
                 if (!clickedOnProjects && projectsButtonClicked) {
                     console.log("Click fuera del plano de projects - desactivando pantalla");
                     projectsButtonClicked = false;
@@ -3719,6 +3809,7 @@
                     iframe.style.border = 'none';
                     iframe.style.overflow = 'hidden';
                     iframe.style.display = 'block';
+                    iframe.style.pointerEvents = 'auto'; // CRÍTICO: Habilitar eventos de puntero
                     iframe.src = 'projects.html'; // Cambié de about-me2.html a projects.html
                     
                     // Crear un elemento div para contener el iframe
@@ -3727,6 +3818,7 @@
                     div.style.height = '606px'; // Aumentado un 1.1% verticalmente
                     div.style.backgroundColor = 'transparent';
                     div.style.overflow = 'hidden';
+                    div.style.pointerEvents = 'auto'; // CRÍTICO: Habilitar eventos de puntero en el contenedor
                     div.appendChild(iframe);
                     
                     // Crear un objeto CSS3D para el div
@@ -3747,8 +3839,10 @@
                     // Posicionar el objeto CSS3D para que coincida con el plano
                     cssObject.position.copy(center);
                     
-                    // Aplicar la rotación del plano
+                    // Aplicar la rotación del plano con corrección para evitar texto invertido
                     cssObject.rotation.copy(rotation);
+                    // Rotar 180 grados en Y para corregir la inversión del texto en about-me (página estática)
+                    cssObject.rotation.y += Math.PI;
                     
                     // Ajustar la posición para que coincida con el plano
                     cssObject.position.z += 0.001; // Pequeño offset para evitar z-fighting
@@ -3967,6 +4061,7 @@
                     iframe.style.border = 'none';
                     iframe.style.overflow = 'hidden';
                     iframe.style.display = 'block';
+                    iframe.style.pointerEvents = 'auto'; // CRÍTICO: Habilitar eventos de puntero
                     iframe.src = 'projects.html';
                     
                     // Crear un elemento div para contener el iframe
@@ -3975,6 +4070,7 @@
                     div.style.height = '606px';
                     div.style.backgroundColor = 'transparent';
                     div.style.overflow = 'hidden';
+                    div.style.pointerEvents = 'auto'; // CRÍTICO: Habilitar eventos de puntero en el contenedor
                     div.appendChild(iframe);
                     
                     // Crear un objeto CSS3D para el div
@@ -3995,8 +4091,10 @@
                     // Posicionar el objeto CSS3D para que coincida con el plano
                     cssObject.position.copy(center);
                     
-                    // Aplicar la rotación del plano
+                    // Aplicar la rotación del plano con corrección fija para evitar texto invertido
                     cssObject.rotation.copy(rotation);
+                    // Rotar 180 grados en Y para corregir la inversión del texto (FIJO, como en about-me)
+                    cssObject.rotation.y += Math.PI;
                     
                     // Ajustar la posición para que coincida con el plano
                     cssObject.position.z += 0.001; // Pequeño offset para evitar z-fighting

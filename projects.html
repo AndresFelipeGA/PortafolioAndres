@@ -16,6 +16,10 @@
             background-attachment: fixed;
             color: #ffffff;
             overflow: hidden;
+            /* Permitir eventos normalmente */
+            pointer-events: auto !important;
+            isolation: isolate;
+            z-index: 99999;
         }
         
         body {
@@ -23,6 +27,11 @@
             justify-content: center;
             align-items: flex-start;
             padding: 0;
+            /* Permitir funcionalidad normal */
+            position: relative;
+            z-index: 999999;
+            isolation: isolate;
+            contain: layout style paint;
         }
         
         .interactive-screen {
@@ -32,7 +41,7 @@
             box-sizing: border-box;
             display: block;
             margin: 0;
-            background: linear-gradient(135deg, 
+            background: linear-gradient(135deg,
                 rgba(0, 0, 0, 0.6) 0%,    /* Negro semi-transparente */
                 rgba(25, 25, 35, 0.7) 35%,     /* Azul muy oscuro */
                 rgba(20, 20, 30, 0.65) 100%);  /* Gris muy oscuro */
@@ -45,7 +54,12 @@
             bottom: 0;
             overflow: hidden;
             backdrop-filter: blur(3px);
-            pointer-events: auto;
+            /* ULTRA AGRESIVO: Maximum event priority */
+            pointer-events: auto !important;
+            isolation: isolate;
+            z-index: 999999;
+            /* Crear una barrera de eventos */
+            contain: layout style paint;
         }
         
         .content-section {
@@ -54,14 +68,18 @@
             height: auto;
             display: block;
             position: relative;
-            background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.75) 0%, 
+            background: linear-gradient(135deg,
+                rgba(255, 255, 255, 0.75) 0%,
                 rgba(248, 248, 250, 0.70) 100%);
             padding: 20px;
             border-radius: 15px;
             backdrop-filter: blur(12px);
             border: 1px solid rgba(200, 200, 200, 0.25);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            /* Prevent any events from bubbling up */
+            pointer-events: auto !important;
+            isolation: isolate;
+            z-index: 1001;
         }
         
         .screen-header {
@@ -88,8 +106,8 @@
         }
         
         .project-card {
-            background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.15) 0%, 
+            background: linear-gradient(135deg,
+                rgba(255, 255, 255, 0.15) 0%,
                 rgba(248, 248, 250, 0.10) 100%);
             border-radius: 10px;
             padding: 10px 10px 8px 10px;
@@ -98,9 +116,12 @@
             transition: all 0.3s ease;
             cursor: pointer;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            pointer-events: auto;
+            pointer-events: auto !important;
             max-width: 220px;
             min-height: 180px;
+            /* Prevent any events from bubbling up */
+            isolation: isolate;
+            z-index: 1002;
         }
         
         .project-card:hover {
@@ -119,6 +140,9 @@
             border-radius: 6px;
             overflow: hidden;
             background: rgba(240, 240, 240, 0.2);
+            /* Asegurar que sea clickeable */
+            pointer-events: auto !important;
+            cursor: pointer !important;
         }
         
         .project-image img {
@@ -126,6 +150,9 @@
             height: 100%;
             object-fit: cover;
             transition: transform 0.3s ease;
+            /* Asegurar que sea clickeable */
+            pointer-events: auto !important;
+            cursor: pointer !important;
         }
         
         .project-image:hover img {
@@ -139,6 +166,10 @@
             margin-bottom: 6px;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
             line-height: 1.2;
+            /* Asegurar que sea clickeable */
+            pointer-events: auto !important;
+            cursor: pointer !important;
+            user-select: none; /* Evitar selección de texto que pueda interferir */
         }
         
         .project-description {
@@ -147,6 +178,10 @@
             margin-bottom: 5px;
             line-height: 1.3;
             font-weight: 500;
+            /* Asegurar que sea clickeable */
+            pointer-events: auto !important;
+            cursor: pointer !important;
+            user-select: none; /* Evitar selección de texto que pueda interferir */
             background: rgba(240, 240, 240, 0.3);
             padding: 6px 8px;
             border-radius: 4px;
@@ -155,6 +190,7 @@
             overflow: hidden;
             display: -webkit-box;
             -webkit-line-clamp: 3;
+            line-clamp: 3;
             -webkit-box-orient: vertical;
         }
         
@@ -225,74 +261,126 @@
         
         /* Estilos para tarjetas expandidas */
         .project-card.expanded {
-            max-width: 400px;
-            min-height: 300px;
-            z-index: 1000;
-            transform: scale(1.05);
+            max-width: 450px;
+            min-height: 350px;
+            z-index: 1005;
+            transform: scale(1.05) translateY(-10px);
             background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.25) 0%, 
-                rgba(248, 248, 250, 0.20) 100%);
+                rgba(255, 255, 255, 0.35) 0%, 
+                rgba(248, 248, 250, 0.30) 100%);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+            border: 2px solid rgba(205, 133, 63, 0.6);
         }
         
         .project-card .expanded-content {
             display: none;
-            margin-top: 10px;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            border-left: 3px solid #CD853F;
+            margin-top: 15px;
+            padding: 15px;
+            background: linear-gradient(135deg,
+                rgba(255, 255, 255, 0.2) 0%,
+                rgba(248, 248, 250, 0.15) 100%);
+            border-radius: 10px;
+            border-left: 4px solid #CD853F;
+            backdrop-filter: blur(10px);
         }
         
         .project-card.expanded .expanded-content {
             display: block;
+            animation: fadeInUp 0.3s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .expanded-details {
-            font-size: 12px;
+            font-size: 13px;
             color: #2c3e50;
-            line-height: 1.4;
-            margin-bottom: 8px;
+            line-height: 1.5;
+            margin-bottom: 12px;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.3);
+            padding: 8px;
+            border-radius: 6px;
         }
         
         .expanded-features {
             list-style: none;
             padding: 0;
-            margin: 8px 0;
+            margin: 12px 0;
         }
         
         .expanded-features li {
-            font-size: 11px;
+            font-size: 12px;
             color: #2c3e50;
-            margin: 4px 0;
-            padding-left: 15px;
+            margin: 6px 0;
+            padding: 4px 0 4px 20px;
             position: relative;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            padding-left: 25px;
+            transition: background 0.2s ease;
+        }
+        
+        .expanded-features li:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
         
         .expanded-features li:before {
             content: "✓";
             position: absolute;
-            left: 0;
+            left: 8px;
             color: #CD853F;
             font-weight: bold;
+            font-size: 14px;
         }
         
         .close-btn {
             position: absolute;
-            top: 5px;
-            right: 10px;
-            background: rgba(205, 133, 63, 0.8);
+            top: 8px;
+            right: 12px;
+            background: linear-gradient(135deg, 
+                rgba(205, 133, 63, 0.9) 0%, 
+                rgba(160, 82, 45, 0.9) 100%);
             color: white;
             border: none;
             border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            font-size: 12px;
+            width: 24px;
+            height: 24px;
+            font-size: 14px;
+            font-weight: bold;
             cursor: pointer;
             display: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease;
+            /* Prevent any events from bubbling up */
+            pointer-events: auto !important;
+            isolation: isolate;
+            z-index: 1006;
+        }
+        
+        .close-btn:hover {
+            background: linear-gradient(135deg, 
+                rgba(220, 20, 60, 0.9) 0%, 
+                rgba(178, 34, 34, 0.9) 100%);
+            transform: scale(1.1);
         }
         
         .project-card.expanded .close-btn {
             display: block;
+            animation: fadeIn 0.3s ease-out 0.2s both;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         
         .filter-buttons {
@@ -304,8 +392,8 @@
         }
         
         .filter-btn {
-            background: linear-gradient(135deg, 
-                rgba(139, 69, 19, 0.9) 0%, 
+            background: linear-gradient(135deg,
+                rgba(139, 69, 19, 0.9) 0%,
                 rgba(101, 67, 33, 0.9) 100%);
             color: white;
             border: 2px solid rgba(139, 69, 19, 0.7);
@@ -317,8 +405,11 @@
             font-weight: 600;
             backdrop-filter: blur(10px);
             text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-            pointer-events: auto;
+            pointer-events: auto !important;
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            /* Prevent any events from bubbling up */
+            isolation: isolate;
+            z-index: 1003;
         }
         
         .filter-btn:hover {
@@ -365,138 +456,356 @@
                     </div>
                     <div class="expanded-content">
                         <div class="expanded-details">
-                            <strong>Tecnologías:</strong> Three.js, WebGL, CSS3DRenderer, JavaScript ES6, GLSL
+                            <strong>Descripción completa:</strong> Este portfolio representa la evolución de la presentación tradicional hacia una experiencia inmersiva en 3D. Desarrollado desde cero con Three.js, incluye un sistema de navegación innovador que permite a los usuarios explorar mis proyectos y habilidades de manera interactiva. La implementación incluye shaders personalizados, iluminación dinámica y optimizaciones para dispositivos móviles.
+                        </div>
+                        <div class="expanded-details">
+                            <strong>Tecnologías:</strong> Three.js, WebGL, CSS3DRenderer, JavaScript ES6, GLSL Shaders, Webpack
                         </div>
                         <ul class="expanded-features">
-                            <li>Renderizado 3D en tiempo real</li>
-                            <li>Sistema de navegación intuitivo</li>
-                            <li>Modelos 3D interactivos</li>
-                            <li>Animaciones fluidas con CSS3D</li>
-                            <li>Responsive design para móviles</li>
+                            <li>Renderizado 3D en tiempo real con optimización de performance</li>
+                            <li>Sistema de navegación intuitivo con transiciones suaves</li>
+                            <li>Modelos 3D interactivos con física básica</li>
+                            <li>Animaciones fluidas con CSS3D y GSAP</li>
+                            <li>Responsive design adaptado para móviles y tablets</li>
+                            <li>Sistema de carga progresiva de assets</li>
+                            <li>Compatibilidad cross-browser optimizada</li>
                         </ul>
                     </div>
                 </div>
                 
-                <div class="project-card" data-category="ai">
+                <!-- Espacios vacíos manteniendo el mismo layout de grid -->
+                <div class="project-card empty-card" style="visibility: hidden;">
                     <button class="close-btn">×</button>
-                    <div class="project-title">Sistema de Prompt Engineering</div>
-                    <div class="project-description">
-                        Framework avanzado para el diseño y optimización de prompts de IA. Incluye técnicas de few-shot learning, chain-of-thought reasoning y fine-tuning de modelos.
-                    </div>
-                    <div class="expanded-content">
-                        <div class="expanded-details">
-                            <strong>Tecnologías:</strong> Python, OpenAI API, LangChain, TensorFlow
-                        </div>
-                        <ul class="expanded-features">
-                            <li>Few-shot learning implementation</li>
-                            <li>Chain-of-thought reasoning</li>
-                            <li>Prompt optimization algorithms</li>
-                            <li>Model fine-tuning capabilities</li>
-                            <li>API integration con OpenAI</li>
-                        </ul>
-                    </div>
+                    <div class="project-title">Proyecto Futuro</div>
+                    <div class="project-description">Espacio reservado para próximos proyectos</div>
                 </div>
                 
-                <div class="project-card" data-category="web">
+                <div class="project-card empty-card" style="visibility: hidden;">
                     <button class="close-btn">×</button>
-                    <div class="project-title">E-commerce Full Stack</div>
-                    <div class="project-description">
-                        Plataforma de comercio electrónico completa con React, Node.js y MongoDB. Incluye sistema de pagos, gestión de inventario y panel de administración.
-                    </div>
-                    <div class="expanded-content">
-                        <div class="expanded-details">
-                            <strong>Tecnologías:</strong> React, Node.js, MongoDB, Stripe
-                        </div>
-                        <ul class="expanded-features">
-                            <li>Sistema de pagos con Stripe</li>
-                            <li>Gestión de inventario en tiempo real</li>
-                            <li>Panel administrativo completo</li>
-                            <li>Autenticación y autorización</li>
-                            <li>Responsive design mobile-first</li>
-                        </ul>
-                    </div>
+                    <div class="project-title">Proyecto Futuro</div>
+                    <div class="project-description">Espacio reservado para próximos proyectos</div>
                 </div>
                 
-                <div class="project-card" data-category="automation">
+                <div class="project-card empty-card" style="visibility: hidden;">
                     <button class="close-btn">×</button>
-                    <div class="project-title">Bot de Trading Automatizado</div>
-                    <div class="project-description">
-                        Sistema de trading algorítmico que utiliza machine learning para analizar patrones de mercado y ejecutar operaciones automáticamente.
-                    </div>
-                    <div class="expanded-content">
-                        <div class="expanded-details">
-                            <strong>Tecnologías:</strong> Python, Pandas, Scikit-learn, APIs
-                        </div>
-                        <ul class="expanded-features">
-                            <li>Análisis de patrones con ML</li>
-                            <li>Ejecución automática de trades</li>
-                            <li>Sistema de gestión de riesgo</li>
-                            <li>Backtesting de estrategias</li>
-                            <li>Dashboard de métricas en tiempo real</li>
-                        </ul>
-                    </div>
+                    <div class="project-title">Proyecto Futuro</div>
+                    <div class="project-description">Espacio reservado para próximos proyectos</div>
                 </div>
                 
-                <div class="project-card" data-category="mobile">
+                <div class="project-card empty-card" style="visibility: hidden;">
                     <button class="close-btn">×</button>
-                    <div class="project-title">App de Productividad</div>
-                    <div class="project-description">
-                        Aplicación móvil cross-platform para gestión de tareas y productividad personal con sincronización en tiempo real y notificaciones inteligentes.
-                    </div>
-                    <div class="expanded-content">
-                        <div class="expanded-details">
-                            <strong>Tecnologías:</strong> React Native, Firebase, Redux, TypeScript
-                        </div>
-                        <ul class="expanded-features">
-                            <li>Cross-platform iOS y Android</li>
-                            <li>Sincronización en tiempo real</li>
-                            <li>Notificaciones push inteligentes</li>
-                            <li>Gestión offline de tareas</li>
-                            <li>Analytics y reportes de productividad</li>
-                        </ul>
-                    </div>
+                    <div class="project-title">Proyecto Futuro</div>
+                    <div class="project-description">Espacio reservado para próximos proyectos</div>
                 </div>
                 
-                <div class="project-card" data-category="ai">
+                <div class="project-card empty-card" style="visibility: hidden;">
                     <button class="close-btn">×</button>
-                    <div class="project-title">Chatbot Conversacional</div>
-                    <div class="project-description">
-                        Asistente virtual inteligente con procesamiento de lenguaje natural avanzado, capaz de mantener conversaciones contextuales y realizar tareas específicas.
-                    </div>
-                    <div class="expanded-content">
-                        <div class="expanded-details">
-                            <strong>Tecnologías:</strong> NLP, Transformers, BERT, FastAPI
-                        </div>
-                        <ul class="expanded-features">
-                            <li>Procesamiento de lenguaje natural</li>
-                            <li>Conversaciones contextuales</li>
-                            <li>Integración con BERT y Transformers</li>
-                            <li>API REST con FastAPI</li>
-                            <li>Aprendizaje continuo de conversaciones</li>
-                        </ul>
-                    </div>
+                    <div class="project-title">Proyecto Futuro</div>
+                    <div class="project-description">Espacio reservado para próximos proyectos</div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        // SOLUCIÓN BALANCEADA: Bloquear propagación externa PERO permitir funcionalidad interna
+        
         document.addEventListener('DOMContentLoaded', function() {
-            // Apply transformation to correct the mirrored display in 3D model
-            document.body.style.transform = 'rotate(180deg) scaleX(-1)';
+            // ⚠️ TRANSFORMACIÓN FIJA PARA CORRECCIÓN DE ESPEJO - NO MODIFICAR ⚠️
+            // Rotar 180° pero SIN scaleX(-1) para evitar efecto espejo
+            // Solo corrección de orientación vertical, sin inversión horizontal
+            document.body.style.transform = 'rotate(180deg)';
             
-            // Filter functionality
+            // Variables globales
             const filterButtons = document.querySelectorAll('.filter-btn');
             const projectCards = document.querySelectorAll('.project-card');
+            const closeBtns = document.querySelectorAll('.close-btn');
+            const interactiveScreen = document.querySelector('.interactive-screen');
+            const contentSection = document.querySelector('.content-section');
             
+            // Screen control variables
+            let isActive = false;
+            
+            console.log("🚀 Inicializando projects.html con bloqueo balanceado");
+
+            // Check if page is in an iframe
+            function isInIframe() {
+                try {
+                    return window.self !== window.top;
+                } catch (e) {
+                    return true;
+                }
+            }
+            
+            // Listen for messages from the parent window - SOLO LOS NECESARIOS
+            window.addEventListener('message', function(event) {
+                console.log("📨 Message received in projects.html:", event.data);
+                
+                if (event.data && event.data.action === 'turnOnScreen') {
+                    console.log("✅ Received message to turn on projects screen");
+                    isActive = true;
+                    
+                    try {
+                        window.parent.postMessage({ action: 'projectsScreenTurnedOn' }, '*');
+                        console.log("📤 Sent confirmation that projects screen was turned on");
+                    } catch (e) {
+                        console.error("❌ Error sending confirmation to parent:", e);
+                    }
+                }
+                
+                if (event.data && event.data.action === 'turnOffScreen') {
+                    console.log("🔴 Received message to turn off projects screen");
+                    isActive = false;
+                    
+                    try {
+                        window.parent.postMessage({ action: 'projectsScreenTurnedOff' }, '*');
+                        console.log("📤 Sent confirmation that projects screen was turned off");
+                    } catch (e) {
+                        console.error("❌ Error sending confirmation to parent:", e);
+                    }
+                }
+            });
+            
+            // Send ready message to parent
+            if (isInIframe()) {
+                try {
+                    window.parent.postMessage({ action: 'projectsReady' }, '*');
+                    console.log("📤 Sent ready message to parent");
+                } catch (e) {
+                    console.error("❌ Error sending message to parent:", e);
+                }
+            }
+
+            // BLOQUEO SELECTIVO: Solo en contenedores principales para prevenir propagación al iframe padre
+            // NOTA: Aplicamos esto solo al nivel más alto, no a elementos interactivos
+            
+            // NUEVA ESTRATEGIA: Event listener MÁS AGRESIVO y directo
+            document.addEventListener('click', function(e) {
+                console.log("🎯 CLICK DETECTADO EN IFRAME:", e.target?.tagName || 'UNKNOWN', e.target?.className || '');
+                console.log("🎯 Coordenadas:", e.clientX, e.clientY);
+                console.log("🎯 Target completo:", e.target);
+                
+                // Verificar si el target es válido
+                if (!e.target || e.target === document) {
+                    console.log("❌ Target no válido o es document, saltando");
+                    e.stopPropagation();
+                    return;
+                }
+                
+                // MÉTODO 1: Verificar si clickeamos directamente en una tarjeta
+                if (e.target.classList.contains('project-card')) {
+                    console.log("🎯 CLICK DIRECTO EN PROJECT-CARD!");
+                    handleCardClick(e, e.target);
+                    return;
+                }
+                
+                // MÉTODO 2: Verificar si clickeamos dentro de una tarjeta usando closest
+                let card = null;
+                if (typeof e.target.closest === 'function') {
+                    card = e.target.closest('.project-card');
+                }
+                
+                if (card) {
+                    console.log("🎯 DETECTADA TARJETA DE PROYECTO:", card.querySelector('.project-title')?.textContent);
+                    console.log("🎯 EJECUTANDO handleCardClick()");
+                    handleCardClick(e, card);
+                    return;
+                }
+                
+                // MÉTODO 3: Buscar tarjetas manualmente si closest no funciona
+                let currentElement = e.target;
+                while (currentElement && currentElement !== document) {
+                    if (currentElement.classList && currentElement.classList.contains('project-card')) {
+                        console.log("🎯 ENCONTRADA TARJETA POR TRAVERSAL MANUAL!");
+                        handleCardClick(e, currentElement);
+                        return;
+                    }
+                    currentElement = currentElement.parentElement;
+                }
+                
+                console.log("🔍 No se encontró tarjeta, verificando si es projects-grid...");
+                
+            // MÉTODO 4: DETECCIÓN ULTRA MEJORADA PARA TODA LA TARJETA
+            console.log("🔍 Intentando detección ultra mejorada...");
+            
+            // Verificar si el click está en alguna área relevante
+            const portfolioCard = document.querySelector('.project-card[data-category="web"]');
+            if (portfolioCard) {
+                const title = portfolioCard.querySelector('.project-title')?.textContent;
+                if (title === 'Portfolio 3D Interactivo') {
+                    
+                    // Obtener todas las coordenadas de la tarjeta
+                    const cardRect = portfolioCard.getBoundingClientRect();
+                    const clickX = e.clientX;
+                    const clickY = e.clientY;
+                    
+                    console.log("📍 Click en:", clickX, clickY);
+                    console.log("📦 Área exacta de tarjeta:", cardRect);
+                    
+                    // DETECCIÓN DIRECTA DENTRO DE LA TARJETA (más precisa)
+                    const isDirectlyInsideCard = (clickX >= cardRect.left && 
+                                                clickX <= cardRect.right && 
+                                                clickY >= cardRect.top && 
+                                                clickY <= cardRect.bottom);
+                    
+                    // DETECCIÓN POR PROXIMIDAD INTELIGENTE (solo si no hay hit directo)
+                    let isNearCard = false;
+                    if (!isDirectlyInsideCard) {
+                        const margin = 50; // Margen más pequeño pero inteligente
+                        isNearCard = (clickX >= cardRect.left - margin && 
+                                     clickX <= cardRect.right + margin && 
+                                     clickY >= cardRect.top - margin && 
+                                     clickY <= cardRect.bottom + margin);
+                    }
+                    
+                    // DETECCIÓN POR CONTENEDOR (para clics en áreas generales)
+                    const isInGeneralArea = (e.target.classList.contains('content-section') ||
+                                           e.target.classList.contains('projects-grid') ||
+                                           e.target.closest('.content-section') ||
+                                           e.target.closest('.projects-grid'));
+                    
+                    const shouldActivate = isDirectlyInsideCard || isNearCard || isInGeneralArea;
+                    
+                    if (shouldActivate) {
+                        let reason = "";
+                        if (isDirectlyInsideCard) reason = "HIT DIRECTO en tarjeta";
+                        else if (isNearCard) reason = "Proximidad a tarjeta";
+                        else reason = "Área general de proyectos";
+                        
+                        console.log("🎯 ACTIVANDO Portfolio 3D por:", reason);
+                        handleCardClick(e, portfolioCard);
+                        return;
+                    } else {
+                        console.log("❌ Click fuera de todas las áreas válidas");
+                        console.log("❌ Distancias:", {
+                            horizontal: Math.min(Math.abs(clickX - cardRect.left), Math.abs(clickX - cardRect.right)),
+                            vertical: Math.min(Math.abs(clickY - cardRect.top), Math.abs(clickY - cardRect.bottom))
+                        });
+                    }
+                }
+            }
+
+            // MÉTODO 5: DETECCIÓN ESPECÍFICA PARA ELEMENTOS DE TEXTO Y PARTES DE LA TARJETA
+            console.log("🔍 Método 5: Verificando elementos específicos de la tarjeta...");
+            
+            // Lista ampliada de selectores para elementos de la tarjeta
+            const cardSelectors = [
+                '.project-title',
+                '.project-description', 
+                '.project-image',
+                '.expanded-content',
+                '.expanded-details',
+                '.expanded-features'
+            ];
+            
+            // Verificar si el elemento clickeado pertenece a una tarjeta
+            for (let selector of cardSelectors) {
+                if (e.target.matches && e.target.matches(selector)) {
+                    console.log(`🎯 CLICK DIRECTO EN: ${selector}`);
+                    const parentCard = e.target.closest('.project-card');
+                    if (parentCard) {
+                        const title = parentCard.querySelector('.project-title')?.textContent;
+                        if (title === 'Portfolio 3D Interactivo') {
+                            console.log("🎯 ACTIVANDO Portfolio 3D por elemento específico!");
+                            handleCardClick(e, parentCard);
+                            return;
+                        }
+                    }
+                } else if (e.target.closest && e.target.closest(selector)) {
+                    console.log(`🎯 CLICK DENTRO DE: ${selector}`);
+                    const parentCard = e.target.closest('.project-card');
+                    if (parentCard) {
+                        const title = parentCard.querySelector('.project-title')?.textContent;
+                        if (title === 'Portfolio 3D Interactivo') {
+                            console.log("🎯 ACTIVANDO Portfolio 3D por elemento anidado!");
+                            handleCardClick(e, parentCard);
+                            return;
+                        }
+                    }
+                }
+            }
+            
+            // MÉTODO 6: DETECCIÓN POR COORDENADAS ABSOLUTAS
+            console.log("🔍 Método 6: Detección por coordenadas absolutas...");
+            const portfolioCardCoords = document.querySelector('.project-card[data-category="web"]');
+            if (portfolioCardCoords) {
+                const cardRect = portfolioCardCoords.getBoundingClientRect();
+                const clickX = e.clientX;
+                const clickY = e.clientY;
+                
+                console.log("📍 Coordenadas del click:", clickX, clickY);
+                console.log("� Bounds de la tarjeta:", {
+                    left: cardRect.left,
+                    right: cardRect.right,
+                    top: cardRect.top,
+                    bottom: cardRect.bottom,
+                    width: cardRect.width,
+                    height: cardRect.height
+                });
+                
+                // Verificación exacta de bounds con tolerancia
+                const tolerance = 5; // píxeles de tolerancia
+                const isWithinBounds = (
+                    clickX >= (cardRect.left - tolerance) && 
+                    clickX <= (cardRect.right + tolerance) && 
+                    clickY >= (cardRect.top - tolerance) && 
+                    clickY <= (cardRect.bottom + tolerance)
+                );
+                
+                if (isWithinBounds) {
+                    console.log("🎯 CLICK DETECTADO POR COORDENADAS ABSOLUTAS!");
+                    const title = portfolioCardCoords.querySelector('.project-title')?.textContent;
+                    if (title === 'Portfolio 3D Interactivo') {
+                        handleCardClick(e, portfolioCardCoords);
+                        return;
+                    }
+                } else {
+                    console.log("❌ Click fuera de bounds por:", {
+                        horizontal: clickX < cardRect.left ? `${cardRect.left - clickX}px izquierda` : 
+                                   clickX > cardRect.right ? `${clickX - cardRect.right}px derecha` : 'dentro',
+                        vertical: clickY < cardRect.top ? `${cardRect.top - clickY}px arriba` : 
+                                 clickY > cardRect.bottom ? `${clickY - cardRect.bottom}px abajo` : 'dentro'
+                    });
+                }
+            }
+            
+            // MÉTODO 7: FALLBACK ULTRA AGRESIVO
+            console.log("🔍 Método 7: Fallback ultra agresivo...");
+            const allCards = document.querySelectorAll('.project-card');
+            if (allCards.length === 1) {
+                // Si solo hay una tarjeta visible, cualquier click la activa
+                const onlyCard = allCards[0];
+                const title = onlyCard.querySelector('.project-title')?.textContent;
+                if (title === 'Portfolio 3D Interactivo') {
+                    console.log("🎯 ACTIVANDO ÚNICA TARJETA DISPONIBLE!");
+                    handleCardClick(e, onlyCard);
+                    return;
+                }
+            }
+
+                // Solo bloquear propagación si llegamos hasta aquí
+                e.stopPropagation();
+                console.log("🛡️ Bloqueando propagación al iframe padre desde document level");
+            }, true);
+
+            // FUNCIONALIDAD INTERNA - Simplificada y directa
+            
+            // Funcionalidad de filtros
             filterButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    // Remove active class from all buttons
+                button.addEventListener('click', function(e) {
+                    // Bloquear solo propagación hacia arriba
+                    e.stopPropagation();
+                    
+                    console.log("🔵 Filter button clicked:", button.textContent);
+                    
                     filterButtons.forEach(btn => btn.classList.remove('active'));
-                    // Add active class to clicked button
                     button.classList.add('active');
                     
                     const filter = button.getAttribute('data-filter');
+                    
+                    projectCards.forEach(card => {
+                        card.classList.remove('expanded');
+                    });
                     
                     projectCards.forEach(card => {
                         if (filter === 'all' || card.getAttribute('data-category') === filter) {
@@ -507,115 +816,172 @@
                     });
                 });
             });
-            
-            // Screen control is now handled by the 3D plane in the main scene
-            let isActive = false;
-            
-            // Check if page is in an iframe
-            function isInIframe() {
-                try {
-                    return window.self !== window.top;
-                } catch (e) {
-                    return true;
-                }
-            }
-            
-            // Listen for messages from the parent window
-            window.addEventListener('message', function(event) {
-                console.log("Message received in projects.html:", event.data);
+
+            // Funcionalidad de tarjetas - MÉTODO DIRECTO MEJORADO
+            projectCards.forEach((card, index) => {
+                console.log(`🔧 Setting up card ${index + 1}:`, card.querySelector('.project-title')?.textContent);
                 
-                if (event.data && event.data.action === 'turnOnScreen') {
-                    console.log("Received message to turn on projects screen");
-                    isActive = true;
-                    
-                    // Send confirmation back to parent
-                    try {
-                        window.parent.postMessage({ action: 'projectsScreenTurnedOn' }, '*');
-                        console.log("Sent confirmation that projects screen was turned on");
-                    } catch (e) {
-                        console.error("Error sending confirmation to parent:", e);
-                    }
-                }
+                // Usar múltiples métodos para asegurar que funcione
+                card.style.cursor = 'pointer';
+                card.style.pointerEvents = 'auto';
                 
-                if (event.data && event.data.action === 'turnOffScreen') {
-                    console.log("Received message to turn off projects screen");
-                    isActive = false;
-                    
-                    // Send confirmation back to parent
-                    try {
-                        window.parent.postMessage({ action: 'projectsScreenTurnedOff' }, '*');
-                        console.log("Sent confirmation that projects screen was turned off");
-                    } catch (e) {
-                        console.error("Error sending confirmation to parent:", e);
-                    }
-                }
-            });
-            
-            // Send ready message to parent
-            if (isInIframe()) {
-                try {
-                    window.parent.postMessage({ action: 'projectsReady' }, '*');
-                    console.log("Sent ready message to parent");
-                } catch (e) {
-                    console.error("Error sending message to parent:", e);
-                }
-            }
-
-            // Prevenir cover negro cuando se hace clic dentro del contenido
-            const projectsContainer = document.querySelector('.projects-screen');
-            if (projectsContainer) {
-                projectsContainer.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    console.log("Click intercepted within projects area");
-                });
-            }
-
-            // Funcionalidad de expansión de tarjetas
-            // Using the projectCards variable already declared above
-            const closeBtns = document.querySelectorAll('.close-btn');
-
-            projectCards.forEach(card => {
+                // Método 1: addEventListener
                 card.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    
-                    // Si se hace clic en el botón de cerrar, no expandir
-                    if (e.target.classList.contains('close-btn')) {
-                        return;
+                    console.log("🎯 CLICK DIRECTO EN TARJETA VIA addEventListener");
+                    handleCardClick(e, card);
+                });
+                
+                // Método 2: onclick como backup
+                card.onclick = function(e) {
+                    console.log("🎯 CLICK DIRECTO EN TARJETA VIA onclick");
+                    handleCardClick(e, card);
+                };
+                
+                // Método 3: onmousedown como backup adicional
+                card.addEventListener('mousedown', function(e) {
+                    if (e.button === 0) { // Solo botón izquierdo
+                        console.log("🎯 MOUSEDOWN EN TARJETA");
+                        handleCardClick(e, card);
                     }
+                });
+                
+                // MÉTODO 4: LISTENERS ESPECÍFICOS EN ELEMENTOS INTERNOS
+                const internalElements = card.querySelectorAll('.project-title, .project-description, .project-image, .project-image img');
+                internalElements.forEach((element, elemIndex) => {
+                    console.log(`🔧 Configurando elemento interno ${elemIndex + 1}:`, element.className || element.tagName);
                     
-                    // Cerrar todas las otras tarjetas
-                    projectCards.forEach(otherCard => {
-                        if (otherCard !== card) {
-                            otherCard.classList.remove('expanded');
-                        }
+                    element.style.pointerEvents = 'auto';
+                    element.style.cursor = 'pointer';
+                    
+                    // Prevenir que los elementos internos bloqueen el click
+                    element.addEventListener('click', function(e) {
+                        console.log("🎯 CLICK EN ELEMENTO INTERNO:", element.className || element.tagName);
+                        e.stopPropagation(); // Evitar duplicación
+                        handleCardClick(e, card);
                     });
                     
-                    // Toggle de la tarjeta actual
-                    card.classList.toggle('expanded');
+                    element.addEventListener('mousedown', function(e) {
+                        if (e.button === 0) {
+                            console.log("🎯 MOUSEDOWN EN ELEMENTO INTERNO:", element.className || element.tagName);
+                            e.stopPropagation(); // Evitar duplicación
+                            handleCardClick(e, card);
+                        }
+                    });
+                });
+            });
+
+            // Función centralizada para manejar clicks en tarjetas - NAVEGACIÓN A NUEVA PÁGINA
+            function handleCardClick(e, card) {
+                console.log("🚀🚀🚀 MANEJANDO CLICK EN TARJETA:", card.querySelector('.project-title')?.textContent);
+                
+                // Prevenir propagación múltiple
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                
+                // No procesar si es botón de cerrar
+                if (e.target.classList.contains('close-btn') || 
+                    e.target.closest('.close-btn')) {
+                    console.log("🚫 Click en botón de cerrar, ignorando");
+                    return;
+                }
+                
+                // Obtener el título del proyecto
+                const projectTitle = card.querySelector('.project-title')?.textContent;
+                console.log("📋 Título del proyecto:", projectTitle);
+                
+                // Solo procesar la tarjeta del Portfolio 3D (que es la única visible)
+                if (projectTitle === 'Portfolio 3D Interactivo') {
+                    console.log("✅ NAVEGANDO A PÁGINA DEL Portfolio 3D Interactivo");
                     
-                    console.log("Project card toggled:", card.querySelector('.project-title').textContent);
-                });
-            });
+                    // Navegar a la página específica del proyecto
+                    const projectPageUrl = 'project-portfolio-3d.html';
+                    console.log("🌐 Navegando a:", projectPageUrl);
+                    
+                    // Cambiar la ubicación del iframe actual (navegar dentro del mismo iframe)
+                    window.location.href = projectPageUrl;
+                    
+                } else {
+                    console.log("⚠️ Tarjeta no es Portfolio 3D, ignorando");
+                }
+            }
 
-            // Funcionalidad de botones de cerrar
-            closeBtns.forEach(btn => {
+            // Funcionalidad de botones cerrar - MÉTODO DIRECTO
+            closeBtns.forEach((btn, index) => {
+                console.log(`🔧 Setting up close button ${index + 1}`);
+                
+                btn.style.cursor = 'pointer';
+                btn.style.pointerEvents = 'auto';
+                
+                // Método 1: addEventListener
                 btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const card = btn.closest('.project-card');
-                    card.classList.remove('expanded');
-                    console.log("Project card closed");
+                    handleCloseClick(e, btn);
                 });
+                
+                // Método 2: onclick como backup
+                btn.onclick = function(e) {
+                    handleCloseClick(e, btn);
+                };
             });
 
-            // Cerrar tarjetas expandidas cuando se hace clic fuera
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.project-card')) {
+            // Función para manejar clicks en botones de cerrar
+            function handleCloseClick(e, btn) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                console.log("❌ Close button clicked");
+                
+                const card = btn.closest('.project-card');
+                if (card) {
+                    card.classList.remove('expanded');
+                    console.log("📉 Project card closed");
+                }
+            }
+
+            // Cerrar tarjetas en área vacía
+            contentSection.addEventListener('click', function(e) {
+                if (e.target === contentSection || 
+                    e.target.classList.contains('projects-grid') || 
+                    e.target.classList.contains('screen-header') ||
+                    e.target.tagName === 'H1') {
+                    console.log("🔘 Click on empty area, closing all cards");
                     projectCards.forEach(card => {
                         card.classList.remove('expanded');
                     });
                 }
+                
+                // Bloquear solo propagación hacia arriba
+                e.stopPropagation();
             });
+
+            // Enlaces de proyecto
+            const projectLinks = document.querySelectorAll('.project-link');
+            projectLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Para los enlaces, solo bloquear propagación, NO preventDefault
+                    e.stopPropagation();
+                    console.log("🔗 Project link clicked:", link.textContent);
+                    // Los enlaces deberían funcionar normalmente
+                });
+            });
+
+            // Test de funcionalidad
+            setTimeout(() => {
+                console.log("🧪 Testing card functionality...");
+                console.log("📊 Found", projectCards.length, "project cards");
+                console.log("📊 Found", filterButtons.length, "filter buttons");
+                console.log("📊 Found", closeBtns.length, "close buttons");
+                
+                // Verificar que los elementos tienen event listeners
+                projectCards.forEach((card, index) => {
+                    const title = card.querySelector('.project-title')?.textContent;
+                    console.log(`✅ Card ${index + 1} (${title}) is ready for interaction`);
+                });
+            }, 1000);
+
+            console.log("✅ Projects.html initialization complete with BALANCED event handling");
         });
+
     </script>
 </body>
 </html>

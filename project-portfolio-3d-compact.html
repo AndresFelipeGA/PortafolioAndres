@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio 3D Interactivo - Detalles</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            color: #333;
+            font-size: 13px;
+            overflow: hidden;
+        }
+        
+        .container {
+            height: 100vh;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            padding: 15px;
+            flex-shrink: 0;
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+        
+        .left-column, .right-column {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .section {
+            flex-shrink: 0;
+        }
+        
+        .section h2 {
+            color: #667eea;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 3px;
+        }
+        
+        .section h3 {
+            color: #764ba2;
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+        
+        .section p {
+            font-size: 0.85rem;
+            line-height: 1.3;
+            margin-bottom: 8px;
+        }
+        
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin: 8px 0;
+        }
+        
+        .tech-tag {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .challenge-solution {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .challenge, .solution {
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+        }
+        
+        .challenge {
+            background: linear-gradient(135deg, #fff3f3 0%, #ffe6e6 100%);
+            border-left: 3px solid #667eea;
+        }
+        
+        .solution {
+            background: linear-gradient(135deg, #f3f0ff 0%, #e6dcff 100%);
+            border-left: 3px solid #764ba2;
+        }
+        
+        .features ul {
+            list-style: none;
+            padding: 0;
+            font-size: 0.8rem;
+        }
+        
+        .features li {
+            padding: 3px 0;
+            position: relative;
+            padding-left: 15px;
+            line-height: 1.2;
+        }
+        
+        .features li:before {
+            content: "⚡";
+            position: absolute;
+            left: 0;
+            top: 3px;
+            font-size: 0.7rem;
+        }
+        
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 10px 0;
+        }
+        
+        .metric-card {
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .metric-card h4 {
+            color: #667eea;
+            font-size: 1.2rem;
+            margin-bottom: 3px;
+        }
+        
+        .metric-card p {
+            font-size: 0.75rem;
+            margin: 0;
+        }
+        
+        .buttons {
+            text-align: center;
+            padding: 10px;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.95);
+            margin: 10px;
+            border-radius: 15px;
+        }
+        
+        .demo-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 20px;
+            font-weight: 600;
+            margin: 0 5px;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+        
+        .demo-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌟 Portfolio 3D Interactivo</h1>
+            <p>Experiencia inmersiva con Three.js y CSS3D</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="left-column">
+                <div class="section">
+                    <h2>📋 Descripción</h2>
+                    <p>Portfolio inmersivo en 3D que combina WebGL, CSS3D y experiencia de usuario avanzada. Desarrollado con Three.js para crear una presentación única e interactiva.</p>
+                    
+                    <div class="tech-stack">
+                        <span class="tech-tag">Three.js</span>
+                        <span class="tech-tag">WebGL</span>
+                        <span class="tech-tag">CSS3D</span>
+                        <span class="tech-tag">JavaScript ES6+</span>
+                        <span class="tech-tag">GLSL</span>
+                        <span class="tech-tag">Blender</span>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>🎯 Desafío vs Solución</h2>
+                    <div class="challenge-solution">
+                        <div class="challenge">
+                            <h3>Desafío</h3>
+                            <p>Crear una experiencia única que combinara rendimiento 3D con contenido HTML interactivo.</p>
+                        </div>
+                        <div class="solution">
+                            <h3>Solución</h3>
+                            <p>Sistema híbrido WebGL + CSS3DRenderer con optimización automática de performance.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>📊 Métricas</h2>
+                    <div class="metrics">
+                        <div class="metric-card">
+                            <h4>60fps</h4>
+                            <p>Performance</p>
+                        </div>
+                        <div class="metric-card">
+                            <h4>< 3s</h4>
+                            <p>Carga inicial</p>
+                        </div>
+                        <div class="metric-card">
+                            <h4>95%</h4>
+                            <p>Compatibilidad</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="right-column">
+                <div class="section">
+                    <h2>✨ Características</h2>
+                    <div class="features">
+                        <ul>
+                            <li>Renderizado 3D en tiempo real optimizado</li>
+                            <li>Navegación cinematográfica con curvas Bézier</li>
+                            <li>Modelos 3D interactivos con física básica</li>
+                            <li>Sistema CSS3D para contenido HTML embebido</li>
+                            <li>Animaciones fluidas con easing personalizado</li>
+                            <li>Responsive design para todos los dispositivos</li>
+                            <li>Carga progresiva con indicadores visuales</li>
+                            <li>Gestión de memoria inteligente</li>
+                            <li>Cross-browser optimizado</li>
+                            <li>Sistema de eventos avanzado</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>🔧 Implementación</h2>
+                    <p><strong>Arquitectura:</strong> Patrón MVC con separación de lógica 3D, UI y datos.</p>
+                    <p><strong>Optimización:</strong> Frustum culling, LOD automático, y pooling de objetos.</p>
+                    <p><strong>UX:</strong> Transiciones naturales con physics-based animation.</p>
+                    <p><strong>Performance:</strong> WebWorkers para cálculos pesados y RAF optimizado.</p>
+                </div>
+                
+                <div class="section">
+                    <h2>🚀 Impacto</h2>
+                    <p>Esta implementación demuestra expertise en:</p>
+                    <p>• Programación 3D avanzada con WebGL/Three.js</p>
+                    <p>• Optimización de performance para aplicaciones complejas</p>
+                    <p>• UX Design para experiencias inmersivas</p>
+                    <p>• Arquitectura escalable para proyectos grandes</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="buttons">
+            <a href="projects.html" class="demo-button">🔙 Volver a Proyectos</a>
+            <a href="#" class="demo-button">📂 Ver Código</a>
+            <a href="#" class="demo-button">🎮 Demo en Vivo</a>
+        </div>
+    </div>
+</body>
+</html>

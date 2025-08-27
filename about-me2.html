@@ -14,6 +14,8 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #ffffff;
             overflow-y: auto;
+            /* Prevent any events from bubbling up */
+            pointer-events: auto !important;
         }
         
         body {
@@ -39,6 +41,10 @@
             right: 0;
             bottom: 0;
             overflow-y: auto;
+            /* Prevent any events from bubbling up */
+            pointer-events: auto !important;
+            isolation: isolate;
+            z-index: 1000;
         }
         
         .content-section {
@@ -51,6 +57,10 @@
             padding: 30px;
             border-radius: 15px;
             backdrop-filter: blur(10px);
+            /* Prevent any events from bubbling up */
+            pointer-events: auto !important;
+            isolation: isolate;
+            z-index: 1001;
         }
         
         .screen-header {
@@ -81,6 +91,10 @@
             backdrop-filter: blur(10px);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             cursor: pointer;
+            /* Prevent any events from bubbling up */
+            pointer-events: auto !important;
+            isolation: isolate;
+            z-index: 1002;
         }
         
         .project-card:hover {
@@ -155,12 +169,91 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 14px;
+            /* Prevent any events from bubbling up */
+            pointer-events: auto !important;
+            isolation: isolate;
+            z-index: 1003;
         }
         
         .filter-btn:hover,
         .filter-btn.active {
             background: rgba(102, 126, 234, 0.8);
             transform: translateY(-2px);
+        }
+        
+        /* Estilos para tarjetas expandidas */
+        .project-card.expanded {
+            max-width: 90%;
+            min-height: 300px;
+            z-index: 1000;
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .project-card .expanded-content {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            border-left: 3px solid rgba(102, 126, 234, 0.8);
+        }
+        
+        .project-card.expanded .expanded-content {
+            display: block;
+        }
+        
+        .expanded-details {
+            font-size: 14px;
+            color: #ffffff;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        
+        .expanded-features {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
+        }
+        
+        .expanded-features li {
+            font-size: 13px;
+            color: #e0e0e0;
+            margin: 5px 0;
+            padding-left: 18px;
+            position: relative;
+        }
+        
+        .expanded-features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: rgba(102, 126, 234, 0.9);
+            font-weight: bold;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(102, 126, 234, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 14px;
+            cursor: pointer;
+            display: none;
+            z-index: 1004;
+            /* Prevent any events from bubbling up */
+            pointer-events: auto !important;
+            isolation: isolate;
+        }
+        
+        .project-card.expanded .close-btn {
+            display: block;
         }
     </style>
 </head>
@@ -181,6 +274,7 @@
             
             <div class="projects-grid">
                 <div class="project-card" data-category="web">
+                    <button class="close-btn">×</button>
                     <div class="project-title">Portfolio 3D Interactivo</div>
                     <div class="project-description">
                         Un portfolio inmersivo en 3D desarrollado con Three.js que muestra mis habilidades de manera interactiva. Incluye modelos 3D, animaciones fluidas y un sistema de navegación intuitivo.
@@ -195,9 +289,22 @@
                         <a href="#" class="project-link">Ver Demo</a>
                         <a href="#" class="project-link">Código</a>
                     </div>
+                    <div class="expanded-content">
+                        <div class="expanded-details">
+                            <strong>Tecnologías:</strong> Three.js, WebGL, CSS3DRenderer, JavaScript ES6, GLSL
+                        </div>
+                        <ul class="expanded-features">
+                            <li>Renderizado 3D en tiempo real</li>
+                            <li>Sistema de navegación intuitivo</li>
+                            <li>Modelos 3D interactivos</li>
+                            <li>Animaciones fluidas con CSS3D</li>
+                            <li>Responsive design para móviles</li>
+                        </ul>
+                    </div>
                 </div>
                 
                 <div class="project-card" data-category="ai">
+                    <button class="close-btn">×</button>
                     <div class="project-title">Sistema de Prompt Engineering</div>
                     <div class="project-description">
                         Framework avanzado para el diseño y optimización de prompts de IA. Incluye técnicas de few-shot learning, chain-of-thought reasoning y fine-tuning de modelos.
@@ -212,9 +319,22 @@
                         <a href="#" class="project-link">Ver Proyecto</a>
                         <a href="#" class="project-link">Documentación</a>
                     </div>
+                    <div class="expanded-content">
+                        <div class="expanded-details">
+                            <strong>Tecnologías:</strong> Python, OpenAI API, LangChain, TensorFlow, Hugging Face
+                        </div>
+                        <ul class="expanded-features">
+                            <li>Few-shot learning implementation</li>
+                            <li>Chain-of-thought reasoning</li>
+                            <li>Prompt optimization algorithms</li>
+                            <li>Model fine-tuning capabilities</li>
+                            <li>API integration con OpenAI</li>
+                        </ul>
+                    </div>
                 </div>
                 
                 <div class="project-card" data-category="web">
+                    <button class="close-btn">×</button>
                     <div class="project-title">E-commerce Full Stack</div>
                     <div class="project-description">
                         Plataforma de comercio electrónico completa con React, Node.js y MongoDB. Incluye sistema de pagos, gestión de inventario y panel de administración.
@@ -229,9 +349,22 @@
                         <a href="#" class="project-link">Ver Demo</a>
                         <a href="#" class="project-link">GitHub</a>
                     </div>
+                    <div class="expanded-content">
+                        <div class="expanded-details">
+                            <strong>Tecnologías:</strong> React, Node.js, MongoDB, Express, Stripe, Redux
+                        </div>
+                        <ul class="expanded-features">
+                            <li>Sistema de pagos con Stripe</li>
+                            <li>Gestión de inventario en tiempo real</li>
+                            <li>Panel administrativo completo</li>
+                            <li>Autenticación y autorización</li>
+                            <li>Responsive design mobile-first</li>
+                        </ul>
+                    </div>
                 </div>
                 
                 <div class="project-card" data-category="automation">
+                    <button class="close-btn">×</button>
                     <div class="project-title">Bot de Trading Automatizado</div>
                     <div class="project-description">
                         Sistema de trading algorítmico que utiliza machine learning para analizar patrones de mercado y ejecutar operaciones automáticamente.
@@ -246,9 +379,22 @@
                         <a href="#" class="project-link">Ver Resultados</a>
                         <a href="#" class="project-link">Código</a>
                     </div>
+                    <div class="expanded-content">
+                        <div class="expanded-details">
+                            <strong>Tecnologías:</strong> Python, Pandas, Scikit-learn, APIs financieras, NumPy
+                        </div>
+                        <ul class="expanded-features">
+                            <li>Análisis de patrones con ML</li>
+                            <li>Ejecución automática de trades</li>
+                            <li>Sistema de gestión de riesgo</li>
+                            <li>Backtesting de estrategias</li>
+                            <li>Dashboard de métricas en tiempo real</li>
+                        </ul>
+                    </div>
                 </div>
                 
                 <div class="project-card" data-category="mobile">
+                    <button class="close-btn">×</button>
                     <div class="project-title">App de Productividad</div>
                     <div class="project-description">
                         Aplicación móvil cross-platform para gestión de tareas y productividad personal con sincronización en tiempo real y notificaciones inteligentes.
@@ -263,9 +409,22 @@
                         <a href="#" class="project-link">App Store</a>
                         <a href="#" class="project-link">Play Store</a>
                     </div>
+                    <div class="expanded-content">
+                        <div class="expanded-details">
+                            <strong>Tecnologías:</strong> React Native, Firebase, Redux, TypeScript, Push Notifications
+                        </div>
+                        <ul class="expanded-features">
+                            <li>Cross-platform iOS y Android</li>
+                            <li>Sincronización en tiempo real</li>
+                            <li>Notificaciones push inteligentes</li>
+                            <li>Gestión offline de tareas</li>
+                            <li>Analytics y reportes de productividad</li>
+                        </ul>
+                    </div>
                 </div>
                 
                 <div class="project-card" data-category="ai">
+                    <button class="close-btn">×</button>
                     <div class="project-title">Chatbot Conversacional</div>
                     <div class="project-description">
                         Asistente virtual inteligente con procesamiento de lenguaje natural avanzado, capaz de mantener conversaciones contextuales y realizar tareas específicas.
@@ -280,6 +439,18 @@
                         <a href="#" class="project-link">Probar Bot</a>
                         <a href="#" class="project-link">Documentación</a>
                     </div>
+                    <div class="expanded-content">
+                        <div class="expanded-details">
+                            <strong>Tecnologías:</strong> NLP, Transformers, BERT, FastAPI, Python
+                        </div>
+                        <ul class="expanded-features">
+                            <li>Procesamiento de lenguaje natural</li>
+                            <li>Conversaciones contextuales</li>
+                            <li>Integración con BERT y Transformers</li>
+                            <li>API REST con FastAPI</li>
+                            <li>Aprendizaje continuo de conversaciones</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -293,9 +464,46 @@
             // Filter functionality
             const filterButtons = document.querySelectorAll('.filter-btn');
             const projectCards = document.querySelectorAll('.project-card');
+            const interactiveScreen = document.querySelector('.interactive-screen');
+            const contentSection = document.querySelector('.content-section');
+            const allClickableElements = document.querySelectorAll('.project-card, .filter-btn, .close-btn, .interactive-screen, .content-section');
+            
+            // Función para detener completamente la propagación de eventos
+            function blockAllEvents(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                console.log("Event blocked completely:", e.type, e.target);
+                return false;
+            }
+            
+            // Aplicar a todos los elementos clickeables
+            allClickableElements.forEach(element => {
+                // Capturar todos los tipos de eventos posibles
+                ['click', 'mousedown', 'mouseup', 'touchstart', 'touchend', 'pointerdown', 'pointerup'].forEach(eventType => {
+                    element.addEventListener(eventType, blockAllEvents, { capture: true });
+                });
+            });
+            
+            // Asegurarse de que el contenedor principal capture todos los eventos
+            if (interactiveScreen) {
+                ['click', 'mousedown', 'mouseup', 'touchstart', 'touchend', 'pointerdown', 'pointerup'].forEach(eventType => {
+                    interactiveScreen.addEventListener(eventType, blockAllEvents, { capture: true });
+                });
+            }
             
             filterButtons.forEach(button => {
-                button.addEventListener('click', () => {
+                // Ensure all filter buttons have pointer-events set to auto
+                button.style.pointerEvents = 'auto';
+                
+                // Usar onclick en lugar de addEventListener para mayor compatibilidad
+                button.onclick = function(e) {
+                    // Detener completamente la propagación del evento
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    console.log("Filter button clicked:", button.textContent);
+                    
                     // Remove active class from all buttons
                     filterButtons.forEach(btn => btn.classList.remove('active'));
                     // Add active class to clicked button
@@ -310,7 +518,10 @@
                             card.style.display = 'none';
                         }
                     });
-                });
+                    
+                    // Return false para asegurarse de que el evento se detenga completamente
+                    return false;
+                };
             });
             
             // Screen control is now handled by the 3D plane in the main scene
@@ -365,6 +576,95 @@
                     console.error("Error sending message to parent:", e);
                 }
             }
+            
+            // The event handling code has been moved to the top of the file
+            
+            // Configurar la funcionalidad de las tarjetas de proyecto con un enfoque más agresivo
+            projectCards.forEach(card => {
+                // Asegurarse de que todas las tarjetas tengan pointer-events establecido en auto
+                card.style.pointerEvents = 'auto';
+                
+                // Usar onclick en lugar de addEventListener para mayor compatibilidad
+                card.onclick = function(e) {
+                    // Detener completamente la propagación del evento
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    console.log("Card clicked:", card.querySelector('.project-title').textContent);
+                    
+                    // Si se hace clic en el botón de cerrar, no expandir
+                    if (e.target.classList.contains('close-btn')) {
+                        console.log("Close button clicked, not expanding");
+                        return false;
+                    }
+                    
+                    // Cerrar todas las otras tarjetas
+                    projectCards.forEach(otherCard => {
+                        if (otherCard !== card) {
+                            otherCard.classList.remove('expanded');
+                        }
+                    });
+                    
+                    // Toggle de la tarjeta actual
+                    card.classList.toggle('expanded');
+                    
+                    if (card.classList.contains('expanded')) {
+                        console.log("Card expanded:", card.querySelector('.project-title').textContent);
+                    } else {
+                        console.log("Card collapsed:", card.querySelector('.project-title').textContent);
+                    }
+                    
+                    // Return false para asegurarse de que el evento se detenga completamente
+                    return false;
+                };
+            });
+            
+            // Funcionalidad de botones de cerrar con un enfoque más agresivo
+            const closeBtns = document.querySelectorAll('.close-btn');
+            closeBtns.forEach(btn => {
+                // Make sure close buttons have pointer-events set to auto
+                btn.style.pointerEvents = 'auto';
+                
+                // Usar onclick en lugar de addEventListener para mayor compatibilidad
+                btn.onclick = function(e) {
+                    // Detener completamente la propagación del evento
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    console.log("Close button clicked");
+                    
+                    const card = btn.closest('.project-card');
+                    if (card) {
+                        card.classList.remove('expanded');
+                        console.log("Project card closed:", card.querySelector('.project-title').textContent);
+                    } else {
+                        console.log("Could not find parent card for close button");
+                    }
+                    
+                    // Return false para asegurarse de que el evento se detenga completamente
+                    return false;
+                };
+            });
+            
+            // Prevent the default behavior of all clicks inside the interactive screen
+            // This is crucial to prevent the black cover from appearing
+            document.querySelector('.interactive-screen').addEventListener('click', function(e) {
+                // This prevents any default behavior and stops propagation to parent elements
+                e.preventDefault();
+                e.stopPropagation();
+                console.log("Click intercepted within interactive screen - preventing default");
+                
+                // Only close cards if the click is inside interactive-screen but outside any project card or filter button
+                if (!e.target.closest('.project-card') && !e.target.closest('.filter-btn')) {
+                    console.log("Click inside interactive screen but outside cards, closing all cards");
+                    projectCards.forEach(card => {
+                        card.classList.remove('expanded');
+                    });
+                }
+                
+                // Return false to ensure the event is completely stopped
+                return false;
+            });
         });
     </script>
 </body>
