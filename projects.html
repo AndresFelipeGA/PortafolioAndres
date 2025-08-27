@@ -84,7 +84,7 @@
         
         .screen-header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 15px;
         }
         
         .screen-header h1 {
@@ -101,7 +101,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 15px;
-            margin-top: 20px;
+            margin-top: 5px;
             justify-items: center;
         }
         
@@ -122,6 +122,8 @@
             /* Prevent any events from bubbling up */
             isolation: isolate;
             z-index: 1002;
+            /* Asegurar que toda la tarjeta sea clickeable */
+            cursor: pointer !important;
         }
         
         .project-card:hover {
@@ -259,6 +261,56 @@
             border-color: rgba(205, 133, 63, 0.8);
         }
         
+        /* Estilo específico para la tarjeta del Portfolio 3D - más larga verticalmente */
+        .project-card.portfolio-3d {
+            min-height: 450px; /* Reducida aún más para eliminar espacios */
+            display: flex;
+            flex-direction: column; /* Layout vertical */
+            padding: 6px 8px 4px 8px; /* Padding ultra compacto */
+        }
+        
+        .project-card.portfolio-3d .project-description {
+            max-height: 280px; /* Mantener espacio para evitar cortes */
+            -webkit-line-clamp: 12; /* Permitir muchas más líneas */
+            line-clamp: 12;
+            padding: 6px 8px; /* Padding mínimo */
+            margin-bottom: 2px; /* Margen mínimo */
+            overflow: visible; /* Asegurar que no se corte */
+        }
+        
+        .project-card.portfolio-3d .project-image {
+            height: 140px; /* Mantener tamaño de imagen */
+            margin-bottom: 2px; /* Margen mínimo */
+        }
+        
+        .project-card.portfolio-3d .project-title {
+            margin-bottom: 2px; /* Margen mínimo */
+        }
+        
+        .project-card.portfolio-3d .mini-tech-tags {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 2px; /* Margen mínimo */
+            margin-top: auto; /* Empujar hacia abajo */
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .project-card.portfolio-3d .mini-tech-tag {
+            background: linear-gradient(135deg, 
+                rgba(34, 139, 34, 0.8) 0%, 
+                rgba(0, 100, 0, 0.8) 100%);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 8px;
+            font-weight: 600;
+            border: 1px solid rgba(34, 139, 34, 0.6);
+            backdrop-filter: blur(5px);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+        }
+        
         /* Estilos para tarjetas expandidas */
         .project-card.expanded {
             max-width: 450px;
@@ -382,51 +434,6 @@
             from { opacity: 0; }
             to { opacity: 1; }
         }
-        
-        .filter-buttons {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .filter-btn {
-            background: linear-gradient(135deg,
-                rgba(139, 69, 19, 0.9) 0%,
-                rgba(101, 67, 33, 0.9) 100%);
-            color: white;
-            border: 2px solid rgba(139, 69, 19, 0.7);
-            padding: 10px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 14px;
-            font-weight: 600;
-            backdrop-filter: blur(10px);
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-            pointer-events: auto !important;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-            /* Prevent any events from bubbling up */
-            isolation: isolate;
-            z-index: 1003;
-        }
-        
-        .filter-btn:hover {
-            background: linear-gradient(135deg, 
-                rgba(160, 82, 45, 1.0) 0%, 
-                rgba(139, 69, 19, 1.0) 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
-        }
-        
-        .filter-btn.active {
-            background: linear-gradient(135deg, 
-                rgba(205, 133, 63, 0.9) 0%, 
-                rgba(160, 82, 45, 0.9) 100%);
-            border-color: rgba(205, 133, 63, 0.8);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
     </style>
 </head>
 <body>
@@ -436,23 +443,23 @@
                 <h1>Mis Proyectos</h1>
             </div>
             
-            <div class="filter-buttons">
-                <button class="filter-btn active" data-filter="all">Todos</button>
-                <button class="filter-btn" data-filter="web">Web</button>
-                <button class="filter-btn" data-filter="ai">IA & ML</button>
-                <button class="filter-btn" data-filter="mobile">Mobile</button>
-                <button class="filter-btn" data-filter="automation">Automatización</button>
-            </div>
-            
             <div class="projects-grid">
-                <div class="project-card" data-category="web">
+                <div class="project-card portfolio-3d" data-category="web">
                     <button class="close-btn">×</button>
                     <div class="project-image">
                         <img src="media/pictures/picturesOfSometingElse/ImagenModelo3D.png" alt="Portfolio 3D Interactivo" />
                     </div>
                     <div class="project-title">Portfolio 3D Interactivo</div>
                     <div class="project-description">
-                        Un portfolio inmersivo en 3D desarrollado con Three.js que muestra mis habilidades de manera interactiva. Incluye modelos 3D, animaciones fluidas y un sistema de navegación intuitivo.
+                        Este es más que un portfolio, es un pedacito de mi vida convertido en código. Cada línea de Three.js refleja mi pasión por crear experiencias que conecten con las personas. Desarrollé este mundo 3D porque creo que la tecnología debe ser humana, emocional y memorable. Aquí no solo muestro mis habilidades técnicas, sino también mi forma de ver el desarrollo: como un arte que combina creatividad, innovación y un toque personal que hace la diferencia.
+                    </div>
+                    <div class="mini-tech-tags">
+                        <span class="mini-tech-tag">Three.js</span>
+                        <span class="mini-tech-tag">Blender</span>
+                        <span class="mini-tech-tag">WebGL</span>
+                        <span class="mini-tech-tag">GSAP</span>
+                        <span class="mini-tech-tag">JavaScript</span>
+                        <span class="mini-tech-tag">GLSL</span>
                     </div>
                     <div class="expanded-content">
                         <div class="expanded-details">
@@ -517,7 +524,6 @@
             document.body.style.transform = 'rotate(180deg)';
             
             // Variables globales
-            const filterButtons = document.querySelectorAll('.filter-btn');
             const projectCards = document.querySelectorAll('.project-card');
             const closeBtns = document.querySelectorAll('.close-btn');
             const interactiveScreen = document.querySelector('.interactive-screen');
@@ -636,8 +642,24 @@
                     
                     // Obtener todas las coordenadas de la tarjeta
                     const cardRect = portfolioCard.getBoundingClientRect();
-                    const clickX = e.clientX;
-                    const clickY = e.clientY;
+                    
+                    // Ajustar coordenadas considerando la rotación de 180 grados
+                    // En una rotación de 180 grados, las coordenadas se invierten respecto al centro
+                    const viewportWidth = window.innerWidth;
+                    const viewportHeight = window.innerHeight;
+                    
+                    // Coordenadas originales del clic
+                    const originalClickX = e.clientX;
+                    const originalClickY = e.clientY;
+                    
+                    // Coordenadas ajustadas para la rotación (si es necesario)
+                    // Si el body tiene rotate(180deg), las coordenadas están invertidas
+                    const clickX = originalClickX;
+                    const clickY = originalClickY;
+                    
+                    console.log("📏 Viewport:", viewportWidth, "x", viewportHeight);
+                    console.log("📏 Coordenadas originales:", originalClickX, originalClickY);
+                    console.log("📏 Coordenadas ajustadas:", clickX, clickY);
                     
                     console.log("📍 Click en:", clickX, clickY);
                     console.log("📦 Área exacta de tarjeta:", cardRect);
@@ -651,7 +673,7 @@
                     // DETECCIÓN POR PROXIMIDAD INTELIGENTE (solo si no hay hit directo)
                     let isNearCard = false;
                     if (!isDirectlyInsideCard) {
-                        const margin = 50; // Margen más pequeño pero inteligente
+                        const margin = 80; // Margen ampliado para mayor área de detección
                         isNearCard = (clickX >= cardRect.left - margin && 
                                      clickX <= cardRect.right + margin && 
                                      clickY >= cardRect.top - margin && 
@@ -744,7 +766,7 @@
                 });
                 
                 // Verificación exacta de bounds con tolerancia
-                const tolerance = 5; // píxeles de tolerancia
+                const tolerance = 15; // píxeles de tolerancia (aumentado para mayor área de detección)
                 const isWithinBounds = (
                     clickX >= (cardRect.left - tolerance) && 
                     clickX <= (cardRect.right + tolerance) && 
@@ -790,33 +812,6 @@
 
             // FUNCIONALIDAD INTERNA - Simplificada y directa
             
-            // Funcionalidad de filtros
-            filterButtons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    // Bloquear solo propagación hacia arriba
-                    e.stopPropagation();
-                    
-                    console.log("🔵 Filter button clicked:", button.textContent);
-                    
-                    filterButtons.forEach(btn => btn.classList.remove('active'));
-                    button.classList.add('active');
-                    
-                    const filter = button.getAttribute('data-filter');
-                    
-                    projectCards.forEach(card => {
-                        card.classList.remove('expanded');
-                    });
-                    
-                    projectCards.forEach(card => {
-                        if (filter === 'all' || card.getAttribute('data-category') === filter) {
-                            card.style.display = 'block';
-                        } else {
-                            card.style.display = 'none';
-                        }
-                    });
-                });
-            });
-
             // Funcionalidad de tarjetas - MÉTODO DIRECTO MEJORADO
             projectCards.forEach((card, index) => {
                 console.log(`🔧 Setting up card ${index + 1}:`, card.querySelector('.project-title')?.textContent);
@@ -824,6 +819,29 @@
                 // Usar múltiples métodos para asegurar que funcione
                 card.style.cursor = 'pointer';
                 card.style.pointerEvents = 'auto';
+                
+                // Asegurar que toda el área de la tarjeta sea clickeable
+                card.style.position = 'relative';
+                
+                // Crear un elemento invisible que cubra toda la tarjeta para capturar clics
+                const clickCatcher = document.createElement('div');
+                clickCatcher.style.position = 'absolute';
+                clickCatcher.style.top = '0';
+                clickCatcher.style.left = '0';
+                clickCatcher.style.width = '100%';
+                clickCatcher.style.height = '100%';
+                clickCatcher.style.zIndex = '1';
+                clickCatcher.style.cursor = 'pointer';
+                clickCatcher.style.pointerEvents = 'auto';
+                
+                // Agregar listener al elemento que cubre toda la tarjeta
+                clickCatcher.addEventListener('click', function(e) {
+                    console.log("🎯 CLICK EN ÁREA COMPLETA DE LA TARJETA");
+                    handleCardClick(e, card);
+                });
+                
+                // Insertar el elemento al principio de la tarjeta
+                card.insertBefore(clickCatcher, card.firstChild);
                 
                 // Método 1: addEventListener
                 card.addEventListener('click', function(e) {
@@ -846,7 +864,7 @@
                 });
                 
                 // MÉTODO 4: LISTENERS ESPECÍFICOS EN ELEMENTOS INTERNOS
-                const internalElements = card.querySelectorAll('.project-title, .project-description, .project-image, .project-image img');
+                const internalElements = card.querySelectorAll('.project-title, .project-description, .project-image, .project-image img, .project-tech, .tech-tag, .project-links, .project-link, .expanded-content, .expanded-details, .expanded-features, .expanded-features li');
                 internalElements.forEach((element, elemIndex) => {
                     console.log(`🔧 Configurando elemento interno ${elemIndex + 1}:`, element.className || element.tagName);
                     
@@ -872,6 +890,11 @@
 
             // Función centralizada para manejar clicks en tarjetas - NAVEGACIÓN A NUEVA PÁGINA
             function handleCardClick(e, card) {
+                // Registrar información detallada sobre el clic
+                console.log("🔍 Detalles del clic:");
+                console.log("- Coordenadas:", e.clientX, e.clientY);
+                console.log("- Elemento target:", e.target.tagName, e.target.className);
+                console.log("- Ruta del evento:", e.composedPath().map(el => el.tagName || el.nodeName).join(' > '));
                 console.log("🚀🚀🚀 MANEJANDO CLICK EN TARJETA:", card.querySelector('.project-title')?.textContent);
                 
                 // Prevenir propagación múltiple
@@ -969,7 +992,6 @@
             setTimeout(() => {
                 console.log("🧪 Testing card functionality...");
                 console.log("📊 Found", projectCards.length, "project cards");
-                console.log("📊 Found", filterButtons.length, "filter buttons");
                 console.log("📊 Found", closeBtns.length, "close buttons");
                 
                 // Verificar que los elementos tienen event listeners
