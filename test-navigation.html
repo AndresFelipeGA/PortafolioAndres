@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Portfolio 3D</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #8B4513;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+        
+        .back-button:hover {
+            background: #A0522D;
+            transform: scale(1.1);
+        }
+        
+        .test-content {
+            max-width: 800px;
+            margin: 80px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .status {
+            background: #e8f5e8;
+            border: 1px solid #4CAF50;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        
+        .button-test {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" id="backButton">←</button>
+    
+    <div class="test-content">
+        <h1>🧪 Test de Navegación - Portfolio 3D</h1>
+        
+        <div class="status" id="status">
+            ⏳ Cargando script de navegación...
+        </div>
+        
+        <h2>Instrucciones de Prueba:</h2>
+        <ol>
+            <li>Haz clic en el botón ← (esquina superior izquierda)</li>
+            <li>O presiona la tecla <strong>Escape</strong></li>
+            <li>Debería navegar a <code>projects.html</code></li>
+        </ol>
+        
+        <h2>Tests Alternativos:</h2>
+        <button class="button-test" onclick="testNavigation1()">Test 1: window.location.href</button>
+        <button class="button-test" onclick="testNavigation2()">Test 2: window.location.assign</button>
+        <button class="button-test" onclick="testNavigation3()">Test 3: window.open</button>
+        
+        <div id="console-output" style="background: #f5f5f5; padding: 15px; margin: 20px 0; border-radius: 5px; font-family: monospace; font-size: 12px; max-height: 200px; overflow-y: auto;">
+            <strong>Console Output:</strong><br>
+        </div>
+    </div>
+    
+    <script>
+        // Interceptar console.log para mostrar en pantalla
+        const originalLog = console.log;
+        const consoleOutput = document.getElementById('console-output');
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            const message = args.join(' ');
+            consoleOutput.innerHTML += '<div>' + new Date().toLocaleTimeString() + ': ' + message + '</div>';
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        };
+        
+        console.log("🚀 Test de navegación iniciado");
+        
+        // Funciones de test
+        function testNavigation1() {
+            console.log("🧪 Test 1: Usando window.location.href");
+            window.location.href = 'projects.html';
+        }
+        
+        function testNavigation2() {
+            console.log("🧪 Test 2: Usando window.location.assign");
+            window.location.assign('projects.html');
+        }
+        
+        function testNavigation3() {
+            console.log("🧪 Test 3: Usando window.open");
+            window.open('projects.html', '_self');
+        }
+        
+        // Función principal de navegación
+        function goBack() {
+            console.log("🔙 Función goBack ejecutada");
+            console.log("📍 URL actual: " + window.location.href);
+            console.log("📁 Directorio base: " + window.location.origin);
+            
+            try {
+                // Verificar si projects.html existe
+                console.log("🔍 Intentando navegar a projects.html");
+                window.location.href = 'projects.html';
+                console.log("✅ Comando de navegación enviado");
+            } catch (error) {
+                console.error("❌ Error en navegación:", error);
+                // Intentar ruta absoluta
+                const absolutePath = window.location.href.replace('project-portfolio-3d.html', 'projects.html');
+                console.log("🔄 Intentando ruta absoluta: " + absolutePath);
+                window.location.href = absolutePath;
+            }
+        }
+        
+        // Configuración cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("📄 DOM cargado");
+            document.getElementById('status').innerHTML = "✅ Script cargado correctamente";
+            
+            const backButton = document.getElementById('backButton');
+            
+            if (backButton) {
+                console.log("✅ Botón encontrado, configurando eventos");
+                
+                // Event listener principal
+                backButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log("🖱️ Click detectado en botón");
+                    goBack();
+                });
+                
+                // Backup onclick
+                backButton.onclick = function(e) {
+                    console.log("🖱️ Onclick backup ejecutado");
+                    goBack();
+                    return false;
+                };
+                
+                console.log("✅ Eventos configurados correctamente");
+            } else {
+                console.error("❌ Botón no encontrado");
+            }
+            
+            // Navegación con teclado
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    console.log("⌨️ Tecla Escape presionada");
+                    goBack();
+                }
+            });
+            
+            console.log("✅ Configuración completa");
+        });
+    </script>
+</body>
+</html>

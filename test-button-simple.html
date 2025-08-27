@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Botón - Sin Rotación</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, 
+                rgba(139, 69, 19, 0.9) 0%, 
+                rgba(101, 67, 33, 0.9) 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            z-index: 9999;
+            pointer-events: auto;
+        }
+        
+        .back-button:hover {
+            background: linear-gradient(135deg, 
+                rgba(160, 82, 45, 0.9) 0%, 
+                rgba(139, 69, 19, 0.9) 100%);
+            transform: scale(1.1);
+        }
+        
+        .content {
+            max-width: 800px;
+            margin: 80px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" id="backButton" onclick="window.location.href='projects.html';">←</button>
+    
+    <div class="content">
+        <h1>🧪 Test del Botón (Sin Rotación)</h1>
+        <p>Este es un test simple del botón de regreso sin la rotación de 180°.</p>
+        <p><strong>Instrucciones:</strong> Haz clic en el botón ← en la esquina superior izquierda.</p>
+        
+        <h2>Métodos de Test:</h2>
+        <button onclick="window.location.href='projects.html';" style="background: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px;">Test 1: window.location.href</button>
+        <button onclick="window.location.assign('projects.html');" style="background: #2196F3; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px;">Test 2: window.location.assign</button>
+        <button onclick="window.open('projects.html', '_self');" style="background: #FF9800; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px;">Test 3: window.open</button>
+    </div>
+    
+    <script>
+        console.log("✅ Test página cargada sin rotación");
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const backButton = document.getElementById('backButton');
+            
+            if (backButton) {
+                console.log("✅ Botón encontrado, configurando eventos adicionales");
+                
+                backButton.addEventListener('click', function(e) {
+                    console.log("🖱️ Click detectado via addEventListener");
+                });
+                
+                backButton.addEventListener('mousedown', function(e) {
+                    console.log("🖱️ Mousedown detectado");
+                });
+            }
+        });
+    </script>
+</body>
+</html>
