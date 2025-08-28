@@ -10,11 +10,19 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: url('media/pictures/picturesOfSometingElse/AztecaBackground.jpg') no-repeat center center;
+            font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(
+                135deg,
+                rgba(252, 203, 144, 0.4) 0%,    /* Amarillo Colombia suave */
+                rgba(129, 199, 132, 0.3) 35%,   /* Verde suave */
+                rgba(100, 181, 246, 0.3) 70%,   /* Azul Colombia suave */
+                rgba(161, 136, 127, 0.4) 100%   /* Café colombiano suave */
+            ),
+            url('media/pictures/picturesOfSometingElse/ContactBack.jpg') no-repeat center center;
             background-size: cover;
             background-attachment: fixed;
-            color: #ffffff;
+            background-blend-mode: soft-light;
+            color: #2c2c2c;
             overflow: hidden;
             pointer-events: auto !important;
         }
@@ -44,68 +52,92 @@
             right: 0;
             bottom: 0;
             overflow: hidden;
-            backdrop-filter: blur(3px);
+            backdrop-filter: blur(1px);
             pointer-events: auto !important;
         }
         
         .content-section {
             width: calc(100% - 20px);
-            max-width: 760px;
-            margin: 5px auto;
-            height: calc(100% - 10px);
+            max-width: 95vw;
+            margin: 10px auto;
+            height: calc(100vh - 20px);
             display: flex;
             flex-direction: column;
             position: relative;
             background: linear-gradient(135deg,
-                rgba(255, 255, 255, 0.75) 0%,
-                rgba(248, 248, 250, 0.70) 100%);
-            padding: 10px;
-            border-radius: 15px;
-            backdrop-filter: blur(5px);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+                rgba(255, 255, 255, 0.92) 0%,
+                rgba(250, 250, 250, 0.88) 100%);
+            padding: 15px;
+            border-radius: 20px;
+            backdrop-filter: blur(12px);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.08),
+                0 4px 16px rgba(252, 203, 144, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.6);
             pointer-events: auto !important;
             box-sizing: border-box;
         }
         
         .screen-header {
             text-align: center;
-            margin-bottom: 8px;
+            margin-bottom: 15px;
             flex-shrink: 0;
         }
         
         .screen-header h1 {
             margin: 0;
-            color: #654321;
-            font-size: 24px;
-            font-weight: 700;
-            text-shadow: 2px 2px 4px rgba(139, 69, 19, 0.3);
-            letter-spacing: 1px;
+            color: #2d3436;
+            font-size: 28px;
+            font-weight: 300;
+            letter-spacing: 2px;
             text-align: center;
+            position: relative;
+        }
+        
+        .screen-header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                #FCD34C 0%,      /* Amarillo Colombia */
+                #00B4D8 50%,     /* Azul Colombia */
+                #E63946 100%);   /* Rojo Colombia */
+            border-radius: 2px;
         }
         
         .contact-container {
             display: flex;
-            gap: 12px;
+            gap: 15px;
             margin-top: 5px;
             justify-content: space-between;
             flex: 1;
             overflow: hidden;
+            min-height: 0;
         }
         
         .contact-form {
             flex: 1.2;
             min-width: 280px;
             background: linear-gradient(135deg,
-                rgba(245, 245, 220, 0.85) 0%,
-                rgba(255, 248, 220, 0.80) 100%);
-            border-radius: 12px;
-            padding: 10px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 25px rgba(139, 69, 19, 0.2);
+                rgba(255, 255, 255, 0.95) 0%,
+                rgba(248, 250, 252, 0.90) 100%);
+            border-radius: 16px;
+            padding: 15px;
+            backdrop-filter: blur(15px);
+            box-shadow: 
+                0 4px 20px rgba(0, 0, 0, 0.06),
+                0 1px 4px rgba(100, 181, 246, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.7);
             pointer-events: auto !important;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
+            overflow-y: auto;
         }
         
         .contact-info {
@@ -113,33 +145,36 @@
             min-width: 220px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            overflow: hidden;
+            gap: 10px;
+            overflow-y: auto;
+            min-height: 0;
         }
         
         .form-group {
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
         
         .form-group label {
             display: block;
-            margin-bottom: 2px;
-            color: #654321;
-            font-weight: 600;
-            font-size: 12px;
+            margin-bottom: 4px;
+            color: #2d3436;
+            font-weight: 500;
+            font-size: 13px;
+            letter-spacing: 0.3px;
         }
         
         .form-group input,
         .form-group textarea,
         .form-group select {
             width: 100%;
-            padding: 5px 8px;
-            border: 2px solid rgba(139, 69, 19, 0.3);
-            border-radius: 6px;
-            background: rgba(255, 255, 255, 0.9);
-            color: #654321;
-            font-size: 12px;
-            transition: all 0.3s ease;
+            padding: 8px 12px;
+            border: 2px solid rgba(100, 181, 246, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            color: #2d3436;
+            font-size: 13px;
+            font-family: inherit;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-sizing: border-box;
             pointer-events: auto !important;
         }
@@ -148,9 +183,12 @@
         .form-group textarea:focus,
         .form-group select:focus {
             outline: none;
-            border-color: rgba(139, 69, 19, 0.6);
-            box-shadow: 0 0 10px rgba(139, 69, 19, 0.2);
-            background: rgba(255, 255, 255, 1);
+            border-color: #00B4D8;
+            box-shadow: 
+                0 0 0 3px rgba(0, 180, 216, 0.1),
+                0 4px 12px rgba(0, 180, 216, 0.15);
+            background: rgba(255, 255, 255, 0.95);
+            transform: translateY(-1px);
         }
         
         .form-group textarea {
@@ -161,83 +199,90 @@
         
         .contact-buttons {
             display: flex;
-            gap: 8px;
+            gap: 10px;
             justify-content: center;
-            margin-top: 8px;
+            margin-top: 12px;
         }
         
         .btn {
             background: linear-gradient(135deg,
-                rgba(139, 69, 19, 0.9) 0%,
-                rgba(101, 67, 33, 0.9) 100%);
+                #00B4D8 0%,     /* Azul Colombia */
+                #0077B6 100%);  /* Azul más profundo */
             color: white;
-            padding: 6px 12px;
+            padding: 8px 16px;
             border: none;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 600;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 4px;
             pointer-events: auto !important;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 180, 216, 0.25);
+            letter-spacing: 0.3px;
         }
         
         .btn:hover {
             background: linear-gradient(135deg, 
-                rgba(205, 133, 63, 0.9) 0%, 
-                rgba(160, 82, 45, 0.9) 100%);
+                #FCD34C 0%,     /* Amarillo Colombia */
+                #F1C40F 100%);  /* Amarillo dorado */
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 6px 25px rgba(252, 211, 76, 0.4);
         }
         
         .btn-primary {
             background: linear-gradient(135deg, 
-                rgba(76, 175, 80, 0.9) 0%, 
-                rgba(56, 142, 60, 0.9) 100%);
+                #E63946 0%,     /* Rojo Colombia */
+                #C53030 100%);  /* Rojo más oscuro */
         }
         
         .btn-primary:hover {
             background: linear-gradient(135deg, 
-                rgba(102, 187, 106, 0.9) 0%, 
-                rgba(76, 175, 80, 0.9) 100%);
+                #FCD34C 0%,     /* Amarillo Colombia */
+                #F1C40F 100%);  /* Amarillo dorado */
+            box-shadow: 0 6px 25px rgba(252, 211, 76, 0.4);
         }
         
         .contact-card {
             background: linear-gradient(135deg,
-                rgba(245, 245, 220, 0.85) 0%,
-                rgba(255, 248, 220, 0.80) 100%);
-            border-radius: 10px;
-            padding: 8px;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
+                rgba(255, 255, 255, 0.95) 0%,
+                rgba(248, 250, 252, 0.90) 100%);
+            border-radius: 12px;
+            padding: 12px;
+            backdrop-filter: blur(15px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
-            box-shadow: 0 8px 25px rgba(139, 69, 19, 0.2);
+            box-shadow: 
+                0 4px 20px rgba(0, 0, 0, 0.06),
+                0 1px 4px rgba(100, 181, 246, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.7);
             pointer-events: auto !important;
             box-sizing: border-box;
         }
         
         .contact-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 30px rgba(139, 69, 19, 0.3);
-            border-color: rgba(160, 82, 45, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 
+                0 6px 25px rgba(0, 0, 0, 0.1),
+                0 3px 6px rgba(100, 181, 246, 0.15);
         }
         
         .contact-card h3 {
-            color: #654321;
+            color: #2d3436;
             font-size: 14px;
-            margin: 0 0 4px 0;
-            text-shadow: 1px 1px 2px rgba(139, 69, 19, 0.3);
+            font-weight: 500;
+            margin: 0 0 6px 0;
+            letter-spacing: 0.3px;
         }
         
         .contact-card p {
-            color: #5d4037;
-            margin: 2px 0;
+            color: #636e72;
+            margin: 3px 0;
             font-size: 11px;
+            line-height: 1.4;
         }
         
         .contact-icon {
@@ -250,66 +295,71 @@
         .social-links {
             display: flex;
             gap: 6px;
-            margin-top: 4px;
+            margin-top: 8px;
             flex-wrap: wrap;
         }
         
         .social-link {
             display: inline-flex;
             align-items: center;
-            gap: 3px;
-            padding: 4px 8px;
+            gap: 4px;
+            padding: 6px 10px;
             background: linear-gradient(135deg,
-                rgba(66, 165, 245, 0.8) 0%,
-                rgba(33, 150, 243, 0.8) 100%);
+                #00B4D8 0%,     /* Azul Colombia */
+                #0077B6 100%);  /* Azul más profundo */
             color: white;
             text-decoration: none;
             border-radius: 15px;
             font-size: 10px;
             font-weight: 500;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             pointer-events: auto !important;
+            letter-spacing: 0.2px;
         }
         
         .social-link.whatsapp {
             background: linear-gradient(135deg, 
-                rgba(76, 175, 80, 0.8) 0%, 
-                rgba(56, 142, 60, 0.8) 100%);
+                #25D366 0%,     /* Verde WhatsApp */
+                #128C7E 100%);  /* Verde más oscuro */
         }
         
         .social-link.email {
             background: linear-gradient(135deg, 
-                rgba(244, 67, 54, 0.8) 0%, 
-                rgba(211, 47, 47, 0.8) 100%);
+                #E63946 0%,     /* Rojo Colombia */
+                #C53030 100%);  /* Rojo más oscuro */
         }
         
         .social-link.linkedin {
             background: linear-gradient(135deg, 
-                rgba(33, 150, 243, 0.8) 0%, 
-                rgba(25, 118, 210, 0.8) 100%);
+                #0077B5 0%,     /* Azul LinkedIn */
+                #005885 100%);  /* Azul más oscuro */
         }
         
         .social-link.github {
             background: linear-gradient(135deg, 
-                rgba(97, 97, 97, 0.8) 0%, 
-                rgba(66, 66, 66, 0.8) 100%);
+                #333333 0%,     /* Gris GitHub */
+                #1a1a1a 100%);  /* Gris más oscuro */
         }
         
         .social-link:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(135deg, 
+                #FCD34C 0%,     /* Amarillo Colombia */
+                #F1C40F 100%);  /* Amarillo dorado */
         }
         
         .contact-form-title {
             text-align: center;
-            margin-bottom: 8px;
-            color: #654321;
+            margin-bottom: 12px;
+            color: #2d3436;
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 400;
+            letter-spacing: 0.5px;
         }
         
         .required {
-            color: #d32f2f;
+            color: #E63946;  /* Rojo Colombia */
         }
         
         @keyframes slideIn {
@@ -338,11 +388,21 @@
         @media (max-width: 768px) {
             .contact-container {
                 flex-direction: column;
+                gap: 10px;
             }
             
             .contact-form,
             .contact-info {
                 min-width: unset;
+                flex: none;
+            }
+            
+            .contact-form {
+                max-height: 60vh;
+            }
+            
+            .contact-info {
+                max-height: 35vh;
             }
             
             .contact-buttons {
@@ -353,32 +413,83 @@
                 flex: 1;
                 text-align: center;
                 justify-content: center;
+                font-size: 11px;
+                padding: 6px 12px;
+            }
+            
+            .content-section {
+                padding: 10px;
+                margin: 5px auto;
+                height: calc(100vh - 10px);
+            }
+            
+            .screen-header h1 {
+                font-size: 24px;
+            }
+        }
+        
+        @media (max-height: 600px) {
+            .content-section {
+                padding: 8px;
+                margin: 5px auto;
+            }
+            
+            .screen-header {
+                margin-bottom: 8px;
+            }
+            
+            .screen-header h1 {
+                font-size: 22px;
+            }
+            
+            .contact-container {
+                gap: 8px;
+            }
+            
+            .form-group {
+                margin-bottom: 6px;
+            }
+            
+            .contact-card {
+                padding: 8px;
+            }
+            
+            .contact-card h3 {
+                font-size: 12px;
+                margin-bottom: 4px;
+            }
+            
+            .contact-card p {
+                font-size: 10px;
             }
         }
         
         .success-message {
             background: linear-gradient(135deg, 
-                #4CAF50 0%,     /* Verde elegante */
-                #45a049 100%); /* Verde más oscuro */
+                #25D366 0%,     /* Verde WhatsApp */
+                #128C7E 100%);  /* Verde más oscuro */
             color: white;
-            padding: 18px 24px;
-            border-radius: 12px;
-            margin-bottom: 15px;
+            padding: 20px 28px;
+            border-radius: 16px;
+            margin-bottom: 20px;
             text-align: center;
-            font-weight: 600;
-            font-size: 15px;
+            font-weight: 500;
+            font-size: 16px;
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 10000;
-            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
-            animation: popupSlideIn 0.4s ease-out;
-            min-width: 280px;
-            max-width: 350px;
-            backdrop-filter: blur(8px);
+            box-shadow: 
+                0 8px 32px rgba(37, 211, 102, 0.25),
+                0 4px 16px rgba(0, 0, 0, 0.1);
+            animation: popupSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            min-width: 300px;
+            max-width: 400px;
+            backdrop-filter: blur(12px);
             display: none;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            letter-spacing: 0.3px;
         }
         
         @keyframes popupSlideIn {
@@ -394,15 +505,18 @@
         
         .error-message {
             background: linear-gradient(135deg, 
-                rgba(244, 67, 54, 0.9) 0%, 
-                rgba(211, 47, 47, 0.9) 100%);
+                #E63946 0%,     /* Rojo Colombia */
+                #C53030 100%);  /* Rojo más oscuro */
             color: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
             text-align: center;
-            font-weight: 600;
+            font-weight: 500;
+            font-size: 14px;
             display: none;
+            box-shadow: 0 4px 20px rgba(230, 57, 70, 0.25);
+            letter-spacing: 0.2px;
         }
     </style>
 </head>
@@ -679,10 +793,10 @@
             
             function validateField(field) {
                 if (field.hasAttribute('required') && !field.value.trim()) {
-                    field.style.borderColor = '#d32f2f';
+                    field.style.borderColor = '#E63946';  /* Rojo Colombia */
                     return false;
                 } else {
-                    field.style.borderColor = 'rgba(139, 69, 19, 0.3)';
+                    field.style.borderColor = 'rgba(100, 181, 246, 0.2)';
                     return true;
                 }
             }
@@ -692,7 +806,7 @@
                     field.addEventListener('blur', () => validateField(field));
                     field.addEventListener('input', () => {
                         if (field.value.trim()) {
-                            field.style.borderColor = 'rgba(139, 69, 19, 0.3)';
+                            field.style.borderColor = 'rgba(100, 181, 246, 0.2)';
                         }
                     });
                 }
