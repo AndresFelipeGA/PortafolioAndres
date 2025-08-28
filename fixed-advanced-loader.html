@@ -4720,8 +4720,8 @@
                     
                     // Aumentar la escala vertical en un 1.1% adicional para cubrir los huecos
                     const verticalScaleAdjustment = 1.011;
-                    // Aumentar la escala horizontal para cubrir toda el área del trapecio
-                    const horizontalScaleAdjustment = 1.15; // 15% adicional para cubrir completamente
+                    // Ajuste horizontal mínimo para cubrir el pequeño espacio en la izquierda
+                    const horizontalScaleAdjustment = 1.02; // 2% adicional para cubrir el espacio izquierdo
                     
                     console.log("Factores de escala para contact:", {
                         scaleX: scaleX,
@@ -4737,6 +4737,9 @@
                     
                     // Posicionar el objeto CSS3D para que coincida con el plano
                     cssObject.position.copy(center);
+                    
+                    // Ajustar ligeramente la posición hacia la izquierda para cubrir el espacio
+                    cssObject.position.x -= 0.015; // Pequeño desplazamiento hacia la izquierda
                     
                     // Aplicar la rotación del plano con corrección fija para evitar texto invertido
                     cssObject.rotation.copy(rotation);
