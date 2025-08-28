@@ -1211,13 +1211,14 @@
             const threshold = 0.1; // Permite hasta ~84 grados de ángulo
             const result = dotProduct > threshold;
             
-            console.log("📐 Contact plane visibility check:", {
-                dotProduct: dotProduct.toFixed(3),
-                threshold,
-                result,
-                cameraPos: camera.position,
-                planePos: window.contactPlane.position
-            });
+            // Solo log cuando cambie el estado de visibilidad
+            if (window.lastContactVisibilityResult !== result) {
+                console.log("📐 Contact visibility changed:", {
+                    visible: result,
+                    dotProduct: dotProduct.toFixed(3)
+                });
+                window.lastContactVisibilityResult = result;
+            }
             
             return result;
         }
@@ -1260,20 +1261,17 @@
                     window.projectsScreenMaterial.transparent = false;
                     window.projectsScreenMaterial.opacity = 1.0;
                     window.projectsScreenMaterial.needsUpdate = true;
-                    console.log("✅ Cover negro visible (botón NO clickeado) - projects");
                 } else {
                     // Si el botón SÍ ha sido clickeado, hacer transparente el cover
                     window.projectsScreenMaterial.transparent = true;
                     window.projectsScreenMaterial.opacity = 0.0;
                     window.projectsScreenMaterial.needsUpdate = true;
-                    console.log("✅ Cover negro transparente (botón SÍ clickeado) - projects");
                 }
                 
                 // LÓGICA DEL CONTENIDO HTML
                 if (projectsButtonClicked && window.projectsCssObject && window.projectsCssObject.element && isProjectsPlaneVisibleFromFront()) {
                     window.projectsCssObject.element.style.visibility = 'visible';
                     window.projectsCssObject.element.style.pointerEvents = 'auto';
-                    console.log("✅ Contenido HTML visible (botón clickeado y visible desde frente) - projects");
                 } else {
                     if (window.projectsCssObject && window.projectsCssObject.element) {
                         window.projectsCssObject.element.style.visibility = 'hidden';
@@ -1302,7 +1300,6 @@
                     window.projectsScreenMaterial.opacity = 1.0;
                     window.projectsScreenMaterial.needsUpdate = true;
                 }
-                console.log("Plano projects no visible desde el frente - contenido HTML oculto pero cover negro mantenido");
             }
         }
         
@@ -1311,22 +1308,26 @@
         let lastContactVisibleFromFront = null;
         let lastContactButtonClickedState = null;
         let lastContactScreenOnState = null;
+        let lastContactUpdateTime = 0;
+        const CONTACT_UPDATE_THROTTLE = 500; // milisegundos - más agresivo
 
         function updateContactVisibility() {
-            console.log("🔄 updateContactVisibility llamada");
+            const now = Date.now();
+            if (now - lastContactUpdateTime < CONTACT_UPDATE_THROTTLE) {
+                return; // Throttle la función
+            }
+            lastContactUpdateTime = now;
             
             if (!window.contactScreenMaterial || !window.contactBackPlane) {
-                console.log("❌ Materiales de contacto no encontrados:", {
-                    material: !!window.contactScreenMaterial,
-                    plane: !!window.contactBackPlane
-                });
+                // Solo log una vez cuando falten materiales
+                if (!window.contactMaterialsErrorLogged) {
+                    console.log("❌ Materiales de contacto no encontrados - inicializando...");
+                    window.contactMaterialsErrorLogged = true;
+                }
                 return;
             }
             
             const isVisibleFromFront = isContactPlaneVisibleFromFront();
-            console.log("👁️ Contact visible from front:", isVisibleFromFront);
-            console.log("🔘 Contact button clicked:", contactButtonClicked);
-            console.log("📺 Contact screen on:", contactScreenOn);
             
             // OPTIMIZACIÓN: Solo hacer cambios cuando el estado realmente cambie
             const stateChanged = (lastContactVisibleFromFront !== isVisibleFromFront || 
@@ -1337,7 +1338,11 @@
                 return; // No hacer nada si el estado no ha cambiado
             }
             
-            console.log("🔄 Estado cambió, actualizando contacto...");
+            console.log("🔄 Contact state changed:", {
+                visible: isVisibleFromFront,
+                clicked: contactButtonClicked, 
+                screenOn: contactScreenOn
+            });
             
             // Actualizar el estado guardado
             lastContactVisibleFromFront = isVisibleFromFront;
@@ -1355,31 +1360,42 @@
                     window.contactScreenMaterial.transparent = false;
                     window.contactScreenMaterial.opacity = 1.0;
                     window.contactScreenMaterial.needsUpdate = true;
-                    console.log("✅ Cover negro visible (botón NO clickeado) - contact");
                 } else {
                     // Si el botón SÍ ha sido clickeado, hacer transparente el cover
                     window.contactScreenMaterial.transparent = true;
                     window.contactScreenMaterial.opacity = 0.0;
                     window.contactScreenMaterial.needsUpdate = true;
-                    console.log("✅ Cover negro transparente (botón SÍ clickeado) - contact");
                 }
                 
                 // LÓGICA DEL CONTENIDO HTML
                 if (contactButtonClicked && window.contactCssObject && window.contactCssObject.element && isContactPlaneVisibleFromFront()) {
                     window.contactCssObject.element.style.visibility = 'visible';
                     window.contactCssObject.element.style.pointerEvents = 'auto';
-                    console.log("✅ Contenido HTML visible (botón clickeado y visible desde frente) - contact");
+                    
+                    // FORZAR pointer events si todas las condiciones son verdaderas
+                    if (isVisibleFromFront && contactButtonClicked && contactScreenOn) {
+                        window.contactCssObject.element.style.pointerEvents = 'auto';
+                        console.log("✅ Contact form fully active and interactive");
+                    }
                 } else {
                     if (window.contactCssObject && window.contactCssObject.element) {
                         window.contactCssObject.element.style.visibility = 'hidden';
                         window.contactCssObject.element.style.pointerEvents = 'none';
                         console.log("✅ Contenido HTML oculto - contact");
+                        console.log("🔍 Razón: contactButtonClicked=" + contactButtonClicked + 
+                                   ", cssObject=" + !!window.contactCssObject + 
+                                   ", element=" + !!window.contactCssObject?.element + 
+                                   ", visibleFromFront=" + isContactPlaneVisibleFromFront());
                     }
                 }
                 
                 // Si la pantalla se puede ver desde el frente Y el botón ha sido clickeado Y la pantalla está encendida
                 if (isVisibleFromFront && contactButtonClicked && contactScreenOn) {
-                    console.log("✅ Plano contact completamente activo y visible desde el frente");
+                    // Solo log una vez cuando se active completamente
+                    if (!window.contactFullyActiveLogged) {
+                        console.log("✅ Contact form is now fully interactive");
+                        window.contactFullyActiveLogged = true;
+                    }
                 }
             } else {
                 // No visible desde el frente - pero mantener el cover negro visible
@@ -1397,7 +1413,6 @@
                     window.contactScreenMaterial.opacity = 1.0;
                     window.contactScreenMaterial.needsUpdate = true;
                 }
-                console.log("Plano contact no visible desde el frente - contenido HTML oculto pero cover negro mantenido");
             }
         }
         
@@ -1851,6 +1866,70 @@
                                         }
                                     } catch (error) {
                                         console.error("❌ Error forwarding click to iframe:", error);
+                                    }
+                                    
+                                    return; // Salir completamente del event listener
+                                }
+                            } else if (iframe.src && iframe.src.includes('contact.html')) {
+                                if (!contactButtonClicked) {
+                                    console.log("🚫 Click en iframe de contact pero botón no activo - ignorando");
+                                    return; // Salir completamente
+                                } else {
+                                    console.log("🎯 Contact click detected - forwarding to form");
+                                    
+                                    // Forwardear el click manualmente al iframe
+                                    try {
+                                        // Obtener dimensiones del iframe y sus transformaciones
+                                        const iframeRect = iframe.getBoundingClientRect();
+                                        const iframeWidth = iframe.offsetWidth;
+                                        const iframeHeight = iframe.offsetHeight;
+                                        
+                                        // Calcular coordenadas relativas con mejor precisión
+                                        // Considerando que el iframe puede estar rotado y escalado
+                                        let relativeX = event.clientX - iframeRect.left;
+                                        let relativeY = event.clientY - iframeRect.top;
+                                        
+                                        // Normalizar a las dimensiones reales del contenido del iframe
+                                        relativeX = (relativeX / iframeRect.width) * iframeWidth;
+                                        relativeY = (relativeY / iframeRect.height) * iframeHeight;
+                                        
+                                        // Debido a la rotación de 180°, invertir las coordenadas
+                                        relativeX = iframeWidth - relativeX;
+                                        relativeY = iframeHeight - relativeY;
+                                        
+                                        // Enviar el evento de click al iframe
+                                        if (iframe.contentWindow && iframe.contentDocument) {
+                                            // Buscar el elemento bajo las coordenadas corregidas
+                                            const elementAtPoint = iframe.contentDocument.elementFromPoint(relativeX, relativeY);
+                                            
+                                            if (elementAtPoint) {
+                                                // Crear eventos más específicos para diferentes tipos de elementos
+                                                if (elementAtPoint.tagName === 'INPUT' || elementAtPoint.tagName === 'TEXTAREA') {
+                                                    elementAtPoint.focus();
+                                                    elementAtPoint.click();
+                                                    console.log(`📝 ${elementAtPoint.tagName}: ${elementAtPoint.id || elementAtPoint.name || 'field'}`);
+                                                } else if (elementAtPoint.tagName === 'SELECT') {
+                                                    elementAtPoint.focus();
+                                                    elementAtPoint.click();
+                                                    console.log(`📋 ${elementAtPoint.tagName}: ${elementAtPoint.id || elementAtPoint.name || 'dropdown'}`);
+                                                } else if (elementAtPoint.tagName === 'BUTTON') {
+                                                    elementAtPoint.click();
+                                                    console.log(`🔘 ${elementAtPoint.tagName}: ${elementAtPoint.id || elementAtPoint.textContent || 'button'}`);
+                                                } else {
+                                                    // Para otros elementos, enviar evento de mouse
+                                                    const clickEvent = new MouseEvent('click', {
+                                                        bubbles: true,
+                                                        cancelable: true,
+                                                        view: iframe.contentWindow,
+                                                        clientX: relativeX,
+                                                        clientY: relativeY
+                                                    });
+                                                    elementAtPoint.dispatchEvent(clickEvent);
+                                                }
+                                            }
+                                        }
+                                    } catch (error) {
+                                        console.error("❌ Contact click error:", error);
                                     }
                                     
                                     return; // Salir completamente del event listener
@@ -3977,7 +4056,6 @@
                     window.aboutMeScreenMaterial.opacity = 1.0;
                     window.aboutMeScreenMaterial.needsUpdate = true;
                     window.aboutMeBackPlane.visible = true;
-                    console.log("Cover negro inicializado como visible - primer intento");
                 }
             }, 100);
             
@@ -3989,7 +4067,6 @@
                     window.aboutMeScreenMaterial.opacity = 1.0;
                     window.aboutMeScreenMaterial.needsUpdate = true;
                     window.aboutMeBackPlane.visible = true;
-                    console.log("Cover negro inicializado como visible - segundo intento");
                 }
             }, 500);
             
@@ -4482,7 +4559,7 @@
                     window.projectsScreenMaterial.opacity = 1.0;
                     window.projectsScreenMaterial.needsUpdate = true;
                     window.projectsBackPlane.visible = true;
-                    console.log("Cover negro inicializado como visible para projects - primer intento");
+                    console.log("Cover negro inicializado como visible para projects");
                 }
             }, 100);
             
@@ -4494,7 +4571,7 @@
                     window.projectsScreenMaterial.opacity = 1.0;
                     window.projectsScreenMaterial.needsUpdate = true;
                     window.projectsBackPlane.visible = true;
-                    console.log("Cover negro inicializado como visible para projects - segundo intento");
+
                 }
             }, 500);
             
@@ -4796,7 +4873,7 @@
                     window.contactScreenMaterial.opacity = 1.0;
                     window.contactScreenMaterial.needsUpdate = true;
                     window.contactBackPlane.visible = true;
-                    console.log("Cover negro inicializado como visible para contact - primer intento");
+                    console.log("Cover negro inicializado como visible para contact");
                 }
             }, 100);
             
@@ -4808,7 +4885,7 @@
                     window.contactScreenMaterial.opacity = 1.0;
                     window.contactScreenMaterial.needsUpdate = true;
                     window.contactBackPlane.visible = true;
-                    console.log("Cover negro inicializado como visible para contact - segundo intento");
+
                 }
             }, 500);
             

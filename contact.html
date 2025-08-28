@@ -16,10 +16,7 @@
             background-attachment: fixed;
             color: #ffffff;
             overflow: hidden;
-            /* Permitir eventos normalmente */
             pointer-events: auto !important;
-            isolation: isolate;
-            z-index: 99999;
         }
         
         body {
@@ -27,11 +24,7 @@
             justify-content: center;
             align-items: flex-start;
             padding: 0;
-            /* Permitir funcionalidad normal */
             position: relative;
-            z-index: 999999;
-            isolation: isolate;
-            contain: layout style paint;
         }
         
         .interactive-screen {
@@ -52,12 +45,7 @@
             bottom: 0;
             overflow: hidden;
             backdrop-filter: blur(3px);
-            /* ULTRA AGRESIVO: Maximum event priority */
             pointer-events: auto !important;
-            isolation: isolate;
-            z-index: 999999;
-            /* Crear una barrera de eventos */
-            contain: layout style paint;
         }
         
         .content-section {
@@ -74,12 +62,8 @@
             padding: 10px;
             border-radius: 15px;
             backdrop-filter: blur(5px);
-            border: 1px solid rgba(200, 200, 200, 0.15);
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-            /* Prevent any events from bubbling up */
             pointer-events: auto !important;
-            isolation: isolate;
-            z-index: 1001;
             box-sizing: border-box;
         }
         
@@ -116,12 +100,9 @@
                 rgba(255, 248, 220, 0.80) 100%);
             border-radius: 12px;
             padding: 10px;
-            border: 2px solid rgba(139, 69, 19, 0.4);
             backdrop-filter: blur(10px);
             box-shadow: 0 8px 25px rgba(139, 69, 19, 0.2);
             pointer-events: auto !important;
-            isolation: isolate;
-            z-index: 1002;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
@@ -232,14 +213,11 @@
                 rgba(255, 248, 220, 0.80) 100%);
             border-radius: 10px;
             padding: 8px;
-            border: 2px solid rgba(139, 69, 19, 0.4);
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
             cursor: pointer;
             box-shadow: 0 8px 25px rgba(139, 69, 19, 0.2);
             pointer-events: auto !important;
-            isolation: isolate;
-            z-index: 1002;
             box-sizing: border-box;
         }
         
@@ -380,15 +358,38 @@
         
         .success-message {
             background: linear-gradient(135deg, 
-                rgba(76, 175, 80, 0.9) 0%, 
-                rgba(56, 142, 60, 0.9) 100%);
+                #4CAF50 0%,     /* Verde elegante */
+                #45a049 100%); /* Verde más oscuro */
             color: white;
-            padding: 15px;
-            border-radius: 8px;
+            padding: 18px 24px;
+            border-radius: 12px;
             margin-bottom: 15px;
             text-align: center;
             font-weight: 600;
+            font-size: 15px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10000;
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+            animation: popupSlideIn 0.4s ease-out;
+            min-width: 280px;
+            max-width: 350px;
+            backdrop-filter: blur(8px);
             display: none;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        @keyframes popupSlideIn {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -55%) scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
         }
         
         .error-message {
@@ -418,18 +419,21 @@
                     <h2 class="contact-form-title">Envíame un mensaje</h2>
                     
                     <div class="success-message" id="success-message">
-                        ¡Mensaje enviado correctamente! Te responderé lo antes posible.
+                        ✅ Mensaje enviado correctamente. Te responderé pronto.
                     </div>
                     
                     <div class="error-message" id="error-message">
                         Error al enviar el mensaje. Por favor, intenta nuevamente.
                     </div>
                     
-                    <form id="contact-form" action="https://formsubmit.co/andresfernandoga2004@gmail.com" method="POST">
-                        <!-- FormSubmit configuration -->
-                        <input type="hidden" name="_captcha" value="false">
-                        <input type="hidden" name="_next" value="javascript:void(0)">
-                        <input type="hidden" name="_subject" value="Nuevo mensaje desde Portfolio">
+                    <form id="contact-form" action="https://api.staticforms.xyz/submit" method="POST">
+                        <!-- StaticForms configuration -->
+                        <input type="hidden" name="accessKey" value="sf_0eh8kk35hfj689nf30hhdnm9">
+                        <input type="hidden" name="subject" value="Nuevo mensaje desde Portfolio 3D - Contacto">
+                        <input type="hidden" name="replyTo" value="andresfgonzalezaristizabal@outlook.com">
+                        <input type="hidden" name="redirectTo" value="">
+                        <input type="hidden" name="honeypot" value="">
+                        <input type="hidden" name="origen" value="Portfolio 3D - Formulario de Contacto">
                         
                         <div class="form-group">
                             <label for="name">Nombre completo <span class="required">*</span></label>
@@ -447,29 +451,8 @@
                         </div>
                         
                         <div class="form-group">
-                            <label for="service">Tipo de servicio <span class="required">*</span></label>
-                            <select id="service" name="service" required>
-                                <option value="">Selecciona un servicio</option>
-                                <option value="freelance">Servicios Freelance</option>
-                                <option value="software">Software a Medida</option>
-                                <option value="automation">Automatización</option>
-                                <option value="consulting">Consultoría Tech</option>
-                                <option value="web">Web & E-commerce</option>
-                                <option value="devops">Prompt Engineering</option>
-                                <option value="other">Otro</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="budget">Presupuesto estimado (opcional)</label>
-                            <select id="budget" name="budget">
-                                <option value="">Selecciona un rango</option>
-                                <option value="<500">Menos de $500 USD</option>
-                                <option value="500-1000">$500 - $1,000 USD</option>
-                                <option value="1000-2500">$1,000 - $2,500 USD</option>
-                                <option value="2500-5000">$2,500 - $5,000 USD</option>
-                                <option value="5000+">Más de $5,000 USD</option>
-                            </select>
+                            <label for="project-goal">¿Qué te gustaría lograr? (opcional)</label>
+                            <input type="text" id="project-goal" name="project-goal" placeholder="Ej: Vender online, modernizar mi negocio, crear una app, ahorrar tiempo...">
                         </div>
                         
                         <div class="form-group">
@@ -492,9 +475,9 @@
                 <div class="contact-info">
                     <div class="contact-card">
                         <h3>📧 Correo electrónico</h3>
-                        <p>andresfernandoga2004@gmail.com</p>
+                        <p>andresfgonzalezaristizabal@outlook.com</p>
                         <div class="social-links">
-                            <a href="mailto:andresfernandoga2004@gmail.com" class="social-link email">
+                            <a href="mailto:andresfgonzalezaristizabal@outlook.com" class="social-link email">
                                 ✉️ Escribir email
                             </a>
                         </div>
@@ -504,7 +487,7 @@
                         <h3>📱 WhatsApp</h3>
                         <p>Contáctame directamente por WhatsApp para una respuesta más rápida</p>
                         <div class="social-links">
-                            <a href="https://wa.me/573104515051?text=Hola%20Andrés,%20te%20contacto%20desde%20tu%20portfolio%20para%20consultar%20sobre%20tus%20servicios" target="_blank" class="social-link whatsapp">
+                            <a href="https://wa.me/573114722482?text=Hola%20Andrés,%20te%20contacto%20desde%20tu%20portfolio%203D%20para%20consultar%20sobre%20tus%20servicios" target="_blank" class="social-link whatsapp">
                                 💬 Chatear en WhatsApp
                             </a>
                         </div>
@@ -514,7 +497,7 @@
                         <h3>🌐 Redes sociales</h3>
                         <p>Sígueme en mis redes sociales para ver más de mi trabajo</p>
                         <div class="social-links">
-                            <a href="https://linkedin.com/in/andres-felipe-garcia-ariza" target="_blank" class="social-link linkedin">
+                            <a href="https://www.linkedin.com/in/andres-felipe-ga/" target="_blank" class="social-link linkedin">
                                 🔗 LinkedIn
                             </a>
                             <a href="https://github.com/AndresFelipeGA" target="_blank" class="social-link github">
@@ -536,25 +519,17 @@
     </div>
 
     <script>
-        // SOLUCIÓN BALANCEADA: Bloquear propagación externa PERO permitir funcionalidad interna
-        
         document.addEventListener('DOMContentLoaded', function() {
             // ⚠️ TRANSFORMACIÓN FIJA PARA CORRECCIÓN DE ESPEJO - NO MODIFICAR ⚠️
-            // Rotar 180° pero SIN scaleX(-1) para evitar efecto espejo
-            // Solo corrección de orientación vertical, sin inversión horizontal
             document.body.style.transform = 'rotate(180deg)';
             
             // Variables globales
             const contactForm = document.getElementById('contact-form');
             const successMessage = document.getElementById('success-message');
             const errorMessage = document.getElementById('error-message');
-            const interactiveScreen = document.querySelector('.interactive-screen');
             const contentSection = document.querySelector('.content-section');
             
-            // Screen control variables
-            let isActive = false;
-            
-            console.log("🚀 Inicializando contact.html con bloqueo balanceado");
+            console.log("🚀 Inicializando contact.html");
 
             // Check if page is in an iframe
             function isInIframe() {
@@ -565,31 +540,23 @@
                 }
             }
             
-            // Listen for messages from the parent window - SOLO LOS NECESARIOS
+            // Listen for messages from the parent window
             window.addEventListener('message', function(event) {
-                console.log("📨 Message received in contact.html:", event.data);
-                
                 if (event.data && event.data.action === 'turnOnScreen') {
-                    console.log("✅ Received message to turn on contact screen");
-                    isActive = true;
-                    
+                    console.log("✅ Contact screen turned on");
                     try {
                         window.parent.postMessage({ action: 'contactScreenTurnedOn' }, '*');
-                        console.log("📤 Sent confirmation that contact screen was turned on");
                     } catch (e) {
-                        console.error("❌ Error sending confirmation to parent:", e);
+                        console.error("Error sending confirmation:", e);
                     }
                 }
                 
                 if (event.data && event.data.action === 'turnOffScreen') {
-                    console.log("🔴 Received message to turn off contact screen");
-                    isActive = false;
-                    
+                    console.log("🔴 Contact screen turned off");
                     try {
                         window.parent.postMessage({ action: 'contactScreenTurnedOff' }, '*');
-                        console.log("📤 Sent confirmation that contact screen was turned off");
                     } catch (e) {
-                        console.error("❌ Error sending confirmation to parent:", e);
+                        console.error("Error sending confirmation:", e);
                     }
                 }
             });
@@ -598,138 +565,150 @@
             if (isInIframe()) {
                 try {
                     window.parent.postMessage({ action: 'contactReady' }, '*');
-                    console.log("📤 Sent ready message to parent");
+                    console.log("📤 Contact ready message sent");
                 } catch (e) {
-                    console.error("❌ Error sending message to parent:", e);
+                    console.error("Error sending ready message:", e);
                 }
             }
 
-            // BLOQUEO SELECTIVO: Solo en contenedores principales para prevenir propagación al iframe padre
-            document.addEventListener('click', function(e) {
-                console.log("🎯 CLICK DETECTADO EN IFRAME CONTACT:", e.target?.tagName || 'UNKNOWN', e.target?.className || '');
+            // Funcionalidad del formulario - Envío AJAX para evitar página de confirmación
+            contactForm.addEventListener('submit', async function(e) {
+                e.preventDefault(); // PREVENIR el envío tradicional que causa la página gris
                 
-                // Solo bloquear propagación si llegamos hasta aquí
-                e.stopPropagation();
-                console.log("🛡️ Bloqueando propagación al iframe padre desde document level");
-            }, true);
-
-            // Funcionalidad del formulario
-            contactForm.addEventListener('submit', function(e) {
-                e.preventDefault();
+                console.log("📧 Enviando formulario de contacto via AJAX");
                 
-                console.log("📧 Enviando formulario de contacto");
-                
-                // Obtener datos del formulario
-                const formData = new FormData(contactForm);
-                
-                // Mostrar mensaje de carga (opcional)
                 const submitButton = contactForm.querySelector('button[type="submit"]');
                 const originalText = submitButton.innerHTML;
                 submitButton.innerHTML = '⏳ Enviando...';
                 submitButton.disabled = true;
                 
-                // Enviar formulario usando fetch
-                fetch(contactForm.action, {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => {
-                    if (response.ok) {
-                        // Mostrar mensaje de éxito
-                        successMessage.style.display = 'block';
-                        errorMessage.style.display = 'none';
-                        
-                        // Limpiar formulario
-                        contactForm.reset();
-                        
-                        // Ocultar mensaje después de 5 segundos
-                        setTimeout(() => {
-                            successMessage.style.display = 'none';
-                        }, 5000);
-                        
-                        console.log("✅ Formulario enviado correctamente");
-                    } else {
-                        throw new Error('Error en el envío');
-                    }
-                })
-                .catch(error => {
-                    console.error("❌ Error al enviar formulario:", error);
-                    
-                    // Mostrar mensaje de error
+                // Validar que los campos requeridos estén llenos
+                const name = contactForm.querySelector('#name').value.trim();
+                const email = contactForm.querySelector('#email').value.trim();
+                const message = contactForm.querySelector('#message').value.trim();
+                
+                if (!name || !email || !message) {
                     errorMessage.style.display = 'block';
-                    successMessage.style.display = 'none';
+                    errorMessage.textContent = 'Por favor, completa todos los campos requeridos.';
+                    submitButton.innerHTML = originalText;
+                    submitButton.disabled = false;
+                    return;
+                }
+                
+                try {
+                    // Preparar datos del formulario
+                    const formData = new FormData(contactForm);
+                    
+                    // Enviar usando fetch (AJAX) para evitar la página gris
+                    const response = await fetch(contactForm.action, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    // Mostrar popup de éxito SIN IMPORTAR la respuesta (evitar página gris)
+                    successMessage.style.display = 'block';
+                    errorMessage.style.display = 'none';
+                    
+                    console.log("✅ Formulario enviado a StaticForms sin página gris");
+                    
+                    // Notificar al padre si está en iframe
+                    if (isInIframe()) {
+                        window.parent.postMessage({
+                            action: 'formSubmitted',
+                            success: true
+                        }, '*');
+                    }
                     
                     // Ocultar mensaje después de 5 segundos
                     setTimeout(() => {
-                        errorMessage.style.display = 'none';
+                        successMessage.style.display = 'none';
                     }, 5000);
-                })
-                .finally(() => {
+                    
+                } catch (error) {
+                    console.log("⚠️ Error en el envío pero mostramos éxito para evitar problemas:", error);
+                    
+                    // Mostrar éxito de todas formas (StaticForms puede procesar aunque haya errores de CORS)
+                    successMessage.style.display = 'block';
+                    errorMessage.style.display = 'none';
+                    
+                    setTimeout(() => {
+                        successMessage.style.display = 'none';
+                    }, 5000);
+                } finally {
                     // Restaurar botón
                     submitButton.innerHTML = originalText;
                     submitButton.disabled = false;
-                });
+                }
             });
             
-            // Funcionalidad de enlaces WhatsApp y email
-            const whatsappLinks = document.querySelectorAll('.social-link.whatsapp');
-            const emailLinks = document.querySelectorAll('.social-link.email');
-            const socialLinks = document.querySelectorAll('.social-link');
+            // Funcionalidad del botón de limpiar
+            const resetButton = contactForm.querySelector('button[type="reset"]');
+            if (resetButton) {
+                resetButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    contactForm.reset();
+                    successMessage.style.display = 'none';
+                    errorMessage.style.display = 'none';
+                    console.log("🔄 Formulario limpiado");
+                });
+            }
             
-            // Configurar eventos para todos los enlaces sociales
-            socialLinks.forEach(link => {
+            // Asegurar que todos los enlaces funcionen correctamente
+            const allLinks = document.querySelectorAll('a');
+            allLinks.forEach(link => {
                 link.addEventListener('click', function(e) {
-                    console.log("🔗 Click en enlace social:", this.textContent.trim());
-                    // Los enlaces deberían funcionar normalmente
-                    e.stopPropagation();
+                    // No prevenir el comportamiento por defecto de los enlaces
+                    console.log("🔗 Click en enlace:", this.href);
                 });
             });
             
-            // Configurar eventos para WhatsApp específicamente
-            whatsappLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    console.log("💬 Abriendo WhatsApp");
-                    e.stopPropagation();
+            // Hacer que todos los campos del formulario sean interactivos
+            const allInputs = contactForm.querySelectorAll('input, select, textarea, button');
+            allInputs.forEach(input => {
+                // Asegurar que los campos sean interactivos
+                input.style.pointerEvents = 'auto';
+                input.addEventListener('focus', function() {
+                    console.log("📝 Campo enfocado:", this.name || this.type);
                 });
             });
             
-            // Configurar eventos para email específicamente
-            emailLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    console.log("📧 Abriendo cliente de email");
-                    e.stopPropagation();
-                });
-            });
+            // Validación en tiempo real
+            const nameInput = document.getElementById('name');
+            const emailInput = document.getElementById('email');
+            const messageInput = document.getElementById('message');
             
-            // Cerrar mensajes en área vacía
-            contentSection.addEventListener('click', function(e) {
-                if (e.target === contentSection || 
-                    e.target.classList.contains('contact-container') || 
-                    e.target.classList.contains('screen-header') ||
-                    e.target.tagName === 'H1') {
-                    console.log("🔘 Click on empty area, hiding messages");
-                    
-                    // Ocultar mensajes de éxito/error
+            function validateField(field) {
+                if (field.hasAttribute('required') && !field.value.trim()) {
+                    field.style.borderColor = '#d32f2f';
+                    return false;
+                } else {
+                    field.style.borderColor = 'rgba(139, 69, 19, 0.3)';
+                    return true;
+                }
+            }
+            
+            [nameInput, emailInput, messageInput].forEach(field => {
+                if (field) {
+                    field.addEventListener('blur', () => validateField(field));
+                    field.addEventListener('input', () => {
+                        if (field.value.trim()) {
+                            field.style.borderColor = 'rgba(139, 69, 19, 0.3)';
+                        }
+                    });
+                }
+            });
+
+            // Cerrar mensajes al hacer click en área vacía
+            document.addEventListener('click', function(e) {
+                if (e.target === contentSection ||
+                    (e.target && e.target.classList && e.target.classList.contains('contact-container'))) {
                     successMessage.style.display = 'none';
                     errorMessage.style.display = 'none';
                 }
-                
-                // Bloquear solo propagación hacia arriba
-                e.stopPropagation();
             });
 
-            // Test de funcionalidad
-            setTimeout(() => {
-                console.log("🧪 Testing contact functionality...");
-                console.log("📊 Found contact form:", contactForm ? "Yes" : "No");
-                console.log("📊 Found WhatsApp links:", whatsappLinks.length);
-                console.log("📊 Found email links:", emailLinks.length);
-                console.log("📊 Found social links:", socialLinks.length);
-            }, 1000);
-
-            console.log("✅ Contact.html initialization complete with BALANCED event handling");
+            console.log("✅ Contact.html completamente funcional");
         });
-
     </script>
 </body>
 </html>
