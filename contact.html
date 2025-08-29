@@ -550,9 +550,6 @@
             height: 100%;
             background: #000000;
             z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             opacity: 1;
             visibility: visible;
             transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
@@ -564,70 +561,12 @@
             visibility: hidden;
             pointer-events: none;
         }
-        
-        .screen-cover-content {
-            text-align: center;
-            color: #ffffff;
-            font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
-            padding: 20px;
-        }
-        
-        .screen-cover h2 {
-            font-size: 24px;
-            font-weight: 300;
-            margin: 0 0 10px 0;
-            letter-spacing: 1px;
-            opacity: 0.9;
-        }
-        
-        .screen-cover p {
-            font-size: 14px;
-            opacity: 0.7;
-            margin: 0;
-            letter-spacing: 0.5px;
-        }
-        
-        /* Indicador de estado de la pantalla */
-        .screen-indicator {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 12px;
-            height: 12px;
-            background: #ff4444;
-            border-radius: 50%;
-            z-index: 10000;
-            transition: background-color 0.3s ease;
-        }
-        
-        .screen-indicator.active {
-            background: #00ff00;
-            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
-        }
-        
-        /* Animación de parpadeo cuando está apagado */
-        .screen-indicator:not(.active) {
-            animation: blink 2s infinite;
-        }
-        
-        @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0.3; }
-        }
     </style>
 </head>
 <body>
     <div class="interactive-screen">
-        <!-- Cover negro que se muestra por defecto -->
-        <div class="screen-cover" id="screen-cover">
-            <div class="screen-cover-content">
-                <h2>Pantalla de Contacto</h2>
-                <p>Presiona el botón de contacto para activar</p>
-            </div>
-        </div>
-        
-        <!-- Indicador de estado de la pantalla -->
-        <div class="screen-indicator" id="screen-indicator"></div>
+        <!-- Cover negro que se muestra por defecto - SIN TEXTO NI BOTONES -->
+        <div class="screen-cover" id="screen-cover"></div>
         
         <div class="content-section">
             <div class="screen-header">
@@ -750,14 +689,12 @@
             const errorMessage = document.getElementById('error-message');
             const contentSection = document.querySelector('.content-section');
             const screenCover = document.getElementById('screen-cover');
-            const screenIndicator = document.getElementById('screen-indicator');
             
             // Estado de la pantalla - INICIA APAGADA (cover activo)
             let screenActive = false;
             
             // Asegurar que el cover esté visible al inicio
             screenCover.classList.remove('hidden');
-            screenIndicator.classList.remove('active');
             
             console.log("🚀 Inicializando contact.html con cover negro ACTIVO por defecto");
 
@@ -774,7 +711,6 @@
             function turnOnScreen() {
                 screenActive = true;
                 screenCover.classList.add('hidden');
-                screenIndicator.classList.add('active');
                 console.log("✅ Pantalla de contacto activada");
                 
                 // Notificar al padre si está en iframe
@@ -791,7 +727,6 @@
             function turnOffScreen() {
                 screenActive = false;
                 screenCover.classList.remove('hidden');
-                screenIndicator.classList.remove('active');
                 console.log("🔴 Pantalla de contacto desactivada");
                 
                 // Notificar al padre si está en iframe

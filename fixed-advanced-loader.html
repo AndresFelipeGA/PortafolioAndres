@@ -659,12 +659,7 @@
                     }
                 });
                 
-                // AUTO-activar la pantalla de contacto para testing
-                setTimeout(() => {
-                    console.log("🧪 Auto-activando pantalla de contacto");
-                    contactButtonClicked = true;
-                    activateContactScreen();
-                }, 1000); // Reducido a 1 segundo
+                // AUTO-activador de testing REMOVIDO - la pantalla solo se activa con el botón
             }
             
             // Recibir confirmación de que la pantalla de contact se encendió
@@ -3126,6 +3121,13 @@
             
             console.log("Coordenadas objetivo para botón de mensajes (relativas):", targetCameraPos);
             console.log("Coordenadas objetivo para botón de mensajes (absolutas):", absoluteTargetPos);
+            
+            // Marcar que el botón de contacto ha sido clickeado - ESTO ES LO QUE FALTABA
+            contactButtonClicked = true;
+            console.log("Botón de contacto activado - Cover negro se quitará cuando se active la pantalla");
+            
+            // Activar la pantalla de contacto inmediatamente
+            activateContactScreen();
             
             // Configurar la animación
             cameraAnimation.enabled = true;

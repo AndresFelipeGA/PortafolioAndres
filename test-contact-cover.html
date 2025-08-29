@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Contact Cover</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        
+        .test-buttons {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        button:hover {
+            background: #005a87;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #333;
+            border-radius: 10px;
+        }
+        
+        .info {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test de Cover Negro - Contact.html</h1>
+        
+        <div class="info">
+            <p><strong>Cambios realizados:</strong></p>
+            <ul>
+                <li>✅ Cover negro sin texto ni botón rojo</li>
+                <li>✅ Cover activo por defecto al cargar la página</li>
+                <li>✅ Se quita completamente cuando se presiona el tercer botón</li>
+            </ul>
+        </div>
+        
+        <div class="test-buttons">
+            <button onclick="activateContact()">🟢 Simular Tercer Botón (Activar)</button>
+            <button onclick="deactivateContact()">🔴 Desactivar Pantalla</button>
+            <button onclick="reloadContact()">🔄 Recargar Contact</button>
+        </div>
+        
+        <iframe id="contactFrame" src="contact.html"></iframe>
+    </div>
+
+    <script>
+        const contactFrame = document.getElementById('contactFrame');
+        
+        // Simular el comportamiento del tercer botón
+        function activateContact() {
+            console.log("🟢 Simulando click en tercer botón");
+            contactFrame.contentWindow.postMessage({
+                action: 'buttonPressed',
+                button: 'contact'
+            }, '*');
+        }
+        
+        // Desactivar la pantalla
+        function deactivateContact() {
+            console.log("🔴 Desactivando pantalla de contacto");
+            contactFrame.contentWindow.postMessage({
+                action: 'turnOffScreen'
+            }, '*');
+        }
+        
+        // Recargar el iframe
+        function reloadContact() {
+            console.log("🔄 Recargando contact.html");
+            contactFrame.src = contactFrame.src;
+        }
+        
+        // Escuchar mensajes del iframe
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.action) {
+                console.log("📨 Mensaje recibido del contact.html:", event.data.action);
+            }
+        });
+        
+        console.log("✅ Test page cargada. Usa los botones para probar el comportamiento del cover negro.");
+    </script>
+</body>
+</html>
