@@ -5174,7 +5174,7 @@
                     // Añadir el plano invisible a la escena (solo para raycasting)
                     scene.add(invisiblePlane);
                     
-                    // Crear un plano negro de fondo (cover negro inicial)
+                    // Crear un plano negro de fondo (cover negro inicial) con geometría custom
                     const contactBackPlaneMaterial = new THREE.MeshBasicMaterial({
                         color: 0x000000, // Negro inicialmente (pantalla apagada)
                         side: THREE.DoubleSide, // Cambiado a DoubleSide para asegurar visibilidad
@@ -5184,8 +5184,25 @@
                         depthTest: true // Reactivar depthTest para que respete la profundidad
                     });
                     
+                    // Crear geometría custom del trapecio usando las coordenadas exactas
+                    const trapezoidGeometry = new THREE.BufferGeometry();
+                    const vertices = new Float32Array([
+                        // Triángulo 1 (topLeft, topRight, bottomLeft)
+                        topLeft.x, topLeft.y, topLeft.z,
+                        topRight.x, topRight.y, topRight.z,
+                        bottomLeft.x, bottomLeft.y, bottomLeft.z,
+                        
+                        // Triángulo 2 (topRight, bottomRight, bottomLeft)
+                        topRight.x, topRight.y, topRight.z,
+                        bottomRight.x, bottomRight.y, bottomRight.z,
+                        bottomLeft.x, bottomLeft.y, bottomLeft.z
+                    ]);
+                    
+                    trapezoidGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+                    trapezoidGeometry.computeVertexNormals();
+                    
                     const contactBackPlane = new THREE.Mesh(
-                        new THREE.PlaneGeometry(width, height), // Mismo tamaño exacto que el plano invisible
+                        trapezoidGeometry, // Usar geometría exacta del trapecio
                         contactBackPlaneMaterial
                     );
                     
@@ -5193,12 +5210,8 @@
                     window.contactScreenMaterial = contactBackPlaneMaterial;
                     window.contactBackPlane = contactBackPlane; // Guardar referencia al plano también
                     
-                    // Posicionar el plano negro exactamente en la misma posición que el plano invisible
-                    contactBackPlane.position.copy(center);
-                    contactBackPlane.rotation.copy(rotation);
-                    
-                    // Mover muy ligeramente hacia adelante para que esté justo por encima del contenido
-                    contactBackPlane.position.z += 0.001; // Reducido el offset para estar más cerca
+                    // El plano ya está en coordenadas absolutas, solo necesita un pequeño offset en Z
+                    contactBackPlane.position.set(0, 0, 0.001); // Muy pequeño offset hacia adelante
                     
                     // Configurar renderOrder para asegurar que se renderice por encima del contenido HTML
                     contactBackPlane.renderOrder = 10; // Valor moderado, no tan alto

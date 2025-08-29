@@ -690,28 +690,24 @@
             const contentSection = document.querySelector('.content-section');
             const screenCover = document.getElementById('screen-cover');
             
-            // Estado de la pantalla - INICIA APAGADA (cover activo)
+            // Variables para el control optimizado del cover negro
             let screenActive = false;
-            
-            // Asegurar que el cover esté visible al inicio
-            screenCover.classList.remove('hidden');
-            
-            console.log("🚀 Inicializando contact.html con cover negro ACTIVO por defecto");
-
-            // Check if page is in an iframe
-            function isInIframe() {
-                try {
-                    return window.self !== window.top;
-                } catch (e) {
-                    return true;
-                }
-            }
+            let lastButtonPress = 0;
+            let activationLock = false;
+            let debounceTimer = null;
             
             // Función para activar la pantalla (quitar cover negro)
             function turnOnScreen() {
+                activationLock = true;
                 screenActive = true;
                 screenCover.classList.add('hidden');
+                lastButtonPress = Date.now();
                 console.log("✅ Pantalla de contacto activada");
+                
+                // Bloquear desactivaciones por 2 segundos después de activar
+                setTimeout(() => {
+                    activationLock = false;
+                }, 2000);
                 
                 // Notificar al padre si está en iframe
                 if (isInIframe()) {
@@ -723,39 +719,57 @@
                 }
             }
             
-            // Función para desactivar la pantalla (mostrar cover negro)
-            function turnOffScreen() {
-                screenActive = false;
-                screenCover.classList.remove('hidden');
-                console.log("🔴 Pantalla de contacto desactivada");
+            // Función para desactivar la pantalla (mostrar cover negro) con debounce
+            function turnOffScreen(force = false) {
+                // No desactivar si está en período de bloqueo, a menos que sea forzado
+                if (activationLock && !force) {
+                    console.log("🛡️ Desactivación bloqueada - período de gracia activo");
+                    return;
+                }
                 
-                // Notificar al padre si está en iframe
-                if (isInIframe()) {
-                    try {
-                        window.parent.postMessage({ action: 'contactScreenTurnedOff' }, '*');
-                    } catch (e) {
-                        console.error("Error sending screen off message:", e);
+                // Debounce para evitar múltiples desactivaciones rápidas
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    screenActive = false;
+                    screenCover.classList.remove('hidden');
+                    console.log("🔴 Pantalla de contacto desactivada");
+                    
+                    // Notificar al padre si está en iframe
+                    if (isInIframe()) {
+                        try {
+                            window.parent.postMessage({ action: 'contactScreenTurnedOff' }, '*');
+                        } catch (e) {
+                            console.error("Error sending screen off message:", e);
+                        }
                     }
+                }, force ? 0 : 500); // 500ms debounce, 0 si es forzado
+            }
+            // Asegurar que el cover esté visible al inicio
+            screenCover.classList.remove('hidden');
+            console.log("🚀 Inicializando contact.html con cover negro ACTIVO por defecto");
+
+            // Check if page is in an iframe
+            function isInIframe() {
+                try {
+                    return window.self !== window.top;
+                } catch (e) {
+                    return true;
                 }
             }
             
             // Listen for messages from the parent window
             window.addEventListener('message', function(event) {
                 if (event.data && event.data.action === 'turnOnScreen') {
-                    console.log("� Recibido: activar pantalla de contacto");
+                    console.log("📨 Recibido: activar pantalla de contacto");
                     turnOnScreen();
                 }
                 
                 if (event.data && event.data.action === 'turnOffScreen') {
                     console.log("📨 Recibido: desactivar pantalla de contacto");
-                    turnOffScreen();
+                    turnOffScreen(true); // Forzar desactivación
                 }
                 
-                if (event.data && event.data.action === 'userMoving') {
-                    console.log("📨 Recibido: usuario se movió en el modelo 3D");
-                    turnOffScreen();
-                }
-                
+                // Manejo inteligente de botones presionados
                 if (event.data && event.data.action === 'buttonPressed') {
                     console.log("📨 Recibido: botón presionado:", event.data.button);
                     if (event.data.button === 'contact' || event.data.button === 'contacto') {
@@ -767,27 +781,38 @@
                     }
                 }
                 
-                // Escuchar cualquier actividad del modelo 3D que indique cambio de foco
+                // Solo desactivar por movimientos SIGNIFICATIVOS del modelo 3D
+                if (event.data && event.data.action === 'significantMovement') {
+                    const timeSinceActivation = Date.now() - lastButtonPress;
+                    if (timeSinceActivation > 3000) { // Solo si han pasado 3+ segundos
+                        console.log("📨 MOVIMIENTO SIGNIFICATIVO detectado - APAGANDO PANTALLA");
+                        turnOffScreen();
+                    } else {
+                        console.log("📨 Movimiento detectado pero muy reciente la activación - IGNORANDO");
+                    }
+                }
+                
+                // Desactivar inmediatamente solo por navegación intencional
                 if (event.data && (
-                    event.data.action === 'modelRotated' ||
-                    event.data.action === 'cameraChanged' ||
-                    event.data.action === 'sceneInteraction' ||
                     event.data.action === 'navigationStarted' ||
-                    event.data.action === 'realMovementDetected'
+                    event.data.action === 'intentionalRotation' ||
+                    event.data.action === 'cameraManualChange'
                 )) {
-                    console.log("📨 Actividad en modelo 3D detectada - APAGANDO PANTALLA");
-                    turnOffScreen();
+                    const timeSinceActivation = Date.now() - lastButtonPress;
+                    if (timeSinceActivation > 2000) { // Solo si han pasado 2+ segundos
+                        console.log("📨 Navegación intencional detectada - APAGANDO PANTALLA");
+                        turnOffScreen();
+                    }
                 }
                 
-                // Escuchar específicamente movimiento real (no micro-movimientos)
-                if (event.data && event.data.action === 'realMovementDetected') {
-                    console.log("📨 MOVIMIENTO REAL detectado en modelo 3D - APAGANDO PANTALLA");
-                    turnOffScreen();
-                }
-                
-                // Ignorar movimientos menores (hover, micro-movimientos)
-                if (event.data && event.data.action === 'minorMovement') {
-                    console.log("📨 Micro-movimiento detectado - IGNORANDO (no apagar pantalla)");
+                // IGNORAR movimientos menores y micro-movimientos
+                if (event.data && (
+                    event.data.action === 'minorMovement' ||
+                    event.data.action === 'mouseHover' ||
+                    event.data.action === 'microMovement' ||
+                    event.data.action === 'userMoving' // Este era muy sensible
+                )) {
+                    console.log("📨 Micro-movimiento o hover detectado - IGNORANDO completamente");
                     // No hacer nada - mantener el estado actual
                 }
             });
@@ -805,7 +830,7 @@
                 }
             }
             
-            // Auto-desactivar después de un período de inactividad
+            // Auto-desactivar después de un período de inactividad más largo
             let inactivityTimer;
             
             function resetInactivityTimer() {
@@ -813,8 +838,8 @@
                 if (screenActive) {
                     inactivityTimer = setTimeout(() => {
                         console.log("⏰ Tiempo de inactividad agotado, desactivando pantalla");
-                        turnOffScreen();
-                    }, 30000); // 30 segundos de inactividad
+                        turnOffScreen(true); // Forzar desactivación por inactividad
+                    }, 60000); // 60 segundos de inactividad (aumentado de 30)
                 }
             }
             
