@@ -2,7 +2,15 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta        <div class="test-buttons">
+            <button onclick="activateContact()">🟢 Simular Tercer Botón (Contacto)</button>
+            <button onclick="pressOtherButton('aboutMe')">🔴 Primer Botón (About Me)</button>
+            <button onclick="pressOtherButton('projects')">📁 Segundo Botón (Projects)</button>
+            <button onclick="pressOtherButton('services')">⚙️ Quinto Botón (Services)</button>
+            <button onclick="simulateMinorMovement()">🐭 Simular Hover/Micro-movimiento</button>
+            <button onclick="simulateRealMovement()">🔄 Simular Movimiento REAL 3D</button>
+            <button onclick="reloadContact()">🔄 Recargar Contact</button>
+        </div>iewport" content="width=device-width, initial-scale=1.0">
     <title>Test Contact Cover</title>
     <style>
         body {
@@ -67,12 +75,23 @@
                 <li>✅ Cover negro sin texto ni botón rojo</li>
                 <li>✅ Cover activo por defecto al cargar la página</li>
                 <li>✅ Se quita completamente cuando se presiona el tercer botón</li>
+                <li>🔧 <strong>NUEVO:</strong> Solo se activa con movimiento REAL del modelo (no hover)</li>
+                <li>🔧 <strong>MEJORADO:</strong> Umbral de movimiento y tiempo mínimo configurados</li>
+            </ul>
+            <p><strong>Configuración de sensibilidad:</strong></p>
+            <ul>
+                <li>📏 <strong>Umbral de movimiento:</strong> 0.1 unidades mínimas</li>
+                <li>⏱️ <strong>Tiempo mínimo:</strong> 300ms de movimiento continuo</li>
+                <li>🎯 <strong>Resultado:</strong> No se activa con hover o micro-movimientos</li>
             </ul>
         </div>
         
         <div class="test-buttons">
-            <button onclick="activateContact()">🟢 Simular Tercer Botón (Activar)</button>
-            <button onclick="deactivateContact()">🔴 Desactivar Pantalla</button>
+            <button onclick="activateContact()">🟢 Simular Tercer Botón (Contacto)</button>
+            <button onclick="pressOtherButton('aboutMe')">🔴 Primer Botón (About Me)</button>
+            <button onclick="pressOtherButton('projects')">� Segundo Botón (Projects)</button>
+            <button onclick="pressOtherButton('services')">⚙️ Quinto Botón (Services)</button>
+            <button onclick="simulateUserMoving()">🔄 Simular Movimiento 3D</button>
             <button onclick="reloadContact()">🔄 Recargar Contact</button>
         </div>
         
@@ -84,11 +103,57 @@
         
         // Simular el comportamiento del tercer botón
         function activateContact() {
-            console.log("🟢 Simulando click en tercer botón");
+            console.log("🟢 Simulando click en tercer botón (contacto)");
             contactFrame.contentWindow.postMessage({
                 action: 'buttonPressed',
                 button: 'contact'
             }, '*');
+        }
+        
+        // Simular presionar otros botones
+        function pressOtherButton(buttonName) {
+            console.log("🔴 Simulando click en botón:", buttonName);
+            contactFrame.contentWindow.postMessage({
+                action: 'buttonPressed',
+                button: buttonName
+            }, '*');
+        }
+        
+        // Simular movimiento menor (hover/micro-movimiento) - NO debería desactivar contact
+        function simulateMinorMovement() {
+            console.log("🐭 Simulando hover/micro-movimiento (NO debería desactivar contact)");
+            contactFrame.contentWindow.postMessage({
+                action: 'minorMovement'
+            }, '*');
+        }
+        
+        // Simular movimiento real del usuario en el modelo 3D - SÍ debería desactivar contact
+        function simulateRealMovement() {
+            console.log("🔄 Simulando movimiento REAL en modelo 3D (SÍ debería desactivar contact)");
+            
+            // Simular secuencia completa de movimiento real
+            contactFrame.contentWindow.postMessage({
+                action: 'userMoving'
+            }, '*');
+            
+            // Simular cambios de cámara con movimiento significativo
+            setTimeout(() => {
+                contactFrame.contentWindow.postMessage({
+                    action: 'cameraChanged'
+                }, '*');
+            }, 100);
+            
+            setTimeout(() => {
+                contactFrame.contentWindow.postMessage({
+                    action: 'realMovementDetected'
+                }, '*');
+            }, 350); // Después del tiempo mínimo
+            
+            setTimeout(() => {
+                contactFrame.contentWindow.postMessage({
+                    action: 'navigationStarted'
+                }, '*');
+            }, 500);
         }
         
         // Desactivar la pantalla

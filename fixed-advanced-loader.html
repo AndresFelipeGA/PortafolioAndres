@@ -1782,6 +1782,74 @@
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             
+            // SISTEMA DE DETECCIÓN DE MOVIMIENTO REAL (NO SOLO HOVER)
+            // 🔧 CONFIGURACIÓN DE SENSIBILIDAD - Ajustar según necesidades
+            let lastCameraPosition = new THREE.Vector3();
+            let lastCameraTarget = new THREE.Vector3();
+            let movementThreshold = 0.1; // 🎛️ Umbral mínimo para considerar movimiento real (ajustable)
+            let isUserActuallyMoving = false;
+            let movementStartTime = 0;
+            let minimumMovementTime = 300; // 🎛️ Mínimo tiempo en ms de movimiento para activar (ajustable)
+            
+            // 📝 NOTA: Aumentar movementThreshold = menos sensible (requiere más movimiento)
+            //          Aumentar minimumMovementTime = menos sensible (requiere más tiempo)
+            //          Reducir valores = más sensible (se activa más fácil)
+            
+            // Guardar posición inicial
+            lastCameraPosition.copy(camera.position);
+            lastCameraTarget.copy(controls.target);
+            
+            controls.addEventListener('start', function() {
+                // Usuario empezó a interactuar - pero aún no desactivamos contact
+                isUserActuallyMoving = false;
+                movementStartTime = Date.now();
+                lastCameraPosition.copy(camera.position);
+                lastCameraTarget.copy(controls.target);
+                console.log("🎯 Usuario empezó a interactuar con los controles");
+            });
+            
+            controls.addEventListener('change', function() {
+                // Verificar si hay movimiento real significativo
+                const currentTime = Date.now();
+                const timeSinceStart = currentTime - movementStartTime;
+                
+                const positionDelta = camera.position.distanceTo(lastCameraPosition);
+                const targetDelta = controls.target.distanceTo(lastCameraTarget);
+                
+                // Solo considerar movimiento real si:
+                // 1. Ha pasado tiempo suficiente
+                // 2. El movimiento supera el umbral
+                if (timeSinceStart > minimumMovementTime && 
+                    (positionDelta > movementThreshold || targetDelta > movementThreshold)) {
+                    
+                    if (!isUserActuallyMoving) {
+                        isUserActuallyMoving = true;
+                        // AHORA SÍ desactivar contact porque hay movimiento real
+                        if (contactButtonClicked) {
+                            // Enviar mensaje específico de movimiento real
+                            if (contactIframe && contactIframe.contentWindow) {
+                                contactIframe.contentWindow.postMessage({
+                                    action: 'realMovementDetected'
+                                }, '*');
+                                console.log("📤 MOVIMIENTO REAL detectado - mensaje específico enviado a contact.html");
+                            }
+                            sendMessageToContact('turnOffScreen');
+                            console.log("📤 MOVIMIENTO REAL detectado - contact.html desactivado");
+                        }
+                    }
+                }
+            });
+            
+            controls.addEventListener('end', function() {
+                // Usuario terminó de mover la cámara
+                if (isUserActuallyMoving) {
+                    console.log("📤 Usuario terminó movimiento real de la cámara");
+                } else {
+                    console.log("📤 Usuario terminó interacción sin movimiento significativo");
+                }
+                isUserActuallyMoving = false;
+            });
+            
             // Iluminación
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
             scene.add(ambientLight);
@@ -2858,6 +2926,9 @@
             console.log("Coordenadas objetivo (relativas):", targetCameraPos);
             console.log("Coordenadas objetivo (absolutas):", absoluteTargetPos);
             
+            // NOTIFICAR A CONTACT.HTML QUE OTRO BOTÓN FUE PRESIONADO
+            sendMessageToContact('turnOffScreen');
+            
             // Cambiar el color del plano trasero a blanco (encender la pantalla)
             if (window.screenMaterial) {
                 window.screenMaterial.color.set(0xFFFFFF); // Cambiar a blanco
@@ -2937,6 +3008,9 @@
             // Marcar que el botón de about-me ha sido clickeado
             aboutMeButtonClicked = true;
             console.log("Botón de about-me clickeado - Cover negro se quitará cuando se active la pantalla");
+            
+            // NOTIFICAR A CONTACT.HTML QUE OTRO BOTÓN FUE PRESIONADO
+            sendMessageToContact('turnOffScreen');
             
             // Activar la pantalla personal (about-me.html)
             console.log("Enviando mensaje para activar pantalla de about-me desde startFirstButtonCameraAnimation");
@@ -3030,6 +3104,9 @@
             // Marcar que el botón de projects ha sido clickeado
             projectsButtonClicked = true;
             console.log("Botón de projects clickeado - Cover negro se quitará cuando se active la pantalla");
+            
+            // NOTIFICAR A CONTACT.HTML QUE OTRO BOTÓN FUE PRESIONADO
+            sendMessageToContact('turnOffScreen');
             
             // Activar la pantalla de projects
             console.log("Enviando mensaje para activar pantalla de projects desde startProjectsButtonCameraAnimation");

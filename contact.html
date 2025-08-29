@@ -772,10 +772,23 @@
                     event.data.action === 'modelRotated' ||
                     event.data.action === 'cameraChanged' ||
                     event.data.action === 'sceneInteraction' ||
-                    event.data.action === 'navigationStarted'
+                    event.data.action === 'navigationStarted' ||
+                    event.data.action === 'realMovementDetected'
                 )) {
                     console.log("📨 Actividad en modelo 3D detectada - APAGANDO PANTALLA");
                     turnOffScreen();
+                }
+                
+                // Escuchar específicamente movimiento real (no micro-movimientos)
+                if (event.data && event.data.action === 'realMovementDetected') {
+                    console.log("📨 MOVIMIENTO REAL detectado en modelo 3D - APAGANDO PANTALLA");
+                    turnOffScreen();
+                }
+                
+                // Ignorar movimientos menores (hover, micro-movimientos)
+                if (event.data && event.data.action === 'minorMovement') {
+                    console.log("📨 Micro-movimiento detectado - IGNORANDO (no apagar pantalla)");
+                    // No hacer nada - mantener el estado actual
                 }
             });
             
