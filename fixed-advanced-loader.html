@@ -521,6 +521,13 @@
         let contactButtonClicked = false;
         let contactIframeReady = false;
         
+        // Variables para cafe-menu
+        let cafeMenuScreenOn = false;
+        let cafeMenuIframe = null;
+        let cafeMenuPlane = null;
+        let cafeMenuButtonClicked = false;
+        let cafeMenuIframeReady = false;
+        
         // Escuchar mensajes de los iframes
         window.addEventListener('message', function(event) {
             console.log("Mensaje recibido en fixed-advanced-loader:", event.data);
@@ -781,6 +788,66 @@
                     window.projectsCssObject.element.style.pointerEvents = 'none';
                 }
             }
+            
+            // ==========================================================
+            // EVENT LISTENERS PARA LA PANTALLA DE CAFE-MENU
+            // ==========================================================
+            
+            // Verificar si es el mensaje de que cafe-menu.html está listo
+            if (event.data && event.data.action === 'cafeMenuReady') {
+                console.log("🟢 Iframe de cafe-menu.html está listo");
+                cafeMenuIframeReady = true;
+                
+                // Buscar el iframe de cafe-menu.html
+                const iframes = document.querySelectorAll('iframe');
+                iframes.forEach(iframe => {
+                    if (iframe.src && iframe.src.includes('cafe-menu.html')) {
+                        console.log("🎯 Encontrado iframe de cafe-menu.html en el evento cafeMenuReady");
+                        cafeMenuIframe = iframe;
+                    }
+                });
+            }
+            
+            // Recibir confirmación de que la pantalla de cafe-menu se encendió
+            if (event.data && event.data.action === 'cafeMenuScreenTurnedOn') {
+                console.log("Recibida confirmación de que la pantalla de cafe-menu se encendió");
+                cafeMenuScreenOn = true;
+                
+                // Solo hacer transparente el plano negro si el botón ha sido clickeado
+                if (cafeMenuButtonClicked && window.cafeMenuScreenMaterial) {
+                    window.cafeMenuScreenMaterial.transparent = true;
+                    window.cafeMenuScreenMaterial.opacity = 0.0;
+                    window.cafeMenuScreenMaterial.needsUpdate = true;
+                }
+                
+                // Solo mostrar el contenido HTML si el botón ha sido clickeado y estamos viendo desde el frente
+                if (cafeMenuButtonClicked && window.cafeMenuCssObject && window.cafeMenuCssObject.element && isCafeMenuPlaneVisibleFromFront()) {
+                    window.cafeMenuCssObject.element.style.visibility = 'visible';
+                    window.cafeMenuCssObject.element.style.pointerEvents = 'auto';
+                }
+            }
+            
+            // Recibir confirmación de que la pantalla de cafe-menu se apagó
+            if (event.data && event.data.action === 'cafeMenuScreenTurnedOff') {
+                console.log("Recibida confirmación de que la pantalla de cafe-menu se apagó");
+                cafeMenuScreenOn = false;
+                
+                // Forzar que el cover negro sea visible cuando se apaga la pantalla
+                if (window.cafeMenuScreenMaterial && window.cafeMenuBackPlane) {
+                    window.cafeMenuScreenMaterial.color.set(0x000000); // Asegurar color negro
+                    window.cafeMenuScreenMaterial.transparent = false;
+                    window.cafeMenuScreenMaterial.opacity = 1.0;
+                    window.cafeMenuScreenMaterial.needsUpdate = true;
+                    window.cafeMenuBackPlane.visible = true;
+                    console.log("Cover negro forzado a visible al apagar pantalla de cafe-menu");
+                }
+                
+                // Ocultar el contenido HTML
+                if (window.cafeMenuCssObject && window.cafeMenuCssObject.element) {
+                    window.cafeMenuCssObject.element.style.visibility = 'hidden';
+                    window.cafeMenuCssObject.element.style.pointerEvents = 'none';
+                }
+            }
         });
         
         // Función para enviar mensaje al iframe de about-me.html
@@ -979,6 +1046,106 @@
                 console.warn("No se encontró el iframe de contact.html o su contentWindow");
                 if (contactIframe) {
                     console.log("iframe de contact encontrado pero sin contentWindow");
+                }
+            }
+        }
+        
+        // FUNCIÓN PARA ENVIAR MENSAJES A PROJECTS.HTML
+        function sendMessageToProjects(action) {
+            console.log(`Intentando enviar mensaje a projects.html: ${action}`);
+            console.log("Estado del iframe de projects:", projectsIframe ? "Encontrado" : "No encontrado");
+            
+            // Si no tenemos el iframe guardado, intentar buscarlo de nuevo
+            if (!projectsIframe) {
+                console.log("Buscando iframe de projects.html...");
+                const iframes = document.querySelectorAll('iframe');
+                console.log("Total de iframes encontrados:", iframes.length);
+                
+                iframes.forEach((iframe, index) => {
+                    console.log(`Iframe ${index}:`, iframe.src || "sin src");
+                    if (iframe.src && iframe.src.includes('projects.html')) {
+                        console.log("Encontrado iframe de projects.html:", iframe);
+                        projectsIframe = iframe;
+                    }
+                });
+            }
+            
+            if (projectsIframe && projectsIframe.contentWindow) {
+                try {
+                    // Asegurarse de que el iframe esté completamente cargado
+                    if (projectsIframe.contentDocument && projectsIframe.contentDocument.readyState === 'complete') {
+                        projectsIframe.contentWindow.postMessage({ action: action }, '*');
+                        console.log(`Mensaje enviado a projects.html: ${action}`);
+                        
+                        if (action === 'turnOnScreen') {
+                            projectsScreenOn = true;
+                            console.log("Pantalla de projects marcada como ENCENDIDA");
+                        } else if (action === 'turnOffScreen') {
+                            projectsScreenOn = false;
+                            console.log("Pantalla de projects marcada como APAGADA");
+                        }
+                    } else {
+                        console.warn("El iframe de projects no está completamente cargado, esperando...");
+                        // Intentar de nuevo después de un breve retraso
+                        setTimeout(() => sendMessageToProjects(action), 500);
+                    }
+                } catch (e) {
+                    console.error("Error al enviar mensaje al iframe de projects:", e);
+                }
+            } else {
+                console.warn("No se encontró el iframe de projects.html o su contentWindow");
+                if (projectsIframe) {
+                    console.log("iframe de projects encontrado pero sin contentWindow");
+                }
+            }
+        }
+        
+        // FUNCIÓN PARA ENVIAR MENSAJES A CAFE-MENU.HTML
+        function sendMessageToCafeMenu(action) {
+            console.log(`Intentando enviar mensaje a cafe-menu.html: ${action}`);
+            console.log("Estado del iframe de cafe-menu:", cafeMenuIframe ? "Encontrado" : "No encontrado");
+            
+            // Si no tenemos el iframe guardado, intentar buscarlo de nuevo
+            if (!cafeMenuIframe) {
+                console.log("Buscando iframe de cafe-menu.html...");
+                const iframes = document.querySelectorAll('iframe');
+                console.log("Total de iframes encontrados:", iframes.length);
+                
+                iframes.forEach((iframe, index) => {
+                    console.log(`Iframe ${index}:`, iframe.src || "sin src");
+                    if (iframe.src && iframe.src.includes('cafe-menu.html')) {
+                        console.log("Encontrado iframe de cafe-menu.html:", iframe);
+                        cafeMenuIframe = iframe;
+                    }
+                });
+            }
+            
+            if (cafeMenuIframe && cafeMenuIframe.contentWindow) {
+                try {
+                    // Asegurarse de que el iframe esté completamente cargado
+                    if (cafeMenuIframe.contentDocument && cafeMenuIframe.contentDocument.readyState === 'complete') {
+                        cafeMenuIframe.contentWindow.postMessage({ action: action }, '*');
+                        console.log(`Mensaje enviado a cafe-menu.html: ${action}`);
+                        
+                        if (action === 'turnOnScreen') {
+                            cafeMenuScreenOn = true;
+                            console.log("Pantalla de cafe-menu marcada como ENCENDIDA");
+                        } else if (action === 'turnOffScreen') {
+                            cafeMenuScreenOn = false;
+                            console.log("Pantalla de cafe-menu marcada como APAGADA");
+                        }
+                    } else {
+                        console.warn("El iframe de cafe-menu no está completamente cargado, esperando...");
+                        // Intentar de nuevo después de un breve retraso
+                        setTimeout(() => sendMessageToCafeMenu(action), 500);
+                    }
+                } catch (e) {
+                    console.error("Error al enviar mensaje al iframe de cafe-menu:", e);
+                }
+            } else {
+                console.warn("No se encontró el iframe de cafe-menu.html o su contentWindow");
+                if (cafeMenuIframe) {
+                    console.log("iframe de cafe-menu encontrado pero sin contentWindow");
                 }
             }
         }
@@ -1411,6 +1578,160 @@
             }
         }
         
+        // ==========================================================
+        // FUNCIONES PARA CAFE-MENU
+        // ==========================================================
+        
+        function isCafeMenuPlaneVisibleFromFront() {
+            if (!window.cafeMenuPlane || !camera) {
+                console.log("❌ cafeMenuPlane o camera no disponibles:", {
+                    cafeMenuPlane: !!window.cafeMenuPlane,
+                    camera: !!camera
+                });
+                return false;
+            }
+            
+            // Obtener la normal del plano (dirección hacia donde "mira" el plano)
+            // Invertimos la normal para que apunte hacia el lado correcto
+            const planeNormal = new THREE.Vector3(0, 0, -1); // Normal invertida
+            planeNormal.applyQuaternion(window.cafeMenuPlane.quaternion); // Aplicar rotación del plano
+            
+            // Obtener la dirección desde el plano hacia la cámara
+            const cameraDirection = new THREE.Vector3();
+            cameraDirection.subVectors(camera.position, window.cafeMenuPlane.position).normalize();
+            
+            // Calcular el ángulo entre la normal del plano y la dirección de la cámara
+            const dotProduct = planeNormal.dot(cameraDirection);
+            
+            // Si el producto punto es positivo, la cámara está viendo el frente del plano
+            // Usamos un umbral para dar un poco de tolerancia en el ángulo
+            const threshold = 0.1; // Permite hasta ~84 grados de ángulo
+            const result = dotProduct > threshold;
+            
+            // Solo log cuando cambie el estado de visibilidad
+            if (window.lastCafeMenuVisibilityResult !== result) {
+                console.log("📐 CafeMenu visibility changed:", {
+                    visible: result,
+                    dotProduct: dotProduct.toFixed(3)
+                });
+                window.lastCafeMenuVisibilityResult = result;
+            }
+            
+            return result;
+        }
+        
+        // Variables para optimizar updateCafeMenuVisibility
+        let lastCafeMenuVisibleFromFront = null;
+        let lastCafeMenuButtonClickedState = null;
+        let lastCafeMenuScreenOnState = null;
+        const CAFE_MENU_UPDATE_THROTTLE = 50; // ms entre actualizaciones
+        let lastCafeMenuUpdateTime = 0;
+        
+        function updateCafeMenuVisibility() {
+            const now = Date.now();
+            if (now - lastCafeMenuUpdateTime < CAFE_MENU_UPDATE_THROTTLE) {
+                return; // Throttle la función
+            }
+            lastCafeMenuUpdateTime = now;
+            
+            if (!window.cafeMenuScreenMaterial || !window.cafeMenuBackPlane) {
+                // Solo log una vez cuando falten materiales
+                if (!window.cafeMenuMaterialsErrorLogged) {
+                    console.log("❌ Materiales de cafe-menu no encontrados - inicializando...");
+                    window.cafeMenuMaterialsErrorLogged = true;
+                }
+                return;
+            }
+            
+            const isVisibleFromFront = isCafeMenuPlaneVisibleFromFront();
+            
+            // OPTIMIZACIÓN: Solo hacer cambios cuando el estado realmente cambie
+            const stateChanged = (lastCafeMenuVisibleFromFront !== isVisibleFromFront || 
+                                lastCafeMenuButtonClickedState !== cafeMenuButtonClicked ||
+                                lastCafeMenuScreenOnState !== cafeMenuScreenOn);
+            
+            if (!stateChanged) {
+                return; // No hacer nada si el estado no ha cambiado
+            }
+            
+            console.log("🔄 CafeMenu state changed:", {
+                visible: isVisibleFromFront,
+                clicked: cafeMenuButtonClicked, 
+                screenOn: cafeMenuScreenOn
+            });
+            
+            // Actualizar el estado guardado
+            lastCafeMenuVisibleFromFront = isVisibleFromFront;
+            lastCafeMenuButtonClickedState = cafeMenuButtonClicked;
+            lastCafeMenuScreenOnState = cafeMenuScreenOn;
+            
+            // Siempre mostrar/ocultar el plano completo basado en la orientación
+            if (isVisibleFromFront) {
+                window.cafeMenuBackPlane.visible = true;
+                
+                // LÓGICA DEL COVER NEGRO
+                if (!cafeMenuButtonClicked) {
+                    // Si el botón NO ha sido clickeado, mantener el cover negro visible
+                    window.cafeMenuScreenMaterial.color.set(0x000000); // Negro
+                    window.cafeMenuScreenMaterial.transparent = false;
+                    window.cafeMenuScreenMaterial.opacity = 1.0;
+                    window.cafeMenuScreenMaterial.needsUpdate = true;
+                } else {
+                    // Si el botón SÍ ha sido clickeado, hacer transparente el cover
+                    window.cafeMenuScreenMaterial.transparent = true;
+                    window.cafeMenuScreenMaterial.opacity = 0.0;
+                    window.cafeMenuScreenMaterial.needsUpdate = true;
+                }
+                
+                // LÓGICA DEL CONTENIDO HTML
+                if (cafeMenuButtonClicked && window.cafeMenuCssObject && window.cafeMenuCssObject.element && isCafeMenuPlaneVisibleFromFront()) {
+                    window.cafeMenuCssObject.element.style.visibility = 'visible';
+                    window.cafeMenuCssObject.element.style.pointerEvents = 'auto';
+                    
+                    // FORZAR pointer events si todas las condiciones son verdaderas
+                    if (isVisibleFromFront && cafeMenuButtonClicked && cafeMenuScreenOn) {
+                        window.cafeMenuCssObject.element.style.pointerEvents = 'auto';
+                        console.log("✅ CafeMenu fully active and interactive");
+                    }
+                } else {
+                    if (window.cafeMenuCssObject && window.cafeMenuCssObject.element) {
+                        window.cafeMenuCssObject.element.style.visibility = 'hidden';
+                        window.cafeMenuCssObject.element.style.pointerEvents = 'none';
+                        console.log("✅ Contenido HTML oculto - cafe-menu");
+                        console.log("🔍 Razón: cafeMenuButtonClicked=" + cafeMenuButtonClicked + 
+                                   ", cssObject=" + !!window.cafeMenuCssObject + 
+                                   ", element=" + !!window.cafeMenuCssObject?.element + 
+                                   ", visibleFromFront=" + isCafeMenuPlaneVisibleFromFront());
+                    }
+                }
+                
+                // Si la pantalla se puede ver desde el frente Y el botón ha sido clickeado Y la pantalla está encendida
+                if (isVisibleFromFront && cafeMenuButtonClicked && cafeMenuScreenOn) {
+                    // Solo log una vez cuando se active completamente
+                    if (!window.cafeMenuFullyActiveLogged) {
+                        console.log("✅ CafeMenu is now fully interactive");
+                        window.cafeMenuFullyActiveLogged = true;
+                    }
+                }
+            } else {
+                // No visible desde el frente - pero mantener el cover negro visible
+                // Solo ocultar el contenido HTML, no el plano negro
+                if (window.cafeMenuCssObject && window.cafeMenuCssObject.element) {
+                    window.cafeMenuCssObject.element.style.visibility = 'hidden';
+                    window.cafeMenuCssObject.element.style.pointerEvents = 'none';
+                }
+                
+                // Mantener el cover negro visible pero asegurar que esté negro
+                if (window.cafeMenuBackPlane && window.cafeMenuScreenMaterial) {
+                    window.cafeMenuBackPlane.visible = true; // Mantener visible
+                    window.cafeMenuScreenMaterial.color.set(0x000000); // Asegurar que esté negro
+                    window.cafeMenuScreenMaterial.transparent = false;
+                    window.cafeMenuScreenMaterial.opacity = 1.0;
+                    window.cafeMenuScreenMaterial.needsUpdate = true;
+                }
+            }
+        }
+        
         // Función para actualizar la visibilidad del about-me basada en la orientación
         function updateAboutMeVisibility() {
             if (!window.aboutMeScreenMaterial || !window.aboutMeBackPlane) {
@@ -1833,8 +2154,18 @@
                                 }, '*');
                                 console.log("📤 MOVIMIENTO REAL detectado - mensaje específico enviado a contact.html");
                             }
+                            
+                            // También enviar a projects.html
+                            if (projectsIframe && projectsIframe.contentWindow) {
+                                projectsIframe.contentWindow.postMessage({
+                                    action: 'realMovementDetected'
+                                }, '*');
+                                console.log("📤 MOVIMIENTO REAL detectado - mensaje específico enviado a projects.html");
+                            }
+                            
                             sendMessageToContact('turnOffScreen');
-                            console.log("📤 MOVIMIENTO REAL detectado - contact.html desactivado");
+                            sendMessageToProjects('turnOffScreen');
+                            console.log("📤 MOVIMIENTO REAL detectado - contact.html y projects.html desactivados");
                         }
                     }
                 }
@@ -2926,8 +3257,18 @@
             console.log("Coordenadas objetivo (relativas):", targetCameraPos);
             console.log("Coordenadas objetivo (absolutas):", absoluteTargetPos);
             
+            // Marcar que el botón de cafe-menu ha sido clickeado
+            cafeMenuButtonClicked = true;
+            console.log("Botón de cafe-menu clickeado - Cover negro se quitará cuando se active la pantalla");
+            
             // NOTIFICAR A CONTACT.HTML QUE OTRO BOTÓN FUE PRESIONADO
             sendMessageToContact('turnOffScreen');
+            
+            // NOTIFICAR A PROJECTS.HTML QUE OTRO BOTÓN FUE PRESIONADO
+            sendMessageToProjects('turnOffScreen');
+            
+            // ACTIVAR CAFE-MENU (ES EL BOTÓN DE SERVICIOS)
+            sendMessageToCafeMenu('turnOnScreen');
             
             // Cambiar el color del plano trasero a blanco (encender la pantalla)
             if (window.screenMaterial) {
@@ -3011,6 +3352,12 @@
             
             // NOTIFICAR A CONTACT.HTML QUE OTRO BOTÓN FUE PRESIONADO
             sendMessageToContact('turnOffScreen');
+            
+            // NOTIFICAR A PROJECTS.HTML QUE OTRO BOTÓN FUE PRESIONADO  
+            sendMessageToProjects('turnOffScreen');
+            
+            // NOTIFICAR A CAFE-MENU.HTML QUE OTRO BOTÓN FUE PRESIONADO
+            sendMessageToCafeMenu('turnOffScreen');
             
             // Activar la pantalla personal (about-me.html)
             console.log("Enviando mensaje para activar pantalla de about-me desde startFirstButtonCameraAnimation");
@@ -3108,6 +3455,12 @@
             // NOTIFICAR A CONTACT.HTML QUE OTRO BOTÓN FUE PRESIONADO
             sendMessageToContact('turnOffScreen');
             
+            // NO desactivar projects porque ES el botón de projects
+            // sendMessageToProjects('turnOffScreen'); // COMENTADO
+            
+            // NOTIFICAR A CAFE-MENU.HTML QUE OTRO BOTÓN FUE PRESIONADO
+            sendMessageToCafeMenu('turnOffScreen');
+            
             // Activar la pantalla de projects
             console.log("Enviando mensaje para activar pantalla de projects desde startProjectsButtonCameraAnimation");
             
@@ -3202,6 +3555,12 @@
             // Marcar que el botón de contacto ha sido clickeado - ESTO ES LO QUE FALTABA
             contactButtonClicked = true;
             console.log("Botón de contacto activado - Cover negro se quitará cuando se active la pantalla");
+            
+            // NOTIFICAR A PROJECTS.HTML QUE OTRO BOTÓN FUE PRESIONADO
+            sendMessageToProjects('turnOffScreen');
+            
+            // NOTIFICAR A CAFE-MENU.HTML QUE OTRO BOTÓN FUE PRESIONADO
+            sendMessageToCafeMenu('turnOffScreen');
             
             // Activar la pantalla de contacto inmediatamente
             activateContactScreen();
@@ -3435,6 +3794,9 @@
                     
                     // Actualizar visibilidad del contacto basada en la orientación de la cámara
                     updateContactVisibility();
+                    
+                    // Actualizar visibilidad del cafe-menu basada en la orientación de la cámara
+                    updateCafeMenuVisibility();
                     
                     // Renderizar escena WebGL
                     renderer.render(scene, camera);
@@ -4972,6 +5334,8 @@
             setTimeout(function() {
                 console.log("Forzando actualización inicial de visibilidad para contact");
                 updateContactVisibility();
+                console.log("Forzando actualización inicial de visibilidad para cafe-menu");
+                updateCafeMenuVisibility();
             }, 1000);
             
             return invisiblePlane;

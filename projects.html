@@ -544,7 +544,7 @@
                 }
             }
             
-            // Listen for messages from the parent window - SOLO LOS NECESARIOS
+            // Listen for messages from the parent window - AMPLIADO PARA REACTIVO
             window.addEventListener('message', function(event) {
                 console.log("📨 Message received in projects.html:", event.data);
                 
@@ -570,6 +570,68 @@
                     } catch (e) {
                         console.error("❌ Error sending confirmation to parent:", e);
                     }
+                }
+                
+                // NUEVOS LISTENERS PARA REACTIVIDAD CON OTROS BOTONES
+                if (event.data && event.data.action === 'buttonPressed') {
+                    console.log("📨 Recibido: botón presionado:", event.data.button);
+                    if (event.data.button === 'projects' || event.data.button === 'carpeta') {
+                        console.log("🟢 Botón de projects presionado - ACTIVANDO PANTALLA");
+                        isActive = true;
+                        try {
+                            window.parent.postMessage({ action: 'projectsScreenTurnedOn' }, '*');
+                        } catch (e) {
+                            console.error("Error sending message:", e);
+                        }
+                    } else {
+                        console.log("🔴 Otro botón presionado - APAGANDO PANTALLA");
+                        isActive = false;
+                        try {
+                            window.parent.postMessage({ action: 'projectsScreenTurnedOff' }, '*');
+                        } catch (e) {
+                            console.error("Error sending message:", e);
+                        }
+                    }
+                }
+                
+                // Escuchar movimiento del usuario
+                if (event.data && event.data.action === 'userMoving') {
+                    console.log("📨 Recibido: usuario se movió en el modelo 3D");
+                    isActive = false;
+                    try {
+                        window.parent.postMessage({ action: 'projectsScreenTurnedOff' }, '*');
+                    } catch (e) {
+                        console.error("Error sending message:", e);
+                    }
+                }
+                
+                // Escuchar cualquier actividad del modelo 3D que indique cambio de foco
+                if (event.data && (
+                    event.data.action === 'modelRotated' ||
+                    event.data.action === 'cameraChanged' ||
+                    event.data.action === 'sceneInteraction' ||
+                    event.data.action === 'navigationStarted' ||
+                    event.data.action === 'realMovementDetected'
+                )) {
+                    console.log("📨 Actividad en modelo 3D detectada - APAGANDO PANTALLA");
+                    isActive = false;
+                    try {
+                        window.parent.postMessage({ action: 'projectsScreenTurnedOff' }, '*');
+                    } catch (e) {
+                        console.error("Error sending message:", e);
+                    }
+                }
+                
+                // Escuchar específicamente movimiento real (no micro-movimientos)
+                if (event.data && event.data.action === 'realMovementDetected') {
+                    console.log("📨 MOVIMIENTO REAL detectado en modelo 3D - APAGANDO PANTALLA");
+                    isActive = false;
+                }
+                
+                // Ignorar movimientos menores (hover, micro-movimientos)
+                if (event.data && event.data.action === 'minorMovement') {
+                    console.log("📨 Micro-movimiento detectado - IGNORANDO (no apagar pantalla)");
+                    // No hacer nada - mantener el estado actual
                 }
             });
             

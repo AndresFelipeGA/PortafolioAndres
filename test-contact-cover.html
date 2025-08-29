@@ -100,13 +100,39 @@
 
     <script>
         const contactFrame = document.getElementById('contactFrame');
+        const projectsFrame = document.getElementById('projectsFrame') || null;
         
-        // Simular el comportamiento del tercer botón
+        // Simular el comportamiento del tercer botón (contacto)
         function activateContact() {
             console.log("🟢 Simulando click en tercer botón (contacto)");
             contactFrame.contentWindow.postMessage({
                 action: 'buttonPressed',
                 button: 'contact'
+            }, '*');
+            
+            // Desactivar projects cuando se active contact
+            if (projectsFrame) {
+                projectsFrame.contentWindow.postMessage({
+                    action: 'buttonPressed',
+                    button: 'contact'
+                }, '*');
+            }
+        }
+        
+        // Simular el comportamiento del segundo botón (projects)
+        function activateProjects() {
+            console.log("📁 Simulando click en segundo botón (projects)");
+            if (projectsFrame) {
+                projectsFrame.contentWindow.postMessage({
+                    action: 'buttonPressed',
+                    button: 'projects'
+                }, '*');
+            }
+            
+            // Desactivar contact cuando se active projects
+            contactFrame.contentWindow.postMessage({
+                action: 'buttonPressed',
+                button: 'projects'
             }, '*');
         }
         
@@ -117,63 +143,74 @@
                 action: 'buttonPressed',
                 button: buttonName
             }, '*');
+            
+            if (projectsFrame) {
+                projectsFrame.contentWindow.postMessage({
+                    action: 'buttonPressed',
+                    button: buttonName
+                }, '*');
+            }
         }
         
-        // Simular movimiento menor (hover/micro-movimiento) - NO debería desactivar contact
+        // Simular movimiento menor (hover/micro-movimiento) - NO debería desactivar ninguna pantalla
         function simulateMinorMovement() {
-            console.log("🐭 Simulando hover/micro-movimiento (NO debería desactivar contact)");
+            console.log("🐭 Simulando hover/micro-movimiento (NO debería desactivar pantallas)");
             contactFrame.contentWindow.postMessage({
                 action: 'minorMovement'
             }, '*');
+            
+            if (projectsFrame) {
+                projectsFrame.contentWindow.postMessage({
+                    action: 'minorMovement'
+                }, '*');
+            }
         }
         
-        // Simular movimiento real del usuario en el modelo 3D - SÍ debería desactivar contact
+        // Simular movimiento real del usuario en el modelo 3D - SÍ debería desactivar pantallas
         function simulateRealMovement() {
-            console.log("🔄 Simulando movimiento REAL en modelo 3D (SÍ debería desactivar contact)");
+            console.log("🔄 Simulando movimiento REAL en modelo 3D (SÍ debería desactivar pantallas)");
             
-            // Simular secuencia completa de movimiento real
-            contactFrame.contentWindow.postMessage({
-                action: 'userMoving'
-            }, '*');
-            
-            // Simular cambios de cámara con movimiento significativo
-            setTimeout(() => {
-                contactFrame.contentWindow.postMessage({
-                    action: 'cameraChanged'
-                }, '*');
-            }, 100);
-            
-            setTimeout(() => {
-                contactFrame.contentWindow.postMessage({
-                    action: 'realMovementDetected'
-                }, '*');
-            }, 350); // Después del tiempo mínimo
-            
-            setTimeout(() => {
-                contactFrame.contentWindow.postMessage({
-                    action: 'navigationStarted'
-                }, '*');
-            }, 500);
+            // Simular secuencia completa de movimiento real para ambos iframes
+            [contactFrame, projectsFrame].forEach(frame => {
+                if (frame) {
+                    frame.contentWindow.postMessage({
+                        action: 'userMoving'
+                    }, '*');
+                    
+                    setTimeout(() => {
+                        frame.contentWindow.postMessage({
+                            action: 'cameraChanged'
+                        }, '*');
+                    }, 100);
+                    
+                    setTimeout(() => {
+                        frame.contentWindow.postMessage({
+                            action: 'realMovementDetected'
+                        }, '*');
+                    }, 350);
+                    
+                    setTimeout(() => {
+                        frame.contentWindow.postMessage({
+                            action: 'navigationStarted'
+                        }, '*');
+                    }, 500);
+                }
+            });
         }
         
-        // Desactivar la pantalla
-        function deactivateContact() {
-            console.log("🔴 Desactivando pantalla de contacto");
-            contactFrame.contentWindow.postMessage({
-                action: 'turnOffScreen'
-            }, '*');
-        }
-        
-        // Recargar el iframe
-        function reloadContact() {
-            console.log("🔄 Recargando contact.html");
+        // Recargar ambos iframes
+        function reloadFrames() {
+            console.log("� Recargando ambos iframes");
             contactFrame.src = contactFrame.src;
+            if (projectsFrame) {
+                projectsFrame.src = projectsFrame.src;
+            }
         }
         
-        // Escuchar mensajes del iframe
+        // Escuchar mensajes de ambos iframes
         window.addEventListener('message', function(event) {
             if (event.data && event.data.action) {
-                console.log("📨 Mensaje recibido del contact.html:", event.data.action);
+                console.log("📨 Mensaje recibido:", event.data.action, "desde", event.source === contactFrame.contentWindow ? "contact.html" : "projects.html");
             }
         });
         
