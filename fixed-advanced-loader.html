@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+N<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -2109,6 +2109,8 @@
             let lastCameraTarget = new THREE.Vector3();
             let movementThreshold = 0.1; // 🎛️ Umbral mínimo para considerar movimiento real (ajustable)
             let isUserActuallyMoving = false;
+            let animationJustFinished = false; // Prevenir detección inmediata después de animaciones
+            let animationFinishTime = 0;
             let movementStartTime = 0;
             let minimumMovementTime = 300; // 🎛️ Mínimo tiempo en ms de movimiento para activar (ajustable)
             
@@ -2140,12 +2142,20 @@
                 // Solo considerar movimiento real si:
                 // 1. Ha pasado tiempo suficiente
                 // 2. El movimiento supera el umbral
+                // 3. NO hay una animación de cámara en progreso (NUEVA CONDICIÓN)
+                // 4. No acaba de terminar una animación hace poco
+                const timeSinceAnimationFinish = Date.now() - animationFinishTime;
+                const animationCooldown = 1500; // 1.5 segundos de pausa después de animación
+                
                 if (timeSinceStart > minimumMovementTime && 
-                    (positionDelta > movementThreshold || targetDelta > movementThreshold)) {
+                    (positionDelta > movementThreshold || targetDelta > movementThreshold) &&
+                    !cameraAnimation.enabled &&
+                    timeSinceAnimationFinish > animationCooldown) { // OPTIMIZACIÓN: Pausa después de animaciones
                     
                     if (!isUserActuallyMoving) {
                         isUserActuallyMoving = true;
-                        // AHORA SÍ desactivar contact porque hay movimiento real
+                        console.log("📤 MOVIMIENTO REAL detectado (no durante/después de animación)");
+                        // AHORA SÍ desactivar contact porque hay movimiento real del usuario
                         if (contactButtonClicked) {
                             // Enviar mensaje específico de movimiento real
                             if (contactIframe && contactIframe.contentWindow) {
@@ -2165,9 +2175,16 @@
                             
                             sendMessageToContact('turnOffScreen');
                             sendMessageToProjects('turnOffScreen');
-                            console.log("📤 MOVIMIENTO REAL detectado - contact.html y projects.html desactivados");
+                            sendMessageToCafeMenu('turnOffScreen');
+                            console.log("📤 MOVIMIENTO REAL detectado - pantallas desactivadas");
                         }
                     }
+                } else if (cameraAnimation.enabled && (positionDelta > movementThreshold || targetDelta > movementThreshold)) {
+                    // Log cuando se detecta movimiento durante animación (para debugging)
+                    console.log("📱 Movimiento detectado durante animación de cámara - ignorado para evitar reactivar cover");
+                } else if (timeSinceAnimationFinish <= animationCooldown && (positionDelta > movementThreshold || targetDelta > movementThreshold)) {
+                    // Log cuando se detecta movimiento en el período de cooldown
+                    console.log("📱 Movimiento detectado en cooldown post-animación - ignorado");
                 }
             });
             
@@ -3078,8 +3095,7 @@
                     'Software Consulting',
                     'FullStack Engineer',
                     'Data Engineer',
-                    'AI Full-Stack Engineer',
-                    'Prompt Engineer'
+                    'AI Full-Stack Engineer'
                 ];
                 
                 // Crear y posicionar cada título
@@ -3751,6 +3767,8 @@
                         } else {
                             // Animación completa
                             cameraAnimation.enabled = false;
+                            animationFinishTime = Date.now(); // Marcar cuando terminó la animación
+                            console.log("🎬 Animación de cámara terminada - cooldown activado");
                             
                             // Asegurarse de que la cámara esté exactamente en la posición objetivo
                             camera.position.copy(cameraAnimation.targetPosition);
@@ -4191,12 +4209,7 @@
                     title: 'Web & E-commerce',
                     description: 'Desarrollo de todo tipo de sitios web y plataformas de comercio electrónico personalizadas.'
                 },
-                {
-                    id: 'devops',
-                    image: 'media/icons/typeOfCoffes/cafeNumeroSeis.png',
-                    title: 'Prompt Engineer',
-                    description: 'Desarrollo de sistemas y soluciones mediante ingeniería de prompts para inteligencia artificial.'
-                }
+                // Eliminado servicio 'Prompt Engineer'
             ];
             
                     // Crear elementos para cada servicio
@@ -4448,7 +4461,7 @@
                     cssObject.position.z += 0.001; // Pequeño offset para evitar z-fighting
                     
                     // Ajustar la posición vertical para centrar el contenido extendido
-                    cssObject.position.y -= 0.003; // Ajuste mínimo para compensar la menor extensión vertical
+                    cssObject.position.y -= 0.043; // Ajuste aumentado para mover 2mm hacia abajo (0.003 + 0.04)
             
             console.log("Posición final del CSS3D:", cssObject.position);
             console.log("Rotación final del CSS3D:", cssObject.rotation);
