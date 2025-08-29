@@ -5256,8 +5256,8 @@
                     // Posicionar el objeto CSS3D para que coincida con el plano
                     cssObject.position.copy(center);
                     
-                    // Ajustar ligeramente la posición hacia la izquierda para cubrir el espacio
-                    cssObject.position.x -= 0.015; // Pequeño desplazamiento hacia la izquierda
+                    // Ajustar la posición hacia la derecha - Movido 3mm hacia la derecha desde la posición original
+                    cssObject.position.x += 0.025; // Cambiado de -0.055 a +0.025 (3mm hacia la derecha desde -0.015)
                     
                     // Aplicar la rotación del plano con corrección fija para evitar texto invertido
                     cssObject.rotation.copy(rotation);
