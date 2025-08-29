@@ -19,20 +19,23 @@
                 rgba(161, 136, 127, 0.4) 100%   /* Café colombiano suave */
             ),
             url('media/pictures/picturesOfSometingElse/ContactBack.jpg') no-repeat center center;
-            background-size: cover;
+            background-size: 120%;
             background-attachment: fixed;
             background-blend-mode: soft-light;
             color: #2c2c2c;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: hidden;
             pointer-events: auto !important;
         }
         
         body {
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
+            display: block;
             padding: 0;
+            margin: 0;
             position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
         }
         
         .interactive-screen {
@@ -57,26 +60,29 @@
         }
         
         .content-section {
-            width: calc(100% - 20px);
-            max-width: 95vw;
-            margin: 10px auto;
-            height: calc(100vh - 20px);
+            width: 100vw;
+            max-width: none;
+            margin: 0;
+            height: 100vh;
+            position: absolute;
+            left: 0;
+            top: 0;
             display: flex;
             flex-direction: column;
-            position: relative;
             background: linear-gradient(135deg,
-                rgba(255, 255, 255, 0.92) 0%,
-                rgba(250, 250, 250, 0.88) 100%);
-            padding: 15px;
-            border-radius: 20px;
+                rgba(255, 255, 255, 0.72) 0%,
+                rgba(250, 250, 250, 0.68) 100%);
+            padding: 20px;
+            border-radius: 0;
             backdrop-filter: blur(12px);
-            box-shadow: 
+            box-shadow:
                 0 8px 32px rgba(0, 0, 0, 0.08),
                 0 4px 16px rgba(252, 203, 144, 0.15),
                 inset 0 1px 0 rgba(255, 255, 255, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.6);
+            border: none;
             pointer-events: auto !important;
             box-sizing: border-box;
+            z-index: 10;
         }
         
         .screen-header {
@@ -112,24 +118,32 @@
         
         .contact-container {
             display: flex;
-            gap: 15px;
-            margin-top: 5px;
-            justify-content: space-between;
+            gap: 20px;
+            margin-top: 10px;
+            justify-content: center;
+            align-items: stretch;
             flex: 1;
             overflow: hidden;
             min-height: 0;
+            max-width: 1200px;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0 20px;
+            box-sizing: border-box;
         }
         
         .contact-form {
             flex: 1.2;
-            min-width: 280px;
+            min-width: 320px;
+            max-width: 500px;
             background: linear-gradient(135deg,
-                rgba(255, 255, 255, 0.95) 0%,
-                rgba(248, 250, 252, 0.90) 100%);
+                rgba(255, 255, 255, 0.75) 0%,
+                rgba(248, 250, 252, 0.70) 100%);
             border-radius: 16px;
-            padding: 15px;
+            padding: 20px;
             backdrop-filter: blur(15px);
-            box-shadow: 
+            box-shadow:
                 0 4px 20px rgba(0, 0, 0, 0.06),
                 0 1px 4px rgba(100, 181, 246, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.7);
@@ -142,10 +156,11 @@
         
         .contact-info {
             flex: 0.8;
-            min-width: 220px;
+            min-width: 280px;
+            max-width: 400px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
             overflow-y: auto;
             min-height: 0;
         }
@@ -248,8 +263,8 @@
         
         .contact-card {
             background: linear-gradient(135deg,
-                rgba(255, 255, 255, 0.95) 0%,
-                rgba(248, 250, 252, 0.90) 100%);
+                rgba(255, 255, 255, 0.75) 0%,
+                rgba(248, 250, 252, 0.70) 100%);
             border-radius: 12px;
             padding: 12px;
             backdrop-filter: blur(15px);
@@ -418,9 +433,12 @@
             }
             
             .content-section {
-                padding: 10px;
-                margin: 5px auto;
-                height: calc(100vh - 10px);
+                padding: 15px;
+                margin: 0;
+                height: 100vh;
+                width: 100vw;
+                left: 0;
+                border-radius: 0;
             }
             
             .screen-header h1 {
@@ -430,8 +448,12 @@
         
         @media (max-height: 600px) {
             .content-section {
-                padding: 8px;
-                margin: 5px auto;
+                padding: 10px;
+                margin: 0;
+                width: 100vw;
+                height: 100vh;
+                left: 0;
+                border-radius: 0;
             }
             
             .screen-header {
@@ -518,10 +540,95 @@
             box-shadow: 0 4px 20px rgba(230, 57, 70, 0.25);
             letter-spacing: 0.2px;
         }
+        
+        /* Cover Negro para la pantalla de contacto */
+        .screen-cover {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000000;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+            pointer-events: auto;
+        }
+        
+        .screen-cover.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        
+        .screen-cover-content {
+            text-align: center;
+            color: #ffffff;
+            font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
+            padding: 20px;
+        }
+        
+        .screen-cover h2 {
+            font-size: 24px;
+            font-weight: 300;
+            margin: 0 0 10px 0;
+            letter-spacing: 1px;
+            opacity: 0.9;
+        }
+        
+        .screen-cover p {
+            font-size: 14px;
+            opacity: 0.7;
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Indicador de estado de la pantalla */
+        .screen-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 12px;
+            height: 12px;
+            background: #ff4444;
+            border-radius: 50%;
+            z-index: 10000;
+            transition: background-color 0.3s ease;
+        }
+        
+        .screen-indicator.active {
+            background: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+        
+        /* Animación de parpadeo cuando está apagado */
+        .screen-indicator:not(.active) {
+            animation: blink 2s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
     </style>
 </head>
 <body>
     <div class="interactive-screen">
+        <!-- Cover negro que se muestra por defecto -->
+        <div class="screen-cover" id="screen-cover">
+            <div class="screen-cover-content">
+                <h2>Pantalla de Contacto</h2>
+                <p>Presiona el botón de contacto para activar</p>
+            </div>
+        </div>
+        
+        <!-- Indicador de estado de la pantalla -->
+        <div class="screen-indicator" id="screen-indicator"></div>
+        
         <div class="content-section">
             <div class="screen-header">
                 <h1>Contacto</h1>
@@ -642,8 +749,17 @@
             const successMessage = document.getElementById('success-message');
             const errorMessage = document.getElementById('error-message');
             const contentSection = document.querySelector('.content-section');
+            const screenCover = document.getElementById('screen-cover');
+            const screenIndicator = document.getElementById('screen-indicator');
             
-            console.log("🚀 Inicializando contact.html");
+            // Estado de la pantalla - INICIA APAGADA (cover activo)
+            let screenActive = false;
+            
+            // Asegurar que el cover esté visible al inicio
+            screenCover.classList.remove('hidden');
+            screenIndicator.classList.remove('active');
+            
+            console.log("🚀 Inicializando contact.html con cover negro ACTIVO por defecto");
 
             // Check if page is in an iframe
             function isInIframe() {
@@ -654,42 +770,119 @@
                 }
             }
             
-            // Listen for messages from the parent window
-            window.addEventListener('message', function(event) {
-                if (event.data && event.data.action === 'turnOnScreen') {
-                    console.log("✅ Contact screen turned on");
+            // Función para activar la pantalla (quitar cover negro)
+            function turnOnScreen() {
+                screenActive = true;
+                screenCover.classList.add('hidden');
+                screenIndicator.classList.add('active');
+                console.log("✅ Pantalla de contacto activada");
+                
+                // Notificar al padre si está en iframe
+                if (isInIframe()) {
                     try {
                         window.parent.postMessage({ action: 'contactScreenTurnedOn' }, '*');
                     } catch (e) {
-                        console.error("Error sending confirmation:", e);
+                        console.error("Error sending screen on message:", e);
                     }
                 }
+            }
+            
+            // Función para desactivar la pantalla (mostrar cover negro)
+            function turnOffScreen() {
+                screenActive = false;
+                screenCover.classList.remove('hidden');
+                screenIndicator.classList.remove('active');
+                console.log("🔴 Pantalla de contacto desactivada");
                 
-                if (event.data && event.data.action === 'turnOffScreen') {
-                    console.log("🔴 Contact screen turned off");
+                // Notificar al padre si está en iframe
+                if (isInIframe()) {
                     try {
                         window.parent.postMessage({ action: 'contactScreenTurnedOff' }, '*');
                     } catch (e) {
-                        console.error("Error sending confirmation:", e);
+                        console.error("Error sending screen off message:", e);
                     }
+                }
+            }
+            
+            // Listen for messages from the parent window
+            window.addEventListener('message', function(event) {
+                if (event.data && event.data.action === 'turnOnScreen') {
+                    console.log("� Recibido: activar pantalla de contacto");
+                    turnOnScreen();
+                }
+                
+                if (event.data && event.data.action === 'turnOffScreen') {
+                    console.log("📨 Recibido: desactivar pantalla de contacto");
+                    turnOffScreen();
+                }
+                
+                if (event.data && event.data.action === 'userMoving') {
+                    console.log("📨 Recibido: usuario se movió en el modelo 3D");
+                    turnOffScreen();
+                }
+                
+                if (event.data && event.data.action === 'buttonPressed') {
+                    console.log("📨 Recibido: botón presionado:", event.data.button);
+                    if (event.data.button === 'contact' || event.data.button === 'contacto') {
+                        console.log("🟢 Botón de contacto presionado - ACTIVANDO PANTALLA");
+                        turnOnScreen();
+                    } else {
+                        console.log("🔴 Otro botón presionado - APAGANDO PANTALLA");
+                        turnOffScreen();
+                    }
+                }
+                
+                // Escuchar cualquier actividad del modelo 3D que indique cambio de foco
+                if (event.data && (
+                    event.data.action === 'modelRotated' ||
+                    event.data.action === 'cameraChanged' ||
+                    event.data.action === 'sceneInteraction' ||
+                    event.data.action === 'navigationStarted'
+                )) {
+                    console.log("📨 Actividad en modelo 3D detectada - APAGANDO PANTALLA");
+                    turnOffScreen();
                 }
             });
             
             // Send ready message to parent
             if (isInIframe()) {
                 try {
-                    window.parent.postMessage({ action: 'contactReady' }, '*');
+                    window.parent.postMessage({ 
+                        action: 'contactReady',
+                        screenActive: screenActive
+                    }, '*');
                     console.log("📤 Contact ready message sent");
                 } catch (e) {
                     console.error("Error sending ready message:", e);
                 }
             }
+            
+            // Auto-desactivar después de un período de inactividad
+            let inactivityTimer;
+            
+            function resetInactivityTimer() {
+                clearTimeout(inactivityTimer);
+                if (screenActive) {
+                    inactivityTimer = setTimeout(() => {
+                        console.log("⏰ Tiempo de inactividad agotado, desactivando pantalla");
+                        turnOffScreen();
+                    }, 30000); // 30 segundos de inactividad
+                }
+            }
+            
+            // Detectar actividad del usuario
+            ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'].forEach(event => {
+                document.addEventListener(event, resetInactivityTimer, true);
+            });
 
             // Funcionalidad del formulario - Envío AJAX para evitar página de confirmación
             contactForm.addEventListener('submit', async function(e) {
                 e.preventDefault(); // PREVENIR el envío tradicional que causa la página gris
                 
                 console.log("📧 Enviando formulario de contacto via AJAX");
+                
+                // Resetear timer de inactividad
+                resetInactivityTimer();
                 
                 const submitButton = contactForm.querySelector('button[type="submit"]');
                 const originalText = submitButton.innerHTML;
@@ -763,6 +956,7 @@
                     contactForm.reset();
                     successMessage.style.display = 'none';
                     errorMessage.style.display = 'none';
+                    resetInactivityTimer(); // Resetear timer de inactividad
                     console.log("🔄 Formulario limpiado");
                 });
             }
@@ -772,6 +966,7 @@
             allLinks.forEach(link => {
                 link.addEventListener('click', function(e) {
                     // No prevenir el comportamiento por defecto de los enlaces
+                    resetInactivityTimer(); // Resetear timer de inactividad
                     console.log("🔗 Click en enlace:", this.href);
                 });
             });
@@ -782,6 +977,7 @@
                 // Asegurar que los campos sean interactivos
                 input.style.pointerEvents = 'auto';
                 input.addEventListener('focus', function() {
+                    resetInactivityTimer(); // Resetear timer de inactividad
                     console.log("📝 Campo enfocado:", this.name || this.type);
                 });
             });
@@ -803,11 +999,15 @@
             
             [nameInput, emailInput, messageInput].forEach(field => {
                 if (field) {
-                    field.addEventListener('blur', () => validateField(field));
+                    field.addEventListener('blur', () => {
+                        validateField(field);
+                        resetInactivityTimer(); // Resetear timer de inactividad
+                    });
                     field.addEventListener('input', () => {
                         if (field.value.trim()) {
                             field.style.borderColor = 'rgba(100, 181, 246, 0.2)';
                         }
+                        resetInactivityTimer(); // Resetear timer de inactividad
                     });
                 }
             });
@@ -818,10 +1018,19 @@
                     (e.target && e.target.classList && e.target.classList.contains('contact-container'))) {
                     successMessage.style.display = 'none';
                     errorMessage.style.display = 'none';
+                    resetInactivityTimer(); // Resetear timer de inactividad
                 }
             });
+            
+            // Función para manejar clicks en el cover negro
+            screenCover.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log("🖱️ Click en cover negro - no se puede activar desde aquí");
+                // No activar la pantalla desde el cover, solo desde el modelo 3D
+            });
 
-            console.log("✅ Contact.html completamente funcional");
+            console.log("✅ Contact.html completamente funcional con cover negro");
         });
     </script>
 </body>
