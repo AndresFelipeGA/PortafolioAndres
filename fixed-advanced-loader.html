@@ -666,6 +666,39 @@
                     }
                 });
                 
+                // FORZAR ESTADO INICIAL CORRECTO cuando el iframe está listo
+                setTimeout(function() {
+                    console.log("🚀 CONTACTREADY: Forzando estado inicial después de contactReady");
+                    
+                    // Asegurar que las variables estén en estado inicial
+                    contactButtonClicked = false;
+                    contactScreenOn = false;
+                    
+                    // Forzar cover negro visible
+                    if (window.contactScreenMaterial && window.contactBackPlane) {
+                        window.contactScreenMaterial.color.set(0x000000);
+                        window.contactScreenMaterial.transparent = false;
+                        window.contactScreenMaterial.opacity = 1.0;
+                        window.contactScreenMaterial.needsUpdate = true;
+                        window.contactBackPlane.visible = true;
+                        console.log("✅ CONTACTREADY: Cover negro forzado como visible");
+                    }
+                    
+                    // Forzar contenido HTML oculto
+                    if (window.contactCssObject && window.contactCssObject.element) {
+                        window.contactCssObject.element.style.visibility = 'hidden';
+                        window.contactCssObject.element.style.pointerEvents = 'none';
+                        console.log("✅ CONTACTREADY: Contenido HTML forzado como oculto");
+                    }
+                    
+                    // Enviar mensaje al iframe para asegurar que también tenga el cover negro
+                    setTimeout(function() {
+                        sendMessageToContact('turnOffScreen');
+                        console.log("📤 CONTACTREADY: Mensaje turnOffScreen enviado al iframe");
+                    }, 100);
+                    
+                }, 200);
+                
                 // AUTO-activador de testing REMOVIDO - la pantalla solo se activa con el botón
             }
             
@@ -707,6 +740,39 @@
                 if (window.contactCssObject && window.contactCssObject.element) {
                     window.contactCssObject.element.style.visibility = 'hidden';
                     window.contactCssObject.element.style.pointerEvents = 'none';
+                }
+            }
+            
+            // ===============================================
+            // CUSTOM CAMERA ANIMATION HANDLER
+            // ===============================================
+            
+            // Manejar solicitud de animación personalizada de cámara
+            if (event.data && event.data.action === 'customCameraAnimation') {
+                console.log("🎬 Recibida solicitud de animación personalizada de cámara");
+                console.log("Datos recibidos:", event.data);
+                
+                // Validar que tenemos las coordenadas necesarias
+                if (event.data.targetPos && event.data.lookAtPos) {
+                    const targetPos = new THREE.Vector3(
+                        event.data.targetPos.x,
+                        event.data.targetPos.y,
+                        event.data.targetPos.z
+                    );
+                    
+                    const lookAtPos = new THREE.Vector3(
+                        event.data.lookAtPos.x,
+                        event.data.lookAtPos.y,
+                        event.data.lookAtPos.z
+                    );
+                    
+                    console.log("🎯 Coordenadas objetivo:", targetPos);
+                    console.log("👁️ Punto objetivo:", lookAtPos);
+                    
+                    // Iniciar la animación personalizada
+                    startCustomCameraAnimation(targetPos, lookAtPos);
+                } else {
+                    console.error("❌ No se proporcionaron coordenadas válidas para la animación personalizada");
                 }
             }
             
@@ -1511,31 +1577,41 @@
             lastContactButtonClickedState = contactButtonClicked;
             lastContactScreenOnState = contactScreenOn;
             
-            // Siempre mostrar/ocultar el plano completo basado en la orientación
-            if (isVisibleFromFront) {
-                window.contactBackPlane.visible = true;
-                
-                // LÓGICA DEL COVER NEGRO
-                if (!contactButtonClicked) {
-                    // Si el botón NO ha sido clickeado, mantener el cover negro visible
-                    window.contactScreenMaterial.color.set(0x000000); // Negro
-                    window.contactScreenMaterial.transparent = false;
-                    window.contactScreenMaterial.opacity = 1.0;
-                    window.contactScreenMaterial.needsUpdate = true;
-                } else {
-                    // Si el botón SÍ ha sido clickeado, hacer transparente el cover
+            // SIEMPRE mantener el plano negro visible - la orientación de la cámara no debe afectar la visibilidad del cover negro
+            window.contactBackPlane.visible = true;
+            
+            // LÓGICA DEL COVER NEGRO - Solo depende del estado del botón y la pantalla, NO de la orientación
+            if (!contactButtonClicked || !contactScreenOn) {
+                // Si el botón NO ha sido clickeado O la pantalla está apagada, mantener el cover negro visible
+                window.contactScreenMaterial.color.set(0x000000); // Negro
+                window.contactScreenMaterial.transparent = false;
+                window.contactScreenMaterial.opacity = 1.0;
+                window.contactScreenMaterial.needsUpdate = true;
+            } else {
+                // SOLO hacer transparente el cover si el botón fue clickeado Y la pantalla está encendida Y es visible desde el frente
+                if (isVisibleFromFront) {
                     window.contactScreenMaterial.transparent = true;
                     window.contactScreenMaterial.opacity = 0.0;
                     window.contactScreenMaterial.needsUpdate = true;
+                } else {
+                    // Mantener negro si no es visible desde el frente, aunque el botón esté clickeado
+                    window.contactScreenMaterial.color.set(0x000000);
+                    window.contactScreenMaterial.transparent = false;
+                    window.contactScreenMaterial.opacity = 1.0;
+                    window.contactScreenMaterial.needsUpdate = true;
                 }
+            }
+            
+            // LÓGICA DEL CONTENIDO HTML - Solo mostrar si es visible desde el frente
+            if (isVisibleFromFront) {
                 
-                // LÓGICA DEL CONTENIDO HTML
-                if (contactButtonClicked && window.contactCssObject && window.contactCssObject.element && isContactPlaneVisibleFromFront()) {
+                // LÓGICA DEL CONTENIDO HTML - Solo mostrar si es visible desde el frente
+                if (contactButtonClicked && window.contactCssObject && window.contactCssObject.element) {
                     window.contactCssObject.element.style.visibility = 'visible';
                     window.contactCssObject.element.style.pointerEvents = 'auto';
                     
                     // FORZAR pointer events si todas las condiciones son verdaderas
-                    if (isVisibleFromFront && contactButtonClicked && contactScreenOn) {
+                    if (contactButtonClicked && contactScreenOn) {
                         window.contactCssObject.element.style.pointerEvents = 'auto';
                         console.log("✅ Contact form fully active and interactive");
                     }
@@ -1543,37 +1619,21 @@
                     if (window.contactCssObject && window.contactCssObject.element) {
                         window.contactCssObject.element.style.visibility = 'hidden';
                         window.contactCssObject.element.style.pointerEvents = 'none';
-                        console.log("✅ Contenido HTML oculto - contact");
-                        console.log("🔍 Razón: contactButtonClicked=" + contactButtonClicked + 
-                                   ", cssObject=" + !!window.contactCssObject + 
-                                   ", element=" + !!window.contactCssObject?.element + 
-                                   ", visibleFromFront=" + isContactPlaneVisibleFromFront());
                     }
                 }
                 
-                // Si la pantalla se puede ver desde el frente Y el botón ha sido clickeado Y la pantalla está encendida
-                if (isVisibleFromFront && contactButtonClicked && contactScreenOn) {
-                    // Solo log una vez cuando se active completamente
+                // Log cuando esté completamente activo
+                if (contactButtonClicked && contactScreenOn) {
                     if (!window.contactFullyActiveLogged) {
                         console.log("✅ Contact form is now fully interactive");
                         window.contactFullyActiveLogged = true;
                     }
                 }
             } else {
-                // No visible desde el frente - pero mantener el cover negro visible
-                // Solo ocultar el contenido HTML, no el plano negro
+                // No visible desde el frente - solo ocultar el contenido HTML
                 if (window.contactCssObject && window.contactCssObject.element) {
                     window.contactCssObject.element.style.visibility = 'hidden';
                     window.contactCssObject.element.style.pointerEvents = 'none';
-                }
-                
-                // Mantener el cover negro visible pero asegurar que esté negro
-                if (window.contactBackPlane && window.contactScreenMaterial) {
-                    window.contactBackPlane.visible = true; // Mantener visible
-                    window.contactScreenMaterial.color.set(0x000000); // Asegurar que esté negro
-                    window.contactScreenMaterial.transparent = false;
-                    window.contactScreenMaterial.opacity = 1.0;
-                    window.contactScreenMaterial.needsUpdate = true;
                 }
             }
         }
@@ -2730,7 +2790,7 @@
                         
                         // Añadir eventos de clic a los botones
                         const buttons = document.querySelectorAll('.floating-button');
-                        if (buttons.length >= 5) {
+                        if (buttons.length >= 6) {
                             // El primer botón (icono personalizado)
                             const firstButton = buttons[0]; // Índice 0 (el primer botón)
                             firstButton.addEventListener('click', function() {
@@ -2762,6 +2822,22 @@
                                 startButtonCameraAnimation();
                             });
                             console.log("Evento de clic añadido al botón de servicios");
+                            
+                            // 🎬 ÚLTIMO BOTÓN (SEXTO BOTÓN) - ANIMACIÓN PERSONALIZADA
+                            const lastButton = buttons[5]; // Índice 5 (el sexto botón - último botón)
+                            lastButton.addEventListener('click', function() {
+                                console.log("🎬 Último botón clickeado - iniciando animación personalizada");
+                                
+                                // Coordenadas específicas proporcionadas por el usuario
+                                const targetPos = new THREE.Vector3(6.04, 6.11, -3.31);
+                                const lookAtPos = new THREE.Vector3(6.50, 6.03, -3.48);
+                                
+                                // Iniciar la animación personalizada
+                                startCustomCameraAnimation(targetPos, lookAtPos);
+                            });
+                            console.log("🎯 Evento de clic añadido al ÚLTIMO BOTÓN (animación personalizada)");
+                        } else {
+                            console.warn("No se encontraron suficientes botones. Se encontraron:", buttons.length);
                         }
                     }, 500);
                 }, 1000);
@@ -3267,6 +3343,17 @@
             // NOTIFICAR A PROJECTS.HTML QUE OTRO BOTÓN FUE PRESIONADO
             sendMessageToProjects('turnOffScreen');
             
+            // ENVIAR MENSAJE ESPECÍFICO DE BOTÓN PRESIONADO AL CAFE-MENU
+            setTimeout(function() {
+                if (cafeMenuIframe && cafeMenuIframe.contentWindow) {
+                    cafeMenuIframe.contentWindow.postMessage({
+                        action: 'buttonPressed',
+                        button: 'services'
+                    }, '*');
+                    console.log("📤 Mensaje 'buttonPressed: services' enviado a cafe-menu.html");
+                }
+            }, 100);
+            
             // ACTIVAR CAFE-MENU (ES EL BOTÓN DE SERVICIOS)
             sendMessageToCafeMenu('turnOnScreen');
             
@@ -3461,6 +3548,17 @@
             // NOTIFICAR A CAFE-MENU.HTML QUE OTRO BOTÓN FUE PRESIONADO
             sendMessageToCafeMenu('turnOffScreen');
             
+            // ENVIAR MENSAJE ESPECÍFICO DE BOTÓN PRESIONADO AL PROJECTS
+            setTimeout(function() {
+                if (projectsIframe && projectsIframe.contentWindow) {
+                    projectsIframe.contentWindow.postMessage({
+                        action: 'buttonPressed',
+                        button: 'projects'
+                    }, '*');
+                    console.log("📤 Mensaje 'buttonPressed: projects' enviado a projects.html");
+                }
+            }, 100);
+            
             // Activar la pantalla de projects
             console.log("Enviando mensaje para activar pantalla de projects desde startProjectsButtonCameraAnimation");
             
@@ -3561,6 +3659,17 @@
             
             // NOTIFICAR A CAFE-MENU.HTML QUE OTRO BOTÓN FUE PRESIONADO
             sendMessageToCafeMenu('turnOffScreen');
+            
+            // ENVIAR MENSAJE ESPECÍFICO DE BOTÓN PRESIONADO AL CONTACT
+            setTimeout(function() {
+                if (contactIframe && contactIframe.contentWindow) {
+                    contactIframe.contentWindow.postMessage({
+                        action: 'buttonPressed',
+                        button: 'contact'
+                    }, '*');
+                    console.log("📤 Mensaje 'buttonPressed: contact' enviado a contact.html");
+                }
+            }, 100);
             
             // Activar la pantalla de contacto inmediatamente
             activateContactScreen();
@@ -3698,6 +3807,68 @@
             console.log("Posición inicial:", currentCameraPos);
             console.log("Posición final:", absoluteTargetPos);
             console.log("Mirando hacia:", lookAtPoint);
+        }
+        
+        // ===============================================
+        // FUNCIÓN DE ANIMACIÓN DE CÁMARA PERSONALIZADA
+        // ===============================================
+        
+        function startCustomCameraAnimation(targetPos, lookAtPos) {
+            console.log("Iniciando animación de cámara personalizada");
+            console.log("Coordenadas objetivo:", targetPos);
+            console.log("Punto objetivo:", lookAtPos);
+            
+            // Convertir coordenadas relativas a absolutas (sumando el offset)
+            const absoluteTargetPos = new THREE.Vector3().copy(targetPos).add(originOffset);
+            const absoluteLookAtPos = new THREE.Vector3().copy(lookAtPos).add(originOffset);
+            
+            // Posición actual de la cámara
+            const currentCameraPos = new THREE.Vector3().copy(camera.position);
+            
+            console.log("Coordenadas objetivo (absolutas):", absoluteTargetPos);
+            console.log("Punto objetivo (absoluto):", absoluteLookAtPos);
+            
+            // Configurar la animación
+            cameraAnimation.enabled = true;
+            cameraAnimation.startTime = Date.now();
+            cameraAnimation.duration = 2000; // 2 segundos de duración
+            cameraAnimation.initialPosition.copy(currentCameraPos);
+            cameraAnimation.targetPosition.copy(absoluteTargetPos);
+            cameraAnimation.initialTarget.copy(controls.target);
+            cameraAnimation.finalTarget.copy(absoluteLookAtPos);
+            
+            // Crear una trayectoria directa entre la posición actual y la posición objetivo
+            cameraAnimation.waypoints = [];
+            cameraAnimation.waypoints.push(new THREE.Vector3().copy(currentCameraPos));
+            
+            // Número de puntos intermedios para una trayectoria suave
+            const numWaypoints = 20;
+            
+            for (let i = 1; i < numWaypoints; i++) {
+                const t = i / numWaypoints;
+                const waypoint = new THREE.Vector3().lerpVectors(currentCameraPos, absoluteTargetPos, t);
+                cameraAnimation.waypoints.push(waypoint);
+            }
+            
+            // Asegurarse de que el último punto sea exactamente las coordenadas objetivo
+            cameraAnimation.waypoints.push(new THREE.Vector3().copy(absoluteTargetPos));
+            
+            // Guardar el estado original de los controles
+            cameraAnimation.originalControlsEnabled = controls.enabled;
+            
+            // Desactivar los controles durante la animación
+            controls.enabled = false;
+            
+            // Ocultar las coordenadas durante la animación
+            const coordDisplay = document.getElementById('coordinates-display');
+            if (coordDisplay) {
+                coordDisplay.style.display = 'none';
+            }
+            
+            console.log("Animación de cámara personalizada configurada");
+            console.log("Posición inicial:", currentCameraPos);
+            console.log("Posición final:", absoluteTargetPos);
+            console.log("Mirando hacia:", absoluteLookAtPos);
         }
         
         function animate() {
@@ -5174,35 +5345,23 @@
                     // Añadir el plano invisible a la escena (solo para raycasting)
                     scene.add(invisiblePlane);
                     
-                    // Crear un plano negro de fondo (cover negro inicial) con geometría custom
+                    // Crear un plano negro de fondo (cover negro inicial) - NUEVO ENFOQUE SIMPLE
                     const contactBackPlaneMaterial = new THREE.MeshBasicMaterial({
                         color: 0x000000, // Negro inicialmente (pantalla apagada)
-                        side: THREE.DoubleSide, // Cambiado a DoubleSide para asegurar visibilidad
+                        side: THREE.DoubleSide, // Para asegurar visibilidad desde ambos lados
                         transparent: false, // Inicialmente NO transparente
                         opacity: 1.0, // Opacidad completa
-                        depthWrite: true, // Reactivar depthWrite
-                        depthTest: true // Reactivar depthTest para que respete la profundidad
+                        depthWrite: false, // Igual que projects/about-me
+                        depthTest: false, // Igual que projects/about-me
+                        fog: false // Evitar que la niebla afecte el cover
                     });
                     
-                    // Crear geometría custom del trapecio usando las coordenadas exactas
-                    const trapezoidGeometry = new THREE.BufferGeometry();
-                    const vertices = new Float32Array([
-                        // Triángulo 1 (topLeft, topRight, bottomLeft)
-                        topLeft.x, topLeft.y, topLeft.z,
-                        topRight.x, topRight.y, topRight.z,
-                        bottomLeft.x, bottomLeft.y, bottomLeft.z,
-                        
-                        // Triángulo 2 (topRight, bottomRight, bottomLeft)
-                        topRight.x, topRight.y, topRight.z,
-                        bottomRight.x, bottomRight.y, bottomRight.z,
-                        bottomLeft.x, bottomLeft.y, bottomLeft.z
-                    ]);
-                    
-                    trapezoidGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-                    trapezoidGeometry.computeVertexNormals();
+                    // CREAR PLANO NEGRO CON TAMAÑO EXACTO DEL HTML (NO MÁS GRANDE)
+                    // Usar exactamente las mismas dimensiones que el contenido HTML
+                    const coverGeometry = new THREE.PlaneGeometry(width, height);
                     
                     const contactBackPlane = new THREE.Mesh(
-                        trapezoidGeometry, // Usar geometría exacta del trapecio
+                        coverGeometry, // Usar geometría con tamaño EXACTO
                         contactBackPlaneMaterial
                     );
                     
@@ -5210,15 +5369,69 @@
                     window.contactScreenMaterial = contactBackPlaneMaterial;
                     window.contactBackPlane = contactBackPlane; // Guardar referencia al plano también
                     
-                    // El plano ya está en coordenadas absolutas, solo necesita un pequeño offset en Z
-                    contactBackPlane.position.set(0, 0, 0.001); // Muy pequeño offset hacia adelante
+                    // IMPORTANTE: Posicionar el plano negro EXACTAMENTE igual que el contenido HTML
+                    // Usar la misma posición calculada para el centro del plano
+                    contactBackPlane.position.copy(center);
+                    
+                    // Aplicar EXACTAMENTE los mismos ajustes de posición que el contenido HTML
+                    contactBackPlane.position.x += 0.025; // Mismo ajuste que cssObject
+                    contactBackPlane.position.y -= 0.003; // Mismo ajuste que cssObject
+                    contactBackPlane.position.z += 0.002; // Ligeramente más adelante que el HTML (0.001 + 0.001)
+                    
+                    // Aplicar la misma rotación que el plano invisible para alinearlo correctamente
+                    contactBackPlane.rotation.copy(rotation);
+                    // NO rotar 180 grados en Y como el HTML porque el cover negro no necesita corrección de texto
                     
                     // Configurar renderOrder para asegurar que se renderice por encima del contenido HTML
-                    contactBackPlane.renderOrder = 10; // Valor moderado, no tan alto
+                    contactBackPlane.renderOrder = 100; // Valor alto para estar por encima del CSS3D
+                    
+                    // Configurar material para mejor visibilidad
+                    contactBackPlaneMaterial.side = THREE.DoubleSide;
+                    contactBackPlaneMaterial.depthWrite = false;
+                    contactBackPlaneMaterial.depthTest = false;
                     
                     // Añadir el plano negro a la escena
                     scene.add(contactBackPlane);
                     console.log("Plano negro de fondo para contact añadido a la escena:", contactBackPlane);
+                    console.log("📏 DIMENSIONES EXACTAS DEL COVER NEGRO:");
+                    console.log("  - Ancho (width):", width);
+                    console.log("  - Alto (height):", height);
+                    console.log("  - Posición cover negro:", contactBackPlane.position);
+                    console.log("  - Rotación cover negro:", contactBackPlane.rotation);
+                    console.log("  - Escala cover negro:", contactBackPlane.scale);
+                    console.log("📏 PARA COMPARAR CON EL CONTENIDO HTML:");
+                    
+                    // CREAR UN SEGUNDO PLANO NEGRO DE RESPALDO CON TAMAÑO EXACTO
+                    const backupCoverMaterial = new THREE.MeshBasicMaterial({
+                        color: 0x000000,
+                        side: THREE.DoubleSide,
+                        transparent: false,
+                        opacity: 1.0,
+                        depthWrite: false,
+                        depthTest: false
+                    });
+                    
+                    // Usar exactamente las mismas dimensiones que el contenido HTML
+                    const backupCoverGeometry = new THREE.PlaneGeometry(width, height);
+                    const backupCoverPlane = new THREE.Mesh(backupCoverGeometry, backupCoverMaterial);
+                    
+                    // Posicionar el plano de respaldo EXACTAMENTE igual que el contenido HTML
+                    backupCoverPlane.position.copy(center);
+                    backupCoverPlane.position.x += 0.025; // Mismo ajuste que cssObject
+                    backupCoverPlane.position.y -= 0.003; // Mismo ajuste que cssObject
+                    backupCoverPlane.position.z += 0.0015; // Entre el HTML (0.001) y el cover principal (0.002)
+                    backupCoverPlane.rotation.copy(rotation);
+                    backupCoverPlane.renderOrder = 150; // Entre el principal y el contenido
+                    
+                    // Guardar referencia al plano de respaldo
+                    window.contactBackupCover = backupCoverPlane;
+                    
+                    // Añadir el plano de respaldo a la escena
+                    scene.add(backupCoverPlane);
+                    console.log("Plano negro de RESPALDO para contact añadido a la escena");
+                    
+                    // Forzar que el cover negro sea visible inicialmente
+                    console.log("Forzando cover negro inicial visible para contact");
                     
                     // Forzar que el cover negro sea visible inicialmente
                     console.log("Forzando cover negro inicial visible para contact");
@@ -5285,6 +5498,11 @@
             
             console.log("Posición final del CSS3D para contact:", cssObject.position);
             console.log("Rotación final del CSS3D para contact:", cssObject.rotation);
+            console.log("📏 CONTENIDO HTML CONFIGURADO:");
+            console.log("  - Iframe tamaño: 800px x 606px");
+            console.log("  - Escala aplicada:", cssObject.scale);
+            console.log("  - Posición final HTML:", cssObject.position);
+            console.log("  - Rotación final HTML:", cssObject.rotation);
             
             // Añadir el objeto CSS3D a la escena CSS3D del plano de contacto
             window.contactScene.add(cssObject);
@@ -5343,9 +5561,40 @@
                 }
             }, 500);
             
+            // INICIALIZACIÓN ADICIONAL - Forzar estado inicial correcto
+            setTimeout(function() {
+                console.log("🚀 INICIALIZACIÓN CONTACT: Forzando estado inicial");
+                
+                // 1. Asegurar que las variables de estado estén correctas
+                contactButtonClicked = false;
+                contactScreenOn = false;
+                console.log("Variables de estado inicializadas:", {
+                    contactButtonClicked: contactButtonClicked,
+                    contactScreenOn: contactScreenOn
+                });
+                
+                // 2. Forzar cover negro visible
+                if (window.contactScreenMaterial && window.contactBackPlane) {
+                    window.contactScreenMaterial.color.set(0x000000);
+                    window.contactScreenMaterial.transparent = false;
+                    window.contactScreenMaterial.opacity = 1.0;
+                    window.contactScreenMaterial.needsUpdate = true;
+                    window.contactBackPlane.visible = true;
+                    console.log("✅ Cover negro FORZADO como visible");
+                }
+                
+                // 3. Forzar contenido HTML oculto
+                if (window.contactCssObject && window.contactCssObject.element) {
+                    window.contactCssObject.element.style.visibility = 'hidden';
+                    window.contactCssObject.element.style.pointerEvents = 'none';
+                    console.log("✅ Contenido HTML FORZADO como oculto");
+                }
+            }, 800);
+            
             // Forzar la actualización de la visibilidad inicial después de la configuración
             setTimeout(function() {
                 console.log("Forzando actualización inicial de visibilidad para contact");
+                
                 updateContactVisibility();
                 console.log("Forzando actualización inicial de visibilidad para cafe-menu");
                 updateCafeMenuVisibility();
@@ -5354,16 +5603,159 @@
             return invisiblePlane;
         }
         
+        // Función de verificación periódica para Contact - VERSION MEJORADA
+        function verifyContactInitialState() {
+            console.log("🔍 VERIFICANDO ESTADO INICIAL DE CONTACT:");
+            
+            // Verificar variables de estado
+            console.log("Variables:", {
+                contactButtonClicked: contactButtonClicked,
+                contactScreenOn: contactScreenOn,
+                contactIframeReady: contactIframeReady
+            });
+            
+            // Verificar materiales y planos
+            console.log("Materiales:", {
+                contactScreenMaterial: !!window.contactScreenMaterial,
+                contactBackPlane: !!window.contactBackPlane,
+                contactCssObject: !!window.contactCssObject
+            });
+            
+            // Verificar estado del cover negro
+            if (window.contactScreenMaterial && window.contactBackPlane) {
+                console.log("Cover negro estado:", {
+                    color: window.contactScreenMaterial.color.getHex(),
+                    transparent: window.contactScreenMaterial.transparent,
+                    opacity: window.contactScreenMaterial.opacity,
+                    visible: window.contactBackPlane.visible,
+                    position: window.contactBackPlane.position,
+                    scale: window.contactBackPlane.scale,
+                    renderOrder: window.contactBackPlane.renderOrder
+                });
+                
+                // FORZAR CORRECCIÓN AGRESIVA - SIN CAMBIAR ESCALA
+                console.log("🔧 FORZANDO CONFIGURACIÓN AGRESIVA DEL COVER NEGRO:");
+                window.contactScreenMaterial.color.set(0x000000);
+                window.contactScreenMaterial.transparent = false;
+                window.contactScreenMaterial.opacity = 1.0;
+                window.contactScreenMaterial.side = THREE.DoubleSide;
+                window.contactScreenMaterial.depthWrite = false;
+                window.contactScreenMaterial.depthTest = false;
+                window.contactScreenMaterial.needsUpdate = true;
+                
+                window.contactBackPlane.visible = true;
+                window.contactBackPlane.renderOrder = 200; // Aumentar aún más
+                
+                // NO CAMBIAR ESCALA - mantener tamaño exacto del HTML
+                console.log("🔧 Manteniendo escala original del cover negro:", window.contactBackPlane.scale);
+                
+                // TAMBIÉN FORZAR EL PLANO DE RESPALDO
+                if (window.contactBackupCover) {
+                    window.contactBackupCover.visible = true;
+                    window.contactBackupCover.material.transparent = false;
+                    window.contactBackupCover.material.opacity = 1.0;
+                    window.contactBackupCover.material.needsUpdate = true;
+                    console.log("🔧 Plano de respaldo también forzado");
+                }
+                
+                console.log("✅ Cover negro configuración forzada completada");
+            }
+            
+            // Verificar estado del contenido HTML
+            if (window.contactCssObject && window.contactCssObject.element) {
+                const visibility = window.contactCssObject.element.style.visibility;
+                const pointerEvents = window.contactCssObject.element.style.pointerEvents;
+                console.log("Contenido HTML estado:", {
+                    visibility: visibility,
+                    pointerEvents: pointerEvents,
+                    position: window.contactCssObject.position
+                });
+                
+                // Forzar corrección si es necesario
+                if (visibility !== 'hidden' && !contactButtonClicked) {
+                    console.log("⚠️ CORRECCIÓN: Contenido HTML visible sin botón clickeado, corrigiendo...");
+                    window.contactCssObject.element.style.visibility = 'hidden';
+                    window.contactCssObject.element.style.pointerEvents = 'none';
+                    console.log("✅ Contenido HTML corregido");
+                }
+            }
+        }
+        
+        // Ejecutar verificación periódica
+        setTimeout(function() {
+            verifyContactInitialState();
+            
+            // NUEVA: Comparar con otros covers que funcionan
+            console.log("🔍 COMPARANDO CON OTROS COVERS:");
+            
+            if (window.projectsScreenMaterial && window.projectsBackPlane) {
+                console.log("Projects cover (FUNCIONA):", {
+                    color: window.projectsScreenMaterial.color.getHex(),
+                    transparent: window.projectsScreenMaterial.transparent,
+                    opacity: window.projectsScreenMaterial.opacity,
+                    visible: window.projectsBackPlane.visible,
+                    position: window.projectsBackPlane.position,
+                    renderOrder: window.projectsBackPlane.renderOrder,
+                    side: window.projectsScreenMaterial.side,
+                    depthWrite: window.projectsScreenMaterial.depthWrite,
+                    depthTest: window.projectsScreenMaterial.depthTest
+                });
+            }
+            
+            if (window.aboutMeScreenMaterial && window.aboutMeBackPlane) {
+                console.log("About-me cover (FUNCIONA):", {
+                    color: window.aboutMeScreenMaterial.color.getHex(),
+                    transparent: window.aboutMeScreenMaterial.transparent,
+                    opacity: window.aboutMeScreenMaterial.opacity,
+                    visible: window.aboutMeBackPlane.visible,
+                    position: window.aboutMeBackPlane.position,
+                    renderOrder: window.aboutMeBackPlane.renderOrder,
+                    side: window.aboutMeScreenMaterial.side,
+                    depthWrite: window.aboutMeScreenMaterial.depthWrite,
+                    depthTest: window.aboutMeScreenMaterial.depthTest
+                });
+            }
+            
+            // Verificar cada 2 segundos durante los primeros 10 segundos
+            let verificationCount = 0;
+            const verificationInterval = setInterval(function() {
+                verificationCount++;
+                verifyContactInitialState();
+                
+                if (verificationCount >= 5) { // 5 verificaciones = 10 segundos
+                    clearInterval(verificationInterval);
+                    console.log("🏁 Verificaciones periódicas de Contact completadas");
+                }
+            }, 2000);
+        }, 3000);
+        
         // Función para activar la pantalla de contacto (buenas prácticas)
         function activateContactScreen() {
             console.log("Activando pantalla de contacto...");
             
-            // Hacer transparente el cover negro
-            if (window.contactScreenMaterial) {
+            // IMPORTANTE: Marcar la pantalla como encendida
+            contactScreenOn = true;
+            
+            // Solo hacer transparente el cover negro si el botón ha sido clickeado y es visible desde el frente
+            if (window.contactScreenMaterial && contactButtonClicked && isContactPlaneVisibleFromFront()) {
                 window.contactScreenMaterial.transparent = true;
                 window.contactScreenMaterial.opacity = 0.0;
                 window.contactScreenMaterial.needsUpdate = true;
-                console.log("Cover negro de contact hecho transparente");
+                
+                // TAMBIÉN OCULTAR EL PLANO DE RESPALDO
+                if (window.contactBackupCover) {
+                    window.contactBackupCover.material.transparent = true;
+                    window.contactBackupCover.material.opacity = 0.0;
+                    window.contactBackupCover.material.needsUpdate = true;
+                }
+                
+                console.log("Cover negro de contact hecho transparente (botón clickeado + visible desde frente)");
+            } else {
+                console.log("Cover negro mantenido - condiciones no cumplidas:", {
+                    material: !!window.contactScreenMaterial,
+                    buttonClicked: contactButtonClicked,
+                    visibleFromFront: isContactPlaneVisibleFromFront()
+                });
             }
             
             // Mostrar contenido HTML si es visible desde el frente
@@ -5383,6 +5775,9 @@
         function deactivateContactScreen() {
             console.log("Desactivando pantalla de contacto...");
             
+            // IMPORTANTE: Marcar la pantalla como apagada
+            contactScreenOn = false;
+            
             // Mostrar el cover negro
             if (window.contactScreenMaterial && window.contactBackPlane) {
                 window.contactScreenMaterial.color.set(0x000000);
@@ -5390,6 +5785,16 @@
                 window.contactScreenMaterial.opacity = 1.0;
                 window.contactScreenMaterial.needsUpdate = true;
                 window.contactBackPlane.visible = true;
+                
+                // TAMBIÉN RESTAURAR EL PLANO DE RESPALDO
+                if (window.contactBackupCover) {
+                    window.contactBackupCover.material.color.set(0x000000);
+                    window.contactBackupCover.material.transparent = false;
+                    window.contactBackupCover.material.opacity = 1.0;
+                    window.contactBackupCover.material.needsUpdate = true;
+                    window.contactBackupCover.visible = true;
+                }
+                
                 console.log("Cover negro de contact restaurado");
             }
             

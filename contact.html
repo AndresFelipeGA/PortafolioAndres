@@ -221,8 +221,8 @@
         
         .btn {
             background: linear-gradient(135deg,
-                #00B4D8 0%,     /* Azul Colombia */
-                #0077B6 100%);  /* Azul más profundo */
+                #dc6868 0%,     /* Rojo suave minimalista */
+                #c53030 100%);  /* Rojo más profundo pero sutil */
             color: white;
             padding: 8px 16px;
             border: none;
@@ -236,29 +236,30 @@
             align-items: center;
             gap: 4px;
             pointer-events: auto !important;
-            box-shadow: 0 4px 15px rgba(0, 180, 216, 0.25);
+            box-shadow: 0 4px 15px rgba(220, 104, 104, 0.2);
             letter-spacing: 0.3px;
         }
         
         .btn:hover {
             background: linear-gradient(135deg, 
-                #FCD34C 0%,     /* Amarillo Colombia */
-                #F1C40F 100%);  /* Amarillo dorado */
+                #e74c3c 0%,     /* Rojo ligeramente más intenso al hover */
+                #c0392b 100%);  /* Rojo más oscuro */
             transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(252, 211, 76, 0.4);
+            box-shadow: 0 6px 25px rgba(231, 76, 60, 0.3);
         }
         
         .btn-primary {
             background: linear-gradient(135deg, 
-                #E63946 0%,     /* Rojo Colombia */
-                #C53030 100%);  /* Rojo más oscuro */
+                #007bff 0%,     /* Azul principal */
+                #0056b3 100%);  /* Azul más oscuro */
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.25);
         }
         
         .btn-primary:hover {
             background: linear-gradient(135deg, 
-                #FCD34C 0%,     /* Amarillo Colombia */
-                #F1C40F 100%);  /* Amarillo dorado */
-            box-shadow: 0 6px 25px rgba(252, 211, 76, 0.4);
+                #0056b3 0%,     /* Azul más oscuro al hover */
+                #004085 100%);  /* Azul aún más oscuro */
+            box-shadow: 0 6px 25px rgba(0, 86, 179, 0.4);
         }
         
         .contact-card {
@@ -759,6 +760,8 @@
             
             // Listen for messages from the parent window
             window.addEventListener('message', function(event) {
+                console.log("📨 Contact message received:", event.data);
+                
                 if (event.data && event.data.action === 'turnOnScreen') {
                     console.log("📨 Recibido: activar pantalla de contacto");
                     turnOnScreen();
@@ -772,7 +775,7 @@
                 // Manejo inteligente de botones presionados
                 if (event.data && event.data.action === 'buttonPressed') {
                     console.log("📨 Recibido: botón presionado:", event.data.button);
-                    if (event.data.button === 'contact' || event.data.button === 'contacto') {
+                    if (event.data.button === 'contact' || event.data.button === 'contacto' || event.data.button === 'messages' || event.data.button === 'mensaje') {
                         console.log("🟢 Botón de contacto presionado - ACTIVANDO PANTALLA");
                         turnOnScreen();
                     } else {
