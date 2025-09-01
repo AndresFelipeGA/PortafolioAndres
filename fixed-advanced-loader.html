@@ -512,6 +512,7 @@
         let aboutMeDuplicateIframe = null;
         let aboutMeDuplicatePlane = null;
         let aboutMeDuplicateButtonClicked = false;
+        let aboutMeDuplicateActivatedByLastButton = false; // Nueva variable para tracking
         
         // Variables para el segundo plano About Me duplicado
         let aboutMe2IframeReady = false;
@@ -919,6 +920,66 @@
                 if (window.cafeMenuCssObject && window.cafeMenuCssObject.element) {
                     window.cafeMenuCssObject.element.style.visibility = 'hidden';
                     window.cafeMenuCssObject.element.style.pointerEvents = 'none';
+                }
+            }
+            
+            // ==========================================================
+            // EVENT LISTENERS PARA EL PLANO DUPLICADO (BOX.HTML)
+            // ==========================================================
+            
+            // Verificar si es el mensaje de que box.html está listo
+            if (event.data && event.data.action === 'boxReady') {
+                console.log("🎯 Iframe de box.html está listo");
+                aboutMeDuplicateIframeReady = true;
+                
+                // Buscar el iframe de box.html
+                const iframes = document.querySelectorAll('iframe');
+                iframes.forEach(iframe => {
+                    if (iframe.src && iframe.src.includes('box.html')) {
+                        console.log("🎯 Encontrado iframe de box.html en el evento boxReady");
+                        aboutMeDuplicateIframe = iframe;
+                    }
+                });
+            }
+            
+            // Recibir confirmación de que la pantalla del plano duplicado se encendió
+            if (event.data && event.data.action === 'aboutMeDuplicateScreenTurnedOn') {
+                console.log("🎯 Recibida confirmación de que la pantalla del plano duplicado se encendió");
+                aboutMeDuplicateScreenOn = true;
+                
+                // Solo hacer transparente el plano negro si el botón ha sido clickeado
+                if (aboutMeDuplicateButtonClicked && window.aboutMeDuplicateScreenMaterial) {
+                    window.aboutMeDuplicateScreenMaterial.transparent = true;
+                    window.aboutMeDuplicateScreenMaterial.opacity = 0.0;
+                    window.aboutMeDuplicateScreenMaterial.needsUpdate = true;
+                }
+                
+                // Solo mostrar el contenido HTML si el botón ha sido clickeado y estamos viendo desde el frente
+                if (aboutMeDuplicateButtonClicked && window.aboutMeDuplicateCssObject && window.aboutMeDuplicateCssObject.element && isAboutMeDuplicatePlaneVisibleFromFront()) {
+                    window.aboutMeDuplicateCssObject.element.style.visibility = 'visible';
+                    window.aboutMeDuplicateCssObject.element.style.pointerEvents = 'auto';
+                }
+            }
+            
+            // Recibir confirmación de que la pantalla del plano duplicado se apagó
+            if (event.data && event.data.action === 'aboutMeDuplicateScreenTurnedOff') {
+                console.log("🎯 Recibida confirmación de que la pantalla del plano duplicado se apagó");
+                aboutMeDuplicateScreenOn = false;
+                
+                // Forzar que el cover negro sea visible cuando se apaga la pantalla
+                if (window.aboutMeDuplicateScreenMaterial && window.aboutMeDuplicateBackPlane) {
+                    window.aboutMeDuplicateScreenMaterial.color.set(0x000000); // Asegurar color negro
+                    window.aboutMeDuplicateScreenMaterial.transparent = false;
+                    window.aboutMeDuplicateScreenMaterial.opacity = 1.0;
+                    window.aboutMeDuplicateScreenMaterial.needsUpdate = true;
+                    window.aboutMeDuplicateBackPlane.visible = true;
+                    console.log("🎯 Cover negro del plano duplicado forzado a visible al apagar pantalla");
+                }
+                
+                // Ocultar el contenido HTML
+                if (window.aboutMeDuplicateCssObject && window.aboutMeDuplicateCssObject.element) {
+                    window.aboutMeDuplicateCssObject.element.style.visibility = 'hidden';
+                    window.aboutMeDuplicateCssObject.element.style.pointerEvents = 'none';
                 }
             }
         });
@@ -1448,6 +1509,91 @@
                     window.aboutMe2CssObject.element.style.pointerEvents = 'none';
                 }
                 // Comentado para evitar spam: console.log("Plano about-me2 no visible desde el frente - oculto");
+            }
+        }
+        
+        // =============================================
+        // FUNCIONES PARA EL PLANO DUPLICADO (BOX.HTML)
+        // =============================================
+        
+        // Variables para optimizar updateAboutMeDuplicateVisibility
+        let lastAboutMeDuplicateVisibleFromFront = null;
+        let lastAboutMeDuplicateButtonClickedState = null;
+        let lastAboutMeDuplicateScreenOnState = null;
+        let lastAboutMeDuplicateUpdateTime = 0;
+        const ABOUT_ME_DUPLICATE_UPDATE_THROTTLE = 1000; // milisegundos
+
+        function updateAboutMeDuplicateVisibility() {
+            const now = Date.now();
+            if (now - lastAboutMeDuplicateUpdateTime < ABOUT_ME_DUPLICATE_UPDATE_THROTTLE) {
+                return; // Throttle la función
+            }
+            lastAboutMeDuplicateUpdateTime = now;
+
+            if (!window.aboutMeDuplicateScreenMaterial || !window.aboutMeDuplicateBackPlane) {
+                return;
+            }
+            
+            const isVisibleFromFront = isAboutMeDuplicatePlaneVisibleFromFront();
+            
+            // OPTIMIZACIÓN: Solo hacer cambios cuando el estado realmente cambie
+            const stateChanged = (lastAboutMeDuplicateVisibleFromFront !== isVisibleFromFront || 
+                                lastAboutMeDuplicateButtonClickedState !== aboutMeDuplicateButtonClicked ||
+                                lastAboutMeDuplicateScreenOnState !== aboutMeDuplicateScreenOn);
+            
+            if (!stateChanged) {
+                return; // No hacer nada si el estado no ha cambiado
+            }
+            
+            // Actualizar el estado guardado
+            lastAboutMeDuplicateVisibleFromFront = isVisibleFromFront;
+            lastAboutMeDuplicateButtonClickedState = aboutMeDuplicateButtonClicked;
+            lastAboutMeDuplicateScreenOnState = aboutMeDuplicateScreenOn;
+            
+            // Siempre mostrar/ocultar el plano completo basado en la orientación
+            if (isVisibleFromFront) {
+                window.aboutMeDuplicateBackPlane.visible = true;
+                
+                // LÓGICA DEL COVER NEGRO
+                if (!aboutMeDuplicateButtonClicked) {
+                    // Si el botón NO ha sido clickeado, mantener el cover negro visible
+                    window.aboutMeDuplicateScreenMaterial.color.set(0x000000); // Negro
+                    window.aboutMeDuplicateScreenMaterial.transparent = false;
+                    window.aboutMeDuplicateScreenMaterial.opacity = 1.0;
+                    window.aboutMeDuplicateScreenMaterial.needsUpdate = true;
+                } else {
+                    // Si el botón SÍ ha sido clickeado, hacer transparente el cover
+                    window.aboutMeDuplicateScreenMaterial.transparent = true;
+                    window.aboutMeDuplicateScreenMaterial.opacity = 0.0;
+                    window.aboutMeDuplicateScreenMaterial.needsUpdate = true;
+                }
+                
+                // LÓGICA DEL CONTENIDO HTML
+                if (aboutMeDuplicateButtonClicked && window.aboutMeDuplicateCssObject && window.aboutMeDuplicateCssObject.element && isAboutMeDuplicatePlaneVisibleFromFront()) {
+                    window.aboutMeDuplicateCssObject.element.style.visibility = 'visible';
+                    window.aboutMeDuplicateCssObject.element.style.pointerEvents = 'auto';
+                } else {
+                    if (window.aboutMeDuplicateCssObject && window.aboutMeDuplicateCssObject.element) {
+                        window.aboutMeDuplicateCssObject.element.style.visibility = 'hidden';
+                        window.aboutMeDuplicateCssObject.element.style.pointerEvents = 'none';
+                    }
+                }
+                
+                // Si la pantalla se puede ver desde el frente Y el botón ha sido clickeado Y la pantalla está encendida
+                if (isVisibleFromFront && aboutMeDuplicateButtonClicked && aboutMeDuplicateScreenOn) {
+                    // Log solo cuando se active completamente
+                    if (!window.aboutMeDuplicateFullyActiveLogged) {
+                        console.log("✅ Plano duplicado (box.html) completamente activo y visible desde el frente");
+                        window.aboutMeDuplicateFullyActiveLogged = true;
+                    }
+                }
+            } else {
+                // No visible desde el frente - ocultar todo
+                window.aboutMeDuplicateBackPlane.visible = false;
+                if (window.aboutMeDuplicateCssObject && window.aboutMeDuplicateCssObject.element) {
+                    window.aboutMeDuplicateCssObject.element.style.visibility = 'hidden';
+                    window.aboutMeDuplicateCssObject.element.style.pointerEvents = 'none';
+                }
             }
         }
         
@@ -2339,6 +2485,24 @@
                             sendMessageToProjects('turnOffScreen');
                             console.log("📤 MOVIMIENTO REAL detectado - contact.html y projects.html desactivados");
                         }
+                        
+                        // TAMBIÉN desactivar el plano duplicado (box.html) cuando hay movimiento real
+                        if (aboutMeDuplicateButtonClicked) {
+                            console.log("📤 MOVIMIENTO REAL detectado - desactivando plano duplicado (box.html)");
+                            aboutMeDuplicateButtonClicked = false;
+                            aboutMeDuplicateActivatedByLastButton = false; // Reset del flag
+                            
+                            // Enviar mensaje al iframe del plano duplicado
+                            if (aboutMeDuplicateIframe && aboutMeDuplicateIframe.contentWindow) {
+                                aboutMeDuplicateIframe.contentWindow.postMessage({
+                                    action: 'realMovementDetected'
+                                }, '*');
+                                console.log("📤 MOVIMIENTO REAL detectado - mensaje específico enviado a box.html");
+                            }
+                            
+                            sendMessageToAboutMeDuplicate('turnOffScreen');
+                            deactivateAboutMeDuplicateScreen();
+                        }
                     }
                 }
             });
@@ -2790,9 +2954,11 @@
                 }
                 
                 // Si el clic no fue en el plano duplicado y la pantalla está activa, desactivarla
+                // Permitir desactivación por clic fuera del plano, incluso si fue activado por el último botón
                 if (!clickedOnAboutMeDuplicate && aboutMeDuplicateButtonClicked) {
-                    console.log("Click fuera del plano duplicado - desactivando pantalla");
+                    console.log("🔴 Click fuera del plano duplicado - desactivando pantalla");
                     aboutMeDuplicateButtonClicked = false;
+                    aboutMeDuplicateActivatedByLastButton = false; // Reset del flag
                     deactivateAboutMeDuplicateScreen();
                 }
             });
@@ -3122,6 +3288,10 @@
                             // El primer botón (icono personalizado)
                             const firstButton = buttons[0]; // Índice 0 (el primer botón)
                             firstButton.addEventListener('click', function() {
+                                // ⚙️ DESACTIVAR BOX.HTML CUANDO SE CLICK OTRO BOTÓN
+                                aboutMeDuplicateButtonClicked = false;
+                                console.log("🔄 Desactivando plano duplicado (box.html) desde primer botón");
+                                
                                 // Iniciar la animación de la cámara hacia el punto específico para el primer botón
                                 startFirstButtonCameraAnimation();
                             });
@@ -3130,6 +3300,10 @@
                             // El segundo botón es el de carpeta (projects)
                             const projectsButton = buttons[1]; // Índice 1 (el segundo botón - carpeta)
                             projectsButton.addEventListener('click', function() {
+                                // ⚙️ DESACTIVAR BOX.HTML CUANDO SE CLICK OTRO BOTÓN
+                                aboutMeDuplicateButtonClicked = false;
+                                console.log("🔄 Desactivando plano duplicado (box.html) desde botón projects");
+                                
                                 // Iniciar la animación de la cámara hacia el punto específico para projects
                                 startProjectsButtonCameraAnimation();
                             });
@@ -3138,27 +3312,58 @@
                             // El tercer botón es el de mensajes/contacto
                             const messagesButton = buttons[2]; // Índice 2 (el tercer botón - mensajes)
                             messagesButton.addEventListener('click', function() {
+                                // ⚙️ DESACTIVAR BOX.HTML CUANDO SE CLICK OTRO BOTÓN
+                                aboutMeDuplicateButtonClicked = false;
+                                console.log("🔄 Desactivando plano duplicado (box.html) desde botón mensajes");
+                                
                                 // Iniciar la animación de la cámara hacia el punto específico para mensajes
                                 startMessagesButtonCameraAnimation();
                             });
                             console.log("Evento de clic añadido al botón de mensajes");
                             
+                            // El cuarto botón es el de clientes (iconClientes)
+                            const clientsButton = buttons[3]; // Índice 3 (el cuarto botón - clientes)
+                            clientsButton.addEventListener('click', function() {
+                                // ⚙️ DESACTIVAR BOX.HTML CUANDO SE CLICK OTRO BOTÓN
+                                aboutMeDuplicateButtonClicked = false;
+                                console.log("🔄 Desactivando plano duplicado (box.html) desde botón clientes");
+                                
+                                // Iniciar la animación de la cámara hacia el punto específico para clientes
+                                startFourthButtonCameraAnimation();
+                            });
+                            console.log("Evento de clic añadido al botón de clientes");
+                            
                             // El quinto botón es el que tiene el icono de servicios
                             const serviceButton = buttons[4]; // Índice 4 (el quinto botón, contando desde 0)
                             serviceButton.addEventListener('click', function() {
+                                // ⚙️ DESACTIVAR BOX.HTML CUANDO SE CLICK OTRO BOTÓN
+                                aboutMeDuplicateButtonClicked = false;
+                                console.log("🔄 Desactivando plano duplicado (box.html) desde botón servicios");
+                                
                                 // Iniciar la animación de la cámara hacia el punto específico
                                 startButtonCameraAnimation();
                             });
                             console.log("Evento de clic añadido al botón de servicios");
                             
-                            // 🎬 ÚLTIMO BOTÓN (SEXTO BOTÓN) - ANIMACIÓN PERSONALIZADA
+                            // 🎬 ÚLTIMO BOTÓN (SEXTO BOTÓN) - ANIMACIÓN PERSONALIZADA + ACTIVAR BOX.HTML
                             const lastButton = buttons[5]; // Índice 5 (el sexto botón - último botón)
                             lastButton.addEventListener('click', function() {
-                                console.log("🎬 Último botón clickeado - iniciando animación personalizada");
+                                console.log("🎬 Último botón clickeado - iniciando animación personalizada y activando box.html");
                                 
                                 // Coordenadas específicas proporcionadas por el usuario
                                 const targetPos = new THREE.Vector3(6.05, 6.05, -3.26);
                                 const lookAtPos = new THREE.Vector3(6.50, 5.99, -3.46);
+                                
+                                // Activar el plano duplicado (box.html) inmediatamente
+                                aboutMeDuplicateButtonClicked = true;
+                                aboutMeDuplicateActivatedByLastButton = true; // Marcar que fue activado por el último botón
+                                console.log("🎯 Activando plano duplicado (box.html) desde el último botón");
+                                
+                                // Activar la pantalla del plano duplicado después de un breve delay
+                                setTimeout(function() {
+                                    activateAboutMeDuplicateScreen();
+                                    console.log("🎯 Pantalla del plano duplicado activada después del delay");
+                                }, 500);
                                 
                                 // Iniciar la animación personalizada
                                 startCustomCameraAnimation(targetPos, lookAtPos);
@@ -4043,6 +4248,79 @@
             console.log("Mirando hacia:", lookAtPoint);
         }
         
+        // Función para iniciar la animación de la cámara hacia el punto específico cuando se hace clic en el cuarto botón (iconClientes)
+        function startFourthButtonCameraAnimation() {
+            // Coordenadas específicas proporcionadas por el usuario para el cuarto botón
+            // Cámara: X: 3.91, Y: 4.66, Z: 6.57
+            const targetCameraPos = new THREE.Vector3(3.91, 4.66, 6.57);
+            
+            // Convertir coordenadas relativas a absolutas (sumando el offset)
+            const absoluteTargetPos = new THREE.Vector3().copy(targetCameraPos).add(originOffset);
+            
+            // Posición actual de la cámara
+            const currentCameraPos = new THREE.Vector3().copy(camera.position);
+            
+            // Punto específico al que mirará la cámara
+            // Objetivo: X: 7.30, Y: 3.17, Z: 10.65
+            const lookAtPoint = new THREE.Vector3(7.30, 3.17, 10.65).add(originOffset);
+            
+            console.log("Coordenadas objetivo para cuarto botón (relativas):", targetCameraPos);
+            console.log("Coordenadas objetivo para cuarto botón (absolutas):", absoluteTargetPos);
+            
+            // DESACTIVAR BOX.HTML CUANDO SE CLICK OTRO BOTÓN
+            aboutMeDuplicateButtonClicked = false;
+            console.log("🔄 Desactivando plano duplicado (box.html) desde cuarto botón");
+            
+            // NOTIFICAR A CONTACT.HTML QUE OTRO BOTÓN FUE PRESIONADO
+            sendMessageToContact('turnOffScreen');
+            
+            // NOTIFICAR A PROJECTS.HTML QUE OTRO BOTÓN FUE PRESIONADO
+            sendMessageToProjects('turnOffScreen');
+            
+            // NOTIFICAR A CAFE-MENU.HTML QUE OTRO BOTÓN FUE PRESIONADO
+            sendMessageToCafeMenu('turnOffScreen');
+            
+            // Configurar la animación
+            cameraAnimation.enabled = true;
+            cameraAnimation.startTime = Date.now();
+            cameraAnimation.duration = 1798; // Usar la misma duración que las otras animaciones
+            cameraAnimation.initialPosition.copy(currentCameraPos);
+            cameraAnimation.targetPosition.copy(absoluteTargetPos);
+            cameraAnimation.initialTarget.copy(controls.target);
+            cameraAnimation.finalTarget.copy(lookAtPoint);
+            
+            // Crear una trayectoria directa entre la posición actual y la posición objetivo
+            cameraAnimation.waypoints = [];
+            cameraAnimation.waypoints.push(new THREE.Vector3().copy(currentCameraPos));
+            
+            // Número de puntos intermedios para una trayectoria suave
+            const numWaypoints = 20;
+            
+            for (let i = 1; i < numWaypoints; i++) {
+                const t = i / numWaypoints;
+                const waypoint = new THREE.Vector3().lerpVectors(currentCameraPos, absoluteTargetPos, t);
+                cameraAnimation.waypoints.push(waypoint);
+            }
+            
+            // Asegurarse de que el último punto sea exactamente las coordenadas objetivo
+            cameraAnimation.waypoints.push(new THREE.Vector3().copy(absoluteTargetPos));
+            
+            // Guardar el estado original de los controles
+            cameraAnimation.originalControlsEnabled = controls.enabled;
+            
+            // Desactivar los controles durante la animación
+            controls.enabled = false;
+            
+            // Ocultar las coordenadas durante la animación
+            const coordDisplay = document.getElementById('coordinates-display');
+            coordDisplay.style.display = 'none';
+            
+            console.log("Iniciando animación de cámara hacia el punto específico para el cuarto botón");
+            console.log("Posición inicial:", currentCameraPos);
+            console.log("Posición final:", absoluteTargetPos);
+            console.log("Mirando hacia:", lookAtPoint);
+        }
+        
         // ===============================================
         // FUNCIÓN DUPLICADA PARA EL SEGUNDO ABOUT ME
         // ===============================================
@@ -4287,6 +4565,9 @@
                     
                     // Actualizar visibilidad del segundo about-me basada en la orientación de la cámara
                     updateAboutMe2Visibility();
+                    
+                    // Actualizar visibilidad del plano duplicado (box.html) basada en la orientación de la cámara
+                    updateAboutMeDuplicateVisibility();
                     
                     // Actualizar visibilidad del projects basada en la orientación de la cámara
                     updateProjectsVisibility();

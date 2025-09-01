@@ -491,8 +491,8 @@
                     
                     // Send confirmation back to parent
                     try {
-                        window.parent.postMessage({ action: 'boxScreenTurnedOn' }, '*');
-                        console.log("✅ Confirmación enviada: pantalla box encendida");
+                        window.parent.postMessage({ action: 'aboutMeDuplicateScreenTurnedOn' }, '*');
+                        console.log("✅ Confirmación enviada: pantalla box encendida (aboutMeDuplicateScreenTurnedOn)");
                     } catch (e) {
                         console.error("❌ Error enviando confirmación al padre:", e);
                     }
@@ -505,8 +505,8 @@
                     
                     // Send confirmation back to parent
                     try {
-                        window.parent.postMessage({ action: 'boxScreenTurnedOff' }, '*');
-                        console.log("✅ Confirmación enviada: pantalla box apagada");
+                        window.parent.postMessage({ action: 'aboutMeDuplicateScreenTurnedOff' }, '*');
+                        console.log("✅ Confirmación enviada: pantalla box apagada (aboutMeDuplicateScreenTurnedOff)");
                     } catch (e) {
                         console.error("❌ Error enviando confirmación al padre:", e);
                     }
