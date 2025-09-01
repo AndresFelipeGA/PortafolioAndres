@@ -2469,13 +2469,21 @@
                                     // relativeY = iframeHeight - relativeY; // COMENTADO: No necesario
                                     
                                     console.log(`🎯 Box click at relative position: ${relativeX}, ${relativeY}`);
+                                    console.log(`🎯 Box iframe dimensions: ${iframeWidth} x ${iframeHeight}`);
                                     
-                                    // Enviar el evento de click al iframe
+                                    // CORRECCIÓN: Usar coordenadas invertidas que funcionan correctamente
+                                    const invertedX = iframeWidth - relativeX;
+                                    const invertedY = iframeHeight - relativeY;
+                                    console.log(`🎯 Box using inverted coordinates: ${invertedX}, ${invertedY}`);
+                                    
+                                    // Enviar el evento de click al iframe usando coordenadas invertidas
                                     if (iframe.contentWindow && iframe.contentDocument) {
-                                        // Buscar el elemento bajo las coordenadas corregidas
-                                        const elementAtPoint = iframe.contentDocument.elementFromPoint(relativeX, relativeY);
+                                        // Buscar el elemento bajo las coordenadas invertidas (que funcionan correctamente)
+                                        const elementAtPoint = iframe.contentDocument.elementFromPoint(invertedX, invertedY);
+                                        const elementAtPointNormal = iframe.contentDocument.elementFromPoint(relativeX, relativeY);
                                         
-                                        console.log("🎯 Box element at point:", elementAtPoint);
+                                        console.log("🎯 Box element at point (inverted - correct):", elementAtPoint);
+                                        console.log("🎯 Box element at point (normal - reference):", elementAtPointNormal);
                                         
                                         // NUEVO: Si es un iframe anidado (contentIframe), reenviar al contenido interno
                                         if (elementAtPoint && elementAtPoint.tagName === 'IFRAME' && elementAtPoint.id === 'contentIframe') {
@@ -2486,18 +2494,18 @@
                                                 // Calcular coordenadas relativas al iframe anidado
                                                 const nestedRect = nestedIframe.getBoundingClientRect();
                                                 
-                                                // Coordenadas relativas al iframe anidado
+                                                // Para iframes anidados (contentIframe), usar coordenadas normales para botones
                                                 let nestedX = relativeX;
                                                 let nestedY = relativeY;
                                                 
                                                 console.log(`🎯 Nested iframe click at position: ${nestedX}, ${nestedY}`);
                                                 
-                                                // Buscar el elemento en el iframe anidado
+                                                // Buscar el elemento en el iframe anidado con coordenadas normales
                                                 const nestedElement = nestedIframe.contentDocument.elementFromPoint(nestedX, nestedY);
                                                 console.log("🎯 Nested element at point:", nestedElement);
                                                 
                                                 if (nestedElement) {
-                                                    // Crear evento específico para el elemento anidado
+                                                    // Crear evento específico para el elemento anidado usando coordenadas normales
                                                     const nestedClickEvent = new MouseEvent('click', {
                                                         bubbles: true,
                                                         cancelable: true,
@@ -2531,24 +2539,24 @@
                                                 }
                                             }
                                         } else if (elementAtPoint) {
-                                            // Crear evento de click específico
+                                            // Crear evento de click específico usando coordenadas invertidas
                                             const clickEvent = new MouseEvent('click', {
                                                 bubbles: true,
                                                 cancelable: true,
                                                 view: iframe.contentWindow,
-                                                clientX: relativeX,
-                                                clientY: relativeY
+                                                clientX: invertedX,
+                                                clientY: invertedY
                                             });
                                             
                                             elementAtPoint.dispatchEvent(clickEvent);
                                             console.log(`🎯 Box click dispatched to: ${elementAtPoint.tagName} ${elementAtPoint.className || ''}`);
                                         } else {
-                                            // Si no hay elemento específico, disparar en el documento
+                                            // Si no hay elemento específico, disparar en el documento usando coordenadas invertidas
                                             const docClickEvent = new MouseEvent('click', {
                                                 bubbles: true,
                                                 cancelable: true,
-                                                clientX: relativeX,
-                                                clientY: relativeY
+                                                clientX: invertedX,
+                                                clientY: invertedY
                                             });
                                             iframe.contentDocument.dispatchEvent(docClickEvent);
                                             console.log("🎯 Box click dispatched to document");

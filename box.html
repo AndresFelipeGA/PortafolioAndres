@@ -54,22 +54,39 @@
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 30px;
-            max-width: 600px;
+            gap: 25px;
+            max-width: 650px;
             width: 100%;
+            padding: 20px;
         }
         
         .card {
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(15px);
             border-radius: 20px;
-            padding: 30px 20px;
+            padding: 25px 20px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
             border: 1px solid rgba(255, 255, 255, 0.2);
             position: relative;
             overflow: hidden;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            /* Asegurar que toda la card sea clickeable */
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+        
+        .card * {
+            /* Hacer que todos los elementos internos sean parte del click */
+            pointer-events: none;
+            user-select: none;
         }
         
         .card::before {
@@ -88,28 +105,48 @@
         }
         
         .card:hover {
-            transform: translateY(-10px) scale(1.05);
+            transform: translateY(-8px) scale(1.03);
             background: rgba(255, 255, 255, 0.25);
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
         }
         
+        .card:active {
+            transform: translateY(-4px) scale(1.01);
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .card-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            /* Asegurar que el contenido no interfiera con los clicks */
+            pointer-events: none;
+        }
+        
         .card-icon {
-            font-size: 3em;
-            margin-bottom: 15px;
+            font-size: 3.2em;
+            margin-bottom: 8px;
             display: block;
+            line-height: 1;
         }
         
         .card-title {
-            font-size: 1.4em;
+            font-size: 1.5em;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             color: #ffffff;
+            line-height: 1.2;
         }
         
         .card-description {
             font-size: 0.95em;
-            opacity: 0.8;
+            opacity: 0.9;
             line-height: 1.4;
+            max-width: 90%;
         }
         
         .experience-card {
@@ -191,28 +228,36 @@
         </div>
         
         <div class="cards-grid">
-            <div class="card experience-card animate-float" onclick="navigateTo('experience.html')">
-                <div class="card-icon">💼</div>
-                <div class="card-title">Experiencia</div>
-                <div class="card-description">Mi trayectoria profesional y proyectos destacados</div>
+            <div class="card experience-card animate-float" onclick="navigateTo('experience.html')" data-page="experience.html">
+                <div class="card-content">
+                    <div class="card-icon">💼</div>
+                    <div class="card-title">Experiencia</div>
+                    <div class="card-description">Mi trayectoria profesional y proyectos destacados</div>
+                </div>
             </div>
             
-            <div class="card skills-card animate-float" onclick="navigateTo('skills.html')">
-                <div class="card-icon">⚡</div>
-                <div class="card-title">Habilidades</div>
-                <div class="card-description">Tecnologías y herramientas que domino</div>
+            <div class="card skills-card animate-float" onclick="navigateTo('skills.html')" data-page="skills.html">
+                <div class="card-content">
+                    <div class="card-icon">⚡</div>
+                    <div class="card-title">Habilidades</div>
+                    <div class="card-description">Tecnologías y herramientas que domino</div>
+                </div>
             </div>
             
-            <div class="card certifications-card animate-float" onclick="navigateTo('certifications.html')">
-                <div class="card-icon">🏆</div>
-                <div class="card-title">Certificaciones</div>
-                <div class="card-description">Cursos y certificados obtenidos</div>
+            <div class="card certifications-card animate-float" onclick="navigateTo('certifications.html')" data-page="certifications.html">
+                <div class="card-content">
+                    <div class="card-icon">🏆</div>
+                    <div class="card-title">Certificaciones</div>
+                    <div class="card-description">Cursos y certificados obtenidos</div>
+                </div>
             </div>
             
-            <div class="card credits-card animate-float" onclick="navigateTo('credits.html')">
-                <div class="card-icon">✨</div>
-                <div class="card-title">Créditos</div>
-                <div class="card-description">Agradecimientos y reconocimientos</div>
+            <div class="card credits-card animate-float" onclick="navigateTo('credits.html')" data-page="credits.html">
+                <div class="card-content">
+                    <div class="card-icon">✨</div>
+                    <div class="card-title">Créditos</div>
+                    <div class="card-description">Agradecimientos y reconocimientos</div>
+                </div>
             </div>
         </div>
     </div>
@@ -309,6 +354,58 @@
             console.log('✅ Regreso al hub principal completado');
         }
         
+        // Mejorar el manejo de eventos de las cards
+        function setupCardEvents() {
+            const cards = document.querySelectorAll('.card');
+            console.log(`🎯 Configurando eventos para ${cards.length} cards`);
+            
+            cards.forEach((card, index) => {
+                const page = card.getAttribute('data-page');
+                
+                // Remover eventos existentes
+                card.onclick = null;
+                
+                // Agregar event listeners más robustos
+                card.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log(`🎯 Card ${index + 1} clickeada: ${page}`);
+                    console.log(`🎯 Event details:`, {
+                        clientX: e.clientX,
+                        clientY: e.clientY,
+                        target: e.target,
+                        currentTarget: e.currentTarget
+                    });
+                    
+                    if (page) {
+                        navigateTo(page);
+                    } else {
+                        console.error(`❌ No se encontró página para la card ${index + 1}`);
+                    }
+                });
+                
+                // Agregar eventos adicionales para mejorar la interactividad
+                card.addEventListener('mouseenter', function() {
+                    console.log(`🎯 Hover en card: ${page}`);
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    console.log(`🎯 Hover out card: ${page}`);
+                });
+                
+                // NUEVO: Agregar listener para eventos sintéticos (desde el forwarding)
+                card.addEventListener('mousedown', function(e) {
+                    console.log(`🎯 MouseDown en card ${index + 1}: ${page}`, e);
+                });
+                
+                card.addEventListener('mouseup', function(e) {
+                    console.log(`🎯 MouseUp en card ${index + 1}: ${page}`, e);
+                });
+                
+                console.log(`✅ Card ${index + 1} (${page}) configurada correctamente`);
+            });
+        }
+        
         // Test function to verify navigation
         function testNavigation() {
             console.log('🧪 Probando sistema de navegación...');
@@ -322,7 +419,27 @@
             const cards = document.querySelectorAll('.card');
             console.log(`- Cards encontradas: ${cards.length}`);
             cards.forEach((card, index) => {
-                console.log(`  Card ${index + 1}:`, card.onclick ? '✅ tiene onclick' : '❌ sin onclick');
+                const hasDataPage = card.getAttribute('data-page');
+                const hasClickListener = card.onclick || card.addEventListener;
+                const rect = card.getBoundingClientRect();
+                console.log(`  Card ${index + 1}: ${hasDataPage ? '✅ tiene data-page' : '❌ sin data-page'} | ${hasClickListener ? '✅ tiene eventos' : '❌ sin eventos'}`);
+                console.log(`    - Posición: top=${rect.top}, left=${rect.left}, width=${rect.width}, height=${rect.height}`);
+                console.log(`    - Data-page: ${hasDataPage}`);
+            });
+        }
+        
+        // NUEVA: Función para debugging de posiciones
+        function debugCardPositions() {
+            console.log('🎯 DEBUG: Posiciones de las cards:');
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                const rect = card.getBoundingClientRect();
+                const page = card.getAttribute('data-page');
+                console.log(`Card ${index + 1} (${page}):`);
+                console.log(`  - Top: ${rect.top}, Left: ${rect.left}`);
+                console.log(`  - Bottom: ${rect.bottom}, Right: ${rect.right}`);
+                console.log(`  - Width: ${rect.width}, Height: ${rect.height}`);
+                console.log(`  - Center: x=${rect.left + rect.width/2}, y=${rect.top + rect.height/2}`);
             });
         }
         
@@ -330,8 +447,14 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 Box.html cargado completamente');
             
+            // Configurar eventos de las cards primero
+            setupCardEvents();
+            
             // Test navigation system
             setTimeout(testNavigation, 500);
+            
+            // NUEVO: Debug de posiciones después de que se cargue todo
+            setTimeout(debugCardPositions, 1000);
             
             // Rotate and flip horizontally to fix the mirror effect (same as about-me.html)
             document.body.style.transform = 'rotate(180deg) scaleX(-1)';
