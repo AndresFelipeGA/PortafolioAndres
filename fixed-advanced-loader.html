@@ -506,6 +506,13 @@
         let aboutMePlane = null;
         let aboutMeButtonClicked = false; // Nueva variable para rastrear si se ha hecho clic en el botón
         
+        // Variables para el plano duplicado de About Me
+        let aboutMeDuplicateIframeReady = false;
+        let aboutMeDuplicateScreenOn = false;
+        let aboutMeDuplicateIframe = null;
+        let aboutMeDuplicatePlane = null;
+        let aboutMeDuplicateButtonClicked = false;
+        
         // Variables para el segundo plano About Me duplicado
         let aboutMe2IframeReady = false;
         let projectsScreenOn = false; // Cambié de aboutMe2 a projects
@@ -1226,6 +1233,11 @@
             // Guardar referencia al plano de about-me
             aboutMePlane = window.brownPlane;
             
+            // Guardar referencia al plano duplicado de about-me
+            if (window.brownPlaneDuplicate) {
+                aboutMeDuplicatePlane = window.brownPlaneDuplicate;
+            }
+            
             // Crear un raycaster desde la cámara hasta el punto del clic
             const raycaster = new THREE.Raycaster();
             raycaster.setFromCamera(point, camera);
@@ -1251,6 +1263,52 @@
             // Obtener la dirección desde el plano hacia la cámara
             const cameraDirection = new THREE.Vector3();
             cameraDirection.subVectors(camera.position, window.brownPlane.position).normalize();
+            
+            // Calcular el ángulo entre la normal del plano y la dirección de la cámara
+            const dotProduct = planeNormal.dot(cameraDirection);
+            
+            // Si el producto punto es positivo, la cámara está viendo el frente del plano
+            // Usamos un umbral para dar un poco de tolerancia en el ángulo
+            const threshold = 0.1; // Permite hasta ~84 grados de ángulo
+            return dotProduct > threshold;
+        }
+        
+        // =============================================
+        // FUNCIONES PARA EL PLANO DUPLICADO DE ABOUT ME
+        // =============================================
+        
+        // Función para verificar si un punto está dentro del plano duplicado de about-me
+        function isPointInAboutMeDuplicatePlane(point) {
+            // Si no tenemos referencia al plano duplicado, no podemos verificar
+            if (!window.brownPlaneDuplicate) {
+                return false;
+            }
+            
+            // Crear un raycaster desde la cámara hasta el punto del clic
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(point, camera);
+            
+            // Verificar si el rayo intersecta con el plano duplicado de about-me
+            const intersects = raycaster.intersectObject(window.brownPlaneDuplicate);
+            
+            // Si hay intersecciones, el clic fue en el plano duplicado
+            return intersects.length > 0;
+        }
+        
+        // Función para verificar si la cámara está viendo el plano duplicado de about-me desde el frente
+        function isAboutMeDuplicatePlaneVisibleFromFront() {
+            if (!window.brownPlaneDuplicate || !camera) {
+                return false;
+            }
+            
+            // Obtener la normal del plano duplicado (dirección hacia donde "mira" el plano)
+            // Invertimos la normal para que apunte hacia el lado correcto
+            const planeNormal = new THREE.Vector3(0, 0, -1); // Normal invertida
+            planeNormal.applyQuaternion(window.brownPlaneDuplicate.quaternion); // Aplicar rotación del plano
+            
+            // Obtener la dirección desde el plano hacia la cámara
+            const cameraDirection = new THREE.Vector3();
+            cameraDirection.subVectors(camera.position, window.brownPlaneDuplicate.position).normalize();
             
             // Calcular el ángulo entre la normal del plano y la dirección de la cámara
             const dotProduct = planeNormal.dot(cameraDirection);
@@ -2829,8 +2887,8 @@
                                 console.log("🎬 Último botón clickeado - iniciando animación personalizada");
                                 
                                 // Coordenadas específicas proporcionadas por el usuario
-                                const targetPos = new THREE.Vector3(6.04, 6.11, -3.31);
-                                const lookAtPos = new THREE.Vector3(6.50, 6.03, -3.48);
+                                const targetPos = new THREE.Vector3(6.05, 6.05, -3.26);
+                                const lookAtPos = new THREE.Vector3(6.50, 5.99, -3.46);
                                 
                                 // Iniciar la animación personalizada
                                 startCustomCameraAnimation(targetPos, lookAtPos);
@@ -3982,6 +4040,11 @@
                         css3dRenderer.render(window.aboutMeScene, camera);
                     }
                     
+                    // Renderizar escena CSS3D para el about me duplicado
+                    if (css3dRenderer && window.aboutMeDuplicateScene) {
+                        css3dRenderer.render(window.aboutMeDuplicateScene, camera);
+                    }
+                    
                     // Renderizar escena CSS3D para el segundo about me
                     if (css3dRenderer && window.aboutMe2Scene) {
                         css3dRenderer.render(window.aboutMe2Scene, camera);
@@ -4644,6 +4707,177 @@
             return invisiblePlane;
         }
         
+        // Función para crear el plano duplicado de About Me en las nuevas coordenadas
+        function setupAboutMeDuplicateScreen() {
+            // Crear una escena CSS3D separada para el plano duplicado si no existe
+            if (!window.aboutMeDuplicateScene) {
+                window.aboutMeDuplicateScene = new THREE.Scene();
+                console.log("CSS3D Scene para About Me Duplicado creada");
+            } else {
+                // Limpiar escena CSS3D si existe
+                while(window.aboutMeDuplicateScene.children.length > 0) {
+                    window.aboutMeDuplicateScene.remove(window.aboutMeDuplicateScene.children[0]);
+                }
+                console.log("CSS3D Scene para About Me Duplicado limpiada");
+            }
+            
+            // COORDENADAS EXACTAS ESPECIFICADAS PARA EL DUPLICADO
+            const topLeft = new THREE.Vector3(7.90, 6.62, -5.18);
+            const topRight = new THREE.Vector3(8.74, 6.62, -3.22);
+            const bottomLeft = new THREE.Vector3(7.90, 4.95, -5.18);
+            const bottomRight = new THREE.Vector3(8.74, 4.95, -3.22);
+            
+            // Convertir coordenadas relativas a absolutas (sumando el offset)
+            const absoluteTopLeft = new THREE.Vector3().copy(topLeft).add(originOffset);
+            const absoluteTopRight = new THREE.Vector3().copy(topRight).add(originOffset);
+            const absoluteBottomLeft = new THREE.Vector3().copy(bottomLeft).add(originOffset);
+            const absoluteBottomRight = new THREE.Vector3().copy(bottomRight).add(originOffset);
+            
+            console.log("Coordenadas absolutas del duplicado:");
+            console.log("Top Left:", absoluteTopLeft);
+            console.log("Top Right:", absoluteTopRight);
+            console.log("Bottom Left:", absoluteBottomLeft);
+            console.log("Bottom Right:", absoluteBottomRight);
+            
+            // Calcular el centro del plano duplicado
+            const center = new THREE.Vector3()
+                .add(absoluteTopLeft)
+                .add(absoluteTopRight)
+                .add(absoluteBottomLeft)
+                .add(absoluteBottomRight)
+                .multiplyScalar(0.25);
+            
+            // Calcular vectores para la orientación
+            const vX = new THREE.Vector3().subVectors(absoluteTopRight, absoluteTopLeft).normalize();
+            const vY = new THREE.Vector3().subVectors(absoluteBottomLeft, absoluteTopLeft).normalize();
+            const vZ = new THREE.Vector3().crossVectors(vX, vY).normalize();
+            
+            // Crear matriz de rotación
+            const matrix = new THREE.Matrix4();
+            matrix.makeBasis(vX, vY, vZ);
+            
+            // Extraer rotación de la matriz
+            const rotation = new THREE.Euler().setFromRotationMatrix(matrix);
+            
+            // Calcular el ancho y alto del plano duplicado
+            const width = absoluteTopLeft.distanceTo(absoluteTopRight);
+            const height = absoluteTopLeft.distanceTo(absoluteBottomLeft);
+            
+            console.log("Dimensiones del plano duplicado:", width, height);
+            
+            // Crear un objeto invisible para raycasting del duplicado
+            const invisiblePlaneDuplicate = new THREE.Mesh(
+                new THREE.PlaneGeometry(width, height),
+                new THREE.MeshBasicMaterial({
+                    color: 0xFFFFFF,
+                    transparent: true,
+                    opacity: 0.0,
+                    side: THREE.FrontSide,
+                    depthWrite: false
+                })
+            );
+            
+            // Posicionar y rotar el plano invisible duplicado
+            invisiblePlaneDuplicate.position.copy(center);
+            invisiblePlaneDuplicate.rotation.copy(rotation);
+            
+            // Guardar referencia global para el raycasting del duplicado
+            window.brownPlaneDuplicate = invisiblePlaneDuplicate;
+            
+            // Añadir el plano invisible duplicado a la escena (solo para raycasting)
+            scene.add(invisiblePlaneDuplicate);
+            
+            // Crear un plano negro de fondo para el duplicado
+            const aboutMeDuplicateBackPlaneMaterial = new THREE.MeshBasicMaterial({
+                color: 0x000000,
+                side: THREE.DoubleSide,
+                transparent: false,
+                opacity: 1.0,
+                depthWrite: true,
+                depthTest: true
+            });
+            
+            const aboutMeDuplicateBackPlane = new THREE.Mesh(
+                new THREE.PlaneGeometry(width * 0.98, height * 0.98),
+                aboutMeDuplicateBackPlaneMaterial
+            );
+            
+            // Guardar referencia al material y plano duplicado
+            window.aboutMeDuplicateScreenMaterial = aboutMeDuplicateBackPlaneMaterial;
+            window.aboutMeDuplicateBackPlane = aboutMeDuplicateBackPlane;
+            
+            // Posicionar el plano negro duplicado
+            aboutMeDuplicateBackPlane.position.copy(center);
+            aboutMeDuplicateBackPlane.rotation.copy(rotation);
+            
+            // Ajustar ligeramente la posición para mejor alineación
+            aboutMeDuplicateBackPlane.position.x += 0.01;
+            aboutMeDuplicateBackPlane.position.y -= 0.01;
+            aboutMeDuplicateBackPlane.position.z += 0.001;
+            
+            // Configurar renderOrder
+            aboutMeDuplicateBackPlane.renderOrder = 10;
+            
+            // Añadir el plano negro duplicado a la escena
+            scene.add(aboutMeDuplicateBackPlane);
+            console.log("Plano negro de fondo para about-me duplicado añadido a la escena:", aboutMeDuplicateBackPlane);
+            
+            // Crear un iframe duplicado
+            const iframeDuplicate = document.createElement('iframe');
+            iframeDuplicate.style.width = '800px';
+            iframeDuplicate.style.height = '606px';
+            iframeDuplicate.style.border = 'none';
+            iframeDuplicate.style.overflow = 'hidden';
+            iframeDuplicate.style.display = 'block';
+            iframeDuplicate.src = 'about-me.html';
+            
+            // Crear un elemento div para contener el iframe duplicado
+            const divDuplicate = document.createElement('div');
+            divDuplicate.style.width = '800px';
+            divDuplicate.style.height = '606px';
+            divDuplicate.style.backgroundColor = 'transparent';
+            divDuplicate.style.overflow = 'hidden';
+            divDuplicate.appendChild(iframeDuplicate);
+            
+            // Crear un objeto CSS3D para el div duplicado
+            const cssObjectDuplicate = new THREE.CSS3DObject(divDuplicate);
+            
+            // Calcular la escala adecuada basada en el tamaño real del plano duplicado
+            const scaleX = width / 800;
+            const scaleY = height / 606;
+            const verticalScaleAdjustment = 1.011;
+            
+            console.log("Factores de escala del duplicado:", scaleX, scaleY);
+            
+            // Aplicar la escala calculada
+            cssObjectDuplicate.scale.set(scaleX, scaleY * verticalScaleAdjustment, 1);
+            
+            // Posicionar el objeto CSS3D duplicado
+            cssObjectDuplicate.position.copy(center);
+            cssObjectDuplicate.rotation.copy(rotation);
+            cssObjectDuplicate.position.z += 0.001;
+            cssObjectDuplicate.position.y -= 0.003;
+            
+            console.log("Posición final del CSS3D duplicado:", cssObjectDuplicate.position);
+            console.log("Rotación final del CSS3D duplicado:", cssObjectDuplicate.rotation);
+            
+            // Añadir el objeto CSS3D duplicado a la escena CSS3D
+            window.aboutMeDuplicateScene.add(cssObjectDuplicate);
+            console.log("Objeto CSS3D para About Me Duplicado añadido a la escena");
+            
+            // Guardar referencia al objeto CSS3D duplicado
+            window.aboutMeDuplicateCssObject = cssObjectDuplicate;
+            
+            // Configurar evento de clic para el plano duplicado
+            invisiblePlaneDuplicate.userData.clickable = true;
+            
+            console.log("Plano About Me duplicado creado con las coordenadas especificadas");
+            console.log("Posición del plano duplicado:", center);
+            console.log("Rotación del plano duplicado:", rotation);
+            
+            return invisiblePlaneDuplicate;
+        }
+        
         // Function to create the brown HTML plane with the specified coordinates
         function createWhitePlane() {
             // Inicializar CSS3DRenderer si no existe
@@ -4659,6 +4893,9 @@
             
             // Configurar el plano invisible para la pantalla interactiva
             const invisiblePlane = setupAboutMeScreen();
+            
+            // Configurar el plano duplicado en las nuevas coordenadas
+            const invisiblePlaneDuplicate = setupAboutMeDuplicateScreen();
             
             // Asegurar que el cover negro esté visible inicialmente - múltiples intentos
             setTimeout(function() {
@@ -4682,6 +4919,28 @@
                 }
             }, 500);
             
+            // Asegurar que el cover negro del duplicado esté visible inicialmente
+            setTimeout(function() {
+                if (window.aboutMeDuplicateScreenMaterial && window.aboutMeDuplicateBackPlane) {
+                    window.aboutMeDuplicateScreenMaterial.color.set(0x000000);
+                    window.aboutMeDuplicateScreenMaterial.transparent = false;
+                    window.aboutMeDuplicateScreenMaterial.opacity = 1.0;
+                    window.aboutMeDuplicateScreenMaterial.needsUpdate = true;
+                    window.aboutMeDuplicateBackPlane.visible = true;
+                }
+            }, 100);
+            
+            // Segundo intento para el duplicado
+            setTimeout(function() {
+                if (window.aboutMeDuplicateScreenMaterial && window.aboutMeDuplicateBackPlane) {
+                    window.aboutMeDuplicateScreenMaterial.color.set(0x000000);
+                    window.aboutMeDuplicateScreenMaterial.transparent = false;
+                    window.aboutMeDuplicateScreenMaterial.opacity = 1.0;
+                    window.aboutMeDuplicateScreenMaterial.needsUpdate = true;
+                    window.aboutMeDuplicateBackPlane.visible = true;
+                }
+            }, 500);
+            
             // Añadir evento de clic al canvas para interactuar con el plano
             renderer.domElement.addEventListener('click', function(event) {
                 // Obtener las coordenadas del clic normalizadas (-1 a +1)
@@ -4698,6 +4957,14 @@
                 
                 if (intersects.length > 0) {
                     console.log("Click on the HTML content plane");
+                    // You can add more interactivity here if desired
+                }
+                
+                // Check if the click was on the duplicate plane
+                const duplicateIntersects = raycaster.intersectObject(invisiblePlaneDuplicate);
+                
+                if (duplicateIntersects.length > 0) {
+                    console.log("Click on the duplicate HTML content plane");
                     // You can add more interactivity here if desired
                 }
             });
