@@ -4251,8 +4251,8 @@
         // Función para iniciar la animación de la cámara hacia el punto específico cuando se hace clic en el cuarto botón (iconClientes)
         function startFourthButtonCameraAnimation() {
             // Coordenadas específicas proporcionadas por el usuario para el cuarto botón
-            // Cámara: X: 3.91, Y: 4.66, Z: 6.57
-            const targetCameraPos = new THREE.Vector3(3.91, 4.66, 6.57);
+            // Cámara: X: 3.93, Y: 4.67, Z: 6.56
+            const targetCameraPos = new THREE.Vector3(3.93, 4.67, 6.56);
             
             // Convertir coordenadas relativas a absolutas (sumando el offset)
             const absoluteTargetPos = new THREE.Vector3().copy(targetCameraPos).add(originOffset);
@@ -4261,8 +4261,8 @@
             const currentCameraPos = new THREE.Vector3().copy(camera.position);
             
             // Punto específico al que mirará la cámara
-            // Objetivo: X: 7.30, Y: 3.17, Z: 10.65
-            const lookAtPoint = new THREE.Vector3(7.30, 3.17, 10.65).add(originOffset);
+            // Objetivo: X: 7.32, Y: 3.18, Z: 10.64
+            const lookAtPoint = new THREE.Vector3(7.32, 3.18, 10.64).add(originOffset);
             
             console.log("Coordenadas objetivo para cuarto botón (relativas):", targetCameraPos);
             console.log("Coordenadas objetivo para cuarto botón (absolutas):", absoluteTargetPos);
