@@ -2446,6 +2446,119 @@
                                     
                                     return; // Salir completamente del event listener
                                 }
+                            } else if (iframe.src && iframe.src.includes('box.html')) {
+                                // NUEVO: Manejo específico para box.html (plano duplicado)
+                                console.log("🎯 Box.html click detected - forwarding to iframe");
+                                
+                                try {
+                                    // Obtener dimensiones del iframe y sus transformaciones
+                                    const iframeRect = iframe.getBoundingClientRect();
+                                    const iframeWidth = iframe.offsetWidth;
+                                    const iframeHeight = iframe.offsetHeight;
+                                    
+                                    // Calcular coordenadas relativas con mejor precisión
+                                    let relativeX = event.clientX - iframeRect.left;
+                                    let relativeY = event.clientY - iframeRect.top;
+                                    
+                                    // Normalizar a las dimensiones reales del contenido del iframe
+                                    relativeX = (relativeX / iframeRect.width) * iframeWidth;
+                                    relativeY = (relativeY / iframeRect.height) * iframeHeight;
+                                    
+                                    // NO INVERTIR COORDENADAS para box.html porque ya tiene transform CSS aplicado
+                                    // relativeX = iframeWidth - relativeX;  // COMENTADO: No necesario
+                                    // relativeY = iframeHeight - relativeY; // COMENTADO: No necesario
+                                    
+                                    console.log(`🎯 Box click at relative position: ${relativeX}, ${relativeY}`);
+                                    
+                                    // Enviar el evento de click al iframe
+                                    if (iframe.contentWindow && iframe.contentDocument) {
+                                        // Buscar el elemento bajo las coordenadas corregidas
+                                        const elementAtPoint = iframe.contentDocument.elementFromPoint(relativeX, relativeY);
+                                        
+                                        console.log("🎯 Box element at point:", elementAtPoint);
+                                        
+                                        // NUEVO: Si es un iframe anidado (contentIframe), reenviar al contenido interno
+                                        if (elementAtPoint && elementAtPoint.tagName === 'IFRAME' && elementAtPoint.id === 'contentIframe') {
+                                            console.log("🎯 Detected nested iframe (contentIframe) - forwarding to internal content");
+                                            
+                                            const nestedIframe = elementAtPoint;
+                                            if (nestedIframe.contentWindow && nestedIframe.contentDocument) {
+                                                // Calcular coordenadas relativas al iframe anidado
+                                                const nestedRect = nestedIframe.getBoundingClientRect();
+                                                
+                                                // Coordenadas relativas al iframe anidado
+                                                let nestedX = relativeX;
+                                                let nestedY = relativeY;
+                                                
+                                                console.log(`🎯 Nested iframe click at position: ${nestedX}, ${nestedY}`);
+                                                
+                                                // Buscar el elemento en el iframe anidado
+                                                const nestedElement = nestedIframe.contentDocument.elementFromPoint(nestedX, nestedY);
+                                                console.log("🎯 Nested element at point:", nestedElement);
+                                                
+                                                if (nestedElement) {
+                                                    // Crear evento específico para el elemento anidado
+                                                    const nestedClickEvent = new MouseEvent('click', {
+                                                        bubbles: true,
+                                                        cancelable: true,
+                                                        view: nestedIframe.contentWindow,
+                                                        clientX: nestedX,
+                                                        clientY: nestedY
+                                                    });
+                                                    
+                                                    nestedElement.dispatchEvent(nestedClickEvent);
+                                                    console.log(`🎯 Nested click dispatched to: ${nestedElement.tagName} ${nestedElement.className || nestedElement.id || ''}`);
+                                                    
+                                                    // También enviar el evento al documento del iframe anidado
+                                                    const nestedDocEvent = new MouseEvent('click', {
+                                                        bubbles: true,
+                                                        cancelable: true,
+                                                        clientX: nestedX,
+                                                        clientY: nestedY
+                                                    });
+                                                    nestedIframe.contentDocument.dispatchEvent(nestedDocEvent);
+                                                    console.log("🎯 Nested document click also dispatched");
+                                                } else {
+                                                    // Si no hay elemento específico en el iframe anidado
+                                                    const nestedDocEvent = new MouseEvent('click', {
+                                                        bubbles: true,
+                                                        cancelable: true,
+                                                        clientX: nestedX,
+                                                        clientY: nestedY
+                                                    });
+                                                    nestedIframe.contentDocument.dispatchEvent(nestedDocEvent);
+                                                    console.log("🎯 Nested document click dispatched (no specific element)");
+                                                }
+                                            }
+                                        } else if (elementAtPoint) {
+                                            // Crear evento de click específico
+                                            const clickEvent = new MouseEvent('click', {
+                                                bubbles: true,
+                                                cancelable: true,
+                                                view: iframe.contentWindow,
+                                                clientX: relativeX,
+                                                clientY: relativeY
+                                            });
+                                            
+                                            elementAtPoint.dispatchEvent(clickEvent);
+                                            console.log(`🎯 Box click dispatched to: ${elementAtPoint.tagName} ${elementAtPoint.className || ''}`);
+                                        } else {
+                                            // Si no hay elemento específico, disparar en el documento
+                                            const docClickEvent = new MouseEvent('click', {
+                                                bubbles: true,
+                                                cancelable: true,
+                                                clientX: relativeX,
+                                                clientY: relativeY
+                                            });
+                                            iframe.contentDocument.dispatchEvent(docClickEvent);
+                                            console.log("🎯 Box click dispatched to document");
+                                        }
+                                    }
+                                } catch (error) {
+                                    console.error("❌ Box click error:", error);
+                                }
+                                
+                                return; // Salir completamente del event listener
                             } else {
                                 console.log("🚫 Click está sobre un iframe visible - ignorando");
                                 return; // Salir completamente
@@ -2524,6 +2637,101 @@
                     console.log("Click fuera del plano de projects - desactivando pantalla");
                     projectsButtonClicked = false;
                     deactivateProjectsScreen();
+                }
+                
+                // ===============================================
+                // PROCESAR EL PLANO DUPLICADO DE ABOUT ME (BOX.HTML)
+                // ===============================================
+                
+                // Verificar si el clic fue en el plano duplicado de about-me
+                let clickedOnAboutMeDuplicate = false;
+                if (window.brownPlaneDuplicate) {
+                    const duplicateIntersects = raycaster.intersectObject(window.brownPlaneDuplicate);
+                    if (duplicateIntersects.length > 0) {
+                        clickedOnAboutMeDuplicate = true;
+                        console.log("🎯 Click detectado en el plano duplicado de about-me (box.html)");
+                        
+                        // Si el plano ya está activo, forwardear el click al iframe
+                        if (aboutMeDuplicateButtonClicked) {
+                            console.log("🔥 Plano duplicado activo - forwarding click to box.html iframe");
+                            
+                            // Buscar el iframe de box.html
+                            const boxIframe = document.querySelector('iframe[src*="box.html"]');
+                            if (boxIframe && boxIframe.contentWindow && boxIframe.contentDocument) {
+                                try {
+                                    // Obtener dimensiones del iframe y sus transformaciones
+                                    const iframeRect = boxIframe.getBoundingClientRect();
+                                    const iframeWidth = boxIframe.offsetWidth;
+                                    const iframeHeight = boxIframe.offsetHeight;
+                                    
+                                    // Calcular coordenadas relativas con mejor precisión
+                                    let relativeX = event.clientX - iframeRect.left;
+                                    let relativeY = event.clientY - iframeRect.top;
+                                    
+                                    // Normalizar a las dimensiones reales del contenido del iframe
+                                    relativeX = (relativeX / iframeRect.width) * iframeWidth;
+                                    relativeY = (relativeY / iframeRect.height) * iframeHeight;
+                                    
+                                    console.log(`🎯 Box click forwarding at relative position: ${relativeX}, ${relativeY}`);
+                                    
+                                    // Buscar el elemento bajo las coordenadas corregidas
+                                    const elementAtPoint = boxIframe.contentDocument.elementFromPoint(relativeX, relativeY);
+                                    
+                                    console.log("🎯 Box element at point:", elementAtPoint);
+                                    
+                                    if (elementAtPoint) {
+                                        // Crear evento de click específico
+                                        const clickEvent = new MouseEvent('click', {
+                                            bubbles: true,
+                                            cancelable: true,
+                                            view: boxIframe.contentWindow,
+                                            clientX: relativeX,
+                                            clientY: relativeY
+                                        });
+                                        
+                                        elementAtPoint.dispatchEvent(clickEvent);
+                                        console.log(`🎯 Box click dispatched to: ${elementAtPoint.tagName} ${elementAtPoint.className || ''}`);
+                                    } else {
+                                        // Si no hay elemento específico, disparar en el documento
+                                        const docClickEvent = new MouseEvent('click', {
+                                            bubbles: true,
+                                            cancelable: true,
+                                            clientX: relativeX,
+                                            clientY: relativeY
+                                        });
+                                        boxIframe.contentDocument.dispatchEvent(docClickEvent);
+                                        console.log("🎯 Box click dispatched to document");
+                                    }
+                                } catch (error) {
+                                    console.error("❌ Box click forwarding error:", error);
+                                }
+                            } else {
+                                console.error("❌ No se encontró el iframe de box.html para forwarding");
+                            }
+                            
+                            // No cambiar el estado del botón si ya está activo
+                            return; // Salir para evitar el toggle
+                        }
+                        
+                        // Toggle del estado del botón del plano duplicado (solo si no estaba activo)
+                        aboutMeDuplicateButtonClicked = !aboutMeDuplicateButtonClicked;
+                        console.log("About Me Duplicate button toggled:", aboutMeDuplicateButtonClicked ? "ACTIVADO" : "DESACTIVADO");
+                        
+                        if (aboutMeDuplicateButtonClicked) {
+                            // Activar la pantalla del plano duplicado
+                            activateAboutMeDuplicateScreen();
+                        } else {
+                            // Desactivar la pantalla del plano duplicado
+                            deactivateAboutMeDuplicateScreen();
+                        }
+                    }
+                }
+                
+                // Si el clic no fue en el plano duplicado y la pantalla está activa, desactivarla
+                if (!clickedOnAboutMeDuplicate && aboutMeDuplicateButtonClicked) {
+                    console.log("Click fuera del plano duplicado - desactivando pantalla");
+                    aboutMeDuplicateButtonClicked = false;
+                    deactivateAboutMeDuplicateScreen();
                 }
             });
             
@@ -5513,6 +5721,108 @@
             setTimeout(function() {
                 sendMessageToProjects('turnOffScreen');
             }, 100);
+        }
+        
+        // ===============================================
+        // FUNCIONES PARA EL PLANO DUPLICADO DE ABOUT ME
+        // ===============================================
+        
+        // Función para activar la pantalla del plano duplicado de about-me (box.html)
+        function activateAboutMeDuplicateScreen() {
+            console.log("🎯 Activando pantalla del plano duplicado de about-me (box.html)...");
+            
+            // Hacer transparente el cover negro del duplicado
+            if (window.aboutMeDuplicateScreenMaterial) {
+                window.aboutMeDuplicateScreenMaterial.transparent = true;
+                window.aboutMeDuplicateScreenMaterial.opacity = 0.0;
+                window.aboutMeDuplicateScreenMaterial.needsUpdate = true;
+                console.log("🎯 Cover negro del plano duplicado hecho transparente");
+            }
+            
+            // Mostrar contenido HTML si es visible desde el frente
+            if (window.aboutMeDuplicateCssObject && window.aboutMeDuplicateCssObject.element && isAboutMeDuplicatePlaneVisibleFromFront()) {
+                window.aboutMeDuplicateCssObject.element.style.visibility = 'visible';
+                window.aboutMeDuplicateCssObject.element.style.pointerEvents = 'auto';
+                console.log("🎯 Contenido HTML del plano duplicado mostrado");
+            }
+            
+            // Enviar mensaje al iframe para encender la pantalla
+            setTimeout(function() {
+                sendMessageToAboutMeDuplicate('turnOnScreen');
+            }, 100);
+        }
+        
+        // Función para desactivar la pantalla del plano duplicado de about-me
+        function deactivateAboutMeDuplicateScreen() {
+            console.log("🎯 Desactivando pantalla del plano duplicado de about-me...");
+            
+            // Mostrar el cover negro del duplicado
+            if (window.aboutMeDuplicateScreenMaterial && window.aboutMeDuplicateBackPlane) {
+                window.aboutMeDuplicateScreenMaterial.color.set(0x000000);
+                window.aboutMeDuplicateScreenMaterial.transparent = false;
+                window.aboutMeDuplicateScreenMaterial.opacity = 1.0;
+                window.aboutMeDuplicateScreenMaterial.needsUpdate = true;
+                window.aboutMeDuplicateBackPlane.visible = true;
+                console.log("🎯 Cover negro del plano duplicado restaurado");
+            }
+            
+            // Ocultar contenido HTML del duplicado
+            if (window.aboutMeDuplicateCssObject && window.aboutMeDuplicateCssObject.element) {
+                window.aboutMeDuplicateCssObject.element.style.visibility = 'hidden';
+                window.aboutMeDuplicateCssObject.element.style.pointerEvents = 'none';
+                console.log("🎯 Contenido HTML del plano duplicado oculto");
+            }
+            
+            // Enviar mensaje al iframe para apagar la pantalla
+            setTimeout(function() {
+                sendMessageToAboutMeDuplicate('turnOffScreen');
+            }, 100);
+        }
+        
+        // Función para enviar mensajes al iframe del plano duplicado de about-me
+        function sendMessageToAboutMeDuplicate(action) {
+            console.log(`🎯 Intentando enviar mensaje a box.html: ${action}`);
+            console.log("Estado del iframe del duplicado: Buscando...");
+            
+            // Buscar todos los iframes
+            const iframes = document.querySelectorAll('iframe');
+            
+            for (let iframe of iframes) {
+                if (iframe.src && iframe.src.includes('box.html')) {
+                    console.log("🎯 Encontrado iframe de box.html:", iframe);
+                    
+                    // Verificar si el iframe está completamente cargado
+                    if (iframe.contentWindow && iframe.contentDocument && iframe.contentDocument.readyState === 'complete') {
+                        try {
+                            iframe.contentWindow.postMessage({ action: action }, '*');
+                            console.log(`🎯 Mensaje enviado a box.html: ${action}`);
+                            
+                            // Actualizar estado local
+                            if (action === 'turnOnScreen') {
+                                aboutMeDuplicateScreenOn = true;
+                                console.log("🎯 Pantalla del plano duplicado marcada como ENCENDIDA");
+                            } else if (action === 'turnOffScreen') {
+                                aboutMeDuplicateScreenOn = false;
+                                console.log("🎯 Pantalla del plano duplicado marcada como APAGADA");
+                            }
+                            
+                            return; // Salir una vez encontrado y enviado
+                        } catch (error) {
+                            console.error("❌ Error enviando mensaje a box.html:", error);
+                        }
+                    } else {
+                        console.log("🎯 El iframe de box.html no está completamente cargado, esperando...");
+                        
+                        // Intentar de nuevo después de un breve retraso
+                        setTimeout(function() {
+                            sendMessageToAboutMeDuplicate(action);
+                        }, 500);
+                        return;
+                    }
+                }
+            }
+            
+            console.warn("⚠️ No se encontró el iframe de box.html o su contentWindow");
         }
         
         // ===============================================

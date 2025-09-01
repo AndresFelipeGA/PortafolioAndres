@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificaciones</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%);
+            color: #ffffff;
+            overflow-y: auto;
+        }
+        
+        .container {
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 3em;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .certification-item {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .cert-icon {
+            font-size: 3em;
+            min-width: 60px;
+        }
+        
+        .cert-content {
+            flex: 1;
+        }
+        
+        .cert-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .cert-issuer {
+            font-size: 1.1em;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+        
+        .cert-date {
+            font-size: 0.9em;
+            opacity: 0.7;
+        }
+        
+        .description {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            line-height: 1.6;
+            opacity: 0.9;
+            margin-top: 30px;
+        }
+        
+        /* Botón de volver minimalista */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            font-size: 20px;
+            color: white;
+        }
+        
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .back-button::before {
+            content: '←';
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" onclick="goBackToBox()" title="Volver al menú"></button>
+    
+    <div class="container">
+        <h1>🏆 Certificaciones</h1>
+        
+        <div class="certification-item">
+            <div class="cert-icon">🎓</div>
+            <div class="cert-content">
+                <div class="cert-title">AWS Solutions Architect</div>
+                <div class="cert-issuer">Amazon Web Services</div>
+                <div class="cert-date">2023</div>
+            </div>
+        </div>
+        
+        <div class="certification-item">
+            <div class="cert-icon">⚛️</div>
+            <div class="cert-content">
+                <div class="cert-title">React Developer Certification</div>
+                <div class="cert-issuer">Meta (Facebook)</div>
+                <div class="cert-date">2022</div>
+            </div>
+        </div>
+        
+        <div class="certification-item">
+            <div class="cert-icon">🐍</div>
+            <div class="cert-content">
+                <div class="cert-title">Python Professional</div>
+                <div class="cert-issuer">Python Institute</div>
+                <div class="cert-date">2022</div>
+            </div>
+        </div>
+        
+        <div class="certification-item">
+            <div class="cert-icon">🚀</div>
+            <div class="cert-content">
+                <div class="cert-title">Full Stack Web Development</div>
+                <div class="cert-issuer">FreeCodeCamp</div>
+                <div class="cert-date">2021</div>
+            </div>
+        </div>
+        
+        <div class="description">
+            <strong>Sobre mis certificaciones:</strong><br><br>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.
+        </div>
+    </div>
+    
+    <script>
+        function goBackToBox() {
+            // Comunicar al iframe padre para volver al box.html
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ action: 'navigateToBox' }, '*');
+            }
+        }
+    </script>
+</body>
+</html>

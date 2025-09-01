@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habilidades</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            color: #ffffff;
+            overflow-y: auto;
+        }
+        
+        .container {
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 3em;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .skill-category {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .skill-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .skill-list {
+            line-height: 1.8;
+            opacity: 0.9;
+        }
+        
+        .description {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+        
+        /* Botón de volver minimalista */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            font-size: 20px;
+            color: white;
+        }
+        
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .back-button::before {
+            content: '←';
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" onclick="goBackToBox()" title="Volver al menú"></button>
+    
+    <div class="container">
+        <h1>⚡ Mis Habilidades</h1>
+        
+        <div class="skills-grid">
+            <div class="skill-category">
+                <div class="skill-title">Frontend</div>
+                <div class="skill-list">
+                    • React.js<br>
+                    • Vue.js<br>
+                    • JavaScript (ES6+)<br>
+                    • HTML5 & CSS3<br>
+                    • Three.js
+                </div>
+            </div>
+            
+            <div class="skill-category">
+                <div class="skill-title">Backend</div>
+                <div class="skill-list">
+                    • Node.js<br>
+                    • Python<br>
+                    • Express.js<br>
+                    • MongoDB<br>
+                    • PostgreSQL
+                </div>
+            </div>
+            
+            <div class="skill-category">
+                <div class="skill-title">Herramientas</div>
+                <div class="skill-list">
+                    • Git & GitHub<br>
+                    • Docker<br>
+                    • AWS<br>
+                    • VS Code<br>
+                    • Figma
+                </div>
+            </div>
+            
+            <div class="skill-category">
+                <div class="skill-title">Metodologías</div>
+                <div class="skill-list">
+                    • Agile/Scrum<br>
+                    • TDD<br>
+                    • CI/CD<br>
+                    • REST APIs<br>
+                    • Responsive Design
+                </div>
+            </div>
+        </div>
+        
+        <div class="description">
+            <strong>Descripción de habilidades:</strong><br><br>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        </div>
+    </div>
+    
+    <script>
+        function goBackToBox() {
+            // Comunicar al iframe padre para volver al box.html
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ action: 'navigateToBox' }, '*');
+            }
+        }
+    </script>
+</body>
+</html>

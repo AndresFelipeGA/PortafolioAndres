@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experiencia</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: #ffffff;
+            overflow-y: auto;
+        }
+        
+        .container {
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 3em;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .experience-item {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .experience-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .experience-company {
+            font-size: 1.2em;
+            opacity: 0.8;
+            margin-bottom: 15px;
+        }
+        
+        .experience-description {
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+        
+        /* Botón de volver minimalista */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            font-size: 20px;
+            color: white;
+        }
+        
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .back-button::before {
+            content: '←';
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" onclick="goBackToBox()" title="Volver al menú"></button>
+    
+    <div class="container">
+        <h1>💼 Mi Experiencia</h1>
+        
+        <div class="experience-item">
+            <div class="experience-title">Senior Full Stack Developer</div>
+            <div class="experience-company">TechCorp Solutions</div>
+            <div class="experience-description">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+            </div>
+        </div>
+        
+        <div class="experience-item">
+            <div class="experience-title">Frontend Developer</div>
+            <div class="experience-company">InnovateTech Inc.</div>
+            <div class="experience-description">
+                Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis.
+            </div>
+        </div>
+        
+        <div class="experience-item">
+            <div class="experience-title">Junior Developer</div>
+            <div class="experience-company">StartupHub</div>
+            <div class="experience-description">
+                Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus.
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function goBackToBox() {
+            // Comunicar al iframe padre para volver al box.html
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ action: 'navigateToBox' }, '*');
+            }
+        }
+    </script>
+</body>
+</html>

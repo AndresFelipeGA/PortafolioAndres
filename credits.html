@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créditos</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #9c27b0 0%, #673ab7 100%);
+            color: #ffffff;
+            overflow-y: auto;
+        }
+        
+        .container {
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 3em;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .credits-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .section-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .credits-list {
+            line-height: 2;
+            opacity: 0.9;
+        }
+        
+        .credit-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border-left: 3px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .description {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            line-height: 1.6;
+            opacity: 0.9;
+            text-align: center;
+        }
+        
+        /* Botón de volver minimalista */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            font-size: 20px;
+            color: white;
+        }
+        
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .back-button::before {
+            content: '←';
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" onclick="goBackToBox()" title="Volver al menú"></button>
+    
+    <div class="container">
+        <h1>✨ Créditos</h1>
+        
+        <div class="credits-section">
+            <div class="section-title">
+                🎨 Diseño y Desarrollo
+            </div>
+            <div class="credits-list">
+                <div class="credit-item">• Three.js - Biblioteca 3D para WebGL</div>
+                <div class="credit-item">• CSS3D Renderer - Integración HTML en 3D</div>
+                <div class="credit-item">• GLTF Loader - Carga de modelos 3D</div>
+                <div class="credit-item">• Draco Decoder - Compresión de geometría</div>
+            </div>
+        </div>
+        
+        <div class="credits-section">
+            <div class="section-title">
+                🔧 Herramientas Utilizadas
+            </div>
+            <div class="credits-list">
+                <div class="credit-item">• Visual Studio Code - Editor de código</div>
+                <div class="credit-item">• GitHub - Control de versiones</div>
+                <div class="credit-item">• Blender - Modelado 3D</div>
+                <div class="credit-item">• Figma - Diseño UI/UX</div>
+            </div>
+        </div>
+        
+        <div class="credits-section">
+            <div class="section-title">
+                🌟 Agradecimientos Especiales
+            </div>
+            <div class="credits-list">
+                <div class="credit-item">• Comunidad de desarrolladores</div>
+                <div class="credit-item">• MDN Web Docs</div>
+                <div class="credit-item">• Stack Overflow</div>
+                <div class="credit-item">• OpenSource contributors</div>
+            </div>
+        </div>
+        
+        <div class="description">
+            <strong>Agradecimientos:</strong><br><br>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+        </div>
+    </div>
+    
+    <script>
+        function goBackToBox() {
+            // Comunicar al iframe padre para volver al box.html
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ action: 'navigateToBox' }, '*');
+            }
+        }
+    </script>
+</body>
+</html>

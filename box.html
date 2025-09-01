@@ -225,27 +225,66 @@
     <script>
         // Navigation functions
         function navigateTo(page) {
+            console.log(`🚀 Intentando navegar a: ${page}`);
+            
             const mainContainer = document.getElementById('mainContainer');
             const iframeContainer = document.getElementById('iframeContainer');
             const contentIframe = document.getElementById('contentIframe');
             const backButton = document.querySelector('.back-button');
             
+            // Verificar que todos los elementos existen
+            if (!mainContainer || !iframeContainer || !contentIframe || !backButton) {
+                console.error('❌ Error: No se encontraron todos los elementos necesarios');
+                console.log('mainContainer:', mainContainer);
+                console.log('iframeContainer:', iframeContainer);
+                console.log('contentIframe:', contentIframe);
+                console.log('backButton:', backButton);
+                return;
+            }
+            
+            console.log('✅ Todos los elementos encontrados, procediendo con la navegación...');
+            
             // Hide main content
             mainContainer.style.display = 'none';
+            console.log('📦 Contenedor principal ocultado');
             
             // Show iframe container
             iframeContainer.style.display = 'block';
+            console.log('🖼️ Contenedor de iframe mostrado');
             
             // Load the page in iframe
             contentIframe.src = page;
+            console.log(`📄 Cargando página: ${page} en el iframe`);
             
             // Show back button
             backButton.style.display = 'block';
+            console.log('🔙 Botón de volver mostrado');
             
-            console.log(`Navigating to: ${page}`);
+            // Add error handling for iframe loading
+            contentIframe.onload = function() {
+                console.log(`✅ Página ${page} cargada exitosamente en el iframe`);
+            };
+            
+            contentIframe.onerror = function() {
+                console.error(`❌ Error al cargar la página: ${page}`);
+                // Fallback: mostrar mensaje de error
+                contentIframe.srcdoc = `
+                    <html>
+                        <body style="margin:0; padding:40px; font-family:Arial; background:#f44336; color:white; text-align:center;">
+                            <h1>Error al cargar la página</h1>
+                            <p>No se pudo cargar: ${page}</p>
+                            <button onclick="parent.goBack()" style="padding:10px 20px; background:white; color:#f44336; border:none; border-radius:5px; cursor:pointer;">Volver</button>
+                        </body>
+                    </html>
+                `;
+            };
+            
+            console.log(`🎯 Navegación a ${page} completada`);
         }
         
         function goBack() {
+            console.log('🔙 Volviendo al hub principal...');
+            
             const mainContainer = document.getElementById('mainContainer');
             const iframeContainer = document.getElementById('iframeContainer');
             const contentIframe = document.getElementById('contentIframe');
@@ -253,23 +292,50 @@
             
             // Show main content
             mainContainer.style.display = 'flex';
+            console.log('📦 Contenedor principal mostrado');
             
             // Hide iframe container
             iframeContainer.style.display = 'none';
+            console.log('🖼️ Contenedor de iframe ocultado');
             
             // Clear iframe source
             contentIframe.src = '';
+            console.log('🗑️ Fuente del iframe limpiada');
             
             // Hide back button
             backButton.style.display = 'none';
+            console.log('🔙 Botón de volver ocultado');
             
-            console.log('Returning to main hub');
+            console.log('✅ Regreso al hub principal completado');
+        }
+        
+        // Test function to verify navigation
+        function testNavigation() {
+            console.log('🧪 Probando sistema de navegación...');
+            console.log('Elementos encontrados:');
+            console.log('- mainContainer:', document.getElementById('mainContainer') ? '✅' : '❌');
+            console.log('- iframeContainer:', document.getElementById('iframeContainer') ? '✅' : '❌');
+            console.log('- contentIframe:', document.getElementById('contentIframe') ? '✅' : '❌');
+            console.log('- backButton:', document.querySelector('.back-button') ? '✅' : '❌');
+            
+            // Test cards click events
+            const cards = document.querySelectorAll('.card');
+            console.log(`- Cards encontradas: ${cards.length}`);
+            cards.forEach((card, index) => {
+                console.log(`  Card ${index + 1}:`, card.onclick ? '✅ tiene onclick' : '❌ sin onclick');
+            });
         }
         
         // Configuración similar a about-me.html para compatibilidad
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Box.html cargado completamente');
+            
+            // Test navigation system
+            setTimeout(testNavigation, 500);
+            
             // Rotate and flip horizontally to fix the mirror effect (same as about-me.html)
             document.body.style.transform = 'rotate(180deg) scaleX(-1)';
+            console.log('🔄 Transformación 3D aplicada');
             
             let isActive = false;
             
@@ -284,34 +350,40 @@
             
             // Listen for messages from the parent window
             window.addEventListener('message', function(event) {
-                console.log("Message received in box.html:", event.data);
+                console.log("📨 Mensaje recibido en box.html:", event.data);
                 
                 // Check if the message is to turn on the screen
                 if (event.data && event.data.action === 'turnOnScreen') {
-                    console.log("Received message to turn on box screen");
+                    console.log("🔛 Recibido mensaje para encender pantalla box");
                     isActive = true;
                     
                     // Send confirmation back to parent
                     try {
                         window.parent.postMessage({ action: 'boxScreenTurnedOn' }, '*');
-                        console.log("Sent confirmation that box screen was turned on");
+                        console.log("✅ Confirmación enviada: pantalla box encendida");
                     } catch (e) {
-                        console.error("Error sending confirmation to parent:", e);
+                        console.error("❌ Error enviando confirmación al padre:", e);
                     }
                 }
                 
                 // Check if the message is to turn off the screen
                 if (event.data && event.data.action === 'turnOffScreen') {
-                    console.log("Received message to turn off box screen");
+                    console.log("🔛 Recibido mensaje para apagar pantalla box");
                     isActive = false;
                     
                     // Send confirmation back to parent
                     try {
                         window.parent.postMessage({ action: 'boxScreenTurnedOff' }, '*');
-                        console.log("Sent confirmation that box screen was turned off");
+                        console.log("✅ Confirmación enviada: pantalla box apagada");
                     } catch (e) {
-                        console.error("Error sending confirmation to parent:", e);
+                        console.error("❌ Error enviando confirmación al padre:", e);
                     }
+                }
+                
+                // Check if the message is to navigate back to box from child iframe
+                if (event.data && event.data.action === 'navigateToBox') {
+                    console.log("🔙 Recibido mensaje para volver al menú box");
+                    goBack(); // Llamar la función goBack() para volver al menú principal
                 }
             });
             
@@ -319,9 +391,9 @@
             if (isInIframe()) {
                 try {
                     window.parent.postMessage({ action: 'boxReady' }, '*');
-                    console.log("Sent ready message to parent");
+                    console.log("✅ Mensaje 'boxReady' enviado al padre");
                 } catch (e) {
-                    console.error("Error sending message to parent:", e);
+                    console.error("❌ Error enviando mensaje al padre:", e);
                 }
             }
         });
