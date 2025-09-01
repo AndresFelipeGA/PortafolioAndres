@@ -1369,12 +1369,39 @@
         }
         
         // Función para actualizar la visibilidad del about-me2 basada en la orientación
+        // Variables para optimizar updateAboutMe2Visibility
+        let lastAboutMe2VisibleFromFront = null;
+        let lastAboutMe2ButtonClickedState = null;
+        let lastAboutMe2ScreenOnState = null;
+        let lastAboutMe2UpdateTime = 0;
+        const ABOUT_ME2_UPDATE_THROTTLE = 1000; // milisegundos
+
         function updateAboutMe2Visibility() {
+            const now = Date.now();
+            if (now - lastAboutMe2UpdateTime < ABOUT_ME2_UPDATE_THROTTLE) {
+                return; // Throttle la función
+            }
+            lastAboutMe2UpdateTime = now;
+
             if (!window.aboutMe2ScreenMaterial || !window.aboutMe2BackPlane) {
                 return;
             }
             
             const isVisibleFromFront = isAboutMe2PlaneVisibleFromFront();
+            
+            // OPTIMIZACIÓN: Solo hacer cambios cuando el estado realmente cambie
+            const stateChanged = (lastAboutMe2VisibleFromFront !== isVisibleFromFront || 
+                                lastAboutMe2ButtonClickedState !== aboutMe2ButtonClicked ||
+                                lastAboutMe2ScreenOnState !== aboutMe2ScreenOn);
+            
+            if (!stateChanged) {
+                return; // No hacer nada si el estado no ha cambiado
+            }
+            
+            // Actualizar el estado guardado
+            lastAboutMe2VisibleFromFront = isVisibleFromFront;
+            lastAboutMe2ButtonClickedState = aboutMe2ButtonClicked;
+            lastAboutMe2ScreenOnState = aboutMe2ScreenOn;
             
             // Siempre mostrar/ocultar el plano completo basado en la orientación
             if (isVisibleFromFront) {
@@ -1387,31 +1414,31 @@
                     window.aboutMe2ScreenMaterial.transparent = false;
                     window.aboutMe2ScreenMaterial.opacity = 1.0;
                     window.aboutMe2ScreenMaterial.needsUpdate = true;
-                    console.log("Cover negro visible (botón NO clickeado) - about-me2");
+                    // Comentado para evitar spam: console.log("Cover negro visible (botón NO clickeado) - about-me2");
                 } else {
                     // Si el botón SÍ ha sido clickeado, hacer transparente el cover
                     window.aboutMe2ScreenMaterial.transparent = true;
                     window.aboutMe2ScreenMaterial.opacity = 0.0;
                     window.aboutMe2ScreenMaterial.needsUpdate = true;
-                    console.log("Cover negro transparente (botón SÍ clickeado) - about-me2");
+                    // Comentado para evitar spam: console.log("Cover negro transparente (botón SÍ clickeado) - about-me2");
                 }
                 
                 // LÓGICA DEL CONTENIDO HTML
                 if (aboutMe2ButtonClicked && window.aboutMe2CssObject && window.aboutMe2CssObject.element && isAboutMe2PlaneVisibleFromFront()) {
                     window.aboutMe2CssObject.element.style.visibility = 'visible';
                     window.aboutMe2CssObject.element.style.pointerEvents = 'auto';
-                    console.log("Contenido HTML visible (botón clickeado y visible desde frente) - about-me2");
+                    // Comentado para evitar spam: console.log("Contenido HTML visible (botón clickeado y visible desde frente) - about-me2");
                 } else {
                     if (window.aboutMe2CssObject && window.aboutMe2CssObject.element) {
                         window.aboutMe2CssObject.element.style.visibility = 'hidden';
                         window.aboutMe2CssObject.element.style.pointerEvents = 'none';
-                        console.log("Contenido HTML oculto - about-me2");
+                        // Comentado para evitar spam: console.log("Contenido HTML oculto - about-me2");
                     }
                 }
                 
                 // Si la pantalla se puede ver desde el frente Y el botón ha sido clickeado Y la pantalla está encendida
                 if (isVisibleFromFront && aboutMe2ButtonClicked && aboutMe2ScreenOn) {
-                    console.log("Plano about-me2 completamente activo y visible desde el frente");
+                    // Comentado para evitar spam: console.log("Plano about-me2 completamente activo y visible desde el frente");
                 }
             } else {
                 // No visible desde el frente - ocultar todo
@@ -1420,7 +1447,7 @@
                     window.aboutMe2CssObject.element.style.visibility = 'hidden';
                     window.aboutMe2CssObject.element.style.pointerEvents = 'none';
                 }
-                console.log("Plano about-me2 no visible desde el frente - oculto");
+                // Comentado para evitar spam: console.log("Plano about-me2 no visible desde el frente - oculto");
             }
         }
         
@@ -1562,13 +1589,13 @@
                     if (window.projectsCssObject && window.projectsCssObject.element) {
                         window.projectsCssObject.element.style.visibility = 'hidden';
                         window.projectsCssObject.element.style.pointerEvents = 'none';
-                        console.log("✅ Contenido HTML oculto - projects");
+                        // Comentado para evitar spam: console.log("✅ Contenido HTML oculto - projects");
                     }
                 }
                 
                 // Si la pantalla se puede ver desde el frente Y el botón ha sido clickeado Y la pantalla está encendida
                 if (isVisibleFromFront && projectsButtonClicked && projectsScreenOn) {
-                    console.log("✅ Plano projects completamente activo y visible desde el frente");
+                    // Comentado para evitar spam: console.log("✅ Plano projects completamente activo y visible desde el frente");
                 }
             } else {
                 // No visible desde el frente - pero mantener el cover negro visible
@@ -1595,7 +1622,7 @@
         let lastContactButtonClickedState = null;
         let lastContactScreenOnState = null;
         let lastContactUpdateTime = 0;
-        const CONTACT_UPDATE_THROTTLE = 500; // milisegundos - más agresivo
+        const CONTACT_UPDATE_THROTTLE = 1000; // milisegundos - reducido de 500 a 1000
 
         function updateContactVisibility() {
             const now = Date.now();
@@ -1742,7 +1769,7 @@
         let lastCafeMenuVisibleFromFront = null;
         let lastCafeMenuButtonClickedState = null;
         let lastCafeMenuScreenOnState = null;
-        const CAFE_MENU_UPDATE_THROTTLE = 50; // ms entre actualizaciones
+        const CAFE_MENU_UPDATE_THROTTLE = 1000; // ms entre actualizaciones - reducido spam
         let lastCafeMenuUpdateTime = 0;
         
         function updateCafeMenuVisibility() {
@@ -1815,7 +1842,7 @@
                     if (window.cafeMenuCssObject && window.cafeMenuCssObject.element) {
                         window.cafeMenuCssObject.element.style.visibility = 'hidden';
                         window.cafeMenuCssObject.element.style.pointerEvents = 'none';
-                        console.log("✅ Contenido HTML oculto - cafe-menu");
+                        // Comentado para evitar spam: console.log("✅ Contenido HTML oculto - cafe-menu");
                         console.log("🔍 Razón: cafeMenuButtonClicked=" + cafeMenuButtonClicked + 
                                    ", cssObject=" + !!window.cafeMenuCssObject + 
                                    ", element=" + !!window.cafeMenuCssObject?.element + 
@@ -1851,12 +1878,39 @@
         }
         
         // Función para actualizar la visibilidad del about-me basada en la orientación
+        // Variables para optimizar updateAboutMeVisibility
+        let lastAboutMeVisibleFromFront = null;
+        let lastAboutMeButtonClickedState = null;
+        let lastAboutMeScreenOnState = null;
+        let lastAboutMeUpdateTime = 0;
+        const ABOUT_ME_UPDATE_THROTTLE = 1000; // milisegundos
+
         function updateAboutMeVisibility() {
+            const now = Date.now();
+            if (now - lastAboutMeUpdateTime < ABOUT_ME_UPDATE_THROTTLE) {
+                return; // Throttle la función
+            }
+            lastAboutMeUpdateTime = now;
+
             if (!window.aboutMeScreenMaterial || !window.aboutMeBackPlane) {
                 return;
             }
             
             const isVisibleFromFront = isAboutMePlaneVisibleFromFront();
+            
+            // OPTIMIZACIÓN: Solo hacer cambios cuando el estado realmente cambie
+            const stateChanged = (lastAboutMeVisibleFromFront !== isVisibleFromFront || 
+                                lastAboutMeButtonClickedState !== aboutMeButtonClicked ||
+                                lastAboutMeScreenOnState !== aboutMeScreenOn);
+            
+            if (!stateChanged) {
+                return; // No hacer nada si el estado no ha cambiado
+            }
+            
+            // Actualizar el estado guardado
+            lastAboutMeVisibleFromFront = isVisibleFromFront;
+            lastAboutMeButtonClickedState = aboutMeButtonClicked;
+            lastAboutMeScreenOnState = aboutMeScreenOn;
             
             // Siempre mostrar/ocultar el plano completo basado en la orientación
             if (isVisibleFromFront) {
@@ -2244,7 +2298,7 @@
                 movementStartTime = Date.now();
                 lastCameraPosition.copy(camera.position);
                 lastCameraTarget.copy(controls.target);
-                console.log("🎯 Usuario empezó a interactuar con los controles");
+                // Comentado para evitar spam: console.log("🎯 Usuario empezó a interactuar con los controles");
             });
             
             controls.addEventListener('change', function() {
@@ -2292,9 +2346,9 @@
             controls.addEventListener('end', function() {
                 // Usuario terminó de mover la cámara
                 if (isUserActuallyMoving) {
-                    console.log("📤 Usuario terminó movimiento real de la cámara");
+                    // Solo log cuando hay movimiento real: console.log("📤 Usuario terminó movimiento real de la cámara");
                 } else {
-                    console.log("📤 Usuario terminó interacción sin movimiento significativo");
+                    // Comentado para evitar spam: console.log("📤 Usuario terminó interacción sin movimiento significativo");
                 }
                 isUserActuallyMoving = false;
             });
@@ -6301,17 +6355,17 @@
                 });
             }
             
-            // Verificar cada 2 segundos durante los primeros 10 segundos
+            // Verificar cada 5 segundos solo 2 veces para reducir spam
             let verificationCount = 0;
             const verificationInterval = setInterval(function() {
                 verificationCount++;
                 verifyContactInitialState();
                 
-                if (verificationCount >= 5) { // 5 verificaciones = 10 segundos
+                if (verificationCount >= 2) { // Solo 2 verificaciones = 10 segundos total
                     clearInterval(verificationInterval);
                     console.log("🏁 Verificaciones periódicas de Contact completadas");
                 }
-            }, 2000);
+            }, 5000); // Cambiado de 2000ms a 5000ms
         }, 3000);
         
         // Función para activar la pantalla de contacto (buenas prácticas)
