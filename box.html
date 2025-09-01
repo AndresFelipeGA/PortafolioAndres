@@ -60,6 +60,13 @@
             padding: 20px;
         }
         
+        /* Adjustments for 3 cards layout */
+        .cards-grid .card:nth-child(3) {
+            grid-column: 1 / -1;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
         .card {
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(15px);
@@ -244,7 +251,7 @@
                 </div>
             </div>
             
-            <div class="card certifications-card animate-float" onclick="navigateTo('credits.html')" data-page="credits.html">
+            <div class="card certifications-card animate-float" onclick="navigateTo('certifications.html')" data-page="certifications.html">
                 <div class="card-content">
                     <div class="card-icon">🏆</div>
                     <div class="card-title">Certificaciones</div>
@@ -252,13 +259,15 @@
                 </div>
             </div>
             
-            <div class="card credits-card animate-float" onclick="navigateTo('certifications.html')" data-page="certifications.html">
+            <!-- 
+            <div class="card credits-card animate-float" onclick="navigateTo('credits.html')" data-page="credits.html">
                 <div class="card-content">
                     <div class="card-icon">✨</div>
                     <div class="card-title">Créditos</div>
                     <div class="card-description">Agradecimientos y reconocimientos</div>
                 </div>
             </div>
+            -->
         </div>
     </div>
     

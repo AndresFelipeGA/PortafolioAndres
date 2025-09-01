@@ -17,7 +17,7 @@
         }
         
         .container {
-            padding: 20px;
+            padding: 15px 20px 10px 20px;
             max-width: 100%;
             height: 100vh;
             display: flex;
@@ -26,9 +26,9 @@
         }
         
         h1 {
-            font-size: 2.5em;
+            font-size: 2.3em;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.3);
             flex-shrink: 0;
         }
@@ -36,33 +36,42 @@
         .skills-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+            grid-template-rows: repeat(3, 1fr);
+            gap: 12px;
             flex: 1;
             min-height: 0;
+            max-height: calc(100vh - 100px);
+            padding: 0 5px;
         }
         
         .skill-category {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border-radius: 15px;
-            padding: 15px;
+            padding: 14px;
             border: 1px solid rgba(255, 255, 255, 0.2);
             display: flex;
             flex-direction: column;
+            height: 100%;
+            box-sizing: border-box;
         }
         
         .skill-title {
-            font-size: 1.2em;
+            font-size: 1.1em;
             font-weight: bold;
             margin-bottom: 10px;
             text-align: center;
+            flex-shrink: 0;
         }
         
         .skill-list {
-            line-height: 1.5;
+            line-height: 1.35;
             opacity: 0.9;
-            font-size: 0.9em;
+            font-size: 0.82em;
             flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
         }
         
         /* Botón de volver minimalista */
@@ -106,46 +115,68 @@
         
         <div class="skills-grid">
             <div class="skill-category">
-                <div class="skill-title">Frontend</div>
+                <div class="skill-title">💻 Frontend</div>
                 <div class="skill-list">
-                    • React.js<br>
-                    • Vue.js<br>
                     • JavaScript (ES6+)<br>
                     • HTML5 & CSS3<br>
-                    • Three.js
-                </div>
-            </div>
-            
-            <div class="skill-category">
-                <div class="skill-title">Backend</div>
-                <div class="skill-list">
-                    • Node.js<br>
-                    • Python<br>
-                    • Express.js<br>
-                    • MongoDB<br>
-                    • PostgreSQL
-                </div>
-            </div>
-            
-            <div class="skill-category">
-                <div class="skill-title">Herramientas</div>
-                <div class="skill-list">
-                    • Git & GitHub<br>
-                    • Docker<br>
-                    • AWS<br>
-                    • VS Code<br>
-                    • Figma
-                </div>
-            </div>
-            
-            <div class="skill-category">
-                <div class="skill-title">Metodologías</div>
-                <div class="skill-list">
-                    • Agile/Scrum<br>
-                    • TDD<br>
-                    • CI/CD<br>
-                    • REST APIs<br>
+                    • Three.js<br>
+                    • React.js<br>
                     • Responsive Design
+                </div>
+            </div>
+            
+            <div class="skill-category">
+                <div class="skill-title">⚙️ Backend</div>
+                <div class="skill-list">
+                    • Python<br>
+                    • Node.js<br>
+                    • Express.js<br>
+                    • REST APIs<br>
+                    • Microservicios
+                </div>
+            </div>
+            
+            <div class="skill-category">
+                <div class="skill-title">🗄️ Data Engineering</div>
+                <div class="skill-list">
+                    • PostgreSQL & MySQL<br>
+                    • ETL Pipelines<br>
+                    • YFlow<br>
+                    • SQL Optimization<br>
+                    • Data Integration
+                </div>
+            </div>
+            
+            <div class="skill-category">
+                <div class="skill-title">🛠️ DevOps & Tools</div>
+                <div class="skill-list">
+                    • Docker<br>
+                    • Git & GitHub<br>
+                    • VS Code<br>
+                    • PowerShell<br>
+                    • SendGrid API
+                </div>
+            </div>
+            
+            <div class="skill-category">
+                <div class="skill-title">📋 Metodologías</div>
+                <div class="skill-list">
+                    • Agile/SCRUM<br>
+                    • CI/CD<br>
+                    • TDD<br>
+                    • Process Automation<br>
+                    • Data Modeling
+                </div>
+            </div>
+            
+            <div class="skill-category">
+                <div class="skill-title">🤝 Habilidades Blandas</div>
+                <div class="skill-list">
+                    • Trabajo en Equipo<br>
+                    • Comunicación Efectiva<br>
+                    • Resolución de Problemas<br>
+                    • Mentoría & Capacitación<br>
+                    • Adaptabilidad
                 </div>
             </div>
         </div>
