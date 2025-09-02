@@ -1127,7 +1127,7 @@
                     } else {
                         console.warn("El iframe no está completamente cargado, esperando...");
                         // Intentar de nuevo después de un breve retraso
-                        setTimeout(() => sendMessageToAboutMe(action), 500);
+                        setTimeout(() => sendMessageToAboutMe(action), 100);
                     }
                 } catch (e) {
                     console.error("Error al enviar mensaje al iframe:", e);
@@ -1177,7 +1177,7 @@
                     } else {
                         console.warn("El iframe de about-me2 no está completamente cargado, esperando...");
                         // Intentar de nuevo después de un breve retraso
-                        setTimeout(() => sendMessageToAboutMe2(action), 500);
+                        setTimeout(() => sendMessageToAboutMe2(action), 100);
                     }
                 } catch (e) {
                     console.error("Error al enviar mensaje al iframe de about-me2:", e);
@@ -1277,7 +1277,7 @@
                     } else {
                         console.warn("El iframe de contact no está completamente cargado, esperando...");
                         // Intentar de nuevo después de un breve retraso
-                        setTimeout(() => sendMessageToContact(action), 500);
+                        setTimeout(() => sendMessageToContact(action), 100);
                     }
                 } catch (e) {
                     console.error("Error al enviar mensaje al iframe de contact:", e);
@@ -1377,7 +1377,7 @@
                     } else {
                         console.warn("El iframe de cafe-menu no está completamente cargado, esperando...");
                         // Intentar de nuevo después de un breve retraso
-                        setTimeout(() => sendMessageToCafeMenu(action), 500);
+                        setTimeout(() => sendMessageToCafeMenu(action), 100);
                     }
                 } catch (e) {
                     console.error("Error al enviar mensaje al iframe de cafe-menu:", e);
@@ -1427,7 +1427,7 @@
                     } else {
                         console.warn("El iframe de community no está completamente cargado, esperando...");
                         // Intentar de nuevo después de un breve retraso
-                        setTimeout(() => sendMessageToCommunity(action), 500);
+                        setTimeout(() => sendMessageToCommunity(action), 100);
                     }
                 } catch (e) {
                     console.error("Error al enviar mensaje al iframe de community:", e);
@@ -1591,7 +1591,7 @@
         let lastAboutMe2ButtonClickedState = null;
         let lastAboutMe2ScreenOnState = null;
         let lastAboutMe2UpdateTime = 0;
-        const ABOUT_ME2_UPDATE_THROTTLE = 1000; // milisegundos
+        const ABOUT_ME2_UPDATE_THROTTLE = 100; // milisegundos - reducido de 1000 a 100
 
         function updateAboutMe2Visibility() {
             const now = Date.now();
@@ -1924,7 +1924,7 @@
         let lastContactButtonClickedState = null;
         let lastContactScreenOnState = null;
         let lastContactUpdateTime = 0;
-        const CONTACT_UPDATE_THROTTLE = 200; // milisegundos - reducido para respuesta más rápida
+        const CONTACT_UPDATE_THROTTLE = 100; // milisegundos - reducido para respuesta más rápida
 
         function updateContactVisibility() {
             const now = Date.now();
@@ -2095,7 +2095,7 @@
         let lastCafeMenuVisibleFromFront = null;
         let lastCafeMenuButtonClickedState = null;
         let lastCafeMenuScreenOnState = null;
-        const CAFE_MENU_UPDATE_THROTTLE = 1000; // ms entre actualizaciones - reducido spam
+        const CAFE_MENU_UPDATE_THROTTLE = 100; // ms entre actualizaciones - reducido de 1000 a 100
         let lastCafeMenuUpdateTime = 0;
         
         function updateCafeMenuVisibility() {
@@ -2212,7 +2212,7 @@
         let lastCommunityButtonClickedState = null;
         let lastCommunityScreenOnState = null;
         let lastCommunityUpdateTime = 0;
-        const COMMUNITY_UPDATE_THROTTLE = 1000; // milisegundos
+        const COMMUNITY_UPDATE_THROTTLE = 100; // milisegundos - reducido de 1000 a 100
         
         function updateCommunityVisibility() {
             const now = Date.now();
@@ -2331,7 +2331,7 @@
         let lastAboutMeButtonClickedState = null;
         let lastAboutMeScreenOnState = null;
         let lastAboutMeUpdateTime = 0;
-        const ABOUT_ME_UPDATE_THROTTLE = 1000; // milisegundos
+        const ABOUT_ME_UPDATE_THROTTLE = 100; // milisegundos - reducido de 1000 a 100
 
         function updateAboutMeVisibility() {
             const now = Date.now();
@@ -3405,7 +3405,7 @@
                     
                     console.log("Estado inicial de projects configurado: cover negro visible");
                 }
-            }, 1500); // Dar tiempo suficiente para que todo se inicialice
+            }, 800); // Reducido de 1500ms a 800ms para inicialización más rápida
             
             // Activar automáticamente el segundo plano después de 3 segundos (opcional)
             setTimeout(function() {
@@ -3430,7 +3430,7 @@
                 setTimeout(function() {
                     sendMessageToProjects('turnOnScreen');
                 }, 500);
-            }, 3000);
+            }, 1500); // Reducido de 3000ms a 1500ms
         }
         
         function setupCoordinateSystem() {
@@ -3780,8 +3780,8 @@
                         } else {
                             console.warn("No se encontraron suficientes botones. Se encontraron:", buttons.length);
                         }
-                    }, 500);
-                }, 1000);
+                    }, 250); // Reducido de 500ms a 250ms
+                }, 500); // Reducido de 1000ms a 500ms
             };
             
             // Create GLTF loader
@@ -4423,7 +4423,7 @@
                 setTimeout(function() {
                     console.log("Enviando mensaje de activación de pantalla de nuevo (por si acaso)");
                     sendMessageToAboutMe('turnOnScreen');
-                }, 1000);
+                }, 500); // Reducido de 1000ms a 500ms
             }, 500);
             
             // Configurar la animación
@@ -7063,7 +7063,7 @@
                     clearInterval(verificationInterval);
                     console.log("🏁 Verificaciones periódicas de Contact completadas");
                 }
-            }, 5000); // Cambiado de 2000ms a 5000ms
+            }, 2000); // Reducido de 5000ms a 2000ms para mayor rapidez
         }, 3000);
         
         // Función para activar la pantalla de contacto (buenas prácticas)
