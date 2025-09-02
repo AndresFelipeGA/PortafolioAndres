@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -187,64 +187,64 @@
                 <p class="coffee-description">Sistemas personalizados web, móvil y escritorio con programación full-stack.</p>
             </div>
             
-            <!-- Café 2 -->
+            <!-- Coffee 2 -->
             <div class="coffee-item" data-service="automation">
-                <img src="media/icons/typeOfCoffes/cafeNumeroDos.png" alt="Café Automatización" class="coffee-image">
-                <h3 class="coffee-title">Automatización</h3>
-                <p class="coffee-description">Optimización de tareas repetitivas mediante scripts y bots para su negocio.</p>
+                <img src="media/icons/typeOfCoffes/cafeNumeroDos.png" alt="Automation Coffee" class="coffee-image">
+                <h3 class="coffee-title">Automation</h3>
+                <p class="coffee-description">Optimization of repetitive tasks through scripts and bots for your business.</p>
             </div>
             
-            <!-- Café 3 -->
+            <!-- Coffee 3 -->
             <div class="coffee-item" data-service="consulting">
-                <img src="media/icons/typeOfCoffes/cafeNumeroTres.png" alt="Café Consultoría Tech" class="coffee-image">
-                <h3 class="coffee-title">Consultoría Tech</h3>
-                <p class="coffee-description">Asesoría en arquitectura, desarrollo y rendimiento para decisiones estratégicas en proyectos tecnológicos.</p>
+                <img src="media/icons/typeOfCoffes/cafeNumeroTres.png" alt="Tech Consulting Coffee" class="coffee-image">
+                <h3 class="coffee-title">Tech Consulting</h3>
+                <p class="coffee-description">Advisory in architecture, development and performance for strategic decisions in technological projects.</p>
             </div>
             
-            <!-- Café 4 -->
+            <!-- Coffee 4 -->
             <div class="coffee-item" data-service="freelance">
                 <span class="coffee-badge">Popular</span>
-                <img src="media/icons/typeOfCoffes/cafeNumeroCuatro.png" alt="Café Servicios Freelance" class="coffee-image">
-                <h3 class="coffee-title">Servicios Freelance</h3>
-                <p class="coffee-description">Desarrollo de soluciones de programación y servicios técnicos con trabajo remoto flexible.</p>
+                <img src="media/icons/typeOfCoffes/cafeNumeroCuatro.png" alt="Freelance Services Coffee" class="coffee-image">
+                <h3 class="coffee-title">Freelance Services</h3>
+                <p class="coffee-description">Development of programming solutions and technical services with flexible remote work.</p>
             </div>
             
-            <!-- Café 5 -->
+            <!-- Coffee 5 -->
             <div class="coffee-item" data-service="web">
-                <img src="media/icons/typeOfCoffes/cafeNumeroCinco.png" alt="Café Web & E-commerce" class="coffee-image">
+                <img src="media/icons/typeOfCoffes/cafeNumeroCinco.png" alt="Web & E-commerce Coffee" class="coffee-image">
                 <h3 class="coffee-title">Web & E-commerce</h3>
-                <p class="coffee-description">Desarrollo de todo tipo de sitios web y plataformas de comercio electrónico personalizadas.</p>
+                <p class="coffee-description">Development of all types of websites and custom e-commerce platforms.</p>
             </div>
             
-            <!-- Café 6 -->
+            <!-- Coffee 6 -->
             <div class="coffee-item" data-service="devops">
-                <img src="media/icons/typeOfCoffes/cafeNumeroSeis.png" alt="Café Prompt Engineer" class="coffee-image">
+                <img src="media/icons/typeOfCoffes/cafeNumeroSeis.png" alt="Prompt Engineer Coffee" class="coffee-image">
                 <h3 class="coffee-title">Prompt Engineer</h3>
-                <p class="coffee-description">Desarrollo de sistemas y soluciones mediante ingeniería de prompts para inteligencia artificial.</p>
+                <p class="coffee-description">Development of systems and solutions through prompt engineering for artificial intelligence.</p>
             </div>
         </div>
         
         <div class="buttons-row">
-            <button class="select-button">Seleccionar café</button>
+            <button class="select-button">Select coffee</button>
         </div>
         
     </div>
 
     <script>
-        // Función para detectar el color de fondo y ajustar el tamaño
+        // Function to detect background color and adjust size
         function adjustSizeBasedOnBackground() {
-            // Obtener el color de fondo computado
+            // Get computed background color
             const bodyBackgroundColor = window.getComputedStyle(document.body).backgroundColor;
             
-            // Convertir el color a valores RGB
+            // Convert color to RGB values
             const rgbValues = bodyBackgroundColor.match(/\d+/g);
             
             if (rgbValues) {
                 const [r, g, b] = rgbValues.map(Number);
-                // Calcular la luminosidad (fórmula simplificada)
+                // Calculate brightness (simplified formula)
                 const brightness = (r + g + b) / 3;
                 
-                // Si el fondo es oscuro (luminosidad baja)
+                // If background is dark (low brightness)
                 if (brightness < 128) {
                     document.body.classList.add('dark-background');
                 } else {
@@ -253,12 +253,12 @@
             }
         }
         
-        // Ejecutar al cargar la página
+        // Execute on page load
         document.addEventListener('DOMContentLoaded', function() {
             adjustSizeBasedOnBackground();
         });
         
-        // También ejecutar si cambia el color de fondo
+        // Also execute if background color changes
         const observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
                 if (mutation.attributeName === 'style' &&
@@ -271,21 +271,21 @@
         observer.observe(document.body, { attributes: true, attributeFilter: ['style'] });
         observer.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
         
-        // Variable para almacenar el servicio seleccionado
+        // Variable to store selected service
         let selectedService = null;
         
-        // Asignar eventos a los elementos de café
+        // Assign events to coffee items
         document.querySelectorAll('.coffee-item').forEach(item => {
             item.addEventListener('click', function() {
-                // Quitar selección previa
+                // Remove previous selection
                 document.querySelectorAll('.coffee-item').forEach(el => {
                     el.style.border = 'none';
                 });
                 
-                // Marcar como seleccionado
+                // Mark as selected
                 this.style.border = '2px solid #C2185B';
                 
-                // Guardar el servicio seleccionado
+                // Save selected service
                 selectedService = this.getAttribute('data-service');
                 
                 // Actualizar texto del botón
@@ -317,10 +317,10 @@
                         window.location.href = 'contact-form-devops.html';
                         break;
                     default:
-                        alert('Por favor, seleccione un servicio primero.');
+                        alert('Please select a service first.');
                 }
             } else {
-                alert('Por favor, seleccione un servicio primero.');
+                alert('Please select a service first.');
             }
         });
         
@@ -345,7 +345,7 @@
             }
         }
         
-        // Función para activar la pantalla (quitar cover negro)
+        // Function to activate screen (remove black cover)
         function turnOnScreen() {
             screenActive = true;
             screenCover.classList.add('hidden');
@@ -361,7 +361,7 @@
             }
         }
         
-        // Función para desactivar la pantalla (mostrar cover negro)
+        // Function to deactivate screen (show black cover)
         function turnOffScreen() {
             screenActive = false;
             screenCover.classList.remove('hidden');

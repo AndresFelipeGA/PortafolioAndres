@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Certificaciones</title>
+    <title>Certifications</title>
     <style>
         html, body {
             margin: 0;
@@ -107,15 +107,15 @@
     </style>
 </head>
 <body>
-    <button class="back-button" onclick="goBackToBox()" title="Volver al menú"></button>
+    <button class="back-button" onclick="goBackToBox()" title="Back to menu"></button>
     
     <div class="container">
-        <h1>🏆 Certificaciones</h1>
+        <h1>🏆 Certifications</h1>
         
         <div class="certification-item">
             <div class="cert-icon">🎓</div>
             <div class="cert-content">
-                <div class="cert-title">Ingeniería de Software</div>
+                <div class="cert-title">Software Engineering</div>
                 <div class="cert-issuer">Universidad Manuela Beltrán</div>
                 <div class="cert-date">2020 - 2025</div>
             </div>
@@ -126,7 +126,7 @@
             <div class="cert-content">
                 <div class="cert-title">IBM Data Engineering Professional</div>
                 <div class="cert-issuer">IBM via Coursera</div>
-                <div class="cert-date">Ene 2025 - Big Data & ETL Pipelines</div>
+                <div class="cert-date">Jan 2025 - Big Data & ETL Pipelines</div>
             </div>
         </div>
         
@@ -144,14 +144,14 @@
             <div class="cert-content">
                 <div class="cert-title">PCAP: Python Programming</div>
                 <div class="cert-issuer">Cisco Networking Academy</div>
-                <div class="cert-date">Ago 2021 - OOP & Database Dev</div>
+                <div class="cert-date">Aug 2021 - OOP & Database Dev</div>
             </div>
         </div>
     </div>
     
     <script>
         function goBackToBox() {
-            // Comunicar al iframe padre para volver al box.html
+            // Communicate to parent iframe to go back to box.html
             if (window.parent && window.parent !== window) {
                 window.parent.postMessage({ action: 'navigateToBox' }, '*');
             }

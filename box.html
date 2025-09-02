@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -231,31 +231,31 @@
     <div class="main-container" id="mainContainer">
         <div class="header">
             <h1>🚀 Portfolio Hub</h1>
-            <p>Explora mis habilidades y experiencia</p>
+            <p>Explore my skills and experience</p>
         </div>
         
         <div class="cards-grid">
             <div class="card experience-card animate-float" onclick="navigateTo('skills.html')" data-page="skills.html">
                 <div class="card-content">
                     <div class="card-icon">💼</div>
-                    <div class="card-title">Experiencia</div>
-                    <div class="card-description">Mi trayectoria profesional y proyectos destacados</div>
+                    <div class="card-title">Experience</div>
+                    <div class="card-description">My professional journey and featured projects</div>
                 </div>
             </div>
             
             <div class="card skills-card animate-float" onclick="navigateTo('experience.html')" data-page="experience.html">
                 <div class="card-content">
                     <div class="card-icon">⚡</div>
-                    <div class="card-title">Habilidades</div>
-                    <div class="card-description">Tecnologías y herramientas que domino</div>
+                    <div class="card-title">Skills</div>
+                    <div class="card-description">Technologies and tools I master</div>
                 </div>
             </div>
             
             <div class="card certifications-card animate-float" onclick="navigateTo('certifications.html')" data-page="certifications.html">
                 <div class="card-content">
                     <div class="card-icon">🏆</div>
-                    <div class="card-title">Certificaciones</div>
-                    <div class="card-description">Cursos y certificados obtenidos</div>
+                    <div class="card-title">Certifications</div>
+                    <div class="card-description">Courses and certificates obtained</div>
                 </div>
             </div>
             
@@ -321,7 +321,7 @@
             
             contentIframe.onerror = function() {
                 console.error(`❌ Error al cargar la página: ${page}`);
-                // Fallback: mostrar mensaje de error
+                // Fallback: show error message
                 contentIframe.srcdoc = `
                     <html>
                         <body style="margin:0; padding:40px; font-family:Arial; background:#f44336; color:white; text-align:center;">

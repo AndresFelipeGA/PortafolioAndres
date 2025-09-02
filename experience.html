@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Experiencia</title>
+    <title>Experience</title>
     <style>
         html, body {
             margin: 0;
@@ -96,35 +96,35 @@
     </style>
 </head>
 <body>
-    <button class="back-button" onclick="goBackToBox()" title="Volver al menú"></button>
+    <button class="back-button" onclick="goBackToBox()" title="Back to menu"></button>
     
     <div class="container">
-        <h1>💼 Mi Experiencia</h1>
+        <h1>💼 My Experience</h1>
         
         <div class="experience-item">
-            <div class="experience-title">Ingeniero de Software | Data Engineering</div>
-            <div class="experience-company">Ingenian Software • Jul 2024 - Presente</div>
+            <div class="experience-title">Software Engineer | Data Engineering</div>
+            <div class="experience-company">Ingenian Software • Jul 2024 - Present</div>
             <div class="experience-description">
-                <strong>Full-stack + Data Engineering:</strong> Diseño, automatización y optimización de flujos de datos e integraciones. 
-                Automatización de chatbots WhatsApp con YFlow/JavaScript, desarrollo de pipelines ETL, integración de APIs, 
-                y procesamiento automatizado de datos. Metodología SCRUM.
+                <strong>Full-stack + Data Engineering:</strong> Design, automation and optimization of data flows and integrations. 
+                WhatsApp chatbot automation with YFlow/JavaScript, ETL pipeline development, API integration, 
+                and automated data processing. SCRUM methodology.
             </div>
         </div>
         
         <div class="experience-item">
             <div class="experience-title">Junior Data Engineer | Software Engineer</div>
-            <div class="experience-company">Forgracol • Ene 2022 - Jun 2024</div>
+            <div class="experience-company">Forgracol • Jan 2022 - Jun 2024</div>
             <div class="experience-description">
-                <strong>Full-Stack + Database Systems:</strong> Desarrollo de sistemas de inventarios y gestión empresarial. 
-                Creación completa de aplicaciones web con Python/SQL backend, optimización de bases de datos PostgreSQL/MySQL, 
-                automatización de procesos y documentación de flujos ETL para sistemas de inventario.
+                <strong>Full-Stack + Database Systems:</strong> Development of inventory and business management systems. 
+                Complete creation of web applications with Python/SQL backend, PostgreSQL/MySQL database optimization, 
+                process automation and ETL flow documentation for inventory systems.
             </div>
         </div>
     </div>
     
     <script>
         function goBackToBox() {
-            // Comunicar al iframe padre para volver al box.html
+            // Communicate to parent iframe to go back to box.html
             if (window.parent && window.parent !== window) {
                 window.parent.postMessage({ action: 'navigateToBox' }, '*');
             }

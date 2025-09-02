@@ -417,10 +417,10 @@
             <img src="media/icons/coffeGif.gif" class="coffee-gif" alt="Cargando...">
         </div>
         
-        <!-- Botón para activar música -->
+        <!-- Button to activate music -->
         <button id="music-activate-btn" class="music-button">
             <span class="music-icon"></span>
-            Activar Música
+            Activate Music
         </button>
         </div>
     </div>
@@ -434,13 +434,13 @@
     </div>
 
     <div id="coordinates-display">
-        <h3>Sistema de Coordenadas</h3>
-        <div id="camera-position">Cámara: X: 0.00, Y: 0.00, Z: 0.00</div>
-        <div id="camera-target">Objetivo: X: 0.00, Y: 0.00, Z: 0.00</div>
-        <div id="mouse-position">Ratón: X: 0.00, Y: 0.00, Z: 0.00</div>
+        <h3>Coordinate System</h3>
+        <div id="camera-position">Camera: X: 0.00, Y: 0.00, Z: 0.00</div>
+        <div id="camera-target">Target: X: 0.00, Y: 0.00, Z: 0.00</div>
+        <div id="mouse-position">Mouse: X: 0.00, Y: 0.00, Z: 0.00</div>
     </div>
     
-    <button id="coordinates-toggle">Mostrar Coordenadas</button>
+    <button id="coordinates-toggle">Show Coordinates</button>
     
     <!-- Contenedor de botones flotantes -->
     <div class="floating-buttons-container">
@@ -460,9 +460,9 @@
         <div class="floating-button">
             <img src="media/icons/iconClientes.png?v=3" alt="Icono de clientes">
         </div>
-        <!-- Botón flotante con el icono de servicios -->
+        <!-- Floating button with services icon -->
         <div class="floating-button">
-            <img src="media/icons/iconServices.png?v=2" alt="Icono de servicios">
+            <img src="media/icons/iconServices.png?v=2" alt="Services icon">
         </div>
         <!-- Botón flotante con el icono de productos -->
         <div class="floating-button">
@@ -3406,8 +3406,8 @@
             coordDisplay.style.display = coordinatesVisible ? 'block' : 'none';
             axesHelper.visible = coordinatesVisible;
             
-            // Establecer texto y color inicial del botón
-            coordToggle.textContent = coordinatesVisible ? 'Ocultar Coordenadas' : 'Mostrar Coordenadas';
+            // Set initial text and color of button
+            coordToggle.textContent = coordinatesVisible ? 'Hide Coordinates' : 'Show Coordinates';
             coordToggle.style.backgroundColor = coordinatesVisible ? '#f44336' : '#4CAF50';
             
             // Actualizar coordenadas solo si están visibles
@@ -3426,8 +3426,8 @@
                 coordDisplay.style.display = coordinatesVisible ? 'block' : 'none';
                 axesHelper.visible = coordinatesVisible;
                 
-                // Actualizar texto del botón
-                this.textContent = coordinatesVisible ? 'Ocultar Coordenadas' : 'Mostrar Coordenadas';
+                // Update button text
+                this.textContent = coordinatesVisible ? 'Hide Coordinates' : 'Show Coordinates';
                 this.style.backgroundColor = coordinatesVisible ? '#f44336' : '#4CAF50';
             });
         }
@@ -5329,13 +5329,13 @@
                             const coffeeGrid = document.createElement('div');
                             coffeeGrid.className = 'coffee-grid';
             
-            // Definir los servicios
+            // Define services
             const services = [
                 {
                     id: 'freelance',
                     image: 'media/icons/typeOfCoffes/cafeNumeroCuatro.png',
-                    title: 'Servicios Freelance',
-                    description: 'Desarrollo de soluciones de programación y servicios técnicos con trabajo remoto flexible.',
+                    title: 'Freelance Services',
+                    description: 'Development of programming solutions and technical services with flexible remote work.',
                     badge: true
                 },
                 {

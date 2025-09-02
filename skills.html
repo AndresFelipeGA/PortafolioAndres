@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Habilidades</title>
+    <title>Skills</title>
     <style>
         html, body {
             margin: 0;
@@ -108,10 +108,10 @@
     </style>
 </head>
 <body>
-    <button class="back-button" onclick="goBackToBox()" title="Volver al menú"></button>
+    <button class="back-button" onclick="goBackToBox()" title="Back to menu"></button>
     
     <div class="container">
-        <h1>⚡ Mis Habilidades</h1>
+        <h1>⚡ My Skills</h1>
         
         <div class="skills-grid">
             <div class="skill-category">
@@ -132,7 +132,7 @@
                     • Node.js<br>
                     • Express.js<br>
                     • REST APIs<br>
-                    • Microservicios
+                    • Microservices
                 </div>
             </div>
             
@@ -159,7 +159,7 @@
             </div>
             
             <div class="skill-category">
-                <div class="skill-title">📋 Metodologías</div>
+                <div class="skill-title">📋 Methodologies</div>
                 <div class="skill-list">
                     • Agile/SCRUM<br>
                     • CI/CD<br>
@@ -170,13 +170,13 @@
             </div>
             
             <div class="skill-category">
-                <div class="skill-title">🤝 Habilidades Blandas</div>
+                <div class="skill-title">🤝 Soft Skills</div>
                 <div class="skill-list">
-                    • Trabajo en Equipo<br>
-                    • Comunicación Efectiva<br>
-                    • Resolución de Problemas<br>
-                    • Mentoría & Capacitación<br>
-                    • Adaptabilidad
+                    • Teamwork<br>
+                    • Effective Communication<br>
+                    • Problem Solving<br>
+                    • Mentoring & Training<br>
+                    • Adaptability
                 </div>
             </div>
         </div>
@@ -184,7 +184,7 @@
     
     <script>
         function goBackToBox() {
-            // Comunicar al iframe padre para volver al box.html
+            // Communicate to parent iframe to go back to box.html
             if (window.parent && window.parent !== window) {
                 window.parent.postMessage({ action: 'navigateToBox' }, '*');
             }

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comunidad</title>
+    <title>Community</title>
     
     <!-- Material-UI CSS -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
@@ -314,23 +314,23 @@
             
             <div class="community-content">
                 <p class="text-paragraph">
-                    Lo que más me gusta desarrollar son cosas que marquen <span class="highlight">impacto real</span> en las personas. Me apasiona trabajar con startups y emprendimientos porque cada proyecto es único, cada idea tiene el potencial de cambiar vidas.
+                    What I love most about developing is creating things that make a <span class="highlight">real impact</span> on people. I'm passionate about working with startups and entrepreneurs because each project is unique, each idea has the potential to change lives.
                 </p>
                 
                 <p class="text-paragraph">
-                    Entiendo perfectamente los desafíos que enfrentan los emprendedores al iniciar sus proyectos. Por eso trato de ofrecer costos accesibles para el desarrollo de software, páginas web y aplicaciones.
+                    I understand perfectly the challenges entrepreneurs face when starting their projects. That's why I try to offer accessible costs for software development, websites, and applications.
                 </p>
                 
                 <div class="cta-section">
                     <p class="text-paragraph cta-text" style="margin-bottom: 10px;">
-                        Si tienes una idea, un emprendimiento o una startup que necesita desarrollo tecnológico, <span class="highlight">hablemos</span>. Me encanta ser parte del proceso de convertir ideas en realidad.
+                        If you have an idea, an entrepreneurship, or a startup that needs technological development, <span class="highlight">let's talk</span>. I love being part of the process of turning ideas into reality.
                     </p>
                     
-                    <!-- Botón MUI Colombian Style -->
+                    <!-- MUI Colombian Style Button -->
                     <div class="contact-button-container">
                         <button class="mui-button contact-btn" onclick="handleContactClick()">
                             <span class="material-icons" style="margin-right: 5px; font-size: 16px;">chat_bubble_outline</span>
-                            ¡Hablemos!
+                            Let's talk!
                             <span class="button-coffee" style="margin-left: 5px;">☕</span>
                         </button>
                     </div>
@@ -348,44 +348,44 @@
     <script src="https://unpkg.com/@mui/material@latest/umd/material-ui.min.js"></script>
     
     <script>
-        console.log("🚀 Community.html cargado completamente");
+        console.log("🚀 Community.html loaded completely");
         
         let isActive = false;
         
-        // Función para manejar el clic del botón de contacto
+        // Function to handle contact button click
         function handleContactClick() {
-            console.log("☕ ¡Usuario quiere contactar! - Botón clickeado desde community.html");
+            console.log("☕ User wants to contact! - Button clicked from community.html");
             
-            // Vibración si está disponible (móviles)
+            // Vibration if available (mobile)
             if (navigator.vibrate) {
                 navigator.vibrate(100);
             }
             
             try {
-                // Simular el comportamiento del tercer botón (contacto) del modelo 3D
-                // Enviar mensaje que simula el click del botón de contacto
+                // Simulate the third button (contact) behavior from the 3D model
+                // Send message that simulates contact button click
                 window.parent.postMessage({ 
                     action: 'simulateContactButton',
                     source: 'community',
-                    message: 'Simular click en tercer botón (contacto) desde community.html'
+                    message: 'Simulate click on third button (contact) from community.html'
                 }, '*');
                 
-                // También enviar el mensaje específico de botón presionado
+                // Also send the specific button pressed message
                 window.parent.postMessage({
                     action: 'buttonPressed',
                     button: 'contact',
                     source: 'community'
                 }, '*');
                 
-                console.log("📨 Mensajes para simular tercer botón enviados al padre");
+                console.log("📨 Messages to simulate third button sent to parent");
             } catch (e) {
-                console.error("❌ Error enviando mensaje de contacto:", e);
+                console.error("❌ Error sending contact message:", e);
             }
             
-            // Feedback visual temporal
+            // Temporary visual feedback
             const button = event.target.closest('.mui-button');
             const originalText = button.innerHTML;
-            button.innerHTML = '<span class="material-icons" style="margin-right: 8px;">check_circle</span>¡Activando contacto!<span style="margin-left: 8px;">✨</span>';
+            button.innerHTML = '<span class="material-icons" style="margin-right: 8px;">check_circle</span>Activating contact!<span style="margin-left: 8px;">✨</span>';
             button.style.background = 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)';
             
             setTimeout(() => {
