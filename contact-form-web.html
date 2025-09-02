@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulario de Contacto - Web & E-commerce</title>
+    <title>Contact Form - Web & E-commerce</title>
     <style>
         body {
             margin: 0;
@@ -219,72 +219,72 @@
     <div class="contact-container">
         <div class="back-corner-button" onclick="window.location.href='cafe-menu.html'">←</div>
         <div class="form-header">
-            <h1>Formulario de Contacto</h1>
+            <h1>Contact Form</h1>
             <img src="media/icons/typeOfCoffes/cafeNumeroCinco.png" alt="Web & E-commerce" class="service-icon" id="serviceIcon">
             <h2 id="serviceTitle">Web & E-commerce</h2>
-            <p class="service-description" id="serviceDescription">Desarrollo de todo tipo de sitios web y plataformas de comercio electrónico personalizadas.</p>
+            <p class="service-description" id="serviceDescription">Development of all types of websites and customized e-commerce platforms.</p>
         </div>
         
         <form class="contact-form" id="contactForm" action="https://api.staticforms.xyz/submit" method="POST">
             <!-- Static Forms Configuration -->
             <input type="hidden" name="accessKey" value="sf_0eh8kk35hfj689nf30hhdnm9">
-            <input type="hidden" name="subject" value="Nuevo formulario de contacto: Web & E-commerce">
+            <input type="hidden" name="subject" value="New contact form: Web & E-commerce">
             <input type="hidden" name="replyTo" value="andresfgonzalezaristizabal@outlook.com">
             <input type="hidden" name="redirectTo" value="cafe-menu.html">
-            <input type="hidden" name="servicio" value="Web & E-commerce">
+            <input type="hidden" name="service" value="Web & E-commerce">
             <div class="form-row">
                 <div class="form-column">
-                    <!-- Columna izquierda -->
+                    <!-- Left column -->
                     <div class="form-group">
-                        <label for="nombre">Nombre Completo*</label>
+                        <label for="nombre">Full Name*</label>
                         <input type="text" id="nombre" name="nombre" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="tipoProyecto">Tipo de Proyecto*</label>
+                        <label for="tipoProyecto">Project Type*</label>
                         <select id="tipoProyecto" name="tipoProyecto" required>
-                            <option value="">Seleccione una opción</option>
-                            <option value="sitio">Sitio Web Informativo</option>
+                            <option value="">Select an option</option>
+                            <option value="sitio">Informational Website</option>
                             <option value="landing">Landing Page</option>
                             <option value="blog">Blog</option>
-                            <option value="ecommerce">Tienda Online (E-commerce)</option>
+                            <option value="ecommerce">Online Store (E-commerce)</option>
                             <option value="marketplace">Marketplace</option>
-                            <option value="webapp">Aplicación Web</option>
-                            <option value="otro">Otro</option>
+                            <option value="webapp">Web Application</option>
+                            <option value="otro">Other</option>
                         </select>
                     </div>
                 </div>
                 
                 <div class="form-column">
-                    <!-- Columna derecha -->
+                    <!-- Right column -->
                     <div class="form-group">
-                        <label for="email">Correo Electrónico*</label>
+                        <label for="email">Email Address*</label>
                         <input type="email" id="email" name="email" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="descripcionProyecto">Descripción del Proyecto*</label>
-                        <textarea id="descripcionProyecto" name="descripcionProyecto" required placeholder="Describa su proyecto web o e-commerce, objetivos, público objetivo y cualquier referencia o ejemplo que le guste"></textarea>
+                        <label for="descripcionProyecto">Project Description*</label>
+                        <textarea id="descripcionProyecto" name="descripcionProyecto" required placeholder="Describe your web or e-commerce project, objectives, target audience and any reference or example you like"></textarea>
                     </div>
                 </div>
             </div>
             
             <div class="form-buttons">
                 <button type="button" class="back-button" onclick="window.location.href='cafe-menu.html'">
-                    <span class="back-icon">←</span> Volver al Menú
+                    <span class="back-icon">←</span> Back to Menu
                 </button>
-                <button type="submit" class="submit-button">Enviar Solicitud</button>
+                <button type="submit" class="submit-button">Send Request</button>
             </div>
         </form>
     </div>
 
     <script>
-        // Función para validar el formulario y habilitar/deshabilitar el botón de envío
+        // Function to validate the form and enable/disable the submit button
         function validateForm() {
             const form = document.getElementById('contactForm');
             const submitButton = form.querySelector('.submit-button');
             
-            // Verificar si todos los campos requeridos tienen valor
+            // Check if all required fields have value
             const requiredFields = form.querySelectorAll('[required]');
             let isValid = true;
             
@@ -294,25 +294,25 @@
                 }
             });
             
-            // Habilitar o deshabilitar el botón de envío
+            // Enable or disable the submit button
             submitButton.disabled = !isValid;
         }
         
-        // Configurar la página al cargar
+        // Configure the page on load
         document.addEventListener('DOMContentLoaded', function() {
-            // Deshabilitar el botón de envío inicialmente
+            // Disable the submit button initially
             const submitButton = document.querySelector('.submit-button');
             submitButton.disabled = true;
             
-            // Agregar eventos de input a todos los campos requeridos
+            // Add input events to all required fields
             const requiredFields = document.querySelectorAll('[required]');
             requiredFields.forEach(field => {
                 field.addEventListener('input', validateForm);
             });
         });
         
-        // FormSubmit manejará el envío del formulario automáticamente
-        // Solo mantenemos la validación del formulario
+        // FormSubmit will handle the form submission automatically
+        // We only keep the form validation
     </script>
 </body>
 </html>

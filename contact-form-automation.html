@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulario de Contacto - Automatización</title>
+    <title>Contact Form - Automation</title>
     <style>
         body {
             margin: 0;
@@ -219,71 +219,71 @@
     <div class="contact-container">
         <div class="back-corner-button" onclick="window.location.href='cafe-menu.html'">←</div>
         <div class="form-header">
-            <h1>Formulario de Contacto</h1>
-            <img src="media/icons/typeOfCoffes/cafeNumeroDos.png" alt="Automatización" class="service-icon" id="serviceIcon">
-            <h2 id="serviceTitle">Automatización</h2>
-            <p class="service-description" id="serviceDescription">Optimización de tareas repetitivas mediante scripts y bots para su negocio.</p>
+            <h1>Contact Form</h1>
+            <img src="media/icons/typeOfCoffes/cafeNumeroDos.png" alt="Automation" class="service-icon" id="serviceIcon">
+            <h2 id="serviceTitle">Automation</h2>
+            <p class="service-description" id="serviceDescription">Optimization of repetitive tasks through scripts and bots for your business.</p>
         </div>
         
         <form class="contact-form" id="contactForm" action="https://api.staticforms.xyz/submit" method="POST">
             <!-- Static Forms Configuration -->
             <input type="hidden" name="accessKey" value="sf_0eh8kk35hfj689nf30hhdnm9">
-            <input type="hidden" name="subject" value="Nuevo formulario de contacto: Automatización">
+            <input type="hidden" name="subject" value="New contact form: Automation">
             <input type="hidden" name="replyTo" value="andresfgonzalezaristizabal@outlook.com">
             <input type="hidden" name="redirectTo" value="cafe-menu.html">
-            <input type="hidden" name="servicio" value="Automatización">
+            <input type="hidden" name="service" value="Automation">
             <div class="form-row">
                 <div class="form-column">
-                    <!-- Columna izquierda -->
+                    <!-- Left column -->
                     <div class="form-group">
-                        <label for="nombre">Nombre Completo*</label>
+                        <label for="nombre">Full Name*</label>
                         <input type="text" id="nombre" name="nombre" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="tipoAutomatizacion">Tipo de Automatización*</label>
+                        <label for="tipoAutomatizacion">Automation Type*</label>
                         <select id="tipoAutomatizacion" name="tipoAutomatizacion" required>
-                            <option value="">Seleccione una opción</option>
-                            <option value="procesos">Automatización de Procesos</option>
-                            <option value="datos">Extracción y Procesamiento de Datos</option>
-                            <option value="reportes">Generación de Reportes</option>
-                            <option value="bots">Bots y Asistentes Virtuales</option>
+                            <option value="">Select an option</option>
+                            <option value="procesos">Process Automation</option>
+                            <option value="datos">Data Extraction and Processing</option>
+                            <option value="reportes">Report Generation</option>
+                            <option value="bots">Bots and Virtual Assistants</option>
                             <option value="rpa">RPA (Robotic Process Automation)</option>
-                            <option value="otro">Otro</option>
+                            <option value="otro">Other</option>
                         </select>
                     </div>
                 </div>
                 
                 <div class="form-column">
-                    <!-- Columna derecha -->
+                    <!-- Right column -->
                     <div class="form-group">
-                        <label for="email">Correo Electrónico*</label>
+                        <label for="email">Email Address*</label>
                         <input type="email" id="email" name="email" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="descripcionProceso">Descripción del Proceso a Automatizar*</label>
-                        <textarea id="descripcionProceso" name="descripcionProceso" required placeholder="Describa el proceso actual que desea automatizar, incluyendo pasos, tiempo que toma actualmente y resultados esperados"></textarea>
+                        <label for="descripcionProceso">Process Description to Automate*</label>
+                        <textarea id="descripcionProceso" name="descripcionProceso" required placeholder="Describe the current process you want to automate, including steps, current time it takes and expected results"></textarea>
                     </div>
                 </div>
             </div>
             
             <div class="form-buttons">
                 <button type="button" class="back-button" onclick="window.location.href='cafe-menu.html'">
-                    <span class="back-icon">←</span> Volver al Menú
+                    <span class="back-icon">←</span> Back to Menu
                 </button>
-                <button type="submit" class="submit-button">Enviar Solicitud</button>
+                <button type="submit" class="submit-button">Send Request</button>
             </div>
         </form>
     </div>
 
     <script>
-        // Función para validar el formulario y habilitar/deshabilitar el botón de envío
+        // Function to validate the form and enable/disable the submit button
         function validateForm() {
             const form = document.getElementById('contactForm');
             const submitButton = form.querySelector('.submit-button');
             
-            // Verificar si todos los campos requeridos tienen valor
+            // Check if all required fields have value
             const requiredFields = form.querySelectorAll('[required]');
             let isValid = true;
             
@@ -293,25 +293,25 @@
                 }
             });
             
-            // Habilitar o deshabilitar el botón de envío
+            // Enable or disable the submit button
             submitButton.disabled = !isValid;
         }
         
-        // Configurar la página al cargar
+        // Configure the page on load
         document.addEventListener('DOMContentLoaded', function() {
-            // Deshabilitar el botón de envío inicialmente
+            // Disable the submit button initially
             const submitButton = document.querySelector('.submit-button');
             submitButton.disabled = true;
             
-            // Agregar eventos de input a todos los campos requeridos
+            // Add input events to all required fields
             const requiredFields = document.querySelectorAll('[required]');
             requiredFields.forEach(field => {
                 field.addEventListener('input', validateForm);
             });
         });
         
-        // FormSubmit manejará el envío del formulario automáticamente
-        // Solo mantenemos la validación del formulario
+        // FormSubmit will handle the form submission automatically
+        // We only keep the form validation
     </script>
 </body>
 </html>

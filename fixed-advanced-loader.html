@@ -1904,12 +1904,18 @@
         let lastContactButtonClickedState = null;
         let lastContactScreenOnState = null;
         let lastContactUpdateTime = 0;
-        const CONTACT_UPDATE_THROTTLE = 1000; // milisegundos - reducido de 500 a 1000
+        const CONTACT_UPDATE_THROTTLE = 200; // milisegundos - reducido para respuesta más rápida
 
         function updateContactVisibility() {
             const now = Date.now();
-            if (now - lastContactUpdateTime < CONTACT_UPDATE_THROTTLE) {
-                return; // Throttle la función
+            
+            // Detectar si se está desactivando (para respuesta inmediata)
+            const isDeactivating = (lastContactButtonClickedState === true && contactButtonClicked === false) ||
+                                   (lastContactScreenOnState === true && contactScreenOn === false);
+            
+            // Si se está desactivando, bypassed el throttle para respuesta inmediata
+            if (!isDeactivating && (now - lastContactUpdateTime < CONTACT_UPDATE_THROTTLE)) {
+                return; // Throttle normal solo para activaciones
             }
             lastContactUpdateTime = now;
             
@@ -1944,23 +1950,35 @@
             lastContactButtonClickedState = contactButtonClicked;
             lastContactScreenOnState = contactScreenOn;
             
-            // SIEMPRE mantener el plano negro visible - la orientación de la cámara no debe afectar la visibilidad del cover negro
-            window.contactBackPlane.visible = true;
-            
-            // LÓGICA DEL COVER NEGRO - Solo depende del estado del botón y la pantalla, NO de la orientación
-            if (!contactButtonClicked || !contactScreenOn) {
-                // Si el botón NO ha sido clickeado O la pantalla está apagada, mantener el cover negro visible
-                window.contactScreenMaterial.color.set(0x000000); // Negro
-                window.contactScreenMaterial.transparent = false;
-                window.contactScreenMaterial.opacity = 1.0;
-                window.contactScreenMaterial.needsUpdate = true;
-            } else {
-                // CAMBIO IMPORTANTE: Si el botón fue clickeado Y la pantalla está encendida, SIEMPRE hacer transparente el cover
-                // independientemente de la orientación de la cámara
-                window.contactScreenMaterial.transparent = true;
-                window.contactScreenMaterial.opacity = 0.0;
-                window.contactScreenMaterial.needsUpdate = true;
-                console.log("🎯 Cover negro mantenido transparente - botón activo y pantalla encendida");
+            // ==========================================
+            // LÓGICA DEL COVER NEGRO (IGUAL QUE COMMUNITY)
+            // ==========================================
+            if (window.contactScreenMaterial && window.contactBackPlane) {
+                if (!contactButtonClicked || !contactScreenOn) {
+                    // Si el botón NO ha sido clickeado O la pantalla está apagada, mantener el cover negro visible
+                    window.contactScreenMaterial.color.set(0x000000); // Negro
+                    window.contactScreenMaterial.transparent = false;
+                    window.contactScreenMaterial.opacity = 1.0;
+                    window.contactScreenMaterial.needsUpdate = true;
+                    window.contactBackPlane.visible = true;
+                    console.log("🎯 Cover negro de contact visible");
+                } else {
+                    // SOLO hacer transparente el cover si el botón fue clickeado Y la pantalla está encendida Y es visible desde el frente
+                    if (isVisibleFromFront) {
+                        window.contactScreenMaterial.transparent = true;
+                        window.contactScreenMaterial.opacity = 0.0;
+                        window.contactScreenMaterial.needsUpdate = true;
+                        console.log("🎯 Cover negro de contact hecho transparente");
+                    } else {
+                        // Mantener negro si no es visible desde el frente, aunque el botón esté clickeado
+                        window.contactScreenMaterial.color.set(0x000000);
+                        window.contactScreenMaterial.transparent = false;
+                        window.contactScreenMaterial.opacity = 1.0;
+                        window.contactScreenMaterial.needsUpdate = true;
+                        window.contactBackPlane.visible = true;
+                        console.log("🎯 Cover negro de contact mantenido (no visible desde frente)");
+                    }
+                }
             }
             
             // LÓGICA DEL CONTENIDO HTML - Solo mostrar si es visible desde el frente
@@ -1996,6 +2014,18 @@
                     window.contactCssObject.element.style.visibility = 'hidden';
                     window.contactCssObject.element.style.pointerEvents = 'none';
                 }
+            }
+        }
+        
+        // Función para forzar la aparición inmediata del cover negro de contact
+        function forceContactCoverVisible() {
+            if (window.contactScreenMaterial && window.contactBackPlane) {
+                window.contactScreenMaterial.color.set(0x000000);
+                window.contactScreenMaterial.transparent = false;
+                window.contactScreenMaterial.opacity = 1.0;
+                window.contactScreenMaterial.needsUpdate = true;
+                window.contactBackPlane.visible = true;
+                console.log("⚡ Cover negro de contact forzado visible inmediatamente");
             }
         }
         
@@ -2731,6 +2761,8 @@
                         
                         if (contactButtonClicked && !inGracePeriod) {
                             // Desactivar contact solo si no estamos en período de gracia
+                            contactButtonClicked = false; // Marcar como desactivado inmediatamente
+                            
                             if (contactIframe && contactIframe.contentWindow) {
                                 contactIframe.contentWindow.postMessage({
                                     action: 'realMovementDetected'
@@ -2739,6 +2771,7 @@
                             }
                             
                             sendMessageToContact('turnOffScreen');
+                            forceContactCoverVisible(); // Forzar cover negro inmediatamente
                             console.log("📤 MOVIMIENTO REAL detectado - contact.html desactivado");
                         } else if (inGracePeriod) {
                             console.log("🎯 Movimiento detectado pero en período de gracia - contact protegido");
@@ -6666,11 +6699,14 @@
                     // Crear un plano negro de fondo (cover negro inicial) - NUEVO ENFOQUE SIMPLE
                     const contactBackPlaneMaterial = new THREE.MeshBasicMaterial({
                         color: 0x000000, // Negro inicialmente (pantalla apagada)
-                        side: THREE.DoubleSide, // Para asegurar visibilidad desde ambos lados
+                        side: THREE.DoubleSide, // Volver a DoubleSide como community
                         transparent: false, // Inicialmente NO transparente
                         opacity: 1.0, // Opacidad completa
-                        depthWrite: false, // Igual que projects/about-me
-                        depthTest: false, // Igual que projects/about-me
+                        depthWrite: true, // Cambiar a true como community
+                        depthTest: true, // Cambiar a true como community
+                        polygonOffset: true, // Agregar como community
+                        polygonOffsetFactor: -1, // Agregar como community
+                        polygonOffsetUnits: -1, // Agregar como community
                         fog: false // Evitar que la niebla afecte el cover
                     });
                     
@@ -6694,19 +6730,14 @@
                     // Aplicar EXACTAMENTE los mismos ajustes de posición que el contenido HTML
                     contactBackPlane.position.x += 0.025; // Mismo ajuste que cssObject
                     contactBackPlane.position.y -= 0.003; // Mismo ajuste que cssObject
-                    contactBackPlane.position.z += 0.002; // Ligeramente más adelante que el HTML (0.001 + 0.001)
+                    contactBackPlane.position.z += 0.0001; // Cambiar a offset ultra mínimo como community
                     
                     // Aplicar la misma rotación que el plano invisible para alinearlo correctamente
                     contactBackPlane.rotation.copy(rotation);
                     // NO rotar 180 grados en Y como el HTML porque el cover negro no necesita corrección de texto
                     
                     // Configurar renderOrder para asegurar que se renderice por encima del contenido HTML
-                    contactBackPlane.renderOrder = 100; // Valor alto para estar por encima del CSS3D
-                    
-                    // Configurar material para mejor visibilidad
-                    contactBackPlaneMaterial.side = THREE.DoubleSide;
-                    contactBackPlaneMaterial.depthWrite = false;
-                    contactBackPlaneMaterial.depthTest = false;
+                    contactBackPlane.renderOrder = 15; // Valor igual que community
                     
                     // Añadir el plano negro a la escena
                     scene.add(contactBackPlane);
@@ -6718,38 +6749,6 @@
                     console.log("  - Rotación cover negro:", contactBackPlane.rotation);
                     console.log("  - Escala cover negro:", contactBackPlane.scale);
                     console.log("📏 PARA COMPARAR CON EL CONTENIDO HTML:");
-                    
-                    // CREAR UN SEGUNDO PLANO NEGRO DE RESPALDO CON TAMAÑO EXACTO
-                    const backupCoverMaterial = new THREE.MeshBasicMaterial({
-                        color: 0x000000,
-                        side: THREE.DoubleSide,
-                        transparent: false,
-                        opacity: 1.0,
-                        depthWrite: false,
-                        depthTest: false
-                    });
-                    
-                    // Usar exactamente las mismas dimensiones que el contenido HTML
-                    const backupCoverGeometry = new THREE.PlaneGeometry(width, height);
-                    const backupCoverPlane = new THREE.Mesh(backupCoverGeometry, backupCoverMaterial);
-                    
-                    // Posicionar el plano de respaldo EXACTAMENTE igual que el contenido HTML
-                    backupCoverPlane.position.copy(center);
-                    backupCoverPlane.position.x += 0.025; // Mismo ajuste que cssObject
-                    backupCoverPlane.position.y -= 0.003; // Mismo ajuste que cssObject
-                    backupCoverPlane.position.z += 0.0015; // Entre el HTML (0.001) y el cover principal (0.002)
-                    backupCoverPlane.rotation.copy(rotation);
-                    backupCoverPlane.renderOrder = 150; // Entre el principal y el contenido
-                    
-                    // Guardar referencia al plano de respaldo
-                    window.contactBackupCover = backupCoverPlane;
-                    
-                    // Añadir el plano de respaldo a la escena
-                    scene.add(backupCoverPlane);
-                    console.log("Plano negro de RESPALDO para contact añadido a la escena");
-                    
-                    // Forzar que el cover negro sea visible inicialmente
-                    console.log("Forzando cover negro inicial visible para contact");
                     
                     // Forzar que el cover negro sea visible inicialmente
                     console.log("Forzando cover negro inicial visible para contact");

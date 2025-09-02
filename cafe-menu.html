@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menú de Cafés</title>
+    <title>Coffee Menu</title>
     <style>
         body {
             margin: 0;
@@ -176,15 +176,15 @@
         <div class="screen-cover" id="screen-cover"></div>
         
         <div class="screen-header">
-            <h1>Café Colombiano</h1>
+            <h1>Select Your Colombian Coffee</h1>
         </div>
         
         <div class="coffee-grid">
-            <!-- Café 1 -->
+            <!-- Coffee 1 -->
             <div class="coffee-item" data-service="software">
-                <img src="media/icons/typeOfCoffes/cafeNumeroUno.png" alt="Café Software a Medida" class="coffee-image">
-                <h3 class="coffee-title">Software a Medida</h3>
-                <p class="coffee-description">Sistemas personalizados web, móvil y escritorio con programación full-stack.</p>
+                <img src="media/icons/typeOfCoffes/cafeNumeroUno.png" alt="Custom Software Coffee" class="coffee-image">
+                <h3 class="coffee-title">Custom Software</h3>
+                <p class="coffee-description">Personalized web, mobile and desktop systems with full-stack programming.</p>
             </div>
             
             <!-- Coffee 2 -->
@@ -225,7 +225,7 @@
         </div>
         
         <div class="buttons-row">
-            <button class="select-button">Select coffee</button>
+            <button class="select-button">Select Coffee</button>
         </div>
         
     </div>
@@ -288,15 +288,15 @@
                 // Save selected service
                 selectedService = this.getAttribute('data-service');
                 
-                // Actualizar texto del botón
-                document.querySelector('.select-button').textContent = 'Seleccionar ' + this.querySelector('.coffee-title').textContent;
+                // Update button text
+                document.querySelector('.select-button').textContent = 'Select ' + this.querySelector('.coffee-title').textContent;
             });
         });
         
-        // Asignar evento al botón de selección
+        // Assign event to selection button
         document.querySelector('.select-button').addEventListener('click', function() {
             if (selectedService) {
-                // Redirigir al formulario correspondiente según el servicio seleccionado
+                // Redirect to corresponding form based on selected service
                 switch (selectedService) {
                     case 'software':
                         window.location.href = 'contact-form-software.html';
