@@ -1058,6 +1058,46 @@
                     console.log("🎯 Contenido HTML de community ocultado");
                 }
             }
+            
+            // NUEVO: Manejar mensajes desde community.html para simular el tercer botón
+            if (event.data && event.data.action === 'simulateContactButton') {
+                console.log("🎯 Mensaje recibido desde community.html para simular tercer botón");
+                
+                // Simular el click del tercer botón (contacto) usando elementos DOM
+                const buttons = document.querySelectorAll('.floating-button');
+                if (buttons && buttons.length > 2) {
+                    const messagesButton = buttons[2]; // Índice 2 (el tercer botón - mensajes)
+                    console.log("🎯 Simulando click en tercer botón desde community.html");
+                    
+                    // Ejecutar la misma función que el tercer botón
+                    startMessagesButtonCameraAnimation();
+                } else {
+                    console.error("❌ No se pudo encontrar el tercer botón para simular - botones encontrados:", buttons.length);
+                }
+            }
+            
+            // NUEVO: Manejar mensaje específico de botón presionado desde community.html
+            if (event.data && event.data.action === 'buttonPressed' && event.data.button === 'contact' && event.data.source === 'community') {
+                console.log("🎯 Mensaje de botón presionado recibido desde community.html");
+                
+                // Activar contacto directamente
+                contactButtonClicked = true;
+                console.log("🎯 contactButtonClicked activado desde community.html");
+                
+                // Activar la pantalla de contacto
+                activateContactScreen();
+                
+                // Enviar mensaje específico al iframe de contacto
+                setTimeout(function() {
+                    if (contactIframe && contactIframe.contentWindow) {
+                        contactIframe.contentWindow.postMessage({
+                            action: 'buttonPressed',
+                            button: 'contact'
+                        }, '*');
+                        console.log("📤 Mensaje 'buttonPressed: contact' enviado desde community.html");
+                    }
+                }, 100);
+            }
         });
         
         // Función para enviar mensaje al iframe de about-me.html
@@ -1945,18 +1985,12 @@
                 window.contactScreenMaterial.opacity = 1.0;
                 window.contactScreenMaterial.needsUpdate = true;
             } else {
-                // SOLO hacer transparente el cover si el botón fue clickeado Y la pantalla está encendida Y es visible desde el frente
-                if (isVisibleFromFront) {
-                    window.contactScreenMaterial.transparent = true;
-                    window.contactScreenMaterial.opacity = 0.0;
-                    window.contactScreenMaterial.needsUpdate = true;
-                } else {
-                    // Mantener negro si no es visible desde el frente, aunque el botón esté clickeado
-                    window.contactScreenMaterial.color.set(0x000000);
-                    window.contactScreenMaterial.transparent = false;
-                    window.contactScreenMaterial.opacity = 1.0;
-                    window.contactScreenMaterial.needsUpdate = true;
-                }
+                // CAMBIO IMPORTANTE: Si el botón fue clickeado Y la pantalla está encendida, SIEMPRE hacer transparente el cover
+                // independientemente de la orientación de la cámara
+                window.contactScreenMaterial.transparent = true;
+                window.contactScreenMaterial.opacity = 0.0;
+                window.contactScreenMaterial.needsUpdate = true;
+                console.log("🎯 Cover negro mantenido transparente - botón activo y pantalla encendida");
             }
             
             // LÓGICA DEL CONTENIDO HTML - Solo mostrar si es visible desde el frente
@@ -2638,6 +2672,11 @@
         // Punto de origen personalizado (offset para el sistema de coordenadas)
         const originOffset = new THREE.Vector3(-10.00, -14.10, -2.20);
         
+        // Variables globales para detección de movimiento y protección de animaciones
+        let animationJustFinished = false;
+        let animationFinishTime = 0;
+        let postAnimationGracePeriod = 1000; // 1000ms de gracia después de animaciones (aumentado para mayor protección)
+        
         // Elementos DOM
         const loadingContainer = document.getElementById('loading-container');
 
@@ -2667,10 +2706,10 @@
             // 🔧 CONFIGURACIÓN DE SENSIBILIDAD - Ajustar según necesidades
             let lastCameraPosition = new THREE.Vector3();
             let lastCameraTarget = new THREE.Vector3();
-            let movementThreshold = 0.1; // 🎛️ Umbral mínimo para considerar movimiento real (ajustable)
+            let movementThreshold = 0.5; // 🎛️ Umbral mínimo para considerar movimiento real (aumentado para ser menos sensible)
             let isUserActuallyMoving = false;
             let movementStartTime = 0;
-            let minimumMovementTime = 300; // 🎛️ Mínimo tiempo en ms de movimiento para activar (ajustable)
+            let minimumMovementTime = 500; // 🎛️ Mínimo tiempo en ms de movimiento para activar (aumentado para ser menos sensible)
             
             // 📝 NOTA: Aumentar movementThreshold = menos sensible (requiere más movimiento)
             //          Aumentar minimumMovementTime = menos sensible (requiere más tiempo)
@@ -2681,12 +2720,12 @@
             lastCameraTarget.copy(controls.target);
             
             controls.addEventListener('start', function() {
-                // Usuario empezó a interactuar - pero aún no desactivamos contact
+                // Usuario empezó a interactuar - siempre permitir esto
                 isUserActuallyMoving = false;
                 movementStartTime = Date.now();
                 lastCameraPosition.copy(camera.position);
                 lastCameraTarget.copy(controls.target);
-                // Comentado para evitar spam: console.log("🎯 Usuario empezó a interactuar con los controles");
+                console.log("🎯 Usuario empezó a interactuar con los controles");
             });
             
             controls.addEventListener('change', function() {
@@ -2697,17 +2736,25 @@
                 const positionDelta = camera.position.distanceTo(lastCameraPosition);
                 const targetDelta = controls.target.distanceTo(lastCameraTarget);
                 
-                // Solo considerar movimiento real si:
-                // 1. Ha pasado tiempo suficiente
-                // 2. El movimiento supera el umbral
-                if (timeSinceStart > minimumMovementTime && 
-                    (positionDelta > movementThreshold || targetDelta > movementThreshold)) {
-                    
+                // Solo procesar desactivación de pantallas si:
+                // 1. No hay animación programática activa
+                // 2. Ha pasado tiempo suficiente
+                // 3. El movimiento supera el umbral
+                const shouldProcessScreenDeactivation = !(cameraAnimation && cameraAnimation.enabled) &&
+                    timeSinceStart > minimumMovementTime && 
+                    (positionDelta > movementThreshold || targetDelta > movementThreshold);
+                
+                if (shouldProcessScreenDeactivation) {
                     if (!isUserActuallyMoving) {
                         isUserActuallyMoving = true;
-                        // AHORA SÍ desactivar contact porque hay movimiento real
-                        if (contactButtonClicked) {
-                            // Enviar mensaje específico de movimiento real
+                        console.log("📤 MOVIMIENTO REAL detectado - procesando...");
+                        console.log(`🎯 Detalles: positionDelta=${positionDelta.toFixed(3)}, targetDelta=${targetDelta.toFixed(3)}, tiempo=${timeSinceStart}ms`);
+                        
+                        // VERIFICAR PERÍODO DE GRACIA SOLO PARA LA DESACTIVACIÓN DE CONTACT
+                        const inGracePeriod = animationJustFinished && (currentTime - animationFinishTime) < postAnimationGracePeriod;
+                        
+                        if (contactButtonClicked && !inGracePeriod) {
+                            // Desactivar contact solo si no estamos en período de gracia
                             if (contactIframe && contactIframe.contentWindow) {
                                 contactIframe.contentWindow.postMessage({
                                     action: 'realMovementDetected'
@@ -2715,6 +2762,14 @@
                                 console.log("📤 MOVIMIENTO REAL detectado - mensaje específico enviado a contact.html");
                             }
                             
+                            sendMessageToContact('turnOffScreen');
+                            console.log("📤 MOVIMIENTO REAL detectado - contact.html desactivado");
+                        } else if (inGracePeriod) {
+                            console.log("🎯 Movimiento detectado pero en período de gracia - contact protegido");
+                        }
+                        
+                        // Para projects y otros, aplicar normalmente (sin período de gracia)
+                        if (projectsButtonClicked) {
                             // También enviar a projects.html
                             if (projectsIframe && projectsIframe.contentWindow) {
                                 projectsIframe.contentWindow.postMessage({
@@ -2723,9 +2778,8 @@
                                 console.log("📤 MOVIMIENTO REAL detectado - mensaje específico enviado a projects.html");
                             }
                             
-                            sendMessageToContact('turnOffScreen');
                             sendMessageToProjects('turnOffScreen');
-                            console.log("📤 MOVIMIENTO REAL detectado - contact.html y projects.html desactivados");
+                            console.log("📤 MOVIMIENTO REAL detectado - projects.html desactivado");
                         }
                         
                         // TAMBIÉN desactivar el plano duplicado (box.html) cuando hay movimiento real
@@ -2902,6 +2956,70 @@
                                         }
                                     } catch (error) {
                                         console.error("❌ Contact click error:", error);
+                                    }
+                                    
+                                    return; // Salir completamente del event listener
+                                }
+                            } else if (iframe.src && iframe.src.includes('community.html')) {
+                                // NUEVO: Manejo específico para community.html
+                                if (!communityButtonClicked) {
+                                    console.log("🚫 Click en iframe de community pero botón no activo - ignorando");
+                                    return; // Salir completamente
+                                } else {
+                                    console.log("🎯 Community click detected - forwarding to iframe");
+                                    
+                                    // Forwardear el click manualmente al iframe
+                                    try {
+                                        // Obtener dimensiones del iframe y sus transformaciones
+                                        const iframeRect = iframe.getBoundingClientRect();
+                                        const iframeWidth = iframe.offsetWidth;
+                                        const iframeHeight = iframe.offsetHeight;
+                                        
+                                        // Calcular coordenadas relativas con mejor precisión
+                                        let relativeX = event.clientX - iframeRect.left;
+                                        let relativeY = event.clientY - iframeRect.top;
+                                        
+                                        // Normalizar a las dimensiones reales del contenido del iframe
+                                        relativeX = (relativeX / iframeRect.width) * iframeWidth;
+                                        relativeY = (relativeY / iframeRect.height) * iframeHeight;
+                                        
+                                        // Debido a la rotación de 180°, invertir las coordenadas
+                                        relativeX = iframeWidth - relativeX;
+                                        relativeY = iframeHeight - relativeY;
+                                        
+                                        console.log(`🎯 Community click at position: ${relativeX}, ${relativeY}`);
+                                        
+                                        // Enviar el evento de click al iframe
+                                        if (iframe.contentWindow && iframe.contentDocument) {
+                                            // Buscar el elemento bajo las coordenadas corregidas
+                                            const elementAtPoint = iframe.contentDocument.elementFromPoint(relativeX, relativeY);
+                                            
+                                            if (elementAtPoint) {
+                                                // Crear evento de click específico para el elemento
+                                                const clickEvent = new MouseEvent('click', {
+                                                    bubbles: true,
+                                                    cancelable: true,
+                                                    view: iframe.contentWindow,
+                                                    clientX: relativeX,
+                                                    clientY: relativeY
+                                                });
+                                                
+                                                elementAtPoint.dispatchEvent(clickEvent);
+                                                console.log(`🎯 Community click dispatched to: ${elementAtPoint.tagName} ${elementAtPoint.className || elementAtPoint.id || ''}`);
+                                            } else {
+                                                // Si no hay elemento específico, disparar en el documento
+                                                const docClickEvent = new MouseEvent('click', {
+                                                    bubbles: true,
+                                                    cancelable: true,
+                                                    clientX: relativeX,
+                                                    clientY: relativeY
+                                                });
+                                                iframe.contentDocument.dispatchEvent(docClickEvent);
+                                                console.log("🎯 Community click dispatched to document");
+                                            }
+                                        }
+                                    } catch (error) {
+                                        console.error("❌ Community click error:", error);
                                     }
                                     
                                     return; // Salir completamente del event listener
@@ -4777,6 +4895,17 @@
                         } else {
                             // Animación completa
                             cameraAnimation.enabled = false;
+                            
+                            // NUEVO: Marcar que acaba de terminar una animación
+                            animationJustFinished = true;
+                            animationFinishTime = Date.now();
+                            console.log("🎯 Animación terminada - período de gracia activado");
+                            
+                            // Reset del flag después del período de gracia
+                            setTimeout(() => {
+                                animationJustFinished = false;
+                                console.log("🎯 Período de gracia terminado - detección de movimiento reactivada");
+                            }, postAnimationGracePeriod);
                             
                             // Asegurarse de que la cámara esté exactamente en la posición objetivo
                             camera.position.copy(cameraAnimation.targetPosition);
@@ -6913,8 +7042,9 @@
             // IMPORTANTE: Marcar la pantalla como encendida
             contactScreenOn = true;
             
-            // Solo hacer transparente el cover negro si el botón ha sido clickeado y es visible desde el frente
-            if (window.contactScreenMaterial && contactButtonClicked && isContactPlaneVisibleFromFront()) {
+            // CAMBIO IMPORTANTE: Hacer transparente el cover negro SIEMPRE que el botón haya sido clickeado
+            // independientemente de la orientación de la cámara
+            if (window.contactScreenMaterial && contactButtonClicked) {
                 window.contactScreenMaterial.transparent = true;
                 window.contactScreenMaterial.opacity = 0.0;
                 window.contactScreenMaterial.needsUpdate = true;
@@ -6926,12 +7056,11 @@
                     window.contactBackupCover.material.needsUpdate = true;
                 }
                 
-                console.log("Cover negro de contact hecho transparente (botón clickeado + visible desde frente)");
+                console.log("Cover negro de contact hecho transparente (botón clickeado)");
             } else {
                 console.log("Cover negro mantenido - condiciones no cumplidas:", {
                     material: !!window.contactScreenMaterial,
-                    buttonClicked: contactButtonClicked,
-                    visibleFromFront: isContactPlaneVisibleFromFront()
+                    buttonClicked: contactButtonClicked
                 });
             }
             

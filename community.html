@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comunidad</title>
+    
+    <!-- Material-UI CSS -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="https://unpkg.com/@mui/material@latest/umd/material-ui.min.css" />
+    
+    <!-- Colombian Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
         * {
             margin: 0;
@@ -12,7 +21,7 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', 'Roboto', sans-serif;
             background: transparent;
             height: 100vh;
             color: #333;
@@ -35,7 +44,7 @@
         
         .container {
             height: 100vh;
-            padding: 15px;
+            padding: 8px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -43,70 +52,347 @@
         }
         
         .community-card {
-            background: linear-gradient(135deg,
-                rgba(245, 245, 220, 0.95) 0%,
-                rgba(255, 248, 220, 0.90) 100%);
-            border: 3px solid rgba(139, 69, 19, 0.4);
+            background: linear-gradient(145deg,
+                rgba(255, 248, 220, 0.95) 0%,
+                rgba(254, 250, 235, 0.92) 100%);
+            backdrop-filter: blur(10px);
+            border: none;
             border-radius: 20px;
-            padding: 40px;
-            max-width: 800px;
-            width: 95%;
-            height: 90vh;
-            box-shadow: 0 15px 35px rgba(139, 69, 19, 0.3);
+            padding: 20px 28px;
+            max-width: 680px;
+            width: 88%;
+            max-height: 82vh;
+            box-shadow: 
+                0 20px 40px rgba(139, 69, 19, 0.15),
+                0 12px 28px rgba(184, 134, 11, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
             display: flex;
             flex-direction: column;
-            align-items: center;
+            align-items: flex-start;
             overflow: hidden;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
-        .community-title {
-            color: #654321;
-            font-size: 48px;
-            font-weight: 700;
-            margin-bottom: 30px;
-            text-shadow: 2px 2px 4px rgba(139, 69, 19, 0.2);
-            text-align: center;
+        .community-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                #FCD116 0%,    /* Amarillo de la bandera */
+                #003893 50%,   /* Azul de la bandera */
+                #CE1126 100%); /* Rojo de la bandera */
+            border-radius: 24px 24px 0 0;
+        }
+        
+        .impact-icon {
+            background: linear-gradient(135deg, #FCD116, #FFD700);
+            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            box-shadow: 0 6px 12px rgba(252, 209, 22, 0.3);
         }
         
         .community-content {
-            color: #5d4037;
-            font-size: 16px;
-            line-height: 1.8;
-            text-align: justify;
-            padding: 20px;
-            background: rgba(139, 69, 19, 0.1);
-            border-radius: 12px;
-            border-left: 4px solid #8b4513;
-            max-width: 100%;
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
         
-        .community-content p {
-            margin-bottom: 20px;
+        .text-paragraph {
+            color: #4a4a4a;
+            font-size: 14px;
+            line-height: 1.5;
+            text-align: left;
+            margin-bottom: 12px;
+            font-weight: 400;
+            letter-spacing: 0.2px;
         }
         
         .highlight {
-            color: #654321;
+            color: #8b4513;
             font-weight: 600;
+            background: linear-gradient(120deg, transparent 0%, rgba(252, 209, 22, 0.2) 0%);
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .highlight:hover {
+            background: linear-gradient(120deg, transparent 0%, rgba(252, 209, 22, 0.4) 0%);
+        }
+        
+        .cta-section {
+            margin-top: 4px;
+            padding: 12px;
+            background: linear-gradient(135deg, 
+                rgba(252, 209, 22, 0.08) 0%, 
+                rgba(0, 56, 147, 0.05) 100%);
+            border-radius: 12px;
+            border-left: 3px solid #FCD116;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="%23FCD116" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="%23003893" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="%23CE1126" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>') repeat;
+            opacity: 0.3;
+            z-index: 0;
+        }
+        
+        .cta-text {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .coffee-accent {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            opacity: 0.1;
+            font-size: 20px;
+            color: #8b4513;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .community-card {
+                padding: 20px 16px;
+                margin: 8px;
+                width: 95%;
+                max-height: 90vh;
+            }
+            
+            .text-paragraph {
+                font-size: 14px;
+                margin-bottom: 12px;
+                line-height: 1.5;
+            }
+            
+            .impact-icon {
+                width: 40px;
+                height: 40px;
+                margin-bottom: 12px;
+            }
+            
+            .cta-section {
+                padding: 12px;
+                margin-top: 6px;
+            }
+            
+            .mui-button {
+                padding: 10px 20px;
+                font-size: 13px;
+                min-width: 160px;
+            }
+        }
+        
+        /* Colombian Coffee Animation */
+        @keyframes coffee-steam {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
+            50% { transform: translateY(-4px) rotate(2deg); opacity: 1; }
+        }
+        
+        .coffee-accent {
+            animation: coffee-steam 3s ease-in-out infinite;
+        }
+        
+        /* MUI Button Colombian Style */
+        .contact-button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 8px;
+        }
+        
+        .mui-button {
+            background: linear-gradient(135deg, #FCD116 0%, #FFD700 100%);
+            border: none;
+            border-radius: 20px;
+            padding: 10px 20px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            color: #8b4513;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 4px 8px rgba(252, 209, 22, 0.3),
+                0 2px 4px rgba(252, 209, 22, 0.2);
+            text-transform: none;
+            letter-spacing: 0.3px;
+            min-width: 160px;
+            height: 36px;
+        }
+        
+        .mui-button:hover {
+            background: linear-gradient(135deg, #FFD700 0%, #FCD116 100%);
+            transform: translateY(-2px);
+            box-shadow: 
+                0 12px 24px rgba(252, 209, 22, 0.4),
+                0 8px 16px rgba(252, 209, 22, 0.3);
+        }
+        
+        .mui-button:active {
+            transform: translateY(0px);
+            box-shadow: 
+                0 6px 12px rgba(252, 209, 22, 0.4),
+                0 3px 6px rgba(252, 209, 22, 0.3);
+        }
+        
+        .mui-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s;
+        }
+        
+        .mui-button:hover::before {
+            left: 100%;
+        }
+        
+        .button-coffee {
+            margin-left: 8px;
+            animation: coffee-bounce 2s ease-in-out infinite;
+        }
+        
+        @keyframes coffee-bounce {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-2px); }
+        }
+        
+        /* Ripple effect */
+        .mui-button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .mui-button:active::after {
+            width: 300px;
+            height: 300px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="community-card">
-            <div class="community-content">
-                <p>Lo que más me gusta desarrollar son cosas que marquen <span class="highlight">impacto real</span> en las personas. Me apasiona trabajar con startups y emprendimientos porque cada proyecto es único, cada idea tiene el potencial de cambiar vidas, y hay algo especial en ver cómo una simple idea se convierte en una realidad digital funcional.</p>
-                
-                <p>Entiendo perfectamente los desafíos que enfrentan los emprendedores al iniciar sus proyectos. Por eso trato de ofrecer costos accesibles para el desarrollo de software, páginas web y aplicaciones. Muchas veces los emprendedores tienen proyectos increíbles pero se ven limitados por los altos costos de desarrollo tradicional.</p>
-                
-                <p>Si tienes una idea, un emprendimiento o una startup que necesita desarrollo de software, páginas web, aplicaciones móviles o cualquier solución tecnológica, <span class="highlight">hablemos</span>. Me encanta ser parte del proceso de convertir ideas en realidad.</p>
+            <!-- Icono de impacto inspirado en café colombiano -->
+            <div class="impact-icon">
+                <span class="material-icons" style="color: #8b4513; font-size: 20px;">auto_awesome</span>
             </div>
+            
+            <div class="community-content">
+                <p class="text-paragraph">
+                    Lo que más me gusta desarrollar son cosas que marquen <span class="highlight">impacto real</span> en las personas. Me apasiona trabajar con startups y emprendimientos porque cada proyecto es único, cada idea tiene el potencial de cambiar vidas.
+                </p>
+                
+                <p class="text-paragraph">
+                    Entiendo perfectamente los desafíos que enfrentan los emprendedores al iniciar sus proyectos. Por eso trato de ofrecer costos accesibles para el desarrollo de software, páginas web y aplicaciones.
+                </p>
+                
+                <div class="cta-section">
+                    <p class="text-paragraph cta-text" style="margin-bottom: 10px;">
+                        Si tienes una idea, un emprendimiento o una startup que necesita desarrollo tecnológico, <span class="highlight">hablemos</span>. Me encanta ser parte del proceso de convertir ideas en realidad.
+                    </p>
+                    
+                    <!-- Botón MUI Colombian Style -->
+                    <div class="contact-button-container">
+                        <button class="mui-button contact-btn" onclick="handleContactClick()">
+                            <span class="material-icons" style="margin-right: 5px; font-size: 16px;">chat_bubble_outline</span>
+                            ¡Hablemos!
+                            <span class="button-coffee" style="margin-left: 5px;">☕</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Acento colombiano sutil -->
+            <div class="coffee-accent">☕</div>
         </div>
     </div>
+    
+    <!-- Material-UI JavaScript -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@mui/material@latest/umd/material-ui.min.js"></script>
     
     <script>
         console.log("🚀 Community.html cargado completamente");
         
         let isActive = false;
+        
+        // Función para manejar el clic del botón de contacto
+        function handleContactClick() {
+            console.log("☕ ¡Usuario quiere contactar! - Botón clickeado desde community.html");
+            
+            // Vibración si está disponible (móviles)
+            if (navigator.vibrate) {
+                navigator.vibrate(100);
+            }
+            
+            try {
+                // Simular el comportamiento del tercer botón (contacto) del modelo 3D
+                // Enviar mensaje que simula el click del botón de contacto
+                window.parent.postMessage({ 
+                    action: 'simulateContactButton',
+                    source: 'community',
+                    message: 'Simular click en tercer botón (contacto) desde community.html'
+                }, '*');
+                
+                // También enviar el mensaje específico de botón presionado
+                window.parent.postMessage({
+                    action: 'buttonPressed',
+                    button: 'contact',
+                    source: 'community'
+                }, '*');
+                
+                console.log("📨 Mensajes para simular tercer botón enviados al padre");
+            } catch (e) {
+                console.error("❌ Error enviando mensaje de contacto:", e);
+            }
+            
+            // Feedback visual temporal
+            const button = event.target.closest('.mui-button');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<span class="material-icons" style="margin-right: 8px;">check_circle</span>¡Activando contacto!<span style="margin-left: 8px;">✨</span>';
+            button.style.background = 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)';
+            
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.style.background = '';
+            }, 2000);
+        }
         
         // Check if page is in an iframe
         function isInIframe() {
