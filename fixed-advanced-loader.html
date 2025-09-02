@@ -887,6 +887,26 @@
                         cafeMenuIframe = iframe;
                     }
                 });
+                
+                // Check if the cafe menu is already active (returning from contact form)
+                if (event.data.screenActive) {
+                    console.log("🔄 Cafe menu is returning from contact form - keeping screen active");
+                    cafeMenuScreenOn = true;
+                    cafeMenuButtonClicked = true; // Mark as if button was clicked to maintain state
+                    
+                    // Make sure the black cover is transparent
+                    if (window.cafeMenuScreenMaterial) {
+                        window.cafeMenuScreenMaterial.transparent = true;
+                        window.cafeMenuScreenMaterial.opacity = 0.0;
+                        window.cafeMenuScreenMaterial.needsUpdate = true;
+                    }
+                    
+                    // Show the HTML content if visible from front
+                    if (window.cafeMenuCssObject && window.cafeMenuCssObject.element && isCafeMenuPlaneVisibleFromFront()) {
+                        window.cafeMenuCssObject.element.style.display = 'block';
+                        console.log("HTML del cafe menu mostrado automáticamente al retornar de formulario");
+                    }
+                }
             }
             
             // Recibir confirmación de que la pantalla de cafe-menu se encendió

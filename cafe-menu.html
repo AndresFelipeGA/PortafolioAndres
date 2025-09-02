@@ -217,10 +217,10 @@
             </div>
             
             <!-- Coffee 6 -->
-            <div class="coffee-item" data-service="devops">
-                <img src="media/icons/typeOfCoffes/cafeNumeroSeis.png" alt="Prompt Engineer Coffee" class="coffee-image">
-                <h3 class="coffee-title">Prompt Engineer</h3>
-                <p class="coffee-description">Development of systems and solutions through prompt engineering for artificial intelligence.</p>
+            <div class="coffee-item" data-service="mobile">
+                <img src="media/icons/typeOfCoffes/cafeNumeroSeis.png" alt="Mobile App Development Coffee" class="coffee-image">
+                <h3 class="coffee-title">Mobile App Development</h3>
+                <p class="coffee-description">Native and cross-platform mobile applications for iOS and Android with modern frameworks.</p>
             </div>
         </div>
         
@@ -313,8 +313,8 @@
                     case 'web':
                         window.location.href = 'contact-form-web.html';
                         break;
-                    case 'devops':
-                        window.location.href = 'contact-form-devops.html';
+                    case 'mobile':
+                        window.location.href = 'contact-form-mobile.html';
                         break;
                     default:
                         alert('Please select a service first.');
@@ -330,11 +330,23 @@
         
         // Variables para el control del cover negro
         const screenCover = document.getElementById('screen-cover');
-        let screenActive = false; // Estado de la pantalla - INICIA APAGADA (cover activo)
+        // Function to check if we're returning from a contact form
+        function isReturningFromContactForm() {
+            // Check if the referring page was a contact form
+            return document.referrer && document.referrer.includes('contact-form-');
+        }
         
-        // Asegurar que el cover esté visible al inicio
-        screenCover.classList.remove('hidden');
-        console.log("🚀 Inicializando cafe-menu.html con cover negro ACTIVO por defecto");
+        // Initial screen state - should start active if returning from contact form
+        let screenActive = isReturningFromContactForm(); // INICIA ACTIVADA si viene de formulario de contacto
+        
+        // Set initial cover state based on screenActive
+        if (screenActive) {
+            screenCover.classList.add('hidden');
+            console.log("🚀 Inicializando cafe-menu.html con cover OCULTO (pantalla activa) - regreso de formulario");
+        } else {
+            screenCover.classList.remove('hidden');
+            console.log("🚀 Inicializando cafe-menu.html con cover negro ACTIVO por defecto");
+        }
         
         // Check if page is in an iframe
         function isInIframe() {
