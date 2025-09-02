@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comunidad</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: transparent;
+            height: 100vh;
+            color: #333;
+            font-size: 13px;
+            overflow: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('media/pictures/picturesOfSometingElse/Community.png') no-repeat center center;
+            background-size: cover;
+            transform: scaleX(-1);
+            z-index: -1;
+        }
+        
+        .container {
+            height: 100vh;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        
+        .community-card {
+            background: linear-gradient(135deg,
+                rgba(245, 245, 220, 0.95) 0%,
+                rgba(255, 248, 220, 0.90) 100%);
+            border: 3px solid rgba(139, 69, 19, 0.4);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 95%;
+            height: 90vh;
+            box-shadow: 0 15px 35px rgba(139, 69, 19, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+        }
+        
+        .community-title {
+            color: #654321;
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(139, 69, 19, 0.2);
+            text-align: center;
+        }
+        
+        .community-content {
+            color: #5d4037;
+            font-size: 16px;
+            line-height: 1.8;
+            text-align: justify;
+            padding: 20px;
+            background: rgba(139, 69, 19, 0.1);
+            border-radius: 12px;
+            border-left: 4px solid #8b4513;
+            max-width: 100%;
+        }
+        
+        .community-content p {
+            margin-bottom: 20px;
+        }
+        
+        .highlight {
+            color: #654321;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="community-card">
+            <div class="community-content">
+                <p>Lo que más me gusta desarrollar son cosas que marquen <span class="highlight">impacto real</span> en las personas. Me apasiona trabajar con startups y emprendimientos porque cada proyecto es único, cada idea tiene el potencial de cambiar vidas, y hay algo especial en ver cómo una simple idea se convierte en una realidad digital funcional.</p>
+                
+                <p>Entiendo perfectamente los desafíos que enfrentan los emprendedores al iniciar sus proyectos. Por eso trato de ofrecer costos accesibles para el desarrollo de software, páginas web y aplicaciones. Muchas veces los emprendedores tienen proyectos increíbles pero se ven limitados por los altos costos de desarrollo tradicional.</p>
+                
+                <p>Si tienes una idea, un emprendimiento o una startup que necesita desarrollo de software, páginas web, aplicaciones móviles o cualquier solución tecnológica, <span class="highlight">hablemos</span>. Me encanta ser parte del proceso de convertir ideas en realidad.</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        console.log("🚀 Community.html cargado completamente");
+        
+        let isActive = false;
+        
+        // Check if page is in an iframe
+        function isInIframe() {
+            try {
+                return window.self !== window.top;
+            } catch (e) {
+                return true;
+            }
+        }
+        
+        // Listen for messages from the parent window
+        window.addEventListener('message', function(event) {
+            console.log("📨 Mensaje recibido en community.html:", event.data);
+            
+            if (event.data && event.data.action === 'turnOnScreen') {
+                console.log("🔛 Recibido mensaje para encender pantalla community");
+                isActive = true;
+                
+                try {
+                    window.parent.postMessage({ action: 'communityScreenTurnedOn' }, '*');
+                    console.log("✅ Confirmación enviada: pantalla community encendida");
+                } catch (e) {
+                    console.error("❌ Error enviando confirmación al padre:", e);
+                }
+            }
+            
+            if (event.data && event.data.action === 'turnOffScreen') {
+                console.log("🔴 Recibido mensaje para apagar pantalla community");
+                isActive = false;
+                
+                try {
+                    window.parent.postMessage({ action: 'communityScreenTurnedOff' }, '*');
+                    console.log("✅ Confirmación enviada: pantalla community apagada");
+                } catch (e) {
+                    console.error("❌ Error enviando confirmación al padre:", e);
+                }
+            }
+        });
+        
+        // Send ready message to parent
+        if (isInIframe()) {
+            try {
+                window.parent.postMessage({ action: 'communityReady' }, '*');
+                console.log("✅ Mensaje 'communityReady' enviado al padre");
+            } catch (e) {
+                console.error("❌ Error enviando mensaje al padre:", e);
+            }
+        }
+        
+        // Aplicar transformación para corrección de orientación (similar a otros archivos)
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.style.transform = 'rotate(180deg) scaleX(-1)';
+            console.log("🔄 Transformación 3D aplicada en community.html");
+        });
+    </script>
+</body>
+</html>
