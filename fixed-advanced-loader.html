@@ -1019,44 +1019,14 @@
             if (event.data && event.data.action === 'communityScreenTurnedOn') {
                 console.log("🎯 Recibida confirmación de que la pantalla de community se encendió");
                 communityScreenOn = true;
-                
-                // Solo hacer transparente el plano negro si el botón ha sido clickeado
-                if (communityButtonClicked && window.communityScreenMaterial) {
-                    window.communityScreenMaterial.transparent = true;
-                    window.communityScreenMaterial.opacity = 0.0;
-                    window.communityScreenMaterial.needsUpdate = true;
-                    console.log("🎯 Cover negro de community hecho transparente");
-                }
-                
-                // Solo mostrar el contenido HTML si el botón ha sido clickeado y estamos viendo desde el frente
-                if (communityButtonClicked && window.communityCssObject && window.communityCssObject.element && isCommunityPlaneVisibleFromFront()) {
-                    window.communityCssObject.element.style.visibility = 'visible';
-                    window.communityCssObject.element.style.pointerEvents = 'auto';
-                    console.log("🎯 Contenido HTML de community mostrado");
-                }
+                // La lógica de mostrar contenido se maneja en updateCommunityVisibility()
             }
             
             // Recibir confirmación de que la pantalla de community se apagó
             if (event.data && event.data.action === 'communityScreenTurnedOff') {
                 console.log("🎯 Recibida confirmación de que la pantalla de community se apagó");
                 communityScreenOn = false;
-                
-                // Forzar que el cover negro sea visible cuando se apaga la pantalla
-                if (window.communityScreenMaterial && window.communityBackPlane) {
-                    window.communityScreenMaterial.color.set(0x000000); // Asegurar color negro
-                    window.communityScreenMaterial.transparent = false;
-                    window.communityScreenMaterial.opacity = 1.0;
-                    window.communityScreenMaterial.needsUpdate = true;
-                    window.communityBackPlane.visible = true;
-                    console.log("🎯 Cover negro de community forzado a visible al apagar pantalla");
-                }
-                
-                // Ocultar el contenido HTML
-                if (window.communityCssObject && window.communityCssObject.element) {
-                    window.communityCssObject.element.style.visibility = 'hidden';
-                    window.communityCssObject.element.style.pointerEvents = 'none';
-                    console.log("🎯 Contenido HTML de community ocultado");
-                }
+                // La lógica de ocultar contenido se maneja en updateCommunityVisibility()
             }
             
             // NUEVO: Manejar mensajes desde community.html para simular el tercer botón
@@ -2201,10 +2171,10 @@
             }
             lastCommunityUpdateTime = now;
             
-            if (!window.communityScreenMaterial || !window.communityBackPlane) {
+            if (!window.communityCssObject || !window.communityScreenMaterial || !window.communityBackPlane) {
                 // Solo log una vez cuando falten materiales
                 if (!window.communityMaterialsErrorLogged) {
-                    console.log("❌ Materiales de community no encontrados - inicializando...");
+                    console.log("❌ Community materials o CSS object no encontrados - inicializando...");
                     window.communityMaterialsErrorLogged = true;
                 }
                 return;
@@ -2232,32 +2202,38 @@
             lastCommunityButtonClickedState = communityButtonClicked;
             lastCommunityScreenOnState = communityScreenOn;
             
-            // SIEMPRE mantener el plano negro visible
-            window.communityBackPlane.visible = true;
-            
+            // ==========================================
             // LÓGICA DEL COVER NEGRO
-            if (!communityButtonClicked || !communityScreenOn) {
-                // Si el botón NO ha sido clickeado O la pantalla está apagada, mantener el cover negro visible
-                window.communityScreenMaterial.color.set(0x000000); // Negro
-                window.communityScreenMaterial.transparent = false;
-                window.communityScreenMaterial.opacity = 1.0;
-                window.communityScreenMaterial.needsUpdate = true;
-            } else {
-                // SOLO hacer transparente el cover si el botón fue clickeado Y la pantalla está encendida Y es visible desde el frente
-                if (isVisibleFromFront) {
-                    window.communityScreenMaterial.transparent = true;
-                    window.communityScreenMaterial.opacity = 0.0;
-                    window.communityScreenMaterial.needsUpdate = true;
-                } else {
-                    // Mantener negro si no es visible desde el frente, aunque el botón esté clickeado
-                    window.communityScreenMaterial.color.set(0x000000);
+            // ==========================================
+            if (window.communityScreenMaterial && window.communityBackPlane) {
+                if (!communityButtonClicked || !communityScreenOn) {
+                    // Si el botón NO ha sido clickeado O la pantalla está apagada, mantener el cover negro visible
+                    window.communityScreenMaterial.color.set(0x000000); // Negro
                     window.communityScreenMaterial.transparent = false;
                     window.communityScreenMaterial.opacity = 1.0;
                     window.communityScreenMaterial.needsUpdate = true;
+                    window.communityBackPlane.visible = true;
+                    console.log("🎯 Cover negro de community visible");
+                } else {
+                    // SOLO hacer transparente el cover si el botón fue clickeado Y la pantalla está encendida Y es visible desde el frente
+                    if (isVisibleFromFront) {
+                        window.communityScreenMaterial.transparent = true;
+                        window.communityScreenMaterial.opacity = 0.0;
+                        window.communityScreenMaterial.needsUpdate = true;
+                        console.log("🎯 Cover negro de community hecho transparente");
+                    } else {
+                        // Mantener negro si no es visible desde el frente, aunque el botón esté clickeado
+                        window.communityScreenMaterial.color.set(0x000000);
+                        window.communityScreenMaterial.transparent = false;
+                        window.communityScreenMaterial.opacity = 1.0;
+                        window.communityScreenMaterial.needsUpdate = true;
+                    }
                 }
             }
             
-            // LÓGICA DEL CONTENIDO HTML - Solo mostrar si es visible desde el frente
+            // ==========================================
+            // LÓGICA DEL CONTENIDO HTML
+            // ==========================================
             if (isVisibleFromFront) {
                 
                 // Solo mostrar contenido si el botón fue clickeado
@@ -2798,6 +2774,22 @@
                             
                             sendMessageToAboutMeDuplicate('turnOffScreen');
                             deactivateAboutMeDuplicateScreen();
+                        }
+                        
+                        // TAMBIÉN desactivar community cuando hay movimiento real
+                        if (communityButtonClicked) {
+                            console.log("📤 MOVIMIENTO REAL detectado - desactivando community");
+                            communityButtonClicked = false;
+                            
+                            // Enviar mensaje al iframe de community
+                            if (communityIframe && communityIframe.contentWindow) {
+                                communityIframe.contentWindow.postMessage({
+                                    action: 'realMovementDetected'
+                                }, '*');
+                                console.log("📤 MOVIMIENTO REAL detectado - mensaje específico enviado a community.html");
+                            }
+                            
+                            sendMessageToCommunity('turnOffScreen');
                         }
                     }
                 }
@@ -4239,6 +4231,11 @@
             // NOTIFICAR A PROJECTS.HTML QUE OTRO BOTÓN FUE PRESIONADO
             sendMessageToProjects('turnOffScreen');
             
+            // NOTIFICAR A COMMUNITY.HTML QUE OTRO BOTÓN FUE PRESIONADO
+            sendMessageToCommunity('turnOffScreen');
+            communityButtonClicked = false;
+            console.log("🔄 Desactivando community desde cafe-menu button");
+            
             // ENVIAR MENSAJE ESPECÍFICO DE BOTÓN PRESIONADO AL CAFE-MENU
             setTimeout(function() {
                 if (cafeMenuIframe && cafeMenuIframe.contentWindow) {
@@ -4342,6 +4339,11 @@
             // NOTIFICAR A CAFE-MENU.HTML QUE OTRO BOTÓN FUE PRESIONADO
             sendMessageToCafeMenu('turnOffScreen');
             
+            // NOTIFICAR A COMMUNITY.HTML QUE OTRO BOTÓN FUE PRESIONADO
+            sendMessageToCommunity('turnOffScreen');
+            communityButtonClicked = false;
+            console.log("🔄 Desactivando community desde about-me button");
+            
             // Activar la pantalla personal (about-me.html)
             console.log("Enviando mensaje para activar pantalla de about-me desde startFirstButtonCameraAnimation");
             
@@ -4443,6 +4445,11 @@
             
             // NOTIFICAR A CAFE-MENU.HTML QUE OTRO BOTÓN FUE PRESIONADO
             sendMessageToCafeMenu('turnOffScreen');
+            
+            // NOTIFICAR A COMMUNITY.HTML QUE OTRO BOTÓN FUE PRESIONADO
+            sendMessageToCommunity('turnOffScreen');
+            communityButtonClicked = false;
+            console.log("🔄 Desactivando community desde projects button");
             
             // ENVIAR MENSAJE ESPECÍFICO DE BOTÓN PRESIONADO AL PROJECTS
             setTimeout(function() {
@@ -4555,6 +4562,11 @@
             
             // NOTIFICAR A CAFE-MENU.HTML QUE OTRO BOTÓN FUE PRESIONADO
             sendMessageToCafeMenu('turnOffScreen');
+            
+            // NOTIFICAR A COMMUNITY.HTML QUE OTRO BOTÓN FUE PRESIONADO
+            sendMessageToCommunity('turnOffScreen');
+            communityButtonClicked = false;
+            console.log("🔄 Desactivando community desde messages button");
             
             // ENVIAR MENSAJE ESPECÍFICO DE BOTÓN PRESIONADO AL CONTACT
             setTimeout(function() {
@@ -7136,10 +7148,10 @@
             }
             
             // COORDENADAS EXACTAS proporcionadas por el usuario para el plano de community
-            const topLeft = new THREE.Vector3(4.99, 4.74, 7.05);
-            const topRight = new THREE.Vector3(4.17, 4.74, 7.72);
-            const bottomLeft = new THREE.Vector3(4.87, 4.13, 6.90);
-            const bottomRight = new THREE.Vector3(4.06, 4.13, 7.58);
+            const topLeft = new THREE.Vector3(4.986, 4.74, 7.046);
+            const topRight = new THREE.Vector3(4.166, 4.74, 7.716);
+            const bottomLeft = new THREE.Vector3(4.866, 4.13, 6.896);
+            const bottomRight = new THREE.Vector3(4.056, 4.13, 7.576);
             
             // Convertir coordenadas relativas a absolutas (sumando el offset)
             const absoluteTopLeft = new THREE.Vector3().copy(topLeft).add(originOffset);
@@ -7203,40 +7215,49 @@
             // Añadir el plano invisible a la escena
             scene.add(invisiblePlane);
             
-            // Crear un plano negro de fondo (cover negro inicial)
+            // =============================================
+            // CREAR COVER NEGRO PARA COMMUNITY
+            // =============================================
+            
+            // Crear material negro para el cover
             const communityBackPlaneMaterial = new THREE.MeshBasicMaterial({
                 color: 0x000000,
                 side: THREE.DoubleSide,
                 transparent: false,
                 opacity: 1.0,
                 depthWrite: true,
-                depthTest: true
+                depthTest: true,
+                polygonOffset: true,
+                polygonOffsetFactor: -1,
+                polygonOffsetUnits: -1
             });
             
+            // Crear plano negro con tamaño mucho mayor para cobertura total garantizada
             const communityBackPlane = new THREE.Mesh(
-                new THREE.PlaneGeometry(width * 0.98, height * 0.98),
+                new THREE.PlaneGeometry(width * 1.15, height * 1.15),  // Incremento del 15% para cobertura absoluta
                 communityBackPlaneMaterial
             );
             
-            // Guardar referencias globales
+            // Guardar referencias globales para el cover negro
             window.communityScreenMaterial = communityBackPlaneMaterial;
             window.communityBackPlane = communityBackPlane;
             
-            // Posicionar el plano negro
-            communityBackPlane.position.copy(center);
-            communityBackPlane.rotation.copy(rotation);
+            // Posicionar el cover negro EXACTAMENTE en la misma posición que el HTML
+            // Usar las mismas coordenadas del plano invisible donde está el HTML
+            communityBackPlane.position.set(center.x, center.y, center.z);  // Posición exacta
+            communityBackPlane.rotation.set(rotation.x, rotation.y, rotation.z);  // Rotación exacta
             
-            // Ajustar posición ligeramente
-            communityBackPlane.position.x += 0.01;
-            communityBackPlane.position.y -= 0.01;
-            communityBackPlane.position.z += 0.001;
+            // Ajuste ultra mínimo hacia adelante en Z para que esté visible pero perfectamente alineado
+            communityBackPlane.position.z += 0.0001;  // Offset aún más pequeño que antes
             
-            // Configurar renderOrder
-            communityBackPlane.renderOrder = 10;
+            // Configurar renderOrder para que esté por encima
+            communityBackPlane.renderOrder = 15;
             
-            // Añadir el plano negro a la escena
+            // Añadir el cover negro a la escena
             scene.add(communityBackPlane);
-            console.log("Plano negro de fondo para community añadido a la escena");
+            console.log("Cover negro para community creado y añadido a la escena");
+            
+            console.log("Community plane añadido a la escena");
             
             // Crear un iframe con community.html
             const iframe = document.createElement('iframe');
@@ -7289,6 +7310,26 @@
             
             console.log("Plano community interactivo creado con las coordenadas especificadas");
             
+            // Inicializar el estado del cover negro
+            setTimeout(function() {
+                if (window.communityScreenMaterial && window.communityBackPlane) {
+                    // Asegurar que el cover negro esté visible inicialmente
+                    window.communityScreenMaterial.color.set(0x000000);
+                    window.communityScreenMaterial.transparent = false;
+                    window.communityScreenMaterial.opacity = 1.0;
+                    window.communityScreenMaterial.needsUpdate = true;
+                    window.communityBackPlane.visible = true;
+                    console.log("🖤 Cover negro de community inicializado como VISIBLE");
+                }
+                
+                // Asegurar que el contenido HTML esté oculto inicialmente
+                if (window.communityCssObject && window.communityCssObject.element) {
+                    window.communityCssObject.element.style.visibility = 'hidden';
+                    window.communityCssObject.element.style.pointerEvents = 'none';
+                    console.log("🔒 Contenido HTML de community inicializado como OCULTO");
+                }
+            }, 100);
+            
             return invisiblePlane;
         }
         
@@ -7308,58 +7349,7 @@
             // Configurar el plano invisible para la pantalla interactiva
             const invisiblePlane = setupCommunityScreen();
             
-            // Asegurar que el cover negro esté visible inicialmente
-            setTimeout(function() {
-                if (window.communityScreenMaterial && window.communityBackPlane) {
-                    window.communityScreenMaterial.color.set(0x000000);
-                    window.communityScreenMaterial.transparent = false;
-                    window.communityScreenMaterial.opacity = 1.0;
-                    window.communityScreenMaterial.needsUpdate = true;
-                    window.communityBackPlane.visible = true;
-                    console.log("Cover negro inicializado como visible para community");
-                }
-            }, 100);
-            
-            // Segundo intento por si acaso
-            setTimeout(function() {
-                if (window.communityScreenMaterial && window.communityBackPlane) {
-                    window.communityScreenMaterial.color.set(0x000000);
-                    window.communityScreenMaterial.transparent = false;
-                    window.communityScreenMaterial.opacity = 1.0;
-                    window.communityScreenMaterial.needsUpdate = true;
-                    window.communityBackPlane.visible = true;
-                }
-            }, 500);
-            
-            // INICIALIZACIÓN ADICIONAL - Forzar estado inicial correcto
-            setTimeout(function() {
-                console.log("🚀 INICIALIZACIÓN COMMUNITY: Forzando estado inicial");
-                
-                // Asegurar que las variables de estado estén correctas
-                communityButtonClicked = false;
-                communityScreenOn = false;
-                console.log("Variables de estado inicializadas para community:", {
-                    communityButtonClicked: communityButtonClicked,
-                    communityScreenOn: communityScreenOn
-                });
-                
-                // Forzar cover negro visible
-                if (window.communityScreenMaterial && window.communityBackPlane) {
-                    window.communityScreenMaterial.color.set(0x000000);
-                    window.communityScreenMaterial.transparent = false;
-                    window.communityScreenMaterial.opacity = 1.0;
-                    window.communityScreenMaterial.needsUpdate = true;
-                    window.communityBackPlane.visible = true;
-                    console.log("✅ Cover negro FORZADO como visible para community");
-                }
-                
-                // Forzar contenido HTML oculto
-                if (window.communityCssObject && window.communityCssObject.element) {
-                    window.communityCssObject.element.style.visibility = 'hidden';
-                    window.communityCssObject.element.style.pointerEvents = 'none';
-                    console.log("✅ Contenido HTML FORZADO como oculto para community");
-                }
-            }, 800);
+            console.log("Community plane configurado correctamente");
             
             return invisiblePlane;
         }
@@ -7387,33 +7377,6 @@
             return isVisible;
         }
         
-        // Función para apagar la pantalla de community
-        function deactivateCommunityScreen() {
-            console.log("Desactivando pantalla de community...");
-            
-            // Restaurar cover negro
-            if (window.communityScreenMaterial && window.communityBackPlane) {
-                window.communityScreenMaterial.color.set(0x000000);
-                window.communityScreenMaterial.transparent = false;
-                window.communityScreenMaterial.opacity = 1.0;
-                window.communityScreenMaterial.needsUpdate = true;
-                window.communityBackPlane.visible = true;
-                
-                console.log("Cover negro de community restaurado");
-            }
-            
-            // Ocultar contenido HTML
-            if (window.communityCssObject && window.communityCssObject.element) {
-                window.communityCssObject.element.style.visibility = 'hidden';
-                window.communityCssObject.element.style.pointerEvents = 'none';
-                console.log("Contenido HTML de community oculto");
-            }
-            
-            // Enviar mensaje al iframe para apagar la pantalla
-            setTimeout(function() {
-                sendMessageToCommunity('turnOffScreen');
-            }, 100);
-        }
     </script>
 </body>
 </html>

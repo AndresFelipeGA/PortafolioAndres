@@ -8,7 +8,8 @@
     <!-- Material-UI CSS -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-    <link rel="stylesheet" href="https://unpkg.com/@mui/material@latest/umd/material-ui.min.css" />
+    <link rel="stylesheet" href="https://unpkg.        
+        // Send ready message to parentterial@latest/umd/material-ui.min.css" />
     
     <!-- Colombian Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -351,6 +352,15 @@
         console.log("🚀 Community.html loaded completely");
         
         let isActive = false;
+        
+        // Check if page is in an iframe
+        function isInIframe() {
+            try {
+                return window.self !== window.top;
+            } catch (e) {
+                return true;
+            }
+        }
         
         // Function to handle contact button click
         function handleContactClick() {
