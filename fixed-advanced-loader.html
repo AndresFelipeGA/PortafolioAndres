@@ -2845,6 +2845,13 @@
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             
+            // Limitar el ángulo de inclinación vertical - evitar que se vea por debajo del modelo
+            // Temporalmente comentado para probar si interfiere con animaciones de botones
+            // controls.maxPolarAngle = Math.PI / 2 - Math.PI / 18; // 90° - 10° = 80° máximo desde la vertical
+            
+            // Deshabilitar desplazamiento con click derecho (pan) temporalmente
+            controls.enablePan = false;
+            
             // SISTEMA DE DETECCIÓN DE MOVIMIENTO REAL (NO SOLO HOVER)
             // 🔧 CONFIGURACIÓN DE SENSIBILIDAD - Ajustar según necesidades
             let lastCameraPosition = new THREE.Vector3();
