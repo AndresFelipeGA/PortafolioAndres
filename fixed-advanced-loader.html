@@ -258,35 +258,18 @@
             transform: translateX(-50%) scale(0.98);
         }
         
-        .music-icon {
-            width: 16px;
-            height: 16px;
-            display: inline-block;
-            position: relative;
+        .bandola-icon, .acordeon-icon {
+            width: 25px;
+            height: 25px;
+            object-fit: contain;
         }
         
-        .music-icon::before,
-        .music-icon::after {
-            content: '';
-            position: absolute;
-            background-color: white;
+        .bandola-icon {
+            margin-right: 5px;
         }
         
-        .music-icon::before {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            top: 0;
-            left: 0;
-            box-shadow: 10px 0 0 0 white;
-        }
-        
-        .music-icon::after {
-            width: 2px;
-            height: 10px;
-            top: 6px;
-            left: 2px;
-            box-shadow: 10px 0 0 0 white;
+        .acordeon-icon {
+            margin-left: 5px;
         }
         /* Estilos para el GIF de la taza de café */
         .coffee-container {
@@ -454,8 +437,9 @@
         
         <!-- Button to activate music -->
         <button id="music-activate-btn" class="music-button">
-            <span class="music-icon"></span>
+            <img src="media/icons/Bandola.png" alt="Bandola" class="bandola-icon">
             Activate Music
+            <img src="media/icons/Acordeon.png" alt="Acordeon" class="acordeon-icon">
         </button>
         </div>
     </div>
@@ -4298,8 +4282,8 @@
         function startCameraAnimation() {
             // Coordenadas iniciales y finales (relativas al origen personalizado)
             const startCameraPos = new THREE.Vector3(43.60, 34.42, -69.81);
-            const endCameraPos = new THREE.Vector3(-33.53, 21.07, 71.36);
-            const targetPos = new THREE.Vector3(10.00, 14.10, 2.20);
+            const endCameraPos = new THREE.Vector3(-20.43, 19.95, 57.95);
+            const targetPos = new THREE.Vector3(-2.36, 3.64, 9.29);
             
             // Convertir coordenadas relativas a absolutas (sumando el offset)
             const absoluteStartPos = new THREE.Vector3().copy(startCameraPos).add(originOffset);
