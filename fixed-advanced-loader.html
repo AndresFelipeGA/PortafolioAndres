@@ -2846,11 +2846,14 @@
             controls.enableDamping = true;
             
             // Limitar el ángulo de inclinación vertical - evitar que se vea por debajo del modelo
-            // Temporalmente comentado para probar si interfiere con animaciones de botones
-            // controls.maxPolarAngle = Math.PI / 2 - Math.PI / 18; // 90° - 10° = 80° máximo desde la vertical
+            // maxPolarAngle: límite superior (no puede bajar más de 80° desde arriba)
+            controls.maxPolarAngle = Math.PI / 2 - Math.PI / 18; // 90° - 10° = 80° máximo desde la vertical
             
-            // Deshabilitar desplazamiento con click derecho (pan) temporalmente
-            controls.enablePan = false;
+            // minPolarAngle: límite inferior (no puede subir más allá de 10° desde arriba)
+            controls.minPolarAngle = Math.PI / 18; // 10° mínimo desde la vertical (evita vista cenital completa)
+            
+            // Habilitar desplazamiento con click derecho (pan)
+            controls.enablePan = true;
             
             // SISTEMA DE DETECCIÓN DE MOVIMIENTO REAL (NO SOLO HOVER)
             // 🔧 CONFIGURACIÓN DE SENSIBILIDAD - Ajustar según necesidades
@@ -3392,6 +3395,9 @@
                     console.log("Click fuera del plano de projects - desactivando pantalla");
                     projectsButtonClicked = false;
                     deactivateProjectsScreen();
+                    
+                    // FUNCIONALIDAD DESACTIVADA: Animar de regreso al punto inicial
+                    // returnToInitialPosition();
                 }
                 
                 // ===============================================
@@ -3489,6 +3495,72 @@
                     aboutMeDuplicateButtonClicked = false;
                     aboutMeDuplicateActivatedByLastButton = false; // Reset del flag
                     deactivateAboutMeDuplicateScreen();
+                    
+                    // FUNCIONALIDAD DESACTIVADA: Animar de regreso al punto inicial
+                    // returnToInitialPosition();
+                }
+                
+                // ===============================================
+                // DETECCIÓN DE CLICK FUERA PARA CONTACT
+                // ===============================================
+                let clickedOnContact = false;
+                if (window.contactPlane && contactButtonClicked) {
+                    raycaster.setFromCamera(mouse, camera);
+                    const contactIntersects = raycaster.intersectObject(window.contactPlane);
+                    if (contactIntersects.length > 0) {
+                        clickedOnContact = true;
+                    }
+                }
+                
+                if (!clickedOnContact && contactButtonClicked) {
+                    console.log("Click fuera del plano de contact - desactivando pantalla");
+                    contactButtonClicked = false;
+                    deactivateContactScreen();
+                    
+                    // FUNCIONALIDAD DESACTIVADA: Animar de regreso al punto inicial
+                    // returnToInitialPosition();
+                }
+                
+                // ===============================================
+                // DETECCIÓN DE CLICK FUERA PARA COMMUNITY
+                // ===============================================
+                let clickedOnCommunity = false;
+                if (window.communityPlane && communityButtonClicked) {
+                    raycaster.setFromCamera(mouse, camera);
+                    const communityIntersects = raycaster.intersectObject(window.communityPlane);
+                    if (communityIntersects.length > 0) {
+                        clickedOnCommunity = true;
+                    }
+                }
+                
+                if (!clickedOnCommunity && communityButtonClicked) {
+                    console.log("Click fuera del plano de community - desactivando pantalla");
+                    communityButtonClicked = false;
+                    deactivateCommunityScreen();
+                    
+                    // FUNCIONALIDAD DESACTIVADA: Animar de regreso al punto inicial
+                    // returnToInitialPosition();
+                }
+                
+                // ===============================================
+                // DETECCIÓN DE CLICK FUERA PARA CAFE MENU (BROWN PLANE)
+                // ===============================================
+                let clickedOnCafeMenu = false;
+                if (window.brownPlane && cafeMenuButtonClicked) {
+                    raycaster.setFromCamera(mouse, camera);
+                    const cafeMenuIntersects = raycaster.intersectObject(window.brownPlane);
+                    if (cafeMenuIntersects.length > 0) {
+                        clickedOnCafeMenu = true;
+                    }
+                }
+                
+                if (!clickedOnCafeMenu && cafeMenuButtonClicked) {
+                    console.log("Click fuera del plano de cafe menu - desactivando pantalla");
+                    cafeMenuButtonClicked = false;
+                    deactivateCafeMenuScreen();
+                    
+                    // FUNCIONALIDAD DESACTIVADA: Animar de regreso al punto inicial
+                    // returnToInitialPosition();
                 }
             });
             
@@ -4600,8 +4672,8 @@
         // Función para iniciar la animación de la cámara hacia el punto específico cuando se hace clic en el botón de projects (carpetas)
         function startProjectsButtonCameraAnimation() {
             // Coordenadas específicas a las que queremos mover la cámara (relativas al origen personalizado)
-            // Coordenadas proporcionadas: Cámara: X: -1.94, Y: 6.09, Z: 5.46
-            const targetCameraPos = new THREE.Vector3(-1.94, 6.09, 5.46);
+            // NUEVAS COORDENADAS: Cámara: X: -1.65, Y: 6.39, Z: 5.11
+            const targetCameraPos = new THREE.Vector3(-1.65, 6.39, 5.11);
             
             // Convertir coordenadas relativas a absolutas (sumando el offset)
             const absoluteTargetPos = new THREE.Vector3().copy(targetCameraPos).add(originOffset);
@@ -4610,8 +4682,8 @@
             const currentCameraPos = new THREE.Vector3().copy(camera.position);
             
             // Punto específico al que mirará la cámara
-            // Coordenadas proporcionadas: Objetivo: X: -5.43, Y: 5.69, Z: 12.08
-            const lookAtPoint = new THREE.Vector3(-5.43, 5.69, 12.08).add(originOffset);
+            // NUEVAS COORDENADAS: Objetivo: X: -3.69, Y: 5.66, Z: 8.69
+            const lookAtPoint = new THREE.Vector3(-3.69, 5.66, 8.69).add(originOffset);
             
             console.log("Coordenadas objetivo para botón de projects (relativas):", targetCameraPos);
             console.log("Coordenadas objetivo para botón de projects (absolutas):", absoluteTargetPos);
@@ -4675,6 +4747,9 @@
                     sendMessageToProjects('turnOnScreen');
                 }, 1000);
             }, 500);
+            
+            // Los límites de ángulo permanecen activos (80° máximo, 10° mínimo)
+            // para evitar que se vea por debajo del modelo
             
             // Configurar la animación
             cameraAnimation.enabled = true;
@@ -4981,6 +5056,67 @@
         // FUNCIÓN DE ANIMACIÓN DE CÁMARA PERSONALIZADA
         // ===============================================
         
+        // Nueva función para regresar a la posición inicial
+        function returnToInitialPosition() {
+            console.log("Iniciando animación de regreso al punto inicial");
+            
+            // Coordenadas iniciales del sistema de coordenadas
+            // Cámara: X: -23.15, Y: 22.89, Z: 66.07
+            // Objetivo: X: -2.07, Y: 3.86, Z: 9.32
+            const initialCameraPos = new THREE.Vector3(-23.15, 22.89, 66.07);
+            const initialLookAtPos = new THREE.Vector3(-2.07, 3.86, 9.32);
+            
+            // Convertir coordenadas relativas a absolutas (sumando el offset)
+            const absoluteCameraPos = new THREE.Vector3().copy(initialCameraPos).add(originOffset);
+            const absoluteLookAtPos = new THREE.Vector3().copy(initialLookAtPos).add(originOffset);
+            
+            // Posición actual de la cámara
+            const currentCameraPos = new THREE.Vector3().copy(camera.position);
+            
+            console.log("Regresando a posición inicial:");
+            console.log("Posición de cámara objetivo:", initialCameraPos);
+            console.log("Punto de mira objetivo:", initialLookAtPos);
+            
+            // Configurar la animación
+            cameraAnimation.enabled = true;
+            cameraAnimation.startTime = Date.now();
+            cameraAnimation.duration = 2000; // 2 segundos de duración
+            cameraAnimation.initialPosition.copy(currentCameraPos);
+            cameraAnimation.targetPosition.copy(absoluteCameraPos);
+            cameraAnimation.initialTarget.copy(controls.target);
+            cameraAnimation.finalTarget.copy(absoluteLookAtPos);
+            
+            // Crear una trayectoria suave entre la posición actual y la posición inicial
+            cameraAnimation.waypoints = [];
+            cameraAnimation.waypoints.push(new THREE.Vector3().copy(currentCameraPos));
+            
+            // Número de puntos intermedios para una trayectoria suave
+            const numWaypoints = 20;
+            
+            for (let i = 1; i < numWaypoints; i++) {
+                const t = i / numWaypoints;
+                const waypoint = new THREE.Vector3().lerpVectors(currentCameraPos, absoluteCameraPos, t);
+                cameraAnimation.waypoints.push(waypoint);
+            }
+            
+            // Asegurarse de que el último punto sea exactamente las coordenadas objetivo
+            cameraAnimation.waypoints.push(new THREE.Vector3().copy(absoluteCameraPos));
+            
+            // Guardar el estado original de los controles
+            cameraAnimation.originalControlsEnabled = controls.enabled;
+            
+            // Desactivar los controles durante la animación
+            controls.enabled = false;
+            
+            // Ocultar las coordenadas durante la animación
+            const coordDisplay = document.getElementById('coordinates-display');
+            if (coordDisplay) {
+                coordDisplay.style.display = 'none';
+            }
+            
+            console.log("Animación de regreso al punto inicial configurada");
+        }
+
         function startCustomCameraAnimation(targetPos, lookAtPos) {
             console.log("Iniciando animación de cámara personalizada");
             console.log("Coordenadas objetivo:", targetPos);
@@ -6624,6 +6760,8 @@
         function deactivateProjectsScreen() {
             console.log("Desactivando pantalla de projects...");
             
+            // Los límites de ángulo ya están siempre activos, no necesitan restaurarse
+            
             // Mostrar el cover negro
             if (window.projectsScreenMaterial && window.projectsBackPlane) {
                 window.projectsScreenMaterial.color.set(0x000000);
@@ -7275,6 +7413,66 @@
             // Enviar mensaje al iframe para apagar la pantalla
             setTimeout(function() {
                 sendMessageToContact('turnOffScreen');
+            }, 100);
+        }
+        
+        // Función para desactivar la pantalla de community
+        function deactivateCommunityScreen() {
+            console.log("Desactivando pantalla de community...");
+            
+            // IMPORTANTE: Marcar la pantalla como apagada
+            communityScreenOn = false;
+            
+            // Mostrar el cover negro
+            if (window.communityScreenMaterial && window.communityBackPlane) {
+                window.communityScreenMaterial.color.set(0x000000);
+                window.communityScreenMaterial.transparent = false;
+                window.communityScreenMaterial.opacity = 1.0;
+                window.communityScreenMaterial.needsUpdate = true;
+                window.communityBackPlane.visible = true;
+                console.log("Cover negro de community restaurado");
+            }
+            
+            // Ocultar contenido HTML
+            if (window.communityCssObject && window.communityCssObject.element) {
+                window.communityCssObject.element.style.visibility = 'hidden';
+                window.communityCssObject.element.style.pointerEvents = 'none';
+                console.log("Contenido HTML de community oculto");
+            }
+            
+            // Enviar mensaje al iframe para apagar la pantalla
+            setTimeout(function() {
+                sendMessageToCommunity('turnOffScreen');
+            }, 100);
+        }
+        
+        // Función para desactivar la pantalla de cafe menu
+        function deactivateCafeMenuScreen() {
+            console.log("Desactivando pantalla de cafe menu...");
+            
+            // IMPORTANTE: Marcar la pantalla como apagada
+            cafeMenuScreenOn = false;
+            
+            // Mostrar el cover negro
+            if (window.cafeMenuScreenMaterial && window.cafeMenuBackPlane) {
+                window.cafeMenuScreenMaterial.color.set(0x000000);
+                window.cafeMenuScreenMaterial.transparent = false;
+                window.cafeMenuScreenMaterial.opacity = 1.0;
+                window.cafeMenuScreenMaterial.needsUpdate = true;
+                window.cafeMenuBackPlane.visible = true;
+                console.log("Cover negro de cafe menu restaurado");
+            }
+            
+            // Ocultar contenido HTML
+            if (window.cafeMenuCssObject && window.cafeMenuCssObject.element) {
+                window.cafeMenuCssObject.element.style.visibility = 'hidden';
+                window.cafeMenuCssObject.element.style.pointerEvents = 'none';
+                console.log("Contenido HTML de cafe menu oculto");
+            }
+            
+            // Enviar mensaje al iframe para apagar la pantalla
+            setTimeout(function() {
+                sendMessageToCafeMenu('turnOffScreen');
             }, 100);
         }
         
