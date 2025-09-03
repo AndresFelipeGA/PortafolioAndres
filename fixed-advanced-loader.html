@@ -2781,13 +2781,13 @@
             phraseElement.textContent = phraseText;
             phraseElement.classList.add('visible');
             
-            // Ocultar después de 2.15 segundos (30% más tiempo adicional)
+            // Ocultar después de 3 segundos para lectura completa
             setTimeout(() => {
                 phraseElement.classList.remove('visible');
                 setTimeout(() => {
                     isShowingPhrase = false;
-                }, 400); // Esperar a que termine la transición
-            }, 2145);
+                }, 100); // Transición más rápida
+            }, 3000);
         }
         
         // Función para iniciar el sistema de frases
@@ -2795,8 +2795,8 @@
             // Mostrar la primera frase inmediatamente
             showRandomPhrase();
             
-            // Mostrar frases cada 2 segundos
-            phraseInterval = setInterval(showRandomPhrase, 2000);
+            // Mostrar frases cada 0.2 segundos para mayor velocidad
+            phraseInterval = setInterval(showRandomPhrase, 200);
         }
         
         // Función para detener el sistema de frases
