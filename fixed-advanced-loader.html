@@ -313,7 +313,7 @@
         /* Indicador de progreso de texto */
         .progress-text {
             position: absolute;
-            bottom: 10px;
+            bottom: 120px;
             left: 0;
             right: 0;
             text-align: center;
@@ -322,11 +322,21 @@
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
             z-index: 20;
         }
-        #loading-text {
-            font-size: 18px;
-            margin-bottom: 10px;
-            color: #ffffff;
-            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        #loading-tip {
+            font-size: 15px;
+            margin-top: 15px;
+            color: #f5e6d3;
+            text-shadow: 0 0 10px rgba(139, 69, 19, 0.8), 0 2px 5px rgba(0, 0, 0, 0.8);
+            font-style: italic;
+            text-align: center;
+            transition: opacity 0.5s ease-in-out;
+            min-height: 20px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.4;
         }
         #loading-stats {
             font-size: 14px;
@@ -415,6 +425,11 @@
     <div id="loading-container">
         <div class="coffee-container">
             <img src="media/icons/coffeGif.gif" class="coffee-gif" alt="Cargando...">
+        </div>
+        
+        <!-- Loading tips text -->
+        <div class="progress-text">
+            <div id="loading-tip">This portfolio is still under development</div>
         </div>
         
         <!-- Button to activate music -->
@@ -2706,10 +2721,103 @@
         // Elementos DOM
         const loadingContainer = document.getElementById('loading-container');
 
+        // Loading tips system
+        const developmentTip = "This portfolio is still under development";
+        const randomTips = [
+            "Colombia is the world's leading emerald producer - 70% of global supply!",
+            "Did you know? Colombia has over 1,900 bird species - more than Europe and North America combined!",
+            "Colombian coffee is grown at high altitudes in the magical Andes mountains",
+            "Colombia is home to 10% of the world's biodiversity in just 1% of Earth's surface",
+            "The Amazon rainforest covers 35% of Colombia - a natural treasure waiting to be explored",
+            "Colombia has both Pacific and Caribbean coastlines - double the beach paradise!",
+            "Medellín was named the most innovative city in the world in 2013",
+            "Colombia is the only South American country with coasts on two oceans",
+            "The Cocora Valley has the world's tallest palm trees - up to 60 meters high!",
+            "Caño Cristales is called 'the river of five colors' - nature's own rainbow",
+            "Colombia produces 95% of the world's emeralds in the mystical Boyacá region",
+            "The Lost City (Ciudad Perdida) is older than Machu Picchu by 650 years",
+            "Colombia has 60 national parks protecting incredible ecosystems",
+            "Cartagena's colonial walls tell 500 years of fascinating Caribbean history",
+            "Colombia is the land of eternal spring - perfect weather year-round in many regions",
+            "The Tatacoa Desert offers some of the clearest stargazing skies in South America",
+            "Colombia has over 3,000 varieties of orchids - the national flower",
+            "Guatapé's colorful houses make it one of the most photogenic towns on Earth",
+            "Colombia's salsa dancing originated in Cali - the world capital of salsa",
+            "The Magdalena River flows through the heart of Colombia for 1,540 kilometers",
+            "Colombia has 87 indigenous languages still spoken today",
+            "The Chocó region has some of the highest rainfall and biodiversity on the planet",
+            "Colombian cumbia and vallenato music are UNESCO cultural heritage",
+            "Bogotá sits at 2,640 meters above sea level - closer to the stars",
+            "The Guaviare region has ancient petroglyphs over 20,000 years old",
+            "Colombia's Pacific coast is a whale watching paradise from July to November",
+            "The páramos (high mountain ecosystems) are unique to the Andes",
+            "Colombia has the most beautiful colonial architecture in South America",
+            "The Chicamocha Canyon is deeper than the Grand Canyon",
+            "Colombian arepas come in over 100 delicious varieties across regions",
+            "Villa de Leyva's cobblestone streets haven't changed in 400 years",
+            "Colombia is a paradise for adventure seekers - hiking, diving, paragliding",
+            "The Zona Cafetera (Coffee Region) is a UNESCO World Heritage site",
+            "Colombian hospitality is legendary - 'Mi casa es su casa'",
+            "Zipaquirá's underground salt cathedral is a marvel of human engineering",
+            "Colombia has over 400 types of mammals roaming its diverse landscapes",
+            "The Serranía de Chiribiquete has over 75,000 cave paintings",
+            "Colombian chocolate is among the finest cacao in the world",
+            "The Sierra Nevada has snow-capped peaks just 42km from the Caribbean",
+            "Colombia's carnival in Barranquilla is a UNESCO masterpiece",
+            "Real-time 3D rendering powers this interactive Colombian experience",
+            "This 3D portfolio celebrates Colombia's incredible natural beauty",
+            "WebGL technology brings Colombian landscapes to your screen",
+            "Loading Colombian magic into your browser..."
+        ];
+        
+        let isFirstTip = true;
+        let tipChangeInterval;
+        
+        function getRandomTip() {
+            const randomIndex = Math.floor(Math.random() * randomTips.length);
+            return randomTips[randomIndex];
+        }
+        
+        function initLoadingTips() {
+            const tipElement = document.getElementById('loading-tip');
+            if (!tipElement) return;
+            
+            // Always start with the development tip
+            tipElement.textContent = developmentTip;
+            isFirstTip = true;
+            
+            // Change tip every 3 seconds
+            tipChangeInterval = setInterval(() => {
+                // Fade out
+                tipElement.style.opacity = '0';
+                
+                setTimeout(() => {
+                    // After first tip, show random tips
+                    if (isFirstTip) {
+                        isFirstTip = false;
+                    }
+                    
+                    // Always show random tip after the first one
+                    tipElement.textContent = getRandomTip();
+                    tipElement.style.opacity = '1';
+                }, 300);
+            }, 3000);
+        }
+        
+        function stopLoadingTips() {
+            if (tipChangeInterval) {
+                clearInterval(tipChangeInterval);
+                tipChangeInterval = null;
+            }
+        }
+
         // Inicializar la escena
         init();
         
         function init() {
+            // Initialize loading tips
+            initLoadingTips();
+            
             // Crear escena con fondo negro
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x000000);
@@ -3676,6 +3784,9 @@
             
             // Configurar evento de carga completa
             manager.onLoad = function() {
+                // Stop loading tips
+                stopLoadingTips();
+                
                 // Ocultar pantalla de carga después de un breve retraso
                 setTimeout(function() {
                     loadingContainer.style.opacity = '0';
@@ -3939,7 +4050,8 @@
                         // Add 3D text
                         addFloatingText();
                         
-                        // Hide loading screen
+                        // Stop loading tips and hide loading screen
+                        stopLoadingTips();
                         loadingContainer.style.opacity = 0;
                         setTimeout(() => {
                             loadingContainer.style.display = 'none';
