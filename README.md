@@ -1,6 +1,6 @@
 # Portfolio Andrés
 
-A portfolio website with a 3D model viewer for Colombian coffee models.
+Interactive 3D portfolio built with Three.js and Node.js.
 
 ## Features
 
