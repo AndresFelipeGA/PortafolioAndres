@@ -18,7 +18,7 @@
                 rgba(100, 181, 246, 0.3) 70%,   /* Azul Colombia suave */
                 rgba(161, 136, 127, 0.4) 100%   /* Café colombiano suave */
             ),
-            url('media/pictures/picturesOfSometingElse/ContactBack.jpg') no-repeat center center;
+            url('../assets/media/pictures/picturesOfSometingElse/ContactBack.jpg') no-repeat center center;
             background-size: cover;
             background-attachment: fixed;
             background-blend-mode: soft-light;
@@ -573,12 +573,12 @@
                         
                         <div class="form-group">
                             <label for="name">Full name <span class="required">*</span></label>
-                            <input type="text" id="name" name="name" required>
+                            <input type="text" id="name" name="name" autocomplete="name" required>
                         </div>
                         
                         <div class="form-group">
                             <label for="email">Email address <span class="required">*</span></label>
-                            <input type="email" id="email" name="email" required>
+                            <input type="email" id="email" name="email" autocomplete="email" required>
                         </div>
                         
                         <div class="form-group">
@@ -588,7 +588,7 @@
                         
                         <div class="form-group">
                             <label for="project-goal">What would you like to achieve? (optional)</label>
-                            <input type="text" id="project-goal" name="project-goal" placeholder="E.g.: Sell online, modernize my business, create an app, save time...">
+                            <input type="text" id="project-goal" name="project-goal" autocomplete="off" placeholder="E.g.: Sell online, modernize my business, create an app, save time...">
                         </div>
                         
                         <div class="form-group">

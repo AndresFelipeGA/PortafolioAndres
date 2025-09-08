@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Form - Mobile App Development</title>
+    <title>Contact Form - Web & E-commerce</title>
     <style>
         body {
             margin: 0;
@@ -52,6 +52,17 @@
             transform: scale(1.1);
         }
         
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
         
         .form-header {
             text-align: center;
@@ -209,35 +220,36 @@
         <div class="back-corner-button" onclick="window.location.href='cafe-menu.html'">←</div>
         <div class="form-header">
             <h1>Contact Form</h1>
-            <img src="media/icons/typeOfCoffes/cafeNumeroSeis.png" alt="Mobile App Development" class="service-icon" id="serviceIcon">
-            <h2 id="serviceTitle">Mobile App Development</h2>
-            <p class="service-description" id="serviceDescription">Native and cross-platform mobile applications for iOS and Android with modern frameworks.</p>
+                        <img src="../assets/media/icons/typeOfCoffes/cafeNumeroCinco.png" alt="Web & E-commerce" class="service-icon" id="serviceIcon">
+            <h2 id="serviceTitle">Web & E-commerce</h2>
+            <p class="service-description" id="serviceDescription">Development of all types of websites and customized e-commerce platforms.</p>
         </div>
         
         <form class="contact-form" id="contactForm" action="https://api.staticforms.xyz/submit" method="POST">
             <!-- Static Forms Configuration -->
             <input type="hidden" name="accessKey" value="sf_0eh8kk35hfj689nf30hhdnm9">
-            <input type="hidden" name="subject" value="New contact form: Mobile App Development">
+            <input type="hidden" name="subject" value="New contact form: Web & E-commerce">
             <input type="hidden" name="replyTo" value="andresfgonzalezaristizabal@outlook.com">
             <input type="hidden" name="redirectTo" value="cafe-menu.html">
-            <input type="hidden" name="service" value="Mobile App Development">
+            <input type="hidden" name="service" value="Web & E-commerce">
             <div class="form-row">
                 <div class="form-column">
                     <!-- Left column -->
                     <div class="form-group">
                         <label for="nombre">Full Name*</label>
-                        <input type="text" id="nombre" name="nombre" required>
+                        <input type="text" id="nombre" name="nombre" autocomplete="name" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="tipoApp">App Type*</label>
-                        <select id="tipoApp" name="tipoApp" required>
+                        <label for="tipoProyecto">Project Type*</label>
+                        <select id="tipoProyecto" name="tipoProyecto" required>
                             <option value="">Select an option</option>
-                            <option value="ios">iOS Native App</option>
-                            <option value="android">Android Native App</option>
-                            <option value="crossplatform">Cross-Platform (React Native/Flutter)</option>
-                            <option value="progressive">Progressive Web App (PWA)</option>
-                            <option value="hybrid">Hybrid App</option>
+                            <option value="sitio">Informational Website</option>
+                            <option value="landing">Landing Page</option>
+                            <option value="blog">Blog</option>
+                            <option value="ecommerce">Online Store (E-commerce)</option>
+                            <option value="marketplace">Marketplace</option>
+                            <option value="webapp">Web Application</option>
                             <option value="otro">Other</option>
                         </select>
                     </div>
@@ -247,12 +259,12 @@
                     <!-- Right column -->
                     <div class="form-group">
                         <label for="email">Email Address*</label>
-                        <input type="email" id="email" name="email" required>
+                        <input type="email" id="email" name="email" autocomplete="email" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="descripcionApp">App Description*</label>
-                        <textarea id="descripcionApp" name="descripcionApp" required placeholder="Describe your mobile app idea, target audience, main features, and platform preferences"></textarea>
+                        <label for="descripcionProyecto">Project Description*</label>
+                        <textarea id="descripcionProyecto" name="descripcionProyecto" required placeholder="Describe your web or e-commerce project, objectives, target audience and any reference or example you like"></textarea>
                     </div>
                 </div>
             </div>
@@ -286,7 +298,7 @@
             submitButton.disabled = !isValid;
         }
         
-        // Configure form validation on page load
+        // Configure the page on load
         document.addEventListener('DOMContentLoaded', function() {
             // Disable the submit button initially
             const submitButton = document.querySelector('.submit-button');
@@ -299,7 +311,8 @@
             });
         });
         
-        // The form now submits directly to Static Forms without AJAX
+        // FormSubmit will handle the form submission automatically
+        // We only keep the form validation
     </script>
 </body>
 </html>

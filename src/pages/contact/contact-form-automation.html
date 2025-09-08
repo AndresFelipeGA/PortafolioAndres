@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Form - Web & E-commerce</title>
+    <title>Contact Form - Automation</title>
     <style>
         body {
             margin: 0;
@@ -220,18 +220,18 @@
         <div class="back-corner-button" onclick="window.location.href='cafe-menu.html'">←</div>
         <div class="form-header">
             <h1>Contact Form</h1>
-            <img src="media/icons/typeOfCoffes/cafeNumeroCinco.png" alt="Web & E-commerce" class="service-icon" id="serviceIcon">
-            <h2 id="serviceTitle">Web & E-commerce</h2>
-            <p class="service-description" id="serviceDescription">Development of all types of websites and customized e-commerce platforms.</p>
+            <img src="../assets/media/icons/typeOfCoffes/cafeNumeroDos.png" alt="Automation" class="service-icon" id="serviceIcon">
+            <h2 id="serviceTitle">Automation</h2>
+            <p class="service-description" id="serviceDescription">Optimization of repetitive tasks through scripts and bots for your business.</p>
         </div>
         
         <form class="contact-form" id="contactForm" action="https://api.staticforms.xyz/submit" method="POST">
             <!-- Static Forms Configuration -->
             <input type="hidden" name="accessKey" value="sf_0eh8kk35hfj689nf30hhdnm9">
-            <input type="hidden" name="subject" value="New contact form: Web & E-commerce">
+            <input type="hidden" name="subject" value="New contact form: Automation">
             <input type="hidden" name="replyTo" value="andresfgonzalezaristizabal@outlook.com">
             <input type="hidden" name="redirectTo" value="cafe-menu.html">
-            <input type="hidden" name="service" value="Web & E-commerce">
+            <input type="hidden" name="service" value="Automation">
             <div class="form-row">
                 <div class="form-column">
                     <!-- Left column -->
@@ -241,15 +241,14 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="tipoProyecto">Project Type*</label>
-                        <select id="tipoProyecto" name="tipoProyecto" required>
+                        <label for="tipoAutomatizacion">Automation Type*</label>
+                        <select id="tipoAutomatizacion" name="tipoAutomatizacion" required>
                             <option value="">Select an option</option>
-                            <option value="sitio">Informational Website</option>
-                            <option value="landing">Landing Page</option>
-                            <option value="blog">Blog</option>
-                            <option value="ecommerce">Online Store (E-commerce)</option>
-                            <option value="marketplace">Marketplace</option>
-                            <option value="webapp">Web Application</option>
+                            <option value="procesos">Process Automation</option>
+                            <option value="datos">Data Extraction and Processing</option>
+                            <option value="reportes">Report Generation</option>
+                            <option value="bots">Bots and Virtual Assistants</option>
+                            <option value="rpa">RPA (Robotic Process Automation)</option>
                             <option value="otro">Other</option>
                         </select>
                     </div>
@@ -263,8 +262,8 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="descripcionProyecto">Project Description*</label>
-                        <textarea id="descripcionProyecto" name="descripcionProyecto" required placeholder="Describe your web or e-commerce project, objectives, target audience and any reference or example you like"></textarea>
+                        <label for="descripcionProceso">Process Description to Automate*</label>
+                        <textarea id="descripcionProceso" name="descripcionProceso" required placeholder="Describe the current process you want to automate, including steps, current time it takes and expected results"></textarea>
                     </div>
                 </div>
             </div>

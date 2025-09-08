@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Form - Custom Software</title>
+    <title>Contact Form - Mobile App Development</title>
     <style>
         body {
             margin: 0;
@@ -52,17 +52,6 @@
             transform: scale(1.1);
         }
         
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {
-                transform: translateY(0);
-            }
-            40% {
-                transform: translateY(-10px);
-            }
-            60% {
-                transform: translateY(-5px);
-            }
-        }
         
         .form-header {
             text-align: center;
@@ -198,6 +187,21 @@
             margin-top: 15px;
             padding-top: 15px;
         }
+        
+        .checkbox-group {
+            margin-top: 10px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+        }
     </style>
 </head>
 <body>
@@ -205,18 +209,18 @@
         <div class="back-corner-button" onclick="window.location.href='cafe-menu.html'">←</div>
         <div class="form-header">
             <h1>Contact Form</h1>
-            <img src="media/icons/typeOfCoffes/cafeNumeroUno.png" alt="Custom Software" class="service-icon" id="serviceIcon">
-            <h2 id="serviceTitle">Custom Software</h2>
-            <p class="service-description" id="serviceDescription">Personalized web, mobile and desktop systems with full-stack programming.</p>
+                        <img src="../assets/media/icons/typeOfCoffes/cafeNumeroSeis.png" alt="Mobile App Development" class="service-icon" id="serviceIcon">
+            <h2 id="serviceTitle">Mobile App Development</h2>
+            <p class="service-description" id="serviceDescription">Native and cross-platform mobile applications for iOS and Android with modern frameworks.</p>
         </div>
         
         <form class="contact-form" id="contactForm" action="https://api.staticforms.xyz/submit" method="POST">
             <!-- Static Forms Configuration -->
             <input type="hidden" name="accessKey" value="sf_0eh8kk35hfj689nf30hhdnm9">
-            <input type="hidden" name="subject" value="New contact form: Custom Software">
+            <input type="hidden" name="subject" value="New contact form: Mobile App Development">
             <input type="hidden" name="replyTo" value="andresfgonzalezaristizabal@outlook.com">
             <input type="hidden" name="redirectTo" value="cafe-menu.html">
-            <input type="hidden" name="service" value="Custom Software">
+            <input type="hidden" name="service" value="Mobile App Development">
             <div class="form-row">
                 <div class="form-column">
                     <!-- Left column -->
@@ -226,13 +230,15 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="tipoSoftware">Software Type*</label>
-                        <select id="tipoSoftware" name="tipoSoftware" required>
+                        <label for="tipoApp">App Type*</label>
+                        <select id="tipoApp" name="tipoApp" required>
                             <option value="">Select an option</option>
-                            <option value="web">Web Application</option>
-                            <option value="movil">Mobile Application</option>
-                            <option value="escritorio">Desktop Application</option>
-                            <option value="hibrido">Hybrid Application</option>
+                            <option value="ios">iOS Native App</option>
+                            <option value="android">Android Native App</option>
+                            <option value="crossplatform">Cross-Platform (React Native/Flutter)</option>
+                            <option value="progressive">Progressive Web App (PWA)</option>
+                            <option value="hybrid">Hybrid App</option>
+                            <option value="otro">Other</option>
                         </select>
                     </div>
                 </div>
@@ -245,8 +251,8 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="descripcionProyecto">Project Description*</label>
-                        <textarea id="descripcionProyecto" name="descripcionProyecto" required placeholder="Briefly describe your idea, main functionalities and software objectives"></textarea>
+                        <label for="descripcionApp">App Description*</label>
+                        <textarea id="descripcionApp" name="descripcionApp" required placeholder="Describe your mobile app idea, target audience, main features, and platform preferences"></textarea>
                     </div>
                 </div>
             </div>
@@ -280,7 +286,7 @@
             submitButton.disabled = !isValid;
         }
         
-        // Configure the page on load
+        // Configure form validation on page load
         document.addEventListener('DOMContentLoaded', function() {
             // Disable the submit button initially
             const submitButton = document.querySelector('.submit-button');
@@ -293,8 +299,7 @@
             });
         });
         
-        // FormSubmit will handle the form submission automatically
-        // We only keep the form validation
+        // The form now submits directly to Static Forms without AJAX
     </script>
 </body>
 </html>

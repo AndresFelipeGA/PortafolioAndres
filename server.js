@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const querystring = require('querystring');
 
-const PORT = 8080;
+const PORT = process.env.PORT || 3000;
 const EMAIL_RECIPIENT = 'andresfgonzalezaristizabal@outlook.com';
 
 // SendGrid API configuration
@@ -221,10 +221,50 @@ const server = http.createServer((req, res) => {
     // Remove query parameters from URL
     const urlWithoutQuery = req.url.split('?')[0];
     
+    let filePath;
+    
     // Handle root URL
-    let filePath = urlWithoutQuery === '/'
-        ? path.join(__dirname, 'fixed-advanced-loader.html')
-        : path.join(__dirname, urlWithoutQuery);
+    if (urlWithoutQuery === '/') {
+        filePath = path.join(__dirname, 'public', 'index.html');
+    } else {
+        // First try in public directory
+        filePath = path.join(__dirname, 'public', urlWithoutQuery);
+        
+        // If not found in public, try in src/pages
+        if (!fs.existsSync(filePath)) {
+            const srcPagesPath = path.join(__dirname, 'src', 'pages', urlWithoutQuery);
+            if (fs.existsSync(srcPagesPath)) {
+                filePath = srcPagesPath;
+            } else {
+                // Try specific subdirectories in src/pages
+                const contactPath = path.join(__dirname, 'src', 'pages', 'contact', urlWithoutQuery);
+                const projectsPath = path.join(__dirname, 'src', 'pages', 'projects', urlWithoutQuery);
+                
+                if (fs.existsSync(contactPath)) {
+                    filePath = contactPath;
+                } else if (fs.existsSync(projectsPath)) {
+                    filePath = projectsPath;
+                } else {
+                    // Try with .html extension if not present
+                    const htmlFile = urlWithoutQuery.endsWith('.html') ? urlWithoutQuery : urlWithoutQuery + '.html';
+                    const publicHtmlPath = path.join(__dirname, 'public', htmlFile);
+                    const srcHtmlPath = path.join(__dirname, 'src', 'pages', htmlFile);
+                    const contactHtmlPath = path.join(__dirname, 'src', 'pages', 'contact', htmlFile);
+                    const projectsHtmlPath = path.join(__dirname, 'src', 'pages', 'projects', htmlFile);
+                    
+                    if (fs.existsSync(publicHtmlPath)) {
+                        filePath = publicHtmlPath;
+                    } else if (fs.existsSync(srcHtmlPath)) {
+                        filePath = srcHtmlPath;
+                    } else if (fs.existsSync(contactHtmlPath)) {
+                        filePath = contactHtmlPath;
+                    } else if (fs.existsSync(projectsHtmlPath)) {
+                        filePath = projectsHtmlPath;
+                    }
+                }
+            }
+        }
+    }
     
     console.log(`[${requestId}] Resolved file path: ${filePath}`);
     console.log(`[${requestId}] File exists check: ${fs.existsSync(filePath)}`);

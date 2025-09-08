@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Form - Freelance Services</title>
+    <title>Contact Form - Tech Consulting</title>
     <style>
         body {
             margin: 0;
@@ -199,31 +199,19 @@
             padding-top: 15px;
         }
         
-        .checkbox-group {
+        .radio-group {
             margin-top: 10px;
         }
         
-        .checkbox-item {
+        .radio-item {
             display: flex;
             align-items: center;
             margin-bottom: 8px;
         }
         
-        .checkbox-item input[type="checkbox"] {
+        .radio-item input[type="radio"] {
             width: auto;
             margin-right: 10px;
-        }
-        
-        .popular-badge {
-            display: inline-block;
-            background: #C2185B;
-            color: white;
-            font-size: 10px;
-            padding: 3px 6px;
-            border-radius: 10px;
-            font-weight: bold;
-            margin-left: 8px;
-            vertical-align: middle;
         }
     </style>
 </head>
@@ -232,18 +220,18 @@
         <div class="back-corner-button" onclick="window.location.href='cafe-menu.html'">←</div>
         <div class="form-header">
             <h1>Contact Form</h1>
-            <img src="media/icons/typeOfCoffes/cafeNumeroCuatro.png" alt="Freelance Services" class="service-icon" id="serviceIcon">
-            <h2 id="serviceTitle">Freelance Services <span class="popular-badge">Popular</span></h2>
-            <p class="service-description" id="serviceDescription">Development of programming solutions and technical services with flexible remote work.</p>
+            <img src="../assets/media/icons/typeOfCoffes/cafeNumeroTres.png" alt="Tech Consulting" class="service-icon" id="serviceIcon">
+            <h2 id="serviceTitle">Tech Consulting</h2>
+            <p class="service-description" id="serviceDescription">Advisory in architecture, development and performance for strategic decisions in technological projects.</p>
         </div>
         
         <form class="contact-form" id="contactForm" action="https://api.staticforms.xyz/submit" method="POST">
             <!-- Static Forms Configuration -->
             <input type="hidden" name="accessKey" value="sf_0eh8kk35hfj689nf30hhdnm9">
-            <input type="hidden" name="subject" value="New contact form: Freelance Services">
+            <input type="hidden" name="subject" value="New contact form: Tech Consulting">
             <input type="hidden" name="replyTo" value="andresfgonzalezaristizabal@outlook.com">
             <input type="hidden" name="redirectTo" value="cafe-menu.html">
-            <input type="hidden" name="service" value="Freelance Services">
+            <input type="hidden" name="service" value="Tech Consulting">
             <div class="form-row">
                 <div class="form-column">
                     <!-- Left column -->
@@ -253,14 +241,14 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="tipoServicio">Freelance Service Type*</label>
-                        <select id="tipoServicio" name="tipoServicio" required>
+                        <label for="tipoConsultoria">Type of Consulting*</label>
+                        <select id="tipoConsultoria" name="tipoConsultoria" required>
                             <option value="">Select an option</option>
-                            <option value="desarrollo">Software Development</option>
-                            <option value="diseno">Web/UI/UX Design</option>
-                            <option value="soporte">Technical Support</option>
-                            <option value="mantenimiento">System Maintenance</option>
-                            <option value="consultoria">Technical Consulting</option>
+                            <option value="arquitectura">Software Architecture</option>
+                            <option value="rendimiento">Performance Optimization</option>
+                            <option value="seguridad">IT Security</option>
+                            <option value="cloud">Cloud Migration</option>
+                            <option value="estrategia">Digital Strategy</option>
                             <option value="otro">Other</option>
                         </select>
                     </div>
@@ -274,8 +262,8 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="descripcionProyecto">Project Description*</label>
-                        <textarea id="descripcionProyecto" name="descripcionProyecto" required placeholder="Describe your project, specific needs, deadlines and any other relevant information"></textarea>
+                        <label for="descripcionProblema">Challenge or Problem Description*</label>
+                        <textarea id="descripcionProblema" name="descripcionProblema" required placeholder="Describe the technical challenge, problem or strategic decision for which you need advisory"></textarea>
                     </div>
                 </div>
             </div>
@@ -290,12 +278,12 @@
     </div>
 
     <script>
-        // Function to validate the form and enable/disable the submit button
+        // Función para validar el formulario y habilitar/deshabilitar el botón de envío
         function validateForm() {
             const form = document.getElementById('contactForm');
             const submitButton = form.querySelector('.submit-button');
             
-            // Check if all required fields have value
+            // Verificar si todos los campos requeridos tienen valor
             const requiredFields = form.querySelectorAll('[required]');
             let isValid = true;
             
@@ -305,25 +293,25 @@
                 }
             });
             
-            // Enable or disable the submit button
+            // Habilitar o deshabilitar el botón de envío
             submitButton.disabled = !isValid;
         }
         
-        // Configure the page on load
+        // Configurar la página al cargar
         document.addEventListener('DOMContentLoaded', function() {
-            // Disable the submit button initially
+            // Deshabilitar el botón de envío inicialmente
             const submitButton = document.querySelector('.submit-button');
             submitButton.disabled = true;
             
-            // Add input events to all required fields
+            // Agregar eventos de input a todos los campos requeridos
             const requiredFields = document.querySelectorAll('[required]');
             requiredFields.forEach(field => {
                 field.addEventListener('input', validateForm);
             });
         });
         
-        // FormSubmit will handle the form submission automatically
-        // We only keep the form validation
+        // FormSubmit manejará el envío del formulario automáticamente
+        // Solo mantenemos la validación del formulario
     </script>
 </body>
 </html>

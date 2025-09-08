@@ -1,6 +1,6 @@
 # Portfolio Andrés
 
-Interactive 3D portfolio built with Three.js and Node.js.
+Interactive 3D portfolio built with Three.js and Node.js following enterprise-level architecture patterns.
 
 ## Features
 
@@ -8,6 +8,20 @@ Interactive 3D portfolio built with Three.js and Node.js.
 - Three.js for 3D model rendering
 - Docker containerization for easy deployment
 - Real-time development with volume mounting
+- Organized codebase following industry best practices
+- Modular architecture for scalability
+
+## Project Structure
+
+```
+├── public/           # Public assets and main entry point
+├── src/              # Source code (pages, scripts)
+├── docs/             # Documentation
+├── server.js         # Node.js server
+└── docker files      # Container configuration
+```
+
+For detailed structure information, see [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md)
 
 ## Running with Docker
 
@@ -50,12 +64,23 @@ For development with auto-reload:
 npm run dev
 ```
 
-## Project Structure
+## Key Files
 
-- `server.js` - Node.js HTTP server
-- `fixed-advanced-loader.html` - Main 3D viewer page
-- `Modelo3DCafeColombiano.glb` - 3D model file
-- `media/` - Image assets
+- `public/index.html` - Main 3D viewer application
+- `public/assets/Modelo3DCafeColombiano.glb` - 3D model file
+- `public/assets/media/` - Images, icons, and music assets
+- `src/pages/` - Application pages organized by feature
+- `src/scripts/` - JavaScript modules
+
+## Architecture
+
+This project follows modern web development practices:
+
+- **Separation of Concerns**: Clear distinction between public assets and source code
+- **Modular Design**: Features organized in logical directories
+- **Scalable Structure**: Easy to extend with new features
+- **Documentation**: Comprehensive docs for maintenance
+- **Containerization**: Docker support for consistent deployments
 
 ## Docker Configuration
 

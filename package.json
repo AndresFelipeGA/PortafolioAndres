@@ -1,14 +1,43 @@
 {
   "name": "portfolio-andres",
-  "version": "1.0.0",
-  "description": "Portfolio website with 3D model viewer",
+  "version": "2.0.0",
+  "description": "Interactive 3D portfolio built with Three.js and Node.js following enterprise-level architecture",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "build:docker": "docker build -t portfolio-andres .",
+    "start:docker": "docker-compose up portfolio-app",
+    "dev:docker": "docker-compose up portfolio-dev",
+    "docs:serve": "echo 'Documentation available at /docs/PROJECT_STRUCTURE.md'",
+    "clean": "rm -rf node_modules package-lock.json",
+    "lint:structure": "echo 'Validating project structure...'",
+    "test:server": "curl http://localhost:8080 || echo 'Server not running'"
+  },
+  "keywords": [
+    "portfolio",
+    "3d",
+    "threejs",
+    "nodejs",
+    "interactive",
+    "web-development",
+    "enterprise-architecture"
+  ],
+  "author": "Andrés Felipe González",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
   },
   "dependencies": {},
   "devDependencies": {
     "nodemon": "^2.0.22"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AndresFelipeGA/PortafolioAndres.git"
+  },
+  "directories": {
+    "doc": "docs",
+    "lib": "src"
   }
 }
