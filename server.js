@@ -218,6 +218,90 @@ const server = http.createServer((req, res) => {
         return;
     }
     
+    // Handle secure model endpoint
+    if (req.method === 'GET' && req.url === '/secure-model') {
+        console.log(`[${requestId}] Secure model request from: ${req.headers.referer || 'direct'}`);
+        
+        // Basic validation: check if request comes from our domain
+        const referer = req.headers.referer;
+        const userAgent = req.headers['user-agent'] || '';
+        
+        // Block direct access and suspicious user agents
+        if (!referer || !referer.includes(req.headers.host) ||
+            userAgent.toLowerCase().includes('bot') ||
+            userAgent.toLowerCase().includes('crawler') ||
+            userAgent.toLowerCase().includes('spider') ||
+            userAgent.toLowerCase().includes('scraper')) {
+            
+            console.log(`[${requestId}] Blocked secure model access - Invalid referer or suspicious user agent`);
+            res.writeHead(403, { 'Content-Type': 'text/plain' });
+            res.end('Access denied');
+            activeRequests.delete(requestId);
+            return;
+        }
+        
+        // Serve the protected model
+        const modelPath = path.join(__dirname, 'private-assets', 'Modelo3DCafeColombiano.glb');
+        
+        fs.access(modelPath, fs.constants.F_OK, (err) => {
+            if (err) {
+                console.error(`[${requestId}] Protected model not found: ${modelPath}`);
+                res.writeHead(404);
+                res.end('Model not found');
+                activeRequests.delete(requestId);
+                return;
+            }
+            
+            // Get file stats
+            fs.stat(modelPath, (err, stats) => {
+                if (err) {
+                    console.error(`[${requestId}] Error getting model stats: ${err.code}`);
+                    res.writeHead(500);
+                    res.end('Server Error');
+                    activeRequests.delete(requestId);
+                    return;
+                }
+                
+                // Set headers for GLB file
+                const headers = {
+                    'Content-Type': 'model/gltf-binary',
+                    'Content-Length': stats.size,
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                };
+                
+                addCorsHeaders(res);
+                
+                console.log(`[${requestId}] Serving protected model: ${(stats.size / (1024 * 1024)).toFixed(2)} MB`);
+                
+                // Stream the protected model
+                const fileStream = fs.createReadStream(modelPath, {
+                    highWaterMark: 1024 * 1024 * 4 // 4MB buffer
+                });
+                
+                fileStream.on('error', (error) => {
+                    console.error(`[${requestId}] Error streaming protected model: ${error.code}`);
+                    if (!res.headersSent) {
+                        res.writeHead(500);
+                        res.end('Server Error');
+                    }
+                    activeRequests.delete(requestId);
+                });
+                
+                fileStream.on('end', () => {
+                    const duration = Date.now() - startTime;
+                    console.log(`[${requestId}] Protected model served successfully (took ${duration}ms)`);
+                    activeRequests.delete(requestId);
+                });
+                
+                res.writeHead(200, headers);
+                fileStream.pipe(res);
+            });
+        });
+        return;
+    }
+    
     // Remove query parameters from URL
     const urlWithoutQuery = req.url.split('?')[0];
     
