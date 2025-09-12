@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const querystring = require('querystring');
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 const EMAIL_RECIPIENT = 'andresfgonzalezaristizabal@outlook.com';
 
 // SendGrid API configuration
