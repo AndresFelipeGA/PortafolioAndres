@@ -3999,10 +3999,10 @@
             // Use a more reliable way to check GLTFLoader version
             console.log("GLTFLoader version:", "r132 (matched with THREE.js)");
             
-            // Try loading with the correct filename first - using secure loader
+            // Try loading with the correct filename first - using secure loader ONLY
             const secureUrls = window.initSecureModelLoader();
-            const primaryModelUrl = secureUrls.primary || "assets/Modelo3DCafeColombiano.glb";
-            const fallbackModelUrl = secureUrls.fallback || "Modelo3DCafeColombiana.glb";
+            const primaryModelUrl = secureUrls.primary || "/secure-model";
+            const fallbackModelUrl = secureUrls.fallback || "/secure-model";
             // Model loading initiated
             
             

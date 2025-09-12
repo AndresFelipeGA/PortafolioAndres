@@ -222,23 +222,43 @@ const server = http.createServer((req, res) => {
     if (req.method === 'GET' && req.url === '/secure-model') {
         console.log(`[${requestId}] Secure model request from: ${req.headers.referer || 'direct'}`);
         
-        // Basic validation: check if request comes from our domain
+        // STRICT validation: check if request comes from our domain
         const referer = req.headers.referer;
         const userAgent = req.headers['user-agent'] || '';
+        const host = req.headers.host;
         
-        // Block direct access and suspicious user agents
-        if (!referer || !referer.includes(req.headers.host) ||
-            userAgent.toLowerCase().includes('bot') ||
-            userAgent.toLowerCase().includes('crawler') ||
-            userAgent.toLowerCase().includes('spider') ||
-            userAgent.toLowerCase().includes('scraper')) {
-            
-            console.log(`[${requestId}] Blocked secure model access - Invalid referer or suspicious user agent`);
+        // Create valid referer patterns
+        const validReferers = [
+            `http://${host}/`,
+            `https://${host}/`,
+            `http://${host}/index.html`,
+            `https://${host}/index.html`,
+            `http://${host}/portfolio-FINAL-SEGURO.html`,
+            `https://${host}/portfolio-FINAL-SEGURO.html`
+        ];
+        
+        // Block direct access, invalid referers, and suspicious user agents
+        const isValidReferer = referer && validReferers.some(valid => referer.startsWith(valid));
+        const isSuspiciousAgent = userAgent.toLowerCase().includes('bot') ||
+                                 userAgent.toLowerCase().includes('crawler') ||
+                                 userAgent.toLowerCase().includes('spider') ||
+                                 userAgent.toLowerCase().includes('scraper') ||
+                                 userAgent.toLowerCase().includes('wget') ||
+                                 userAgent.toLowerCase().includes('curl');
+        
+        if (!isValidReferer || isSuspiciousAgent) {
+            console.log(`[${requestId}] BLOCKED secure model access:`);
+            console.log(`[${requestId}]   Referer: ${referer || 'none'}`);
+            console.log(`[${requestId}]   User-Agent: ${userAgent}`);
+            console.log(`[${requestId}]   Valid referer: ${isValidReferer}`);
+            console.log(`[${requestId}]   Suspicious agent: ${isSuspiciousAgent}`);
             res.writeHead(403, { 'Content-Type': 'text/plain' });
             res.end('Access denied');
             activeRequests.delete(requestId);
             return;
         }
+        
+        console.log(`[${requestId}] ALLOWED secure model access - Valid referer and user agent`);
         
         // Serve the protected model
         const modelPath = path.join(__dirname, 'private-assets', 'Modelo3DCafeColombiano.glb');
