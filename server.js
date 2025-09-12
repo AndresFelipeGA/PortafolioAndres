@@ -261,7 +261,7 @@ const server = http.createServer((req, res) => {
         console.log(`[${requestId}] ALLOWED secure model access - Valid referer and user agent`);
         
         // Serve the protected model
-        const modelPath = path.join(__dirname, 'private-assets', 'Modelo3DCafeColombiano.glb');
+        const modelPath = path.join(__dirname, 'private-assets', 'xk9m7p4q2w8n5v3z1r6t8y4u9i2o7e5a3s6d8f1g4h7j9k2l5m8n1b6v4c7x9z2q5w8e3r6.glb');
         
         fs.access(modelPath, fs.constants.F_OK, (err) => {
             if (err) {
