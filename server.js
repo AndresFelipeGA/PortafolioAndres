@@ -3,6 +3,7 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const querystring = require('querystring');
+const zlib = require('zlib');
 
 const PORT = process.env.PORT || 8080;
 const EMAIL_RECIPIENT = 'andresfgonzalezaristizabal@outlook.com';
@@ -260,7 +261,7 @@ const server = http.createServer((req, res) => {
         
         console.log(`[${requestId}] ALLOWED secure model access - Valid referer and user agent`);
         
-        // Serve the protected model
+        // Serve the protected model with HTTP compression
         const modelPath = path.join(__dirname, 'private-assets', 'xk9m7p4q2w8n5v3z1r6t8y4u9i2o7e5a3s6d8f1g4h7j9k2l5m8n1b6v4c7x9z2q5w8e3r6.glb');
         
         fs.access(modelPath, fs.constants.F_OK, (err) => {
@@ -282,41 +283,101 @@ const server = http.createServer((req, res) => {
                     return;
                 }
                 
-                // Set headers for GLB file
-                const headers = {
-                    'Content-Type': 'model/gltf-binary',
-                    'Content-Length': stats.size,
-                    'Cache-Control': 'no-cache, no-store, must-revalidate',
-                    'Pragma': 'no-cache',
-                    'Expires': '0'
-                };
-                
-                addCorsHeaders(res);
-                
                 console.log(`[${requestId}] Serving protected model: ${(stats.size / (1024 * 1024)).toFixed(2)} MB`);
                 
-                // Stream the protected model
-                const fileStream = fs.createReadStream(modelPath, {
-                    highWaterMark: 1024 * 1024 * 4 // 4MB buffer
-                });
+                // Check if client accepts gzip compression
+                const acceptEncoding = req.headers['accept-encoding'] || '';
+                const supportsGzip = acceptEncoding.includes('gzip');
                 
-                fileStream.on('error', (error) => {
-                    console.error(`[${requestId}] Error streaming protected model: ${error.code}`);
-                    if (!res.headersSent) {
-                        res.writeHead(500);
-                        res.end('Server Error');
-                    }
-                    activeRequests.delete(requestId);
-                });
-                
-                fileStream.on('end', () => {
-                    const duration = Date.now() - startTime;
-                    console.log(`[${requestId}] Protected model served successfully (took ${duration}ms)`);
-                    activeRequests.delete(requestId);
-                });
-                
-                res.writeHead(200, headers);
-                fileStream.pipe(res);
+                if (supportsGzip && stats.size > 1024 * 1024) { // Only compress files > 1MB
+                    console.log(`[${requestId}] Compressing model with gzip...`);
+                    
+                    // Read and compress the file
+                    fs.readFile(modelPath, (err, data) => {
+                        if (err) {
+                            console.error(`[${requestId}] Error reading model: ${err.code}`);
+                            res.writeHead(500);
+                            res.end('Server Error');
+                            activeRequests.delete(requestId);
+                            return;
+                        }
+                        
+                        // Compress with gzip
+                        zlib.gzip(data, { level: 6 }, (err, compressedData) => {
+                            if (err) {
+                                console.error(`[${requestId}] Error compressing model: ${err.message}`);
+                                // Fallback to uncompressed
+                                const headers = {
+                                    'Content-Type': 'model/gltf-binary',
+                                    'Content-Length': stats.size,
+                                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                                    'Pragma': 'no-cache',
+                                    'Expires': '0'
+                                };
+                                addCorsHeaders(res);
+                                res.writeHead(200, headers);
+                                res.end(data);
+                                activeRequests.delete(requestId);
+                                return;
+                            }
+                            
+                            const compressionRatio = ((stats.size - compressedData.length) / stats.size * 100).toFixed(1);
+                            console.log(`[${requestId}] Compressed: ${(compressedData.length / (1024 * 1024)).toFixed(2)} MB (${compressionRatio}% reduction)`);
+                            
+                            // Set headers for compressed GLB file
+                            const headers = {
+                                'Content-Type': 'model/gltf-binary',
+                                'Content-Encoding': 'gzip',
+                                'Content-Length': compressedData.length,
+                                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                                'Pragma': 'no-cache',
+                                'Expires': '0'
+                            };
+                            
+                            addCorsHeaders(res);
+                            res.writeHead(200, headers);
+                            res.end(compressedData);
+                            
+                            const duration = Date.now() - startTime;
+                            console.log(`[${requestId}] Protected model served successfully (took ${duration}ms)`);
+                            activeRequests.delete(requestId);
+                        });
+                    });
+                } else {
+                    // Serve uncompressed file
+                    const headers = {
+                        'Content-Type': 'model/gltf-binary',
+                        'Content-Length': stats.size,
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    };
+                    
+                    addCorsHeaders(res);
+                    
+                    // Stream the protected model
+                    const fileStream = fs.createReadStream(modelPath, {
+                        highWaterMark: 1024 * 1024 * 4 // 4MB buffer
+                    });
+                    
+                    fileStream.on('error', (error) => {
+                        console.error(`[${requestId}] Error streaming protected model: ${error.code}`);
+                        if (!res.headersSent) {
+                            res.writeHead(500);
+                            res.end('Server Error');
+                        }
+                        activeRequests.delete(requestId);
+                    });
+                    
+                    fileStream.on('end', () => {
+                        const duration = Date.now() - startTime;
+                        console.log(`[${requestId}] Protected model served successfully (took ${duration}ms)`);
+                        activeRequests.delete(requestId);
+                    });
+                    
+                    res.writeHead(200, headers);
+                    fileStream.pipe(res);
+                }
             });
         });
         return;
