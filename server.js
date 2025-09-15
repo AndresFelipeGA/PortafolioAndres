@@ -220,26 +220,30 @@ const server = http.createServer((req, res) => {
     }
     
     // Handle secure model endpoint
-    if (req.method === 'GET' && req.url === '/secure-model') {
+    if (req.method === 'GET' && req.url.startsWith('/secure-model')) {
         console.log(`[${requestId}] Secure model request from: ${req.headers.referer || 'direct'}`);
         
-        // STRICT validation: check if request comes from our domain
+        // More flexible validation for Railway deployment
         const referer = req.headers.referer;
         const userAgent = req.headers['user-agent'] || '';
         const host = req.headers.host;
         
-        // Create valid referer patterns
+        // Create valid referer patterns - more flexible for Railway
         const validReferers = [
-            `http://${host}/`,
-            `https://${host}/`,
-            `http://${host}/index.html`,
-            `https://${host}/index.html`,
-            `http://${host}/portfolio-FINAL-SEGURO.html`,
-            `https://${host}/portfolio-FINAL-SEGURO.html`
+            `http://${host}`,
+            `https://${host}`,
+            // Support Railway domains
+            'https://portafolioandres-production',
+            'https://portafolioandres3d.onrender.com'
         ];
         
-        // Block direct access, invalid referers, and suspicious user agents
-        const isValidReferer = referer && validReferers.some(valid => referer.startsWith(valid));
+        // More lenient referer validation
+        const isValidReferer = !referer || // Allow requests without referer (for development)
+                              referer === 'undefined' || // Handle undefined referer
+                              validReferers.some(valid => referer.startsWith(valid)) ||
+                              referer.includes(host); // Allow if contains the host
+        
+        // Only block obvious bots/scrapers
         const isSuspiciousAgent = userAgent.toLowerCase().includes('bot') ||
                                  userAgent.toLowerCase().includes('crawler') ||
                                  userAgent.toLowerCase().includes('spider') ||
@@ -247,7 +251,8 @@ const server = http.createServer((req, res) => {
                                  userAgent.toLowerCase().includes('wget') ||
                                  userAgent.toLowerCase().includes('curl');
         
-        if (!isValidReferer || isSuspiciousAgent) {
+        // More lenient blocking - only block if both conditions are suspicious
+        if (isSuspiciousAgent && !isValidReferer) {
             console.log(`[${requestId}] BLOCKED secure model access:`);
             console.log(`[${requestId}]   Referer: ${referer || 'none'}`);
             console.log(`[${requestId}]   User-Agent: ${userAgent}`);
