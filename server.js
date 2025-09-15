@@ -224,40 +224,79 @@ const server = http.createServer((req, res) => {
         console.log(`[${requestId}] Secure model request from: ${req.headers.referer || 'direct'}`);
         
         // More flexible validation for Railway deployment
+        // Enhanced validation for deployment environments
         const referer = req.headers.referer;
         const userAgent = req.headers['user-agent'] || '';
         const host = req.headers.host;
+        const origin = req.headers.origin;
         
-        // Create valid referer patterns - more flexible for Railway
-        const validReferers = [
+        // Create comprehensive valid patterns for different deployment environments
+        const validPatterns = [
+            // Local development
+            `http://localhost`,
+            `http://127.0.0.1`,
             `http://${host}`,
             `https://${host}`,
-            // Support Railway domains
+            // Railway patterns
             'https://portafolioandres-production',
-            'https://portafolioandres3d.onrender.com'
+            'railway.app',
+            // Render patterns
+            'https://portafolioandres3d.onrender.com',
+            'onrender.com',
+            // Vercel patterns
+            'vercel.app',
+            // Netlify patterns
+            'netlify.app',
+            // Heroku patterns
+            'herokuapp.com'
         ];
         
-        // More lenient referer validation
-        const isValidReferer = !referer || // Allow requests without referer (for development)
-                              referer === 'undefined' || // Handle undefined referer
-                              validReferers.some(valid => referer.startsWith(valid)) ||
-                              referer.includes(host); // Allow if contains the host
+        // Enhanced referer/origin validation
+        const isValidRequest = () => {
+            // Allow requests from same origin
+            if (origin && validPatterns.some(pattern => origin.includes(pattern))) {
+                return true;
+            }
+            
+            // Allow requests with valid referer
+            if (referer && validPatterns.some(pattern => referer.includes(pattern))) {
+                return true;
+            }
+            
+            // Allow requests from same host
+            if (host && (
+                (referer && referer.includes(host)) ||
+                (origin && origin.includes(host))
+            )) {
+                return true;
+            }
+            
+            // Allow direct requests in development (no referer/origin)
+            if (!referer && !origin && host && (
+                host.includes('localhost') ||
+                host.includes('127.0.0.1')
+            )) {
+                return true;
+            }
+            
+            return false;
+        };
         
-        // Only block obvious bots/scrapers
-        const isSuspiciousAgent = userAgent.toLowerCase().includes('bot') ||
-                                 userAgent.toLowerCase().includes('crawler') ||
-                                 userAgent.toLowerCase().includes('spider') ||
-                                 userAgent.toLowerCase().includes('scraper') ||
-                                 userAgent.toLowerCase().includes('wget') ||
-                                 userAgent.toLowerCase().includes('curl');
+        // Block only obvious malicious requests
+        const isMaliciousAgent = userAgent.toLowerCase().includes('wget') ||
+                                userAgent.toLowerCase().includes('curl') ||
+                                userAgent.toLowerCase().includes('python-requests') ||
+                                userAgent.toLowerCase().includes('scrapy');
         
-        // More lenient blocking - only block if both conditions are suspicious
-        if (isSuspiciousAgent && !isValidReferer) {
+        // Enhanced blocking logic
+        if (isMaliciousAgent || !isValidRequest()) {
             console.log(`[${requestId}] BLOCKED secure model access:`);
             console.log(`[${requestId}]   Referer: ${referer || 'none'}`);
+            console.log(`[${requestId}]   Origin: ${origin || 'none'}`);
+            console.log(`[${requestId}]   Host: ${host}`);
             console.log(`[${requestId}]   User-Agent: ${userAgent}`);
-            console.log(`[${requestId}]   Valid referer: ${isValidReferer}`);
-            console.log(`[${requestId}]   Suspicious agent: ${isSuspiciousAgent}`);
+            console.log(`[${requestId}]   Valid request: ${isValidRequest()}`);
+            console.log(`[${requestId}]   Malicious agent: ${isMaliciousAgent}`);
             res.writeHead(403, { 'Content-Type': 'text/plain' });
             res.end('Access denied');
             activeRequests.delete(requestId);
