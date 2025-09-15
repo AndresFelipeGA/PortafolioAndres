@@ -281,9 +281,11 @@ const server = http.createServer((req, res) => {
                 // Redirect to external model URL (GitHub raw or similar)
                 // Try multiple URLs for the external model
                 const externalModelUrls = [
+                    // GitHub Releases URL (primary - supports large files)
+                    'https://github.com/AndresFelipeGA/PortafolioAndres/releases/download/v1.0.0/xk9m7p4q2w8n5v3z1r6t8y4u9i2o7e5a3s6d8f1g4h7j9k2l5m8n1b6v4c7x9z2q5w8e3r6.glb',
+                    // Fallback URLs (in case releases fail)
                     'https://github.com/AndresFelipeGA/PortafolioAndres/raw/main/private-assets/xk9m7p4q2w8n5v3z1r6t8y4u9i2o7e5a3s6d8f1g4h7j9k2l5m8n1b6v4c7x9z2q5w8e3r6.glb',
-                    'https://raw.githubusercontent.com/AndresFelipeGA/PortafolioAndres/main/private-assets/xk9m7p4q2w8n5v3z1r6t8y4u9i2o7e5a3s6d8f1g4h7j9k2l5m8n1b6v4c7x9z2q5w8e3r6.glb',
-                    'https://github.com/AndresFelipeGA/PortafolioAndres/raw/7ccc17c386c1ac9fc2f5fd32925e2bbcca529e02/private-assets/xk9m7p4q2w8n5v3z1r6t8y4u9i2o7e5a3s6d8f1g4h7j9k2l5m8n1b6v4c7x9z2q5w8e3r6.glb'
+                    'https://raw.githubusercontent.com/AndresFelipeGA/PortafolioAndres/main/private-assets/xk9m7p4q2w8n5v3z1r6t8y4u9i2o7e5a3s6d8f1g4h7j9k2l5m8n1b6v4c7x9z2q5w8e3r6.glb'
                 ];
                 
                 const tryExternalUrl = (urlIndex = 0) => {
