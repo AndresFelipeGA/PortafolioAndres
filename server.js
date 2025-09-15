@@ -279,55 +279,71 @@ const server = http.createServer((req, res) => {
                 console.log(`[${requestId}] Local model not found, serving from external URL`);
                 
                 // Redirect to external model URL (GitHub raw or similar)
-                const externalModelUrl = 'https://github.com/AndresFelipeGA/PortafolioAndres/raw/7ccc17c386c1ac9fc2f5fd32925e2bbcca529e02/private-assets/xk9m7p4q2w8n5v3z1r6t8y4u9i2o7e5a3s6d8f1g4h7j9k2l5m8n1b6v4c7x9z2q5w8e3r6.glb';
+                // Try multiple URLs for the external model
+                const externalModelUrls = [
+                    'https://github.com/AndresFelipeGA/PortafolioAndres/raw/main/private-assets/xk9m7p4q2w8n5v3z1r6t8y4u9i2o7e5a3s6d8f1g4h7j9k2l5m8n1b6v4c7x9z2q5w8e3r6.glb',
+                    'https://raw.githubusercontent.com/AndresFelipeGA/PortafolioAndres/main/private-assets/xk9m7p4q2w8n5v3z1r6t8y4u9i2o7e5a3s6d8f1g4h7j9k2l5m8n1b6v4c7x9z2q5w8e3r6.glb',
+                    'https://github.com/AndresFelipeGA/PortafolioAndres/raw/7ccc17c386c1ac9fc2f5fd32925e2bbcca529e02/private-assets/xk9m7p4q2w8n5v3z1r6t8y4u9i2o7e5a3s6d8f1g4h7j9k2l5m8n1b6v4c7x9z2q5w8e3r6.glb'
+                ];
                 
-                console.log(`[${requestId}] Redirecting to external model: ${externalModelUrl}`);
-                
-                // Proxy the external file
-                const protocol = externalModelUrl.startsWith('https:') ? https : http;
-                const proxyReq = protocol.get(externalModelUrl, (proxyRes) => {
-                    console.log(`[${requestId}] External model response status: ${proxyRes.statusCode}`);
-                    
-                    if (proxyRes.statusCode !== 200) {
-                        console.error(`[${requestId}] Failed to fetch external model: ${proxyRes.statusCode}`);
+                const tryExternalUrl = (urlIndex = 0) => {
+                    if (urlIndex >= externalModelUrls.length) {
+                        console.error(`[${requestId}] All external URLs failed`);
                         res.writeHead(404, { 'Content-Type': 'text/plain' });
                         res.end('Model not found');
                         activeRequests.delete(requestId);
                         return;
                     }
                     
-                    // Set headers for GLB file
-                    const headers = {
-                        'Content-Type': 'model/gltf-binary',
-                        'Cache-Control': 'no-cache, no-store, must-revalidate',
-                        'Pragma': 'no-cache',
-                        'Expires': '0'
-                    };
+                    const externalModelUrl = externalModelUrls[urlIndex];
+                    console.log(`[${requestId}] Trying external model URL ${urlIndex + 1}/${externalModelUrls.length}: ${externalModelUrl}`);
                     
-                    if (proxyRes.headers['content-length']) {
-                        headers['Content-Length'] = proxyRes.headers['content-length'];
-                        const sizeMB = (parseInt(proxyRes.headers['content-length']) / (1024 * 1024)).toFixed(2);
-                        console.log(`[${requestId}] Serving external model: ${sizeMB} MB`);
-                    }
-                    
-                    addCorsHeaders(res);
-                    res.writeHead(200, headers);
-                    
-                    // Pipe the external response to our response
-                    proxyRes.pipe(res);
-                    
-                    proxyRes.on('end', () => {
-                        console.log(`[${requestId}] External model served successfully`);
-                        activeRequests.delete(requestId);
+                    // Proxy the external file
+                    const protocol = externalModelUrl.startsWith('https:') ? https : http;
+                    const proxyReq = protocol.get(externalModelUrl, (proxyRes) => {
+                        console.log(`[${requestId}] External model response status: ${proxyRes.statusCode}`);
+                        
+                        if (proxyRes.statusCode !== 200) {
+                            console.error(`[${requestId}] Failed to fetch external model from URL ${urlIndex + 1}: ${proxyRes.statusCode}`);
+                            // Try next URL
+                            tryExternalUrl(urlIndex + 1);
+                            return;
+                        }
+                        
+                        // Set headers for GLB file
+                        const headers = {
+                            'Content-Type': 'model/gltf-binary',
+                            'Cache-Control': 'no-cache, no-store, must-revalidate',
+                            'Pragma': 'no-cache',
+                            'Expires': '0'
+                        };
+                        
+                        if (proxyRes.headers['content-length']) {
+                            headers['Content-Length'] = proxyRes.headers['content-length'];
+                            const sizeMB = (parseInt(proxyRes.headers['content-length']) / (1024 * 1024)).toFixed(2);
+                            console.log(`[${requestId}] Serving external model: ${sizeMB} MB`);
+                        }
+                        
+                        addCorsHeaders(res);
+                        res.writeHead(200, headers);
+                        
+                        // Pipe the external response to our response
+                        proxyRes.pipe(res);
+                        
+                        proxyRes.on('end', () => {
+                            console.log(`[${requestId}] External model served successfully from URL ${urlIndex + 1}`);
+                            activeRequests.delete(requestId);
+                        });
+                        
+                    }).on('error', (proxyErr) => {
+                        console.error(`[${requestId}] Error fetching external model from URL ${urlIndex + 1}:`, proxyErr.message);
+                        // Try next URL
+                        tryExternalUrl(urlIndex + 1);
                     });
-                    
-                }).on('error', (proxyErr) => {
-                    console.error(`[${requestId}] Error fetching external model:`, proxyErr.message);
-                    res.writeHead(500, { 'Content-Type': 'text/plain' });
-                    res.end('Error fetching model');
-                    activeRequests.delete(requestId);
-                });
+                };
                 
+                // Start trying URLs
+                tryExternalUrl(0);
                 return;
             }
             
