@@ -259,17 +259,83 @@ const server = http.createServer((req, res) => {
         // Serve the protected model with HTTP compression
         const modelPath = path.join(__dirname, 'private-assets', 'xk9m7p4q2w8n5v3z1r6t8y4u9i2o7e5a3s6d8f1g4h7j9k2l5m8n1b6v4c7x9z2q5w8e3r6.glb');
         
+        console.log(`[${requestId}] Looking for model at: ${modelPath}`);
+        console.log(`[${requestId}] Current directory: ${__dirname}`);
+        
+        // Check if private-assets directory exists
+        const privateAssetsDir = path.join(__dirname, 'private-assets');
+        console.log(`[${requestId}] Checking private-assets directory: ${privateAssetsDir}`);
+        
+        try {
+            const dirContents = fs.readdirSync(privateAssetsDir);
+            console.log(`[${requestId}] private-assets directory contents:`, dirContents);
+        } catch (dirErr) {
+            console.error(`[${requestId}] private-assets directory not found or not readable:`, dirErr.message);
+        }
+        
+        // Try to serve local model first
         fs.access(modelPath, fs.constants.F_OK, (err) => {
             if (err) {
-                console.error(`[${requestId}] Protected model not found: ${modelPath}`);
-                res.writeHead(404);
-                res.end('Model not found');
-                activeRequests.delete(requestId);
+                console.log(`[${requestId}] Local model not found, serving from external URL`);
+                
+                // Redirect to external model URL (GitHub raw or similar)
+                const externalModelUrl = 'https://github.com/AndresFelipeGA/PortafolioAndres/raw/main/private-assets/xk9m7p4q2w8n5v3z1r6t8y4u9i2o7e5a3s6d8f1g4h7j9k2l5m8n1b6v4c7x9z2q5w8e3r6.glb';
+                
+                console.log(`[${requestId}] Redirecting to external model: ${externalModelUrl}`);
+                
+                // Proxy the external file
+                const protocol = externalModelUrl.startsWith('https:') ? https : http;
+                const proxyReq = protocol.get(externalModelUrl, (proxyRes) => {
+                    console.log(`[${requestId}] External model response status: ${proxyRes.statusCode}`);
+                    
+                    if (proxyRes.statusCode !== 200) {
+                        console.error(`[${requestId}] Failed to fetch external model: ${proxyRes.statusCode}`);
+                        res.writeHead(404, { 'Content-Type': 'text/plain' });
+                        res.end('Model not found');
+                        activeRequests.delete(requestId);
+                        return;
+                    }
+                    
+                    // Set headers for GLB file
+                    const headers = {
+                        'Content-Type': 'model/gltf-binary',
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    };
+                    
+                    if (proxyRes.headers['content-length']) {
+                        headers['Content-Length'] = proxyRes.headers['content-length'];
+                        const sizeMB = (parseInt(proxyRes.headers['content-length']) / (1024 * 1024)).toFixed(2);
+                        console.log(`[${requestId}] Serving external model: ${sizeMB} MB`);
+                    }
+                    
+                    addCorsHeaders(res);
+                    res.writeHead(200, headers);
+                    
+                    // Pipe the external response to our response
+                    proxyRes.pipe(res);
+                    
+                    proxyRes.on('end', () => {
+                        console.log(`[${requestId}] External model served successfully`);
+                        activeRequests.delete(requestId);
+                    });
+                    
+                }).on('error', (proxyErr) => {
+                    console.error(`[${requestId}] Error fetching external model:`, proxyErr.message);
+                    res.writeHead(500, { 'Content-Type': 'text/plain' });
+                    res.end('Error fetching model');
+                    activeRequests.delete(requestId);
+                });
+                
                 return;
             }
             
+            // Local model exists, serve it normally
+            const actualModelPath = modelPath;
+            
             // Get file stats
-            fs.stat(modelPath, (err, stats) => {
+            fs.stat(actualModelPath, (err, stats) => {
                 if (err) {
                     console.error(`[${requestId}] Error getting model stats: ${err.code}`);
                     res.writeHead(500);
@@ -288,7 +354,7 @@ const server = http.createServer((req, res) => {
                     console.log(`[${requestId}] Compressing model with gzip...`);
                     
                     // Read and compress the file
-                    fs.readFile(modelPath, (err, data) => {
+                    fs.readFile(actualModelPath, (err, data) => {
                         if (err) {
                             console.error(`[${requestId}] Error reading model: ${err.code}`);
                             res.writeHead(500);
@@ -351,7 +417,7 @@ const server = http.createServer((req, res) => {
                     addCorsHeaders(res);
                     
                     // Stream the protected model
-                    const fileStream = fs.createReadStream(modelPath, {
+                    const fileStream = fs.createReadStream(actualModelPath, {
                         highWaterMark: 1024 * 1024 * 4 // 4MB buffer
                     });
                     
