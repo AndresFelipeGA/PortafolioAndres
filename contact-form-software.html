@@ -255,7 +255,7 @@
                 <button type="button" class="back-button" onclick="window.location.href='cafe-menu.html'">
                     <span class="back-icon">←</span> Back to Menu
                 </button>
-                <button type="submit" class="submit-button">Send Request</button>
+                <a href="cafe-menu.html?sent=true" class="submit-button" style="display: inline-block; text-decoration: none; text-align: center; line-height: 1;">Send Request</a>
             </div>
         </form>
     </div>
@@ -278,6 +278,17 @@
             
             // Enable or disable the submit button
             submitButton.disabled = !isValid;
+        }
+        
+        // Simple function to redirect immediately
+        function redirectToMenu() {
+            // Show loading state
+            const submitButton = document.querySelector('.submit-button');
+            submitButton.textContent = 'Sending...';
+            submitButton.disabled = true;
+            
+            // Redirect immediately to avoid StaticForms ugly page
+            window.location.href = 'cafe-menu.html?sent=true';
         }
         
         // Configure the page on load

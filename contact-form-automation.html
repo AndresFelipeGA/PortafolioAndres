@@ -225,7 +225,7 @@
             <p class="service-description" id="serviceDescription">Optimization of repetitive tasks through scripts and bots for your business.</p>
         </div>
         
-        <form class="contact-form" id="contactForm" action="https://api.staticforms.xyz/submit" method="POST">
+        <form class="contact-form" id="contactForm" action="https://api.staticforms.xyz/submit" method="POST" onsubmit="return handleFormSubmit(event)">
             <!-- Static Forms Configuration -->
             <input type="hidden" name="accessKey" value="sf_0eh8kk35hfj689nf30hhdnm9">
             <input type="hidden" name="subject" value="New contact form: Automation">
@@ -272,7 +272,7 @@
                 <button type="button" class="back-button" onclick="window.location.href='cafe-menu.html'">
                     <span class="back-icon">←</span> Back to Menu
                 </button>
-                <button type="submit" class="submit-button">Send Request</button>
+                <a href="cafe-menu.html?sent=true" class="submit-button" style="display: inline-block; text-decoration: none; text-align: center; line-height: 1;">Send Request</a>
             </div>
         </form>
     </div>
@@ -295,6 +295,37 @@
             
             // Enable or disable the submit button
             submitButton.disabled = !isValid;
+        }
+        
+        // Function to handle form submission and redirect immediately
+        function handleFormSubmit(event) {
+            event.preventDefault(); // Prevent default form submission
+            
+            const form = document.getElementById('contactForm');
+            const formData = new FormData(form);
+            
+            // Show loading state
+            const submitButton = form.querySelector('.submit-button');
+            submitButton.textContent = 'Sending...';
+            submitButton.disabled = true;
+            
+            // Redirect immediately to avoid StaticForms ugly page
+            window.location.href = 'cafe-menu.html?sent=true';
+            
+            // Try to send form data in background (may fail due to redirect)
+            try {
+                fetch('https://api.staticforms.xyz/submit', {
+                    method: 'POST',
+                    body: formData,
+                    keepalive: true // Try to keep request alive after redirect
+                }).catch(error => {
+                    console.log('Form submission error (expected due to redirect):', error);
+                });
+            } catch (error) {
+                console.log('Fetch error (expected due to redirect):', error);
+            }
+            
+            return false; // Prevent default form submission
         }
         
         // Configure the page on load
