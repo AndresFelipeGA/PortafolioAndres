@@ -4,19 +4,14 @@
 
 // Función para obtener la URL del modelo de forma segura
 window.getSecureModelUrl = function() {
-    // Validación básica del entorno
-    if (typeof window === 'undefined' || !document.referrer.includes(window.location.hostname)) {
-        return null;
-    }
-    
-    // Usar endpoint seguro del servidor
-    const timestamp = Date.now();
-    return '/secure-model?t=' + timestamp;
+    // Usar Cloudflare R2 como primera opción
+    return 'https://pub-3eee7465d9374f15a9c4a6192489c0b1.r2.dev/modelo3d.glb';
 };
 
 // Función para obtener URL de fallback (también segura)
 window.getSecureFallbackUrl = function() {
-    return '/secure-model';
+    // Fallback también desde Cloudflare R2
+    return 'https://pub-3eee7465d9374f15a9c4a6192489c0b1.r2.dev/modelo3d.glb';
 };
 
 // Validación adicional de seguridad
