@@ -4,14 +4,14 @@
 
 // Función para obtener la URL del modelo de forma segura
 window.getSecureModelUrl = function() {
-    // Usar GitHub Releases como primera opción
-    return 'https://github.com/AndresFelipeGA/PortafolioAndres/releases/download/v1.0.0/xk9m7p4q2w8n5v3z1r6t8y4u9i2o7e5a3s6d8f1g4h7j9k2l5m8n1b6v4c7x9z2q5w8e3r6.glb';
+    // Usar Cloudflare R2 como primera opción
+    return 'https://pub-3eee7465d9374f15a9c4a6192489c0b1.r2.dev/modelo3d.glb';
 };
 
-// Función para obtener URL de fallback (local)
+// Función para obtener URL de fallback (también Cloudflare R2)
 window.getSecureFallbackUrl = function() {
-    // Fallback local desde GitHub Pages
-    return './assets/modelo3d.glb';
+    // Fallback también desde Cloudflare R2
+    return 'https://pub-3eee7465d9374f15a9c4a6192489c0b1.r2.dev/modelo3d.glb';
 };
 
 // Validación adicional de seguridad
@@ -30,14 +30,22 @@ window.validateModelAccess = function() {
 
 // Función principal que reemplaza las URLs hardcodeadas en index.html
 window.initSecureModelLoader = function() {
+    console.log('🔧 DEBUG: initSecureModelLoader called');
+    
     if (!window.validateModelAccess()) {
         console.warn('Access validation failed');
         return { primary: null, fallback: null };
     }
     
+    const primaryUrl = window.getSecureModelUrl();
+    const fallbackUrl = window.getSecureFallbackUrl();
+    
+    console.log('🔧 DEBUG: Primary URL:', primaryUrl);
+    console.log('🔧 DEBUG: Fallback URL:', fallbackUrl);
+    
     return {
-        primary: window.getSecureModelUrl(),
-        fallback: window.getSecureFallbackUrl()
+        primary: primaryUrl,
+        fallback: fallbackUrl
     };
 };
 
