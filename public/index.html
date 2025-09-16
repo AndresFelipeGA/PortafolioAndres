@@ -4001,8 +4001,8 @@
             console.log("GLTFLoader version:", "r132 (matched with THREE.js)");
             
             // Use Cloudflare R2 directly for model loading
-            const primaryModelUrl = 'https://cors-anywhere.herokuapp.com/https://pub-3eee7465d9374f15a9c4a6192489c0b1.r2.dev/modelo3d.glb';
-            const fallbackModelUrl = 'https://cors-anywhere.herokuapp.com/https://pub-3eee7465d9374f15a9c4a6192489c0b1.r2.dev/modelo3d.glb';
+            const primaryModelUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://pub-3eee7465d9374f15a9c4a6192489c0b1.r2.dev/modelo3d.glb');
+            const fallbackModelUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://pub-3eee7465d9374f15a9c4a6192489c0b1.r2.dev/modelo3d.glb');
             
             console.log('🔧 DEBUG: Using Cloudflare R2 URLs - Primary:', primaryModelUrl, 'Fallback:', fallbackModelUrl);
             // Model loading initiated
