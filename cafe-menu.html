@@ -334,20 +334,12 @@
         function isReturningFromContactForm() {
             // Check if the referring page was a contact form
             return document.referrer && document.referrer.includes('contact-form-');
+        }
         
         // Function to check if form was sent successfully
         function checkFormSent() {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get('sent') === 'true';
-        }
-        
-        // Show success popup if form was sent
-        if (checkFormSent()) {
-            showSuccessPopup();
-            // Clean URL without refreshing page
-            const url = new URL(window.location);
-            url.searchParams.delete('sent');
-            window.history.replaceState({}, document.title, url);
         }
         
         // Success popup function
@@ -483,7 +475,20 @@
                 }, 300);
             });
         }
-        }
+        
+        // Check for form success popup when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            if (checkFormSent()) {
+                // Wait a bit for the page to fully load, then show popup
+                setTimeout(() => {
+                    showSuccessPopup();
+                    // Clean URL without refreshing page
+                    const url = new URL(window.location);
+                    url.searchParams.delete('sent');
+                    window.history.replaceState({}, document.title, url);
+                }, 500);
+            }
+        });
         
         // Initial screen state - should start active if returning from contact form
         let screenActive = isReturningFromContactForm(); // INICIA ACTIVADA si viene de formulario de contacto
