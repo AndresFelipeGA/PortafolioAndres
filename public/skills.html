@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skills</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            color: #ffffff;
+            overflow: hidden;
+        }
+        
+        .container {
+            padding: 15px 20px 10px 20px;
+            max-width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+        }
+        
+        h1 {
+            font-size: 2.3em;
+            text-align: center;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            flex-shrink: 0;
+        }
+        
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 12px;
+            flex: 1;
+            min-height: 0;
+            max-height: calc(100vh - 100px);
+            padding: 0 5px;
+        }
+        
+        .skill-category {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            box-sizing: border-box;
+        }
+        
+        .skill-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        
+        .skill-list {
+            line-height: 1.35;
+            opacity: 0.9;
+            font-size: 0.82em;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+        }
+        
+        /* Botón de volver minimalista */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            font-size: 20px;
+            color: white;
+        }
+        
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .back-button::before {
+            content: '←';
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" onclick="goBackToBox()" title="Back to menu"></button>
+    
+    <div class="container">
+        <h1>⚡ My Skills</h1>
+        
+        <div class="skills-grid">
+            <div class="skill-category">
+                <div class="skill-title">💻 Frontend</div>
+                <div class="skill-list">
+                    • JavaScript (ES6+)<br>
+                    • HTML5 & CSS3<br>
+                    • Three.js<br>
+                    • React.js<br>
+                    • Responsive Design
+                </div>
+            </div>
+            
+            <div class="skill-category">
+                <div class="skill-title">⚙️ Backend</div>
+                <div class="skill-list">
+                    • Python<br>
+                    • Node.js<br>
+                    • Express.js<br>
+                    • REST APIs<br>
+                    • Microservices
+                </div>
+            </div>
+            
+            <div class="skill-category">
+                <div class="skill-title">🗄️ Data Engineering</div>
+                <div class="skill-list">
+                    • PostgreSQL & MySQL<br>
+                    • ETL Pipelines<br>
+                    • YFlow<br>
+                    • SQL Optimization<br>
+                    • Data Integration
+                </div>
+            </div>
+            
+            <div class="skill-category">
+                <div class="skill-title">🛠️ DevOps & Tools</div>
+                <div class="skill-list">
+                    • Docker<br>
+                    • Git & GitHub<br>
+                    • VS Code<br>
+                    • PowerShell<br>
+                    • SendGrid API
+                </div>
+            </div>
+            
+            <div class="skill-category">
+                <div class="skill-title">📋 Methodologies</div>
+                <div class="skill-list">
+                    • Agile/SCRUM<br>
+                    • CI/CD<br>
+                    • TDD<br>
+                    • Process Automation<br>
+                    • Data Modeling
+                </div>
+            </div>
+            
+            <div class="skill-category">
+                <div class="skill-title">🤝 Soft Skills</div>
+                <div class="skill-list">
+                    • Teamwork<br>
+                    • Effective Communication<br>
+                    • Problem Solving<br>
+                    • Mentoring & Training<br>
+                    • Adaptability
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function goBackToBox() {
+            // Communicate to parent iframe to go back to box.html
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ action: 'navigateToBox' }, '*');
+            }
+        }
+    </script>
+</body>
+</html>

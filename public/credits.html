@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créditos</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #9c27b0 0%, #673ab7 100%);
+            color: #ffffff;
+            overflow: hidden;
+        }
+        
+        .container {
+            padding: 20px;
+            max-width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            flex-shrink: 0;
+        }
+        
+        .credits-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            flex: 1;
+            min-height: 0;
+        }
+        
+        .section-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .credits-list {
+            line-height: 1.6;
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+        
+        .credit-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border-left: 3px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .description {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            line-height: 1.6;
+            opacity: 0.9;
+            text-align: center;
+        }
+        
+        /* Botón de volver minimalista */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            font-size: 20px;
+            color: white;
+        }
+        
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .back-button::before {
+            content: '←';
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" onclick="goBackToBox()" title="Volver al menú"></button>
+    
+    <div class="container">
+        <h1>✨ Créditos</h1>
+        
+        <div class="credits-section">
+            <div class="section-title">
+                🎨 Tecnologías Frontend
+            </div>
+            <div class="credits-list">
+                <div class="credit-item">• Three.js r132 - Biblioteca principal para WebGL y renderizado 3D</div>
+                <div class="credit-item">• CSS3DRenderer - Integración perfecta de elementos HTML en 3D</div>
+                <div class="credit-item">• GLTFLoader - Carga eficiente de modelos 3D (.glb/.gltf)</div>
+                <div class="credit-item">• DRACOLoader - Compresión avanzada de geometría 3D</div>
+                <div class="credit-item">• OrbitControls - Navegación intuitiva en el espacio 3D</div>
+                <div class="credit-item">• FontLoader & TextGeometry - Renderizado de texto 3D</div>
+            </div>
+        </div>
+        
+        <div class="credits-section">
+            <div class="section-title">
+                🔧 Herramientas de Desarrollo
+            </div>
+            <div class="credits-list">
+                <div class="credit-item">• Visual Studio Code - Editor principal con extensiones Git y Live Server</div>
+                <div class="credit-item">• Node.js v18 - Runtime para el servidor backend</div>
+                <div class="credit-item">• GitHub - Control de versiones y hosting del repositorio</div>
+                <div class="credit-item">• Docker - Containerización con imagen Alpine Linux</div>
+                <div class="credit-item">• SendGrid API - Servicio de envío de emails del formulario</div>
+                <div class="credit-item">• PowerShell - Terminal y scripts de automatización</div>
+            </div>
+        </div>
+        
+        <div class="credits-section">
+            <div class="section-title">
+                � Recursos de Diseño
+            </div>
+            <div class="credits-list">
+                <div class="credit-item">• Modelos 3D personalizados (.glb) - Café colombiano y otros elementos</div>
+                <div class="credit-item">• Íconos y gráficos personalizados en formato PNG</div>
+                <div class="credit-item">• Gradientes CSS avanzados para fondos dinámicos</div>
+                <div class="credit-item">• Audio MP3 - "Soy Colombiano" para ambientación</div>
+                <div class="credit-item">• Fotografías personales y fondos temáticos</div>
+            </div>
+        </div>
+        
+        <div class="description">
+            <strong>Sobre este proyecto:</strong><br><br>
+            This interactive 3D portfolio was completely developed from scratch using modern web technologies. 
+            El proyecto incluye un servidor Node.js personalizado con API de SendGrid para el manejo de formularios, 
+            containerization with Docker for deployment, and an immersive 3D experience built with Three.js.
+            <br><br>
+            <strong>Características técnicas:</strong><br>
+            ✨ Renderizado 3D en tiempo real con optimización de performance<br>
+            📱 Diseño completamente responsivo para todos los dispositivos<br>
+            🔄 Sistema de navegación fluido entre secciones<br>
+            📧 Formularios funcionales con envío automático de emails<br>
+            🎵 Integración multimedia con audio ambiente<br>
+            🐳 Deployment automatizado con Docker
+        </div>
+    </div>
+    
+    <script>
+        function goBackToBox() {
+            // Comunicar al iframe padre para volver al box.html
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ action: 'navigateToBox' }, '*');
+            }
+        }
+    </script>
+</body>
+</html>

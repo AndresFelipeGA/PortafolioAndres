@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Me</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: Arial, sans-serif;
+            background-image: url('../assets/media/pictures/picturesOfSometingElse/vibrant-abstract-painting-inspired-by-600nw-2441172959.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #000000; /* Texto negro */
+            overflow: hidden;
+        }
+        
+        /* Black cover removed - now handled by the 3D plane in the main scene */
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        body.dark-background {
+            background-color: #121212;
+            color: #f5f5f5;
+        }
+        
+        /* No separate interactive screen container - the entire body is the content */
+        .interactive-screen {
+            width: 100%;
+            height: 100%;
+            padding: 0; /* Remove padding to allow photo to touch the very edge */
+            box-sizing: border-box;
+            display: block; /* Changed from flex to block for better text flow */
+            margin: 0;
+            background-color: rgba(255, 255, 255, 0.7); /* Fondo blanco con opacidad */
+            border-radius: 0;
+            box-shadow: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+        }
+        
+        /* Photo gallery styles */
+        .photo-gallery {
+            position: absolute; /* Absolute positioning */
+            top: 190px; /* Position from top - moved down further below Biography title */
+            right: 35px; /* Position from right - moved more to the left */
+            width: 35%; /* Reduced width */
+            height: 45%; /* Reduced height */
+            overflow: hidden;
+            margin: 0; /* No margin */
+            padding: 0; /* No padding */
+            z-index: 10; /* Ensure it's above other content */
+            background: none; /* No background */
+            box-shadow: none; /* No shadow */
+            border-radius: 15px; /* Rounded corners */
+        }
+        
+        .photo-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            border-radius: 15px; /* Rounded corners for container */
+        }
+        
+        .photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Changed back to cover for better appearance */
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            border-radius: 15px; /* Rounded corners for images */
+        }
+        
+        .photo.active {
+            opacity: 1;
+        }
+        
+        /* Removed dark background adjustment since we're using brown background */
+        
+        .screen-header {
+            text-align: left;
+            margin-bottom: 15px;
+            margin-left: 20px;
+        }
+        
+        .screen-header h1 {
+            margin: 0;
+            color: #000000; /* Texto negro */
+            font-size: 22px; /* Slightly smaller */
+        }
+        
+        .profile-container {
+            display: block;
+            margin-bottom: 15px;
+            margin-left: 20px;
+        }
+        
+        .profile-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 15px;
+            border: 3px solid #A67C52; /* Medium brown border */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .profile-name {
+            font-size: 20px; /* Slightly smaller */
+            font-weight: 700;
+            color: #000000; /* Texto negro */
+            margin: 0 0 3px 0;
+        }
+        
+        .profile-title {
+            font-size: 14px; /* Slightly smaller */
+            color: #555555; /* Gris oscuro para el subtítulo */
+            margin: 0 0 10px 0;
+            font-style: italic;
+        }
+        
+        .about-section {
+            background: rgba(255, 255, 255, 0.8); /* Fondo blanco semi-transparente */
+            padding: 15px; /* Añadir padding */
+            margin: 0 20px 20px 20px; /* Add margin on sides and bottom */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Sombra sutil */
+            overflow: visible; /* No scrolling */
+            position: relative; /* For positioning */
+            width: calc(100% - 40px); /* Full width minus margins */
+            border-radius: 8px; /* Esquinas redondeadas */
+        }
+        
+        .about-section h2 {
+            color: #000000; /* Texto negro */
+            margin-top: 0;
+            font-size: 16px; /* Slightly smaller */
+            border-bottom: 1px solid #000000; /* Borde negro */
+            padding-bottom: 3px;
+            margin-bottom: 15px;
+            max-width: 100%; /* Ensure it doesn't overflow */
+        }
+        
+        .about-text {
+            font-size: 13px; /* Smaller text */
+            line-height: 1.5; /* Tighter line height */
+            color: #000000; /* Texto negro */
+            text-align: justify;
+            margin-bottom: 15px; /* Space between paragraphs */
+            text-wrap: balance; /* Better text wrapping */
+            max-width: 100%; /* Ensure text doesn't overflow */
+        }
+        
+        /* Estilo para el texto que fluye alrededor de la imagen */
+        .about-section {
+            position: relative;
+            z-index: 1; /* Asegura que esté por debajo de la imagen */
+        }
+        
+        /* Primer párrafo - a la izquierda de la imagen */
+        .about-section p:nth-of-type(1) {
+            width: 58%;
+            margin-right: 42%;
+        }
+        
+        /* Segundo párrafo - a la izquierda de la imagen */
+        .about-section p:nth-of-type(2) {
+            width: 58%;
+            margin-right: 42%;
+        }
+        
+        /* Tercer párrafo - continuación con pequeño espacio */
+        .about-section p:nth-of-type(3) {
+            width: 100%;
+            margin-top: 15px; /* Pequeño espacio para separar de la imagen */
+        }
+        
+        /* Asegura que la imagen esté por encima del texto */
+        .photo-gallery {
+            z-index: 5;
+        }
+        
+        /* Content section styles */
+        .content-section {
+            width: 90%; /* Reduced width */
+            margin: 20px; /* Margin all around */
+            height: auto; /* Auto height */
+            display: block; /* Block display */
+            position: relative; /* For positioning */
+            background-color: rgba(255, 255, 255, 0.7); /* Fondo blanco con opacidad */
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        /* Remove buttons-row and contact-button styles */
+    </style>
+</head>
+<body>
+    <!-- Black cover removed - now handled by the 3D plane in the main scene -->
+    
+    <div class="interactive-screen">
+        <!-- Photo gallery in top-right corner, touching the top edge -->
+        <div class="photo-gallery">
+            <div class="photo-container">
+                <img src="../assets/media/pictures/picturesOfMe/IMG_0162.JPEG" alt="Andrés Photo 1" class="photo active">
+                <img src="../assets/media/pictures/picturesOfMe/IMG_2400.JPEG" alt="Andrés Photo 2" class="photo">
+                <img src="../assets/media/pictures/picturesOfMe/IMG_5636.JPEG" alt="Andrés Photo 3" class="photo">
+                <img src="../assets/media/pictures/picturesOfMe/IMG_6116.JPEG" alt="Andrés Photo 4" class="photo">
+                <img src="../assets/media/pictures/picturesOfMe/IMG_7328.JPEG" alt="Andrés Photo 5" class="photo">
+            </div>
+        </div>
+        
+        <div class="content-section">
+            <div class="screen-header">
+                <h1>About Me</h1>
+            </div>
+            
+            <div class="profile-container">
+                <h2 class="profile-name">Andrés Felipe González</h2>
+                <p class="profile-title">Full Stack Developer & Data Engineer</p>
+            </div>
+            
+            <div class="about-section">
+                <h2>Biography</h2>
+                <p class="about-text">
+                    Welcome to my portfolio! In case you haven't noticed from the vibrant colors and warm atmosphere, I'm Colombian and proud of it. My journey in technology has been as rich and diverse as the landscapes of my beautiful country. With a passion for innovation and problem-solving, I've developed expertise across multiple domains of software engineering.
+                </p>
+                <p class="about-text">
+                    As a Full Stack Developer, I craft seamless digital experiences from front-end to back-end. I thrive on challenges and embrace new technologies – this adaptability drives me to continuously expand my skill set. I work with modern frameworks, cloud technologies, and database management, always striving to build better solutions that meet diverse business needs. Currently, I'm diving deep into Prompt Engineering and AI integration, exploring how to bridge human creativity with artificial intelligence and develop alongside these rapidly evolving tools.
+                </p>
+                <p class="about-text">
+                    When I'm not coding or building AI-powered applications, you'll find me discovering coffee shops, exploring new places, or experimenting with new technologies. I believe in continuous learning and staying at the cutting edge of tech innovation. My approach combines creativity and dedication with a friendly, collaborative spirit – bringing both expertise and enthusiasm to every project I undertake.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Rotate and flip horizontally to fix the mirror effect
+        document.addEventListener('DOMContentLoaded', function() {
+            // Rotate 180 degrees and flip horizontally (scaleX(-1))
+            document.body.style.transform = 'rotate(180deg) scaleX(-1)';
+            
+            // Photo slideshow functionality
+            const photos = document.querySelectorAll('.photo');
+            let currentPhotoIndex = 0;
+            
+            function showNextPhoto() {
+                // Hide current photo
+                photos[currentPhotoIndex].classList.remove('active');
+                
+                // Move to next photo (loop back to first if at the end)
+                currentPhotoIndex = (currentPhotoIndex + 1) % photos.length;
+                
+                // Show new current photo
+                photos[currentPhotoIndex].classList.add('active');
+            }
+            
+            // Change photo every 20 seconds (as requested)
+            setInterval(showNextPhoto, 20000);
+            
+            // Screen control is now handled by the 3D plane in the main scene
+            let isActive = false;
+            
+            // Check if page is in an iframe (which means it was loaded by clicking the button)
+            function isInIframe() {
+                try {
+                    return window.self !== window.top;
+                } catch (e) {
+                    return true; // If access to parent window is denied, we're in an iframe
+                }
+            }
+            
+            // Listen for messages from the parent window (fixed-advanced-loader.html)
+            window.addEventListener('message', function(event) {
+                console.log("Message received in about-me.html:", event.data);
+                console.log("Message source:", event.source);
+                console.log("Current screen state:", isActive ? "ACTIVE (content shown)" : "INACTIVE (screen off)");
+                
+                // Check if the message is to turn on the screen
+                if (event.data && event.data.action === 'turnOnScreen') {
+                    console.log("Received message to turn on screen");
+                    isActive = true;
+                    
+                    // Send confirmation back to parent
+                    try {
+                        window.parent.postMessage({ action: 'aboutMeScreenTurnedOn' }, '*');
+                        console.log("Sent confirmation that screen was turned on");
+                    } catch (e) {
+                        console.error("Error sending confirmation to parent:", e);
+                    }
+                }
+                
+                // Check if the message is to turn off the screen
+                if (event.data && event.data.action === 'turnOffScreen') {
+                    console.log("Received message to turn off screen");
+                    isActive = false;
+                    
+                    // Send confirmation back to parent
+                    try {
+                        window.parent.postMessage({ action: 'aboutMeScreenTurnedOff' }, '*');
+                        console.log("Sent confirmation that screen was turned off");
+                    } catch (e) {
+                        console.error("Error sending confirmation to parent:", e);
+                    }
+                }
+            });
+            
+            // Send a message to the parent window to let it know we're ready
+            if (isInIframe()) {
+                try {
+                    window.parent.postMessage({ action: 'aboutMeReady' }, '*');
+                    console.log("Sent ready message to parent");
+                } catch (e) {
+                    console.error("Error sending message to parent:", e);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
