@@ -4,13 +4,13 @@
 
 // Función para obtener la URL del modelo de forma segura
 window.getSecureModelUrl = function() {
-    // Usar Cloudflare R2 como primera opción
-    return 'https://pub-3eee7465d9374f15a9c4a6192489c0b1.r2.dev/modelo3d.glb';
+    // Usar proxy CORS temporal mientras se configura Cloudflare R2
+    return 'https://cors-anywhere.herokuapp.com/https://pub-3eee7465d9374f15a9c4a6192489c0b1.r2.dev/modelo3d.glb';
 };
 
 // Función para obtener URL de fallback (también segura)
 window.getSecureFallbackUrl = function() {
-    // Fallback también desde Cloudflare R2
+    // Fallback directo a Cloudflare R2 (sin proxy)
     return 'https://pub-3eee7465d9374f15a9c4a6192489c0b1.r2.dev/modelo3d.glb';
 };
 
