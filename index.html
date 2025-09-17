@@ -2856,8 +2856,8 @@
             // minPolarAngle: límite inferior (no puede subir más allá de 10° desde arriba)
             controls.minPolarAngle = Math.PI / 18; // 10° mínimo desde la vertical (evita vista cenital completa)
             
-            // Habilitar desplazamiento con click derecho (pan)
-            controls.enablePan = true;
+            // Deshabilitar desplazamiento con click derecho (pan) - solo permitir rotación y zoom
+            controls.enablePan = false;
             
             // SISTEMA DE DETECCIÓN DE MOVIMIENTO REAL (NO SOLO HOVER)
             // 🔧 CONFIGURACIÓN DE SENSIBILIDAD - Ajustar según necesidades
