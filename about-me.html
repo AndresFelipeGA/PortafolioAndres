@@ -217,11 +217,7 @@
         <!-- Photo gallery in top-right corner, touching the top edge -->
         <div class="photo-gallery">
             <div class="photo-container">
-                <img src="assets/media/pictures/picturesOfMe/IMG_0162.JPEG" alt="Andrés Photo 1" class="photo active">
-                <img src="assets/media/pictures/picturesOfMe/IMG_2400.JPEG" alt="Andrés Photo 2" class="photo">
-                <img src="assets/media/pictures/picturesOfMe/IMG_5636.JPEG" alt="Andrés Photo 3" class="photo">
-                <img src="assets/media/pictures/picturesOfMe/IMG_6116.JPEG" alt="Andrés Photo 4" class="photo">
-                <img src="assets/media/pictures/picturesOfMe/IMG_7328.JPEG" alt="Andrés Photo 5" class="photo">
+                <img src="assets/media/pictures/picturesOfMe/IMG_6116.JPEG" alt="Andrés Photo" class="photo active">
             </div>
         </div>
         
@@ -256,23 +252,7 @@
             // Rotate 180 degrees and flip horizontally (scaleX(-1))
             document.body.style.transform = 'rotate(180deg) scaleX(-1)';
             
-            // Photo slideshow functionality
-            const photos = document.querySelectorAll('.photo');
-            let currentPhotoIndex = 0;
-            
-            function showNextPhoto() {
-                // Hide current photo
-                photos[currentPhotoIndex].classList.remove('active');
-                
-                // Move to next photo (loop back to first if at the end)
-                currentPhotoIndex = (currentPhotoIndex + 1) % photos.length;
-                
-                // Show new current photo
-                photos[currentPhotoIndex].classList.add('active');
-            }
-            
-            // Change photo every 20 seconds (as requested)
-            setInterval(showNextPhoto, 20000);
+            // Photo slideshow functionality removed - now showing only one static photo
             
             // Screen control is now handled by the 3D plane in the main scene
             let isActive = false;
