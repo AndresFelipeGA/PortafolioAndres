@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8E71S6QG6E"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-8E71S6QG6E');
+    </script>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fixed 3D Model Loader</title>
@@ -494,15 +503,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r132/three.min.js"></script>
     
     <!-- Three.js components - using same version and ensuring proper load order -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.0/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.0/examples/js/loaders/DRACOLoader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.0/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.0/examples/js/loaders/FontLoader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.0/examples/js/geometries/TextGeometry.js"></script>
+    <script src="https://unpkg.com/three@0.132.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://unpkg.com/three@0.132.0/examples/js/loaders/DRACOLoader.js"></script>
+    <script src="https://unpkg.com/three@0.132.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://unpkg.com/three@0.132.0/examples/js/loaders/FontLoader.js"></script>
+    <script src="https://unpkg.com/three@0.132.0/examples/js/geometries/TextGeometry.js"></script>
     
     <!-- Secure Model Loader -->
     <script src="assets/scripts/secure-model-loader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.0/examples/js/renderers/CSS3DRenderer.js"></script>
+    <script src="https://unpkg.com/three@0.132.0/examples/js/renderers/CSS3DRenderer.js"></script>
     
     <!-- Custom music autoplay script -->
     <script src="assets/scripts/music-autoplay.js"></script>
@@ -2489,17 +2498,20 @@
         function controlAudio(mute) {
             musicMuted = mute;
             
-            // Si hay un iframe de YouTube, silenciarlo o activarlo
-            const iframe = document.querySelector('#youtube-container iframe');
-            if (iframe && iframe.contentWindow) {
+            // Si hay un elemento de audio local, silenciarlo o activarlo
+            const audioElement = document.querySelector('#youtube-container #local-audio');
+            if (audioElement) {
                 if (mute) {
-                    iframe.contentWindow.postMessage('{"event":"command","func":"mute","args":""}', '*');
-                    console.log('YouTube video silenciado');
+                    audioElement.pause();
+                    console.log('Audio local silenciado');
                 } else {
-                    iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
-                    // Set volume to 0.01 (1%)
-                    iframe.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[1]}', '*');
-                    console.log('YouTube video activado con volumen al 1%');
+                    audioElement.play().then(() => {
+                        // Set volume to 0.01 (1%)
+                        audioElement.volume = 0.01;
+                        console.log('Audio local activado con volumen al 1%');
+                    }).catch(e => {
+                        console.log('Error al reproducir audio local:', e);
+                    });
                 }
             }
         }
@@ -2619,11 +2631,10 @@
                         musicControlBtn.classList.add('music-on');
                     }
                     
-                    // Ajustar el volumen del video de YouTube
-                    const iframe = document.querySelector('#youtube-container iframe');
-                    if (iframe && iframe.contentWindow) {
-                        iframe.contentWindow.postMessage(`{"event":"command","func":"unMute","args":""}`, '*');
-                        iframe.contentWindow.postMessage(`{"event":"command","func":"setVolume","args":[${volumeLevel}]}`, '*');
+                    // Ajustar el volumen del audio local
+                    const audioElement = document.querySelector('#youtube-container #local-audio');
+                    if (audioElement) {
+                        audioElement.volume = volumeLevel / 100;
                         console.log(`Volumen ajustado al ${volumeLevel}%`);
                     }
                 }
@@ -2636,60 +2647,57 @@
         
         // Nota: Los controles de música se configurarán después de que se creen dinámicamente
         
-        // Function to play the YouTube video using a direct embed approach
+        // Function to play local music (replaces YouTube)
         function playYouTubeVideo() {
             if (!musicPlayed) {
-                console.log('Intentando reproducir música de YouTube');
+                console.log('Intentando reproducir música local');
                 
                 try {
-                    // Get the container
+                    // Get the container (reuse existing container)
                     const youtubeContainer = document.getElementById('youtube-container');
                     
-                    // Create the iframe with all necessary parameters
-                    // Using YouTube Shorts embed URL
-                    const embedHtml = `
-                        <iframe
-                            width="1"
-                            height="1"
-                            src="https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=1&loop=1&playlist=${youtubeVideoId}&controls=0&showinfo=0&disablekb=1&fs=0&modestbranding=1&rel=0&enablejsapi=1"
-                            frameborder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowfullscreen>
-                        </iframe>
+                    // Create audio element instead of iframe
+                    const audioHtml = `
+                        <audio id="local-audio" loop preload="auto" style="display: none;">
+                            <source src="assets/media/music/soy-colombiano.mp3" type="audio/mpeg">
+                        </audio>
                     `;
                     
-                    // Add the iframe to the container
-                    youtubeContainer.innerHTML = embedHtml;
+                    // Add the audio to the container
+                    youtubeContainer.innerHTML = audioHtml;
+                    
+                    // Get the audio element
+                    const audioElement = youtubeContainer.querySelector('#local-audio');
                     
                     // Mark as played
                     musicPlayed = true;
                     
-                    console.log('YouTube video embedded successfully');
+                    console.log('Audio local embedded successfully');
                     
-                    // Solo desmuteamos si el usuario ha activado explícitamente la música
+                    // Solo reproducimos si el usuario ha activado explícitamente la música
                     if (musicButtonClicked && !musicMuted) {
-                        // Try to unmute the video and set volume to 0.5 (50%) after a delay
+                        // Try to play the audio after a delay
                         setTimeout(() => {
                             try {
-                                // Try to find the iframe and postMessage to it
-                                const iframe = youtubeContainer.querySelector('iframe');
-                                if (iframe && iframe.contentWindow) {
-                                    // Try to unmute
-                                    iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
-                                    console.log('Attempted to unmute YouTube video');
+                                if (audioElement) {
+                                    // Set volume to 1% (0.01)
+                                    audioElement.volume = 0.01;
                                     
-                                    // Set volume to 0.01 (1%)
-                                    iframe.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[1]}', '*');
-                                    console.log('Set YouTube video volume to 1%');
+                                    // Try to play
+                                    audioElement.play().then(() => {
+                                        console.log('Local audio started playing');
+                                    }).catch(e => {
+                                        console.log('Autoplay blocked, waiting for user interaction:', e);
+                                    });
                                 }
                             } catch (e) {
-                                console.error('Error trying to unmute video or set volume:', e);
+                                console.error('Error trying to play local audio:', e);
                             }
                         }, 2000);
                     }
                     
                 } catch (error) {
-                    console.error('Error embedding YouTube video:', error);
+                    console.error('Error embedding local audio:', error);
                 }
             }
         }
@@ -2773,7 +2781,7 @@
             
             // La primera frase siempre debe ser sobre el desarrollo del portafolio
             if (isFirstPhrase) {
-                phraseText = "This portfolio is still under development";
+                phraseText = "Welcome! This portfolio is still under development and may take a moment to load completely";
                 isFirstPhrase = false;
             } else {
                 // Seleccionar frase completamente aleatoria
@@ -2785,13 +2793,13 @@
             phraseElement.textContent = phraseText;
             phraseElement.classList.add('visible');
             
-            // Ocultar después de 3 segundos para lectura completa
+            // Ocultar después de 5 segundos para lectura completa
             setTimeout(() => {
                 phraseElement.classList.remove('visible');
                 setTimeout(() => {
                     isShowingPhrase = false;
                 }, 100); // Transición más rápida
-            }, 3000);
+            }, 5000);
         }
         
         // Función para iniciar el sistema de frases
@@ -2856,8 +2864,8 @@
             // minPolarAngle: límite inferior (no puede subir más allá de 10° desde arriba)
             controls.minPolarAngle = Math.PI / 18; // 10° mínimo desde la vertical (evita vista cenital completa)
             
-            // Habilitar desplazamiento con click derecho (pan)
-            controls.enablePan = true;
+            // Deshabilitar desplazamiento con click derecho (pan) - solo permitir rotación y zoom
+            controls.enablePan = false;
             
             // SISTEMA DE DETECCIÓN DE MOVIMIENTO REAL (NO SOLO HOVER)
             // 🔧 CONFIGURACIÓN DE SENSIBILIDAD - Ajustar según necesidades
@@ -3072,7 +3080,7 @@
                                     
                                     return; // Salir completamente del event listener
                                 }
-                            } else if (iframe.src && iframe.src.includes('contact.html')) {
+                            } else if (iframe.src && iframe.src.includes('contact-main.html')) {
                                 if (!contactButtonClicked) {
                                     console.log("🚫 Click en iframe de contact pero botón no activo - ignorando");
                                     return; // Salir completamente
@@ -7055,7 +7063,7 @@
                     iframe.style.overflow = 'hidden';
                     iframe.style.display = 'block';
                     iframe.style.pointerEvents = 'auto'; // CRÍTICO: Habilitar eventos de puntero
-                    iframe.src = 'contact/contact.html';
+                    iframe.src = 'contact-main.html';
                     
                     // Crear un elemento div para contener el iframe
                     const div = document.createElement('div');
