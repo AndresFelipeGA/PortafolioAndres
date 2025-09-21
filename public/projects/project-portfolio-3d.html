@@ -296,7 +296,6 @@
     </div>
     
     <script>
-        console.log("🚀 SUPER SCRIPT DE NAVEGACIÓN ACTIVADO");
         
         // Variables globales
         let navigationAttempts = 0;
@@ -304,42 +303,33 @@
         // Función de navegación ultra agresiva
         function FORCE_NAVIGATION() {
             navigationAttempts++;
-            console.log(`🔥 INTENTO DE NAVEGACIÓN #${navigationAttempts}`);
             
             try {
                 // Método directo
                 window.location.href = 'projects.html';
-                console.log("✅ Navegación directa enviada");
                 return true;
             } catch (e) {
-                console.error("❌ Navegación directa falló:", e);
             }
             
             try {
                 // Método alternativo
                 window.location.assign('projects.html');
-                console.log("✅ Navegación assign enviada");
                 return true;
             } catch (e) {
-                console.error("❌ Navegación assign falló:", e);
             }
             
             try {
                 // Método de ventana
                 window.open('projects.html', '_self');
-                console.log("✅ Navegación open enviada");
                 return true;
             } catch (e) {
-                console.error("❌ Navegación open falló:", e);
             }
             
             // Si todo falla, usar replace
             try {
                 window.location.replace('projects.html');
-                console.log("✅ Navegación replace enviada");
                 return true;
             } catch (e) {
-                console.error("❌ Navegación replace falló:", e);
             }
             
             return false;
@@ -387,7 +377,6 @@
                 const navKeys = ['Escape', 'Backspace', 'Home', 'ArrowLeft'];
                 if (navKeys.includes(e.key)) {
                     e.preventDefault();
-                    console.log(`⌨️ TECLA ${e.key} - NAVEGANDO`);
                     FORCE_NAVIGATION();
                 }
             }, { passive: false, capture: true });
@@ -401,7 +390,6 @@
                 button.onclick = FORCE_NAVIGATION;
                 button.onmousedown = FORCE_NAVIGATION;
                 button.ontouchstart = FORCE_NAVIGATION;
-                console.log(`✅ Botón ${button.id} configurado`);
             }
         }
         
@@ -412,7 +400,6 @@
         
         // También después del DOM
         document.addEventListener('DOMContentLoaded', function() {
-            console.log("📄 DOM cargado - reconfiguración total");
             
             // Aplicar transformación pero mantener botones sin transformar
             document.body.style.transform = 'rotate(180deg)';
@@ -433,12 +420,10 @@
         // Auto-navegación de emergencia después de 15 segundos
         setTimeout(function() {
             if (navigationAttempts === 0) {
-                console.log("⏰ AUTO-NAVEGACIÓN DE EMERGENCIA");
                 FORCE_NAVIGATION();
             }
         }, 15000);
         
-        console.log("✅ SUPER SCRIPT ACTIVADO - Todo configurado");
     </script>
 </body>
 </html>

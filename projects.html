@@ -533,7 +533,6 @@
             // Screen control variables
             let isActive = false;
             
-            console.log("🚀 Inicializando projects.html con bloqueo balanceado");
 
             // Check if page is in an iframe
             function isInIframe() {
@@ -546,62 +545,48 @@
             
             // Listen for messages from the parent window - AMPLIADO PARA REACTIVO
             window.addEventListener('message', function(event) {
-                console.log("📨 Message received in projects.html:", event.data);
                 
                 if (event.data && event.data.action === 'turnOnScreen') {
-                    console.log("✅ Received message to turn on projects screen");
                     isActive = true;
                     
                     try {
                         window.parent.postMessage({ action: 'projectsScreenTurnedOn' }, '*');
-                        console.log("📤 Sent confirmation that projects screen was turned on");
                     } catch (e) {
-                        console.error("❌ Error sending confirmation to parent:", e);
                     }
                 }
                 
                 if (event.data && event.data.action === 'turnOffScreen') {
-                    console.log("🔴 Received message to turn off projects screen");
                     isActive = false;
                     
                     try {
                         window.parent.postMessage({ action: 'projectsScreenTurnedOff' }, '*');
-                        console.log("📤 Sent confirmation that projects screen was turned off");
                     } catch (e) {
-                        console.error("❌ Error sending confirmation to parent:", e);
                     }
                 }
                 
                 // NUEVOS LISTENERS PARA REACTIVIDAD CON OTROS BOTONES
                 if (event.data && event.data.action === 'buttonPressed') {
-                    console.log("📨 Recibido: botón presionado:", event.data.button);
                     if (event.data.button === 'projects' || event.data.button === 'carpeta') {
-                        console.log("🟢 Botón de projects presionado - ACTIVANDO PANTALLA");
                         isActive = true;
                         try {
                             window.parent.postMessage({ action: 'projectsScreenTurnedOn' }, '*');
                         } catch (e) {
-                            console.error("Error sending message:", e);
                         }
                     } else {
-                        console.log("🔴 Otro botón presionado - APAGANDO PANTALLA");
                         isActive = false;
                         try {
                             window.parent.postMessage({ action: 'projectsScreenTurnedOff' }, '*');
                         } catch (e) {
-                            console.error("Error sending message:", e);
                         }
                     }
                 }
                 
                 // Escuchar movimiento del usuario
                 if (event.data && event.data.action === 'userMoving') {
-                    console.log("📨 Recibido: usuario se movió en el modelo 3D");
                     isActive = false;
                     try {
                         window.parent.postMessage({ action: 'projectsScreenTurnedOff' }, '*');
                     } catch (e) {
-                        console.error("Error sending message:", e);
                     }
                 }
                 
@@ -613,18 +598,15 @@
                     event.data.action === 'navigationStarted' ||
                     event.data.action === 'realMovementDetected'
                 )) {
-                    console.log("📨 Actividad en modelo 3D detectada - APAGANDO PANTALLA");
                     isActive = false;
                     try {
                         window.parent.postMessage({ action: 'projectsScreenTurnedOff' }, '*');
                     } catch (e) {
-                        console.error("Error sending message:", e);
                     }
                 }
                 
                 // Escuchar específicamente movimiento real (no micro-movimientos)
                 if (event.data && event.data.action === 'realMovementDetected') {
-                    console.log("📨 MOVIMIENTO REAL detectado en modelo 3D - APAGANDO PANTALLA");
                     isActive = false;
                 }
                 
@@ -639,9 +621,7 @@
             if (isInIframe()) {
                 try {
                     window.parent.postMessage({ action: 'projectsReady' }, '*');
-                    console.log("📤 Sent ready message to parent");
                 } catch (e) {
-                    console.error("❌ Error sending message to parent:", e);
                 }
             }
 
@@ -650,20 +630,15 @@
             
             // NUEVA ESTRATEGIA: Event listener MÁS AGRESIVO y directo
             document.addEventListener('click', function(e) {
-                console.log("🎯 CLICK DETECTADO EN IFRAME:", e.target?.tagName || 'UNKNOWN', e.target?.className || '');
-                console.log("🎯 Coordinates:", e.clientX, e.clientY);
-                console.log("🎯 Target completo:", e.target);
                 
                 // Verificar si el target es válido
                 if (!e.target || e.target === document) {
-                    console.log("❌ Target no válido o es document, saltando");
                     e.stopPropagation();
                     return;
                 }
                 
                 // MÉTODO 1: Verificar si clickeamos directamente en una tarjeta
                 if (e.target.classList.contains('project-card')) {
-                    console.log("🎯 CLICK DIRECTO EN PROJECT-CARD!");
                     handleCardClick(e, e.target);
                     return;
                 }
@@ -685,17 +660,14 @@
                 let currentElement = e.target;
                 while (currentElement && currentElement !== document) {
                     if (currentElement.classList && currentElement.classList.contains('project-card')) {
-                        console.log("🎯 ENCONTRADA TARJETA POR TRAVERSAL MANUAL!");
                         handleCardClick(e, currentElement);
                         return;
                     }
                     currentElement = currentElement.parentElement;
                 }
                 
-                console.log("🔍 No se encontró tarjeta, verificando si es projects-grid...");
                 
             // MÉTODO 4: DETECCIÓN ULTRA MEJORADA PARA TODA LA TARJETA
-            console.log("🔍 Intentando detección ultra mejorada...");
             
             // Verificar si el click está en alguna área relevante
             const portfolioCard = document.querySelector('.project-card[data-category="web"]');
@@ -720,12 +692,7 @@
                     const clickX = originalClickX;
                     const clickY = originalClickY;
                     
-                    console.log("📏 Viewport:", viewportWidth, "x", viewportHeight);
-                    console.log("📏 Original coordinates:", originalClickX, originalClickY);
-                    console.log("📏 Adjusted coordinates:", clickX, clickY);
                     
-                    console.log("📍 Click en:", clickX, clickY);
-                    console.log("📦 Área exacta de tarjeta:", cardRect);
                     
                     // DETECCIÓN DIRECTA DENTRO DE LA TARJETA (más precisa)
                     const isDirectlyInsideCard = (clickX >= cardRect.left && 
@@ -757,11 +724,9 @@
                         else if (isNearCard) reason = "Proximidad a tarjeta";
                         else reason = "General projects area";
                         
-                        console.log("🎯 ACTIVANDO Portfolio 3D por:", reason);
                         handleCardClick(e, portfolioCard);
                         return;
                     } else {
-                        console.log("❌ Click fuera de todas las áreas válidas");
                         console.log("❌ Distancias:", {
                             horizontal: Math.min(Math.abs(clickX - cardRect.left), Math.abs(clickX - cardRect.right)),
                             vertical: Math.min(Math.abs(clickY - cardRect.top), Math.abs(clickY - cardRect.bottom))
@@ -771,7 +736,6 @@
             }
 
             // MÉTODO 5: DETECCIÓN ESPECÍFICA PARA ELEMENTOS DE TEXTO Y PARTES DE LA TARJETA
-            console.log("🔍 Método 5: Verificando elementos específicos de la tarjeta...");
             
             // Lista ampliada de selectores para elementos de la tarjeta
             const cardSelectors = [
@@ -786,23 +750,19 @@
             // Verificar si el elemento clickeado pertenece a una tarjeta
             for (let selector of cardSelectors) {
                 if (e.target.matches && e.target.matches(selector)) {
-                    console.log(`🎯 CLICK DIRECTO EN: ${selector}`);
                     const parentCard = e.target.closest('.project-card');
                     if (parentCard) {
                         const title = parentCard.querySelector('.project-title')?.textContent;
                         if (title === 'Portfolio 3D Interactivo') {
-                            console.log("🎯 ACTIVANDO Portfolio 3D por elemento específico!");
                             handleCardClick(e, parentCard);
                             return;
                         }
                     }
                 } else if (e.target.closest && e.target.closest(selector)) {
-                    console.log(`🎯 CLICK DENTRO DE: ${selector}`);
                     const parentCard = e.target.closest('.project-card');
                     if (parentCard) {
                         const title = parentCard.querySelector('.project-title')?.textContent;
                         if (title === 'Portfolio 3D Interactivo') {
-                            console.log("🎯 ACTIVANDO Portfolio 3D por elemento anidado!");
                             handleCardClick(e, parentCard);
                             return;
                         }
@@ -811,14 +771,12 @@
             }
             
             // METHOD 6: DETECTION BY ABSOLUTE COORDINATES
-            console.log("🔍 Method 6: Detection by absolute coordinates...");
             const portfolioCardCoords = document.querySelector('.project-card[data-category="web"]');
             if (portfolioCardCoords) {
                 const cardRect = portfolioCardCoords.getBoundingClientRect();
                 const clickX = e.clientX;
                 const clickY = e.clientY;
                 
-                console.log("📍 Click coordinates:", clickX, clickY);
                 console.log("� Bounds de la tarjeta:", {
                     left: cardRect.left,
                     right: cardRect.right,
@@ -838,7 +796,6 @@
                 );
                 
                 if (isWithinBounds) {
-                    console.log("🎯 CLICK DETECTED BY ABSOLUTE COORDINATES!");
                     const title = portfolioCardCoords.querySelector('.project-title')?.textContent;
                     if (title === 'Portfolio 3D Interactivo') {
                         handleCardClick(e, portfolioCardCoords);
@@ -855,14 +812,12 @@
             }
             
             // MÉTODO 7: FALLBACK ULTRA AGRESIVO
-            console.log("🔍 Método 7: Fallback ultra agresivo...");
             const allCards = document.querySelectorAll('.project-card');
             if (allCards.length === 1) {
                 // Si solo hay una tarjeta visible, cualquier click la activa
                 const onlyCard = allCards[0];
                 const title = onlyCard.querySelector('.project-title')?.textContent;
                 if (title === 'Portfolio 3D Interactivo') {
-                    console.log("🎯 ACTIVANDO ÚNICA TARJETA DISPONIBLE!");
                     handleCardClick(e, onlyCard);
                     return;
                 }
@@ -870,7 +825,6 @@
 
                 // Solo bloquear propagación si llegamos hasta aquí
                 e.stopPropagation();
-                console.log("🛡️ Bloqueando propagación al iframe padre desde document level");
             }, true);
 
             // FUNCIONALIDAD INTERNA - Simplificada y directa
@@ -899,7 +853,6 @@
                 
                 // Agregar listener al elemento que cubre toda la tarjeta
                 clickCatcher.addEventListener('click', function(e) {
-                    console.log("🎯 CLICK EN ÁREA COMPLETA DE LA TARJETA");
                     handleCardClick(e, card);
                 });
                 
@@ -908,20 +861,17 @@
                 
                 // Método 1: addEventListener
                 card.addEventListener('click', function(e) {
-                    console.log("🎯 CLICK DIRECTO EN TARJETA VIA addEventListener");
                     handleCardClick(e, card);
                 });
                 
                 // Método 2: onclick como backup
                 card.onclick = function(e) {
-                    console.log("🎯 CLICK DIRECTO EN TARJETA VIA onclick");
                     handleCardClick(e, card);
                 };
                 
                 // Método 3: onmousedown como backup adicional
                 card.addEventListener('mousedown', function(e) {
                     if (e.button === 0) { // Solo botón izquierdo
-                        console.log("🎯 MOUSEDOWN EN TARJETA");
                         handleCardClick(e, card);
                     }
                 });
@@ -929,21 +879,18 @@
                 // MÉTODO 4: LISTENERS ESPECÍFICOS EN ELEMENTOS INTERNOS
                 const internalElements = card.querySelectorAll('.project-title, .project-description, .project-image, .project-image img, .project-tech, .tech-tag, .project-links, .project-link, .expanded-content, .expanded-details, .expanded-features, .expanded-features li');
                 internalElements.forEach((element, elemIndex) => {
-                    console.log(`🔧 Configurando elemento interno ${elemIndex + 1}:`, element.className || element.tagName);
                     
                     element.style.pointerEvents = 'auto';
                     element.style.cursor = 'pointer';
                     
                     // Prevenir que los elementos internos bloqueen el click
                     element.addEventListener('click', function(e) {
-                        console.log("🎯 CLICK EN ELEMENTO INTERNO:", element.className || element.tagName);
                         e.stopPropagation(); // Evitar duplicación
                         handleCardClick(e, card);
                     });
                     
                     element.addEventListener('mousedown', function(e) {
                         if (e.button === 0) {
-                            console.log("🎯 MOUSEDOWN EN ELEMENTO INTERNO:", element.className || element.tagName);
                             e.stopPropagation(); // Evitar duplicación
                             handleCardClick(e, card);
                         }
@@ -954,9 +901,6 @@
             // Función centralizada para manejar clicks en tarjetas - NAVEGACIÓN A NUEVA PÁGINA
             function handleCardClick(e, card) {
                 // Registrar información detallada sobre el clic
-                console.log("🔍 Detalles del clic:");
-                console.log("- Coordinates:", e.clientX, e.clientY);
-                console.log("- Elemento target:", e.target.tagName, e.target.className);
                 console.log("- Ruta del evento:", e.composedPath().map(el => el.tagName || el.nodeName).join(' > '));
                 console.log("🚀🚀🚀 MANEJANDO CLICK EN TARJETA:", card.querySelector('.project-title')?.textContent);
                 
@@ -968,33 +912,27 @@
                 // No procesar si es botón de cerrar
                 if (e.target.classList.contains('close-btn') || 
                     e.target.closest('.close-btn')) {
-                    console.log("🚫 Click en botón de cerrar, ignorando");
                     return;
                 }
                 
                 // Get project title
                 const projectTitle = card.querySelector('.project-title')?.textContent;
-                console.log("📋 Project title:", projectTitle);
                 
                 // Solo procesar la tarjeta del Portfolio 3D (que es la única visible)
                 if (projectTitle === 'Portfolio 3D Interactivo') {
-                    console.log("✅ NAVEGANDO A PÁGINA DEL Portfolio 3D Interactivo");
                     
                     // Navigate to specific project page
                     const projectPageUrl = 'project-portfolio-3d.html';
-                    console.log("🌐 Navegando a:", projectPageUrl);
                     
                     // Cambiar la ubicación del iframe actual (navegar dentro del mismo iframe)
                     window.location.href = projectPageUrl;
                     
                 } else {
-                    console.log("⚠️ Tarjeta no es Portfolio 3D, ignorando");
                 }
             }
 
             // Funcionalidad de botones cerrar - MÉTODO DIRECTO
             closeBtns.forEach((btn, index) => {
-                console.log(`🔧 Setting up close button ${index + 1}`);
                 
                 btn.style.cursor = 'pointer';
                 btn.style.pointerEvents = 'auto';
@@ -1015,12 +953,10 @@
                 e.preventDefault();
                 e.stopPropagation();
                 
-                console.log("❌ Close button clicked");
                 
                 const card = btn.closest('.project-card');
                 if (card) {
                     card.classList.remove('expanded');
-                    console.log("📉 Project card closed");
                 }
             }
 
@@ -1030,7 +966,6 @@
                     e.target.classList.contains('projects-grid') || 
                     e.target.classList.contains('screen-header') ||
                     e.target.tagName === 'H1') {
-                    console.log("🔘 Click on empty area, closing all cards");
                     projectCards.forEach(card => {
                         card.classList.remove('expanded');
                     });
@@ -1046,16 +981,12 @@
                 link.addEventListener('click', function(e) {
                     // Para los enlaces, solo bloquear propagación, NO preventDefault
                     e.stopPropagation();
-                    console.log("🔗 Project link clicked:", link.textContent);
                     // Los enlaces deberían funcionar normalmente
                 });
             });
 
             // Test de funcionalidad
             setTimeout(() => {
-                console.log("🧪 Testing card functionality...");
-                console.log("📊 Found", projectCards.length, "project cards");
-                console.log("📊 Found", closeBtns.length, "close buttons");
                 
                 // Verificar que los elementos tienen event listeners
                 projectCards.forEach((card, index) => {
@@ -1064,7 +995,6 @@
                 });
             }, 1000);
 
-            console.log("✅ Projects.html initialization complete with BALANCED event handling");
         });
 
     </script>

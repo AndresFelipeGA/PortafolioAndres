@@ -345,7 +345,6 @@
             console.log("🚀 Inicializando cafe-menu.html con cover OCULTO (pantalla activa) - regreso de formulario");
         } else {
             screenCover.classList.remove('hidden');
-            console.log("🚀 Inicializando cafe-menu.html con cover negro ACTIVO por defecto");
         }
         
         // Check if page is in an iframe
@@ -361,14 +360,12 @@
         function turnOnScreen() {
             screenActive = true;
             screenCover.classList.add('hidden');
-            console.log("✅ Pantalla de cafe menu activada");
             
             // Notificar al padre si está en iframe
             if (isInIframe()) {
                 try {
                     window.parent.postMessage({ action: 'cafeMenuScreenTurnedOn' }, '*');
                 } catch (e) {
-                    console.error("Error sending screen on message:", e);
                 }
             }
         }
@@ -377,47 +374,38 @@
         function turnOffScreen() {
             screenActive = false;
             screenCover.classList.remove('hidden');
-            console.log("🔴 Pantalla de cafe menu desactivada");
             
             // Notificar al padre si está en iframe
             if (isInIframe()) {
                 try {
                     window.parent.postMessage({ action: 'cafeMenuScreenTurnedOff' }, '*');
                 } catch (e) {
-                    console.error("Error sending screen off message:", e);
                 }
             }
         }
         
         // Listen for messages from the parent window - SISTEMA REACTIVO
         window.addEventListener('message', function(event) {
-            console.log("📨 Message received in cafe-menu.html:", event.data);
             
             if (event.data && event.data.action === 'turnOnScreen') {
-                console.log("✅ Received message to turn on cafe menu screen");
                 turnOnScreen();
             }
             
             if (event.data && event.data.action === 'turnOffScreen') {
-                console.log("🔴 Received message to turn off cafe menu screen");
                 turnOffScreen();
             }
             
             // NUEVOS LISTENERS PARA REACTIVIDAD CON OTROS BOTONES
             if (event.data && event.data.action === 'buttonPressed') {
-                console.log("📨 Recibido: botón presionado:", event.data.button);
                 if (event.data.button === 'services' || event.data.button === 'servicio' || event.data.button === 'cafe') {
-                    console.log("🟢 Botón de servicios/cafe presionado - ACTIVANDO PANTALLA");
                     turnOnScreen();
                 } else {
-                    console.log("🔴 Otro botón presionado - APAGANDO PANTALLA");
                     turnOffScreen();
                 }
             }
             
             // Escuchar movimiento del usuario
             if (event.data && event.data.action === 'userMoving') {
-                console.log("📨 Recibido: usuario se movió en el modelo 3D");
                 turnOffScreen();
             }
             
@@ -429,13 +417,11 @@
                 event.data.action === 'navigationStarted' ||
                 event.data.action === 'realMovementDetected'
             )) {
-                console.log("📨 Actividad en modelo 3D detectada - APAGANDO PANTALLA");
                 turnOffScreen();
             }
             
             // Escuchar específicamente movimiento real (no micro-movimientos)
             if (event.data && event.data.action === 'realMovementDetected') {
-                console.log("📨 MOVIMIENTO REAL detectado en modelo 3D - APAGANDO PANTALLA");
                 turnOffScreen();
             }
             
@@ -453,13 +439,10 @@
                     action: 'cafeMenuReady',
                     screenActive: screenActive
                 }, '*');
-                console.log("📤 Cafe menu ready message sent");
             } catch (e) {
-                console.error("Error sending ready message:", e);
             }
         }
         
-        console.log("✅ Cafe-menu.html completamente funcional con cover negro reactivo");
     </script>
 </body>
 </html>

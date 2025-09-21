@@ -306,7 +306,6 @@
     <script>
         // Navigation functions
         function navigateTo(page) {
-            console.log(`🚀 Attempting to navigate to: ${page}`);
             
             const mainContainer = document.getElementById('mainContainer');
             const iframeContainer = document.getElementById('iframeContainer');
@@ -315,39 +314,27 @@
             
             // Verify that all elements exist
             if (!mainContainer || !iframeContainer || !contentIframe || !backButton) {
-                console.error('❌ Error: Not all necessary elements were found');
-                console.log('mainContainer:', mainContainer);
-                console.log('iframeContainer:', iframeContainer);
-                console.log('contentIframe:', contentIframe);
-                console.log('backButton:', backButton);
                 return;
             }
             
-            console.log('✅ All elements found, proceeding with navigation...');
             
             // Hide main content
             mainContainer.style.display = 'none';
-            console.log('📦 Main container hidden');
             
             // Show iframe container
             iframeContainer.style.display = 'block';
-            console.log('🖼️ Iframe container shown');
             
             // Load the page in iframe
             contentIframe.src = page;
-            console.log(`📄 Loading page: ${page} in the iframe`);
             
             // Show back button
             backButton.style.display = 'block';
-            console.log('🔙 Back button shown');
             
             // Add error handling for iframe loading
             contentIframe.onload = function() {
-                console.log(`✅ Page ${page} loaded successfully in the iframe`);
             };
             
             contentIframe.onerror = function() {
-                console.error(`❌ Error loading page: ${page}`);
                 // Fallback: show error message
                 contentIframe.srcdoc = `
                     <html>
@@ -360,11 +347,9 @@
                 `;
             };
             
-            console.log(`🎯 Navigation to ${page} completed`);
         }
         
         function goBack() {
-            console.log('🔙 Returning to main hub...');
             
             const mainContainer = document.getElementById('mainContainer');
             const iframeContainer = document.getElementById('iframeContainer');
@@ -373,27 +358,21 @@
             
             // Show main content
             mainContainer.style.display = 'flex';
-            console.log('📦 Main container shown');
             
             // Hide iframe container
             iframeContainer.style.display = 'none';
-            console.log('🖼️ Iframe container hidden');
             
             // Clear iframe source
             contentIframe.src = '';
-            console.log('🗑️ Iframe source cleared');
             
             // Hide back button
             backButton.style.display = 'none';
-            console.log('🔙 Back button hidden');
             
-            console.log('✅ Return to main hub completed');
         }
         
         // Improve card event handling
         function setupCardEvents() {
             const cards = document.querySelectorAll('.card');
-            console.log(`🎯 Setting up events for ${cards.length} cards`);
             
             cards.forEach((card, index) => {
                 const page = card.getAttribute('data-page');
@@ -405,7 +384,6 @@
                 card.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log(`🎯 Card ${index + 1} clicked: ${page}`);
                     console.log(`🎯 Event details:`, {
                         clientX: e.clientX,
                         clientY: e.clientY,
@@ -416,26 +394,21 @@
                     if (page) {
                         navigateTo(page);
                     } else {
-                        console.error(`❌ No page found for card ${index + 1}`);
                     }
                 });
                 
                 // Add additional events to improve interactivity
                 card.addEventListener('mouseenter', function() {
-                    console.log(`🎯 Hover on card: ${page}`);
                 });
                 
                 card.addEventListener('mouseleave', function() {
-                    console.log(`🎯 Hover out card: ${page}`);
                 });
                 
                 // NEW: Add listener for synthetic events (from forwarding)
                 card.addEventListener('mousedown', function(e) {
-                    console.log(`🎯 MouseDown on card ${index + 1}: ${page}`, e);
                 });
                 
                 card.addEventListener('mouseup', function(e) {
-                    console.log(`🎯 MouseUp on card ${index + 1}: ${page}`, e);
                 });
                 
                 console.log(`✅ Card ${index + 1} (${page}) configured correctly`);
@@ -444,8 +417,6 @@
         
         // Test function to verify navigation
         function testNavigation() {
-            console.log('🧪 Testing navigation system...');
-            console.log('Elements found:');
             console.log('- mainContainer:', document.getElementById('mainContainer') ? '✅' : '❌');
             console.log('- iframeContainer:', document.getElementById('iframeContainer') ? '✅' : '❌');
             console.log('- contentIframe:', document.getElementById('contentIframe') ? '✅' : '❌');
@@ -453,35 +424,25 @@
             
             // Test cards click events
             const cards = document.querySelectorAll('.card');
-            console.log(`- Cards found: ${cards.length}`);
             cards.forEach((card, index) => {
                 const hasDataPage = card.getAttribute('data-page');
                 const hasClickListener = card.onclick || card.addEventListener;
                 const rect = card.getBoundingClientRect();
-                console.log(`  Card ${index + 1}: ${hasDataPage ? '✅ has data-page' : '❌ no data-page'} | ${hasClickListener ? '✅ has events' : '❌ no events'}`);
-                console.log(`    - Position: top=${rect.top}, left=${rect.left}, width=${rect.width}, height=${rect.height}`);
-                console.log(`    - Data-page: ${hasDataPage}`);
             });
         }
         
         // NEW: Function for debugging positions
         function debugCardPositions() {
-            console.log('🎯 DEBUG: Card positions:');
             const cards = document.querySelectorAll('.card');
             cards.forEach((card, index) => {
                 const rect = card.getBoundingClientRect();
                 const page = card.getAttribute('data-page');
                 console.log(`Card ${index + 1} (${page}):`);
-                console.log(`  - Top: ${rect.top}, Left: ${rect.left}`);
-                console.log(`  - Bottom: ${rect.bottom}, Right: ${rect.right}`);
-                console.log(`  - Width: ${rect.width}, Height: ${rect.height}`);
-                console.log(`  - Center: x=${rect.left + rect.width/2}, y=${rect.top + rect.height/2}`);
             });
         }
         
         // Configuration similar to about-me.html for compatibility
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Box.html loaded completely');
             
             // Set up card events first
             setupCardEvents();
@@ -494,7 +455,6 @@
             
             // Rotate and flip horizontally to fix the mirror effect (same as about-me.html)
             document.body.style.transform = 'rotate(180deg) scaleX(-1)';
-            console.log('🔄 3D transformation applied');
             
             let isActive = false;
             
@@ -509,11 +469,9 @@
             
             // Listen for messages from the parent window
             window.addEventListener('message', function(event) {
-                console.log("📨 Message received in box.html:", event.data);
                 
                 // Check if the message is to turn on the screen
                 if (event.data && event.data.action === 'turnOnScreen') {
-                    console.log("🔛 Received message to turn on box screen");
                     isActive = true;
                     
                     // Send confirmation back to parent
@@ -521,13 +479,11 @@
                         window.parent.postMessage({ action: 'aboutMeDuplicateScreenTurnedOn' }, '*');
                         console.log("✅ Confirmation sent: box screen turned on (aboutMeDuplicateScreenTurnedOn)");
                     } catch (e) {
-                        console.error("❌ Error sending confirmation to parent:", e);
                     }
                 }
                 
                 // Check if the message is to turn off the screen
                 if (event.data && event.data.action === 'turnOffScreen') {
-                    console.log("🔛 Received message to turn off box screen");
                     isActive = false;
                     
                     // Send confirmation back to parent
@@ -535,13 +491,11 @@
                         window.parent.postMessage({ action: 'aboutMeDuplicateScreenTurnedOff' }, '*');
                         console.log("✅ Confirmation sent: box screen turned off (aboutMeDuplicateScreenTurnedOff)");
                     } catch (e) {
-                        console.error("❌ Error sending confirmation to parent:", e);
                     }
                 }
                 
                 // Check if the message is to navigate back to box from child iframe
                 if (event.data && event.data.action === 'navigateToBox') {
-                    console.log("🔙 Received message to return to box menu");
                     goBack(); // Call the goBack() function to return to the main menu
                 }
             });
@@ -550,9 +504,7 @@
             if (isInIframe()) {
                 try {
                     window.parent.postMessage({ action: 'boxReady' }, '*');
-                    console.log("✅ Message 'boxReady' sent to parent");
                 } catch (e) {
-                    console.error("❌ Error sending message to parent:", e);
                 }
             }
         });

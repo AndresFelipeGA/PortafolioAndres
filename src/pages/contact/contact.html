@@ -665,7 +665,6 @@
             const errorMessage = document.getElementById('error-message');
             const contentSection = document.querySelector('.content-section');
             
-            console.log("🚀 Inicializando contact.html");
 
             // Check if page is in an iframe
             function isInIframe() {
@@ -679,20 +678,16 @@
             // Listen for messages from the parent window
             window.addEventListener('message', function(event) {
                 if (event.data && event.data.action === 'turnOnScreen') {
-                    console.log("✅ Contact screen turned on");
                     try {
                         window.parent.postMessage({ action: 'contactScreenTurnedOn' }, '*');
                     } catch (e) {
-                        console.error("Error sending confirmation:", e);
                     }
                 }
                 
                 if (event.data && event.data.action === 'turnOffScreen') {
-                    console.log("🔴 Contact screen turned off");
                     try {
                         window.parent.postMessage({ action: 'contactScreenTurnedOff' }, '*');
                     } catch (e) {
-                        console.error("Error sending confirmation:", e);
                     }
                 }
             });
@@ -701,9 +696,7 @@
             if (isInIframe()) {
                 try {
                     window.parent.postMessage({ action: 'contactReady' }, '*');
-                    console.log("📤 Contact ready message sent");
                 } catch (e) {
-                    console.error("Error sending ready message:", e);
                 }
             }
 
@@ -711,7 +704,6 @@
             contactForm.addEventListener('submit', async function(e) {
                 e.preventDefault(); // PREVENIR el envío tradicional que causa la página gris
                 
-                console.log("📧 Enviando formulario de contacto via AJAX");
                 
                 const submitButton = contactForm.querySelector('button[type="submit"]');
                 const originalText = submitButton.innerHTML;
@@ -745,7 +737,6 @@
                     successMessage.style.display = 'block';
                     errorMessage.style.display = 'none';
                     
-                    console.log("✅ Form sent to StaticForms without gray page");
                     
                     // Notify parent if in iframe
                     if (isInIframe()) {
@@ -761,7 +752,6 @@
                     }, 5000);
                     
                 } catch (error) {
-                    console.log("⚠️ Error sending but showing success to avoid issues:", error);
                     
                     // Show success anyway (StaticForms can process even with CORS errors)
                     successMessage.style.display = 'block';
@@ -785,7 +775,6 @@
                     contactForm.reset();
                     successMessage.style.display = 'none';
                     errorMessage.style.display = 'none';
-                    console.log("🔄 Form cleared");
                 });
             }
             
@@ -794,7 +783,6 @@
             allLinks.forEach(link => {
                 link.addEventListener('click', function(e) {
                     // Don't prevent default behavior of links
-                    console.log("🔗 Link click:", this.href);
                 });
             });
             
@@ -804,7 +792,6 @@
                 // Ensure fields are interactive
                 input.style.pointerEvents = 'auto';
                 input.addEventListener('focus', function() {
-                    console.log("📝 Field focused:", this.name || this.type);
                 });
             });
             
@@ -843,7 +830,6 @@
                 }
             });
 
-            console.log("✅ Contact.html fully functional");
         });
     </script>
 </body>

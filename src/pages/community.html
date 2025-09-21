@@ -348,7 +348,6 @@
     <script src="https://unpkg.com/@mui/material@latest/umd/material-ui.min.js"></script>
     
     <script>
-        console.log("🚀 Community.html loaded completely");
         
         let isActive = false;
         
@@ -363,7 +362,6 @@
         
         // Function to handle contact button click
         function handleContactClick() {
-            console.log("☕ User wants to contact! - Button clicked from community.html");
             
             // Vibration if available (mobile)
             if (navigator.vibrate) {
@@ -386,9 +384,7 @@
                     source: 'community'
                 }, '*');
                 
-                console.log("📨 Messages to simulate third button sent to parent");
             } catch (e) {
-                console.error("❌ Error sending contact message:", e);
             }
             
             // Temporary visual feedback
@@ -414,29 +410,22 @@
         
         // Listen for messages from the parent window
         window.addEventListener('message', function(event) {
-            console.log("📨 Mensaje recibido en community.html:", event.data);
             
             if (event.data && event.data.action === 'turnOnScreen') {
-                console.log("🔛 Recibido mensaje para encender pantalla community");
                 isActive = true;
                 
                 try {
                     window.parent.postMessage({ action: 'communityScreenTurnedOn' }, '*');
-                    console.log("✅ Confirmación enviada: pantalla community encendida");
                 } catch (e) {
-                    console.error("❌ Error enviando confirmación al padre:", e);
                 }
             }
             
             if (event.data && event.data.action === 'turnOffScreen') {
-                console.log("🔴 Recibido mensaje para apagar pantalla community");
                 isActive = false;
                 
                 try {
                     window.parent.postMessage({ action: 'communityScreenTurnedOff' }, '*');
-                    console.log("✅ Confirmación enviada: pantalla community apagada");
                 } catch (e) {
-                    console.error("❌ Error enviando confirmación al padre:", e);
                 }
             }
         });
@@ -445,16 +434,13 @@
         if (isInIframe()) {
             try {
                 window.parent.postMessage({ action: 'communityReady' }, '*');
-                console.log("✅ Mensaje 'communityReady' enviado al padre");
             } catch (e) {
-                console.error("❌ Error enviando mensaje al padre:", e);
             }
         }
         
         // Aplicar transformación para corrección de orientación (similar a otros archivos)
         document.addEventListener('DOMContentLoaded', function() {
             document.body.style.transform = 'rotate(180deg) scaleX(-1)';
-            console.log("🔄 Transformación 3D aplicada en community.html");
         });
     </script>
 </body>

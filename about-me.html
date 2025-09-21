@@ -268,35 +268,27 @@
             
             // Listen for messages from the parent window (fixed-advanced-loader.html)
             window.addEventListener('message', function(event) {
-                console.log("Message received in about-me.html:", event.data);
-                console.log("Message source:", event.source);
                 console.log("Current screen state:", isActive ? "ACTIVE (content shown)" : "INACTIVE (screen off)");
                 
                 // Check if the message is to turn on the screen
                 if (event.data && event.data.action === 'turnOnScreen') {
-                    console.log("Received message to turn on screen");
                     isActive = true;
                     
                     // Send confirmation back to parent
                     try {
                         window.parent.postMessage({ action: 'aboutMeScreenTurnedOn' }, '*');
-                        console.log("Sent confirmation that screen was turned on");
                     } catch (e) {
-                        console.error("Error sending confirmation to parent:", e);
                     }
                 }
                 
                 // Check if the message is to turn off the screen
                 if (event.data && event.data.action === 'turnOffScreen') {
-                    console.log("Received message to turn off screen");
                     isActive = false;
                     
                     // Send confirmation back to parent
                     try {
                         window.parent.postMessage({ action: 'aboutMeScreenTurnedOff' }, '*');
-                        console.log("Sent confirmation that screen was turned off");
                     } catch (e) {
-                        console.error("Error sending confirmation to parent:", e);
                     }
                 }
             });
@@ -305,9 +297,7 @@
             if (isInIframe()) {
                 try {
                     window.parent.postMessage({ action: 'aboutMeReady' }, '*');
-                    console.log("Sent ready message to parent");
                 } catch (e) {
-                    console.error("Error sending message to parent:", e);
                 }
             }
         });

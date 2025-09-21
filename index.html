@@ -577,18 +577,15 @@
         
         // Escuchar mensajes de los iframes
         window.addEventListener('message', function(event) {
-            console.log("Mensaje recibido en fixed-advanced-loader:", event.data);
             
             // Verificar si es el mensaje de que about-me.html está listo
             if (event.data && event.data.action === 'aboutMeReady') {
-                console.log("Iframe de about-me.html está listo");
                 aboutMeIframeReady = true;
                 
                 // Buscar el iframe de about-me.html
                 const iframes = document.querySelectorAll('iframe');
                 iframes.forEach(iframe => {
                     if (iframe.src && iframe.src.includes('about-me.html')) {
-                        console.log("Encontrado iframe de about-me.html en el evento aboutMeReady");
                         aboutMeIframe = iframe;
                     }
                 });
@@ -596,7 +593,6 @@
             
             // Recibir confirmación de que la pantalla se encendió
             if (event.data && event.data.action === 'aboutMeScreenTurnedOn') {
-                console.log("Recibida confirmación de que la pantalla de about-me se encendió");
                 aboutMeScreenOn = true;
                 
                 // Solo hacer transparente el plano negro si el botón ha sido clickeado
@@ -615,7 +611,6 @@
             
             // Recibir confirmación de que la pantalla se apagó
             if (event.data && event.data.action === 'aboutMeScreenTurnedOff') {
-                console.log("Recibida confirmación de que la pantalla de about-me se apagó");
                 aboutMeScreenOn = false;
                 
                 // Forzar que el cover negro sea visible cuando se apaga la pantalla
@@ -625,7 +620,6 @@
                     window.aboutMeScreenMaterial.opacity = 1.0;
                     window.aboutMeScreenMaterial.needsUpdate = true;
                     window.aboutMeBackPlane.visible = true;
-                    console.log("Cover negro forzado a visible al apagar pantalla");
                 }
                 
                 // Ocultar el contenido HTML
@@ -641,14 +635,12 @@
             
             // Verificar si es el mensaje de que projects.html está listo
             if (event.data && event.data.action === 'projectsReady') {
-                console.log("Iframe de projects.html está listo");
                 aboutMe2IframeReady = true; // Mantengo esta variable por compatibilidad
                 
                 // Buscar el iframe de projects.html
                 const iframes = document.querySelectorAll('iframe');
                 iframes.forEach(iframe => {
                     if (iframe.src && iframe.src.includes('projects.html')) {
-                        console.log("Encontrado iframe de projects.html en el evento projectsReady");
                         projectsIframe = iframe;
                     }
                 });
@@ -656,7 +648,6 @@
             
             // Recibir confirmación de que la pantalla de projects se encendió
             if (event.data && event.data.action === 'projectsScreenTurnedOn') {
-                console.log("Recibida confirmación de que la pantalla de projects se encendió");
                 projectsScreenOn = true;
                 
                 // Solo hacer transparente el plano negro si el botón ha sido clickeado
@@ -675,7 +666,6 @@
             
             // Recibir confirmación de que la pantalla de projects se apagó
             if (event.data && event.data.action === 'projectsScreenTurnedOff') {
-                console.log("Recibida confirmación de que la pantalla de projects se apagó");
                 projectsScreenOn = false;
                 
                 // Forzar que el cover negro sea visible cuando se apaga la pantalla
@@ -685,7 +675,6 @@
                     window.aboutMe2ScreenMaterial.opacity = 1.0;
                     window.aboutMe2ScreenMaterial.needsUpdate = true;
                     window.aboutMe2BackPlane.visible = true;
-                    console.log("Cover negro forzado a visible al apagar pantalla de projects");
                 }
                 
                 // Ocultar el contenido HTML
@@ -701,21 +690,18 @@
             
             // Verificar si es el mensaje de que contact.html está listo
             if (event.data && event.data.action === 'contactReady') {
-                console.log("🟢 Iframe de contact.html está listo");
                 contactIframeReady = true;
                 
                 // Buscar el iframe de contact.html
                 const iframes = document.querySelectorAll('iframe');
                 iframes.forEach(iframe => {
                     if (iframe.src && iframe.src.includes('contact.html')) {
-                        console.log("🎯 Encontrado iframe de contact.html en el evento contactReady");
                         contactIframe = iframe;
                     }
                 });
                 
                 // FORZAR ESTADO INICIAL CORRECTO cuando el iframe está listo
                 setTimeout(function() {
-                    console.log("🚀 CONTACTREADY: Forzando estado inicial después de contactReady");
                     
                     // Asegurar que las variables estén en estado inicial
                     contactButtonClicked = false;
@@ -728,20 +714,17 @@
                         window.contactScreenMaterial.opacity = 1.0;
                         window.contactScreenMaterial.needsUpdate = true;
                         window.contactBackPlane.visible = true;
-                        console.log("✅ CONTACTREADY: Cover negro forzado como visible");
                     }
                     
                     // Forzar contenido HTML oculto
                     if (window.contactCssObject && window.contactCssObject.element) {
                         window.contactCssObject.element.style.visibility = 'hidden';
                         window.contactCssObject.element.style.pointerEvents = 'none';
-                        console.log("✅ CONTACTREADY: Contenido HTML forzado como oculto");
                     }
                     
                     // Enviar mensaje al iframe para asegurar que también tenga el cover negro
                     setTimeout(function() {
                         sendMessageToContact('turnOffScreen');
-                        console.log("📤 CONTACTREADY: Mensaje turnOffScreen enviado al iframe");
                     }, 100);
                     
                 }, 200);
@@ -751,7 +734,6 @@
             
             // Recibir confirmación de que la pantalla de contact se encendió
             if (event.data && event.data.action === 'contactScreenTurnedOn') {
-                console.log("Recibida confirmación de que la pantalla de contact se encendió");
                 contactScreenOn = true;
                 
                 // Solo hacer transparente el plano negro si el botón ha sido clickeado
@@ -770,7 +752,6 @@
             
             // Recibir confirmación de que la pantalla de contact se apagó
             if (event.data && event.data.action === 'contactScreenTurnedOff') {
-                console.log("Recibida confirmación de que la pantalla de contact se apagó");
                 contactScreenOn = false;
                 
                 // Forzar que el cover negro sea visible cuando se apaga la pantalla
@@ -780,7 +761,6 @@
                     window.contactScreenMaterial.opacity = 1.0;
                     window.contactScreenMaterial.needsUpdate = true;
                     window.contactBackPlane.visible = true;
-                    console.log("Cover negro forzado a visible al apagar pantalla de contact");
                 }
                 
                 // Ocultar el contenido HTML
@@ -796,8 +776,6 @@
             
             // Manejar solicitud de animación personalizada de cámara
             if (event.data && event.data.action === 'customCameraAnimation') {
-                console.log("🎬 Recibida solicitud de animación personalizada de cámara");
-                console.log("Datos recibidos:", event.data);
                 
                 // Validar que tenemos las coordenadas necesarias
                 if (event.data.targetPos && event.data.lookAtPos) {
@@ -813,19 +791,15 @@
                         event.data.lookAtPos.z
                     );
                     
-                    console.log("🎯 Coordenadas objetivo:", targetPos);
-                    console.log("👁️ Punto objetivo:", lookAtPos);
                     
                     // Iniciar la animación personalizada
                     startCustomCameraAnimation(targetPos, lookAtPos);
                 } else {
-                    console.error("❌ No se proporcionaron coordenadas válidas para la animación personalizada");
                 }
             }
             
             // Recibir confirmación de que la pantalla se encendió por clic
             if (event.data && event.data.action === 'aboutMeScreenTurnedOnByClick') {
-                console.log("Recibida confirmación de que la pantalla de about-me se encendió por clic");
                 aboutMeScreenOn = true;
                 
                 // Solo hacer transparente el plano negro si el botón ha sido clickeado
@@ -848,14 +822,12 @@
             
             // Verificar si es el mensaje de que projects.html está listo
             if (event.data && event.data.action === 'projectsReady') {
-                console.log("Iframe de projects.html está listo");
                 projectsIframeReady = true;
                 
                 // Buscar el iframe de projects.html
                 const iframes = document.querySelectorAll('iframe');
                 iframes.forEach(iframe => {
                     if (iframe.src && iframe.src.includes('projects.html')) {
-                        console.log("Encontrado iframe de projects.html en el evento projectsReady");
                         projectsIframe = iframe;
                     }
                 });
@@ -863,7 +835,6 @@
             
             // Recibir confirmación de que la pantalla de proyectos se encendió
             if (event.data && event.data.action === 'projectsScreenTurnedOn') {
-                console.log("Recibida confirmación de que la pantalla de projects se encendió");
                 projectsScreenOn = true;
                 
                 // Solo hacer transparente el plano negro si el botón ha sido clickeado
@@ -882,7 +853,6 @@
             
             // Recibir confirmación de que la pantalla de proyectos se apagó
             if (event.data && event.data.action === 'projectsScreenTurnedOff') {
-                console.log("Recibida confirmación de que la pantalla de projects se apagó");
                 projectsScreenOn = false;
                 
                 // Forzar que el cover negro sea visible cuando se apaga la pantalla
@@ -892,7 +862,6 @@
                     window.projectsScreenMaterial.opacity = 1.0;
                     window.projectsScreenMaterial.needsUpdate = true;
                     window.projectsBackPlane.visible = true;
-                    console.log("Cover negro forzado a visible al apagar pantalla de projects");
                 }
                 
                 // Ocultar el contenido HTML
@@ -908,21 +877,18 @@
             
             // Verificar si es el mensaje de que cafe-menu.html está listo
             if (event.data && event.data.action === 'cafeMenuReady') {
-                console.log("🟢 Iframe de cafe-menu.html está listo");
                 cafeMenuIframeReady = true;
                 
                 // Buscar el iframe de cafe-menu.html
                 const iframes = document.querySelectorAll('iframe');
                 iframes.forEach(iframe => {
                     if (iframe.src && iframe.src.includes('cafe-menu.html')) {
-                        console.log("🎯 Encontrado iframe de cafe-menu.html en el evento cafeMenuReady");
                         cafeMenuIframe = iframe;
                     }
                 });
                 
                 // Check if the cafe menu is already active (returning from contact form)
                 if (event.data.screenActive) {
-                    console.log("🔄 Cafe menu is returning from contact form - keeping screen active");
                     cafeMenuScreenOn = true;
                     cafeMenuButtonClicked = true; // Mark as if button was clicked to maintain state
                     
@@ -936,14 +902,12 @@
                     // Show the HTML content if visible from front
                     if (window.cafeMenuCssObject && window.cafeMenuCssObject.element && isCafeMenuPlaneVisibleFromFront()) {
                         window.cafeMenuCssObject.element.style.display = 'block';
-                        console.log("HTML del cafe menu mostrado automáticamente al retornar de formulario");
                     }
                 }
             }
             
             // Recibir confirmación de que la pantalla de cafe-menu se encendió
             if (event.data && event.data.action === 'cafeMenuScreenTurnedOn') {
-                console.log("Recibida confirmación de que la pantalla de cafe-menu se encendió");
                 cafeMenuScreenOn = true;
                 
                 // Solo hacer transparente el plano negro si el botón ha sido clickeado
@@ -962,7 +926,6 @@
             
             // Recibir confirmación de que la pantalla de cafe-menu se apagó
             if (event.data && event.data.action === 'cafeMenuScreenTurnedOff') {
-                console.log("Recibida confirmación de que la pantalla de cafe-menu se apagó");
                 cafeMenuScreenOn = false;
                 
                 // Forzar que el cover negro sea visible cuando se apaga la pantalla
@@ -972,7 +935,6 @@
                     window.cafeMenuScreenMaterial.opacity = 1.0;
                     window.cafeMenuScreenMaterial.needsUpdate = true;
                     window.cafeMenuBackPlane.visible = true;
-                    console.log("Cover negro forzado a visible al apagar pantalla de cafe-menu");
                 }
                 
                 // Ocultar el contenido HTML
@@ -988,14 +950,12 @@
             
             // Verificar si es el mensaje de que box.html está listo
             if (event.data && event.data.action === 'boxReady') {
-                console.log("🎯 Iframe de box.html está listo");
                 aboutMeDuplicateIframeReady = true;
                 
                 // Buscar el iframe de box.html
                 const iframes = document.querySelectorAll('iframe');
                 iframes.forEach(iframe => {
                     if (iframe.src && iframe.src.includes('box.html')) {
-                        console.log("🎯 Encontrado iframe de box.html en el evento boxReady");
                         aboutMeDuplicateIframe = iframe;
                     }
                 });
@@ -1003,7 +963,6 @@
             
             // Recibir confirmación de que la pantalla del plano duplicado se encendió
             if (event.data && event.data.action === 'aboutMeDuplicateScreenTurnedOn') {
-                console.log("🎯 Recibida confirmación de que la pantalla del plano duplicado se encendió");
                 aboutMeDuplicateScreenOn = true;
                 
                 // Solo hacer transparente el plano negro si el botón ha sido clickeado
@@ -1022,7 +981,6 @@
             
             // Recibir confirmación de que la pantalla del plano duplicado se apagó
             if (event.data && event.data.action === 'aboutMeDuplicateScreenTurnedOff') {
-                console.log("🎯 Recibida confirmación de que la pantalla del plano duplicado se apagó");
                 aboutMeDuplicateScreenOn = false;
                 
                 // Forzar que el cover negro sea visible cuando se apaga la pantalla
@@ -1032,7 +990,6 @@
                     window.aboutMeDuplicateScreenMaterial.opacity = 1.0;
                     window.aboutMeDuplicateScreenMaterial.needsUpdate = true;
                     window.aboutMeDuplicateBackPlane.visible = true;
-                    console.log("🎯 Cover negro del plano duplicado forzado a visible al apagar pantalla");
                 }
                 
                 // Ocultar el contenido HTML
@@ -1048,7 +1005,6 @@
             
             // Recibir confirmación de que community.html está listo
             if (event.data && event.data.action === 'communityReady') {
-                console.log("🎯 Iframe de community.html está listo");
                 communityIframeReady = true;
                 
                 // Buscar y guardar referencia al iframe de community
@@ -1056,55 +1012,46 @@
                 iframes.forEach((iframe) => {
                     if (iframe.src && iframe.src.includes('community.html')) {
                         communityIframe = iframe;
-                        console.log("✅ Referencia al iframe de community guardada");
                     }
                 });
                 
                 // Si el botón ya fue clickeado, activar la pantalla inmediatamente
                 if (communityButtonClicked) {
-                    console.log("🔄 Botón de community ya fue clickeado, activando pantalla inmediatamente");
                     sendMessageToCommunity('turnOnScreen');
                 }
             }
             
             // Recibir confirmación de que la pantalla de community se encendió
             if (event.data && event.data.action === 'communityScreenTurnedOn') {
-                console.log("🎯 Recibida confirmación de que la pantalla de community se encendió");
                 communityScreenOn = true;
                 // La lógica de mostrar contenido se maneja en updateCommunityVisibility()
             }
             
             // Recibir confirmación de que la pantalla de community se apagó
             if (event.data && event.data.action === 'communityScreenTurnedOff') {
-                console.log("🎯 Recibida confirmación de que la pantalla de community se apagó");
                 communityScreenOn = false;
                 // La lógica de ocultar contenido se maneja en updateCommunityVisibility()
             }
             
             // NUEVO: Manejar mensajes desde community.html para simular el tercer botón
             if (event.data && event.data.action === 'simulateContactButton') {
-                console.log("🎯 Mensaje recibido desde community.html para simular tercer botón");
                 
                 // Simular el click del tercer botón (contacto) usando elementos DOM
                 const buttons = document.querySelectorAll('.floating-button');
                 if (buttons && buttons.length > 2) {
                     const messagesButton = buttons[2]; // Índice 2 (el tercer botón - mensajes)
-                    console.log("🎯 Simulando click en tercer botón desde community.html");
                     
                     // Ejecutar la misma función que el tercer botón
                     startMessagesButtonCameraAnimation();
                 } else {
-                    console.error("❌ No se pudo encontrar el tercer botón para simular - botones encontrados:", buttons.length);
                 }
             }
             
             // NUEVO: Manejar mensaje específico de botón presionado desde community.html
             if (event.data && event.data.action === 'buttonPressed' && event.data.button === 'contact' && event.data.source === 'community') {
-                console.log("🎯 Mensaje de botón presionado recibido desde community.html");
                 
                 // Activar contacto directamente
                 contactButtonClicked = true;
-                console.log("🎯 contactButtonClicked activado desde community.html");
                 
                 // Activar la pantalla de contacto
                 activateContactScreen();
@@ -1116,7 +1063,6 @@
                             action: 'buttonPressed',
                             button: 'contact'
                         }, '*');
-                        console.log("📤 Mensaje 'buttonPressed: contact' enviado desde community.html");
                     }
                 }, 100);
             }
@@ -1124,19 +1070,13 @@
         
         // Función para enviar mensaje al iframe de about-me.html
         function sendMessageToAboutMe(action) {
-            console.log(`Intentando enviar mensaje a about-me.html: ${action}`);
-            console.log("Estado del iframe:", aboutMeIframe ? "Encontrado" : "No encontrado");
             
             // Si no tenemos el iframe guardado, intentar buscarlo de nuevo
             if (!aboutMeIframe) {
-                console.log("Buscando iframe de about-me.html...");
                 const iframes = document.querySelectorAll('iframe');
-                console.log("Total de iframes encontrados:", iframes.length);
                 
                 iframes.forEach((iframe, index) => {
-                    console.log(`Iframe ${index}:`, iframe.src || "sin src");
                     if (iframe.src && iframe.src.includes('about-me.html')) {
-                        console.log("Encontrado iframe de about-me.html:", iframe);
                         aboutMeIframe = iframe;
                     }
                 });
@@ -1147,46 +1087,33 @@
                     // Asegurarse de que el iframe esté completamente cargado
                     if (aboutMeIframe.contentDocument && aboutMeIframe.contentDocument.readyState === 'complete') {
                         aboutMeIframe.contentWindow.postMessage({ action: action }, '*');
-                        console.log(`Mensaje enviado a about-me.html: ${action}`);
                         
                         if (action === 'turnOnScreen') {
                             aboutMeScreenOn = true;
-                            console.log("Pantalla de about-me marcada como ENCENDIDA");
                         } else if (action === 'turnOffScreen') {
                             aboutMeScreenOn = false;
-                            console.log("Pantalla de about-me marcada como APAGADA");
                         }
                     } else {
-                        console.warn("El iframe no está completamente cargado, esperando...");
                         // Intentar de nuevo después de un breve retraso
                         setTimeout(() => sendMessageToAboutMe(action), 100);
                     }
                 } catch (e) {
-                    console.error("Error al enviar mensaje al iframe:", e);
                 }
             } else {
-                console.warn("No se encontró el iframe de about-me.html o su contentWindow");
                 if (aboutMeIframe) {
-                    console.log("iframe encontrado pero sin contentWindow");
                 }
             }
         }
         
         // Función para enviar mensaje al iframe de about-me2.html (DUPLICADO)
         function sendMessageToProjects(action) {
-            console.log(`Intentando enviar mensaje a projects.html: ${action}`);
-            console.log("Estado del iframe de projects:", projectsIframe ? "Encontrado" : "No encontrado");
             
             // Si no tenemos el iframe guardado, intentar buscarlo de nuevo
             if (!projectsIframe) {
-                console.log("Buscando iframe de projects.html...");
                 const iframes = document.querySelectorAll('iframe');
-                console.log("Total de iframes encontrados:", iframes.length);
                 
                 iframes.forEach((iframe, index) => {
-                    console.log(`Iframe ${index}:`, iframe.src || "sin src");
                     if (iframe.src && iframe.src.includes('projects.html')) {
-                        console.log("Encontrado iframe de projects.html:", iframe);
                         projectsIframe = iframe;
                     }
                 });
@@ -1197,46 +1124,33 @@
                     // Asegurarse de que el iframe esté completamente cargado
                     if (aboutMe2Iframe.contentDocument && aboutMe2Iframe.contentDocument.readyState === 'complete') {
                         aboutMe2Iframe.contentWindow.postMessage({ action: action }, '*');
-                        console.log(`Mensaje enviado a about-me2.html: ${action}`);
                         
                         if (action === 'turnOnScreen') {
                             aboutMe2ScreenOn = true;
-                            console.log("Pantalla de about-me2 marcada como ENCENDIDA");
                         } else if (action === 'turnOffScreen') {
                             aboutMe2ScreenOn = false;
-                            console.log("Pantalla de about-me2 marcada como APAGADA");
                         }
                     } else {
-                        console.warn("El iframe de about-me2 no está completamente cargado, esperando...");
                         // Intentar de nuevo después de un breve retraso
                         setTimeout(() => sendMessageToAboutMe2(action), 100);
                     }
                 } catch (e) {
-                    console.error("Error al enviar mensaje al iframe de about-me2:", e);
                 }
             } else {
-                console.warn("No se encontró el iframe de about-me2.html o su contentWindow");
                 if (aboutMe2Iframe) {
-                    console.log("iframe de about-me2 encontrado pero sin contentWindow");
                 }
             }
         }
         
         // Función para enviar mensaje al iframe de projects.html (Sistema Projects)
         function sendMessageToProjects(action) {
-            console.log(`Intentando enviar mensaje a projects.html: ${action}`);
-            console.log("Estado del iframe de projects:", projectsIframe ? "Encontrado" : "No encontrado");
             
             // Si no tenemos el iframe guardado, intentar buscarlo de nuevo
             if (!projectsIframe) {
-                console.log("Buscando iframe de projects.html...");
                 const iframes = document.querySelectorAll('iframe');
-                console.log("Total de iframes encontrados:", iframes.length);
                 
                 iframes.forEach((iframe, index) => {
-                    console.log(`Iframe ${index}:`, iframe.src || "sin src");
                     if (iframe.src && iframe.src.includes('projects.html')) {
-                        console.log("Encontrado iframe de projects.html:", iframe);
                         projectsIframe = iframe;
                     }
                 });
@@ -1247,46 +1161,33 @@
                     // Asegurarse de que el iframe esté completamente cargado
                     if (projectsIframe.contentDocument && projectsIframe.contentDocument.readyState === 'complete') {
                         projectsIframe.contentWindow.postMessage({ action: action }, '*');
-                        console.log(`Mensaje enviado a projects.html: ${action}`);
                         
                         if (action === 'turnOnScreen') {
                             projectsScreenOn = true;
-                            console.log("Pantalla de projects marcada como ENCENDIDA");
                         } else if (action === 'turnOffScreen') {
                             projectsScreenOn = false;
-                            console.log("Pantalla de projects marcada como APAGADA");
                         }
                     } else {
-                        console.warn("El iframe de projects no está completamente cargado, esperando...");
                         // Intentar de nuevo después de un breve retraso
                         setTimeout(() => sendMessageToProjects(action), 500);
                     }
                 } catch (e) {
-                    console.error("Error al enviar mensaje al iframe de projects:", e);
                 }
             } else {
-                console.warn("No se encontró el iframe de projects.html o su contentWindow");
                 if (projectsIframe) {
-                    console.log("iframe de projects encontrado pero sin contentWindow");
                 }
             }
         }
         
         // Función para enviar mensaje al iframe de contact.html (Sistema Contact)
         function sendMessageToContact(action) {
-            console.log(`Intentando enviar mensaje a contact.html: ${action}`);
-            console.log("Estado del iframe de contact:", contactIframe ? "Encontrado" : "No encontrado");
             
             // Si no tenemos el iframe guardado, intentar buscarlo de nuevo
             if (!contactIframe) {
-                console.log("Buscando iframe de contact.html...");
                 const iframes = document.querySelectorAll('iframe');
-                console.log("Total de iframes encontrados:", iframes.length);
                 
                 iframes.forEach((iframe, index) => {
-                    console.log(`Iframe ${index}:`, iframe.src || "sin src");
                     if (iframe.src && iframe.src.includes('contact.html')) {
-                        console.log("Encontrado iframe de contact.html:", iframe);
                         contactIframe = iframe;
                     }
                 });
@@ -1297,46 +1198,33 @@
                     // Asegurarse de que el iframe esté completamente cargado
                     if (contactIframe.contentDocument && contactIframe.contentDocument.readyState === 'complete') {
                         contactIframe.contentWindow.postMessage({ action: action }, '*');
-                        console.log(`Mensaje enviado a contact.html: ${action}`);
                         
                         if (action === 'turnOnScreen') {
                             contactScreenOn = true;
-                            console.log("Pantalla de contact marcada como ENCENDIDA");
                         } else if (action === 'turnOffScreen') {
                             contactScreenOn = false;
-                            console.log("Pantalla de contact marcada como APAGADA");
                         }
                     } else {
-                        console.warn("El iframe de contact no está completamente cargado, esperando...");
                         // Intentar de nuevo después de un breve retraso
                         setTimeout(() => sendMessageToContact(action), 100);
                     }
                 } catch (e) {
-                    console.error("Error al enviar mensaje al iframe de contact:", e);
                 }
             } else {
-                console.warn("No se encontró el iframe de contact.html o su contentWindow");
                 if (contactIframe) {
-                    console.log("iframe de contact encontrado pero sin contentWindow");
                 }
             }
         }
         
         // FUNCIÓN PARA ENVIAR MENSAJES A PROJECTS.HTML
         function sendMessageToProjects(action) {
-            console.log(`Intentando enviar mensaje a projects.html: ${action}`);
-            console.log("Estado del iframe de projects:", projectsIframe ? "Encontrado" : "No encontrado");
             
             // Si no tenemos el iframe guardado, intentar buscarlo de nuevo
             if (!projectsIframe) {
-                console.log("Buscando iframe de projects.html...");
                 const iframes = document.querySelectorAll('iframe');
-                console.log("Total de iframes encontrados:", iframes.length);
                 
                 iframes.forEach((iframe, index) => {
-                    console.log(`Iframe ${index}:`, iframe.src || "sin src");
                     if (iframe.src && iframe.src.includes('projects.html')) {
-                        console.log("Encontrado iframe de projects.html:", iframe);
                         projectsIframe = iframe;
                     }
                 });
@@ -1347,46 +1235,33 @@
                     // Asegurarse de que el iframe esté completamente cargado
                     if (projectsIframe.contentDocument && projectsIframe.contentDocument.readyState === 'complete') {
                         projectsIframe.contentWindow.postMessage({ action: action }, '*');
-                        console.log(`Mensaje enviado a projects.html: ${action}`);
                         
                         if (action === 'turnOnScreen') {
                             projectsScreenOn = true;
-                            console.log("Pantalla de projects marcada como ENCENDIDA");
                         } else if (action === 'turnOffScreen') {
                             projectsScreenOn = false;
-                            console.log("Pantalla de projects marcada como APAGADA");
                         }
                     } else {
-                        console.warn("El iframe de projects no está completamente cargado, esperando...");
                         // Intentar de nuevo después de un breve retraso
                         setTimeout(() => sendMessageToProjects(action), 500);
                     }
                 } catch (e) {
-                    console.error("Error al enviar mensaje al iframe de projects:", e);
                 }
             } else {
-                console.warn("No se encontró el iframe de projects.html o su contentWindow");
                 if (projectsIframe) {
-                    console.log("iframe de projects encontrado pero sin contentWindow");
                 }
             }
         }
         
         // FUNCIÓN PARA ENVIAR MENSAJES A CAFE-MENU.HTML
         function sendMessageToCafeMenu(action) {
-            console.log(`Intentando enviar mensaje a cafe-menu.html: ${action}`);
-            console.log("Estado del iframe de cafe-menu:", cafeMenuIframe ? "Encontrado" : "No encontrado");
             
             // Si no tenemos el iframe guardado, intentar buscarlo de nuevo
             if (!cafeMenuIframe) {
-                console.log("Buscando iframe de cafe-menu.html...");
                 const iframes = document.querySelectorAll('iframe');
-                console.log("Total de iframes encontrados:", iframes.length);
                 
                 iframes.forEach((iframe, index) => {
-                    console.log(`Iframe ${index}:`, iframe.src || "sin src");
                     if (iframe.src && iframe.src.includes('cafe-menu.html')) {
-                        console.log("Encontrado iframe de cafe-menu.html:", iframe);
                         cafeMenuIframe = iframe;
                     }
                 });
@@ -1397,46 +1272,33 @@
                     // Asegurarse de que el iframe esté completamente cargado
                     if (cafeMenuIframe.contentDocument && cafeMenuIframe.contentDocument.readyState === 'complete') {
                         cafeMenuIframe.contentWindow.postMessage({ action: action }, '*');
-                        console.log(`Mensaje enviado a cafe-menu.html: ${action}`);
                         
                         if (action === 'turnOnScreen') {
                             cafeMenuScreenOn = true;
-                            console.log("Pantalla de cafe-menu marcada como ENCENDIDA");
                         } else if (action === 'turnOffScreen') {
                             cafeMenuScreenOn = false;
-                            console.log("Pantalla de cafe-menu marcada como APAGADA");
                         }
                     } else {
-                        console.warn("El iframe de cafe-menu no está completamente cargado, esperando...");
                         // Intentar de nuevo después de un breve retraso
                         setTimeout(() => sendMessageToCafeMenu(action), 100);
                     }
                 } catch (e) {
-                    console.error("Error al enviar mensaje al iframe de cafe-menu:", e);
                 }
             } else {
-                console.warn("No se encontró el iframe de cafe-menu.html o su contentWindow");
                 if (cafeMenuIframe) {
-                    console.log("iframe de cafe-menu encontrado pero sin contentWindow");
                 }
             }
         }
         
         // FUNCIÓN PARA ENVIAR MENSAJES A COMMUNITY.HTML
         function sendMessageToCommunity(action) {
-            console.log(`Intentando enviar mensaje a community.html: ${action}`);
-            console.log("Estado del iframe de community:", communityIframe ? "Encontrado" : "No encontrado");
             
             // Si no tenemos el iframe guardado, intentar buscarlo de nuevo
             if (!communityIframe) {
-                console.log("Buscando iframe de community.html...");
                 const iframes = document.querySelectorAll('iframe');
-                console.log("Total de iframes encontrados:", iframes.length);
                 
                 iframes.forEach((iframe, index) => {
-                    console.log(`Iframe ${index}:`, iframe.src || "sin src");
                     if (iframe.src && iframe.src.includes('community.html')) {
-                        console.log("Encontrado iframe de community.html:", iframe);
                         communityIframe = iframe;
                     }
                 });
@@ -1447,27 +1309,20 @@
                     // Asegurarse de que el iframe esté completamente cargado
                     if (communityIframe.contentDocument && communityIframe.contentDocument.readyState === 'complete') {
                         communityIframe.contentWindow.postMessage({ action: action }, '*');
-                        console.log(`Mensaje enviado a community.html: ${action}`);
                         
                         if (action === 'turnOnScreen') {
                             communityScreenOn = true;
-                            console.log("Pantalla de community marcada como ENCENDIDA");
                         } else if (action === 'turnOffScreen') {
                             communityScreenOn = false;
-                            console.log("Pantalla de community marcada como APAGADA");
                         }
                     } else {
-                        console.warn("El iframe de community no está completamente cargado, esperando...");
                         // Intentar de nuevo después de un breve retraso
                         setTimeout(() => sendMessageToCommunity(action), 100);
                     }
                 } catch (e) {
-                    console.error("Error al enviar mensaje al iframe de community:", e);
                 }
             } else {
-                console.warn("No se encontró el iframe de community.html o su contentWindow");
                 if (communityIframe) {
-                    console.log("iframe de community encontrado pero sin contentWindow");
                 }
             }
         }
@@ -1974,7 +1829,6 @@
             if (!window.contactScreenMaterial || !window.contactBackPlane) {
                 // Solo log una vez cuando falten materiales
                 if (!window.contactMaterialsErrorLogged) {
-                    console.log("❌ Materiales de contacto no encontrados - inicializando...");
                     window.contactMaterialsErrorLogged = true;
                 }
                 return;
@@ -2013,14 +1867,12 @@
                     window.contactScreenMaterial.opacity = 1.0;
                     window.contactScreenMaterial.needsUpdate = true;
                     window.contactBackPlane.visible = true;
-                    console.log("🎯 Cover negro de contact visible");
                 } else {
                     // SOLO hacer transparente el cover si el botón fue clickeado Y la pantalla está encendida Y es visible desde el frente
                     if (isVisibleFromFront) {
                         window.contactScreenMaterial.transparent = true;
                         window.contactScreenMaterial.opacity = 0.0;
                         window.contactScreenMaterial.needsUpdate = true;
-                        console.log("🎯 Cover negro de contact hecho transparente");
                     } else {
                         // Mantener negro si no es visible desde el frente, aunque el botón esté clickeado
                         window.contactScreenMaterial.color.set(0x000000);
@@ -2044,7 +1896,6 @@
                     // FORZAR pointer events si todas las condiciones son verdaderas
                     if (contactButtonClicked && contactScreenOn) {
                         window.contactCssObject.element.style.pointerEvents = 'auto';
-                        console.log("✅ Contact form fully active and interactive");
                     }
                 } else {
                     if (window.contactCssObject && window.contactCssObject.element) {
@@ -2056,7 +1907,6 @@
                 // Log cuando esté completamente activo
                 if (contactButtonClicked && contactScreenOn) {
                     if (!window.contactFullyActiveLogged) {
-                        console.log("✅ Contact form is now fully interactive");
                         window.contactFullyActiveLogged = true;
                     }
                 }
@@ -2077,7 +1927,6 @@
                 window.contactScreenMaterial.opacity = 1.0;
                 window.contactScreenMaterial.needsUpdate = true;
                 window.contactBackPlane.visible = true;
-                console.log("⚡ Cover negro de contact forzado visible inmediatamente");
             }
         }
         
@@ -2140,7 +1989,6 @@
             if (!window.cafeMenuScreenMaterial || !window.cafeMenuBackPlane) {
                 // Solo log una vez cuando falten materiales
                 if (!window.cafeMenuMaterialsErrorLogged) {
-                    console.log("❌ Materiales de cafe-menu no encontrados - inicializando...");
                     window.cafeMenuMaterialsErrorLogged = true;
                 }
                 return;
@@ -2194,7 +2042,6 @@
                     // FORZAR pointer events si todas las condiciones son verdaderas
                     if (isVisibleFromFront && cafeMenuButtonClicked && cafeMenuScreenOn) {
                         window.cafeMenuCssObject.element.style.pointerEvents = 'auto';
-                        console.log("✅ CafeMenu fully active and interactive");
                     }
                 } else {
                     if (window.cafeMenuCssObject && window.cafeMenuCssObject.element) {
@@ -2212,7 +2059,6 @@
                 if (isVisibleFromFront && cafeMenuButtonClicked && cafeMenuScreenOn) {
                     // Solo log una vez cuando se active completamente
                     if (!window.cafeMenuFullyActiveLogged) {
-                        console.log("✅ CafeMenu is now fully interactive");
                         window.cafeMenuFullyActiveLogged = true;
                     }
                 }
@@ -2256,7 +2102,6 @@
             if (!window.communityCssObject || !window.communityScreenMaterial || !window.communityBackPlane) {
                 // Solo log una vez cuando falten materiales
                 if (!window.communityMaterialsErrorLogged) {
-                    console.log("❌ Community materials o CSS object no encontrados - inicializando...");
                     window.communityMaterialsErrorLogged = true;
                 }
                 return;
@@ -2295,14 +2140,12 @@
                     window.communityScreenMaterial.opacity = 1.0;
                     window.communityScreenMaterial.needsUpdate = true;
                     window.communityBackPlane.visible = true;
-                    console.log("🎯 Cover negro de community visible");
                 } else {
                     // SOLO hacer transparente el cover si el botón fue clickeado Y la pantalla está encendida Y es visible desde el frente
                     if (isVisibleFromFront) {
                         window.communityScreenMaterial.transparent = true;
                         window.communityScreenMaterial.opacity = 0.0;
                         window.communityScreenMaterial.needsUpdate = true;
-                        console.log("🎯 Cover negro de community hecho transparente");
                     } else {
                         // Mantener negro si no es visible desde el frente, aunque el botón esté clickeado
                         window.communityScreenMaterial.color.set(0x000000);
@@ -2326,7 +2169,6 @@
                     // FORZAR pointer events si todas las condiciones son verdaderas
                     if (communityButtonClicked && communityScreenOn) {
                         window.communityCssObject.element.style.pointerEvents = 'auto';
-                        console.log("✅ Community content fully active and interactive");
                     }
                 } else {
                     if (window.communityCssObject && window.communityCssObject.element) {
@@ -2338,7 +2180,6 @@
                 // Log cuando esté completamente activo
                 if (communityButtonClicked && communityScreenOn) {
                     if (!window.communityFullyActiveLogged) {
-                        console.log("✅ Community content is now fully interactive");
                         window.communityFullyActiveLogged = true;
                     }
                 }
@@ -2352,7 +2193,6 @@
             
             // ACTIVAR LA PANTALLA COMMUNITY SI EL BOTÓN FUE CLICKEADO Y EL IFRAME ESTÁ LISTO
             if (communityButtonClicked && !communityScreenOn && communityIframeReady) {
-                console.log("🔥 ACTIVANDO PANTALLA COMMUNITY - condiciones cumplidas");
                 sendMessageToCommunity('turnOnScreen');
             }
         }
@@ -2447,7 +2287,6 @@
             
             // Verificar si el clic fue en el plano de about-me
             if (!isPointInAboutMePlane(mouse)) {
-                console.log("Clic fuera del plano de about-me, apagando pantalla");
                 
                 // Cambiar el plano negro de about-me de vuelta a opaco (apagar la pantalla)
                 if (window.aboutMeScreenMaterial) {
@@ -2461,7 +2300,6 @@
                         window.aboutMeScreenMaterial.opacity = 0.0;
                     }
                     window.aboutMeScreenMaterial.needsUpdate = true;
-                    console.log("Plano negro de about-me actualizado - Pantalla apagada");
                 }
                 
                 // Ocultar el contenido HTML
@@ -2503,14 +2341,11 @@
             if (audioElement) {
                 if (mute) {
                     audioElement.pause();
-                    console.log('Audio local silenciado');
                 } else {
                     audioElement.play().then(() => {
                         // Set volume to 0.01 (1%)
                         audioElement.volume = 0.01;
-                        console.log('Audio local activado con volumen al 1%');
                     }).catch(e => {
-                        console.log('Error al reproducir audio local:', e);
                     });
                 }
             }
@@ -2602,7 +2437,6 @@
                                 iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
                                 // Set volume to 0.01 (1%)
                                 iframe.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[1]}', '*');
-                                console.log('Música activada desde el botón de control con volumen al 1%');
                             }
                         } else {
                             // Si el video aún no está cargado, cargar y reproducir
@@ -2635,13 +2469,11 @@
                     const audioElement = document.querySelector('#youtube-container #local-audio');
                     if (audioElement) {
                         audioElement.volume = volumeLevel / 100;
-                        console.log(`Volumen ajustado al ${volumeLevel}%`);
                     }
                 }
             });
             
             musicControlCreated = true;
-            console.log("Botón de control de música creado");
         }
         
         
@@ -2650,7 +2482,6 @@
         // Function to play local music (replaces YouTube)
         function playYouTubeVideo() {
             if (!musicPlayed) {
-                console.log('Intentando reproducir música local');
                 
                 try {
                     // Get the container (reuse existing container)
@@ -2672,7 +2503,6 @@
                     // Mark as played
                     musicPlayed = true;
                     
-                    console.log('Audio local embedded successfully');
                     
                     // Solo reproducimos si el usuario ha activado explícitamente la música
                     if (musicButtonClicked && !musicMuted) {
@@ -2685,19 +2515,15 @@
                                     
                                     // Try to play
                                     audioElement.play().then(() => {
-                                        console.log('Local audio started playing');
                                     }).catch(e => {
-                                        console.log('Autoplay blocked, waiting for user interaction:', e);
                                     });
                                 }
                             } catch (e) {
-                                console.error('Error trying to play local audio:', e);
                             }
                         }, 2000);
                     }
                     
                 } catch (error) {
-                    console.error('Error embedding local audio:', error);
                 }
             }
         }
@@ -2890,7 +2716,6 @@
                 movementStartTime = Date.now();
                 lastCameraPosition.copy(camera.position);
                 lastCameraTarget.copy(controls.target);
-                console.log("🎯 Usuario empezó a interactuar con los controles");
             });
             
             controls.addEventListener('change', function() {
@@ -2912,7 +2737,6 @@
                 if (shouldProcessScreenDeactivation) {
                     if (!isUserActuallyMoving) {
                         isUserActuallyMoving = true;
-                        console.log("📤 MOVIMIENTO REAL detectado - procesando...");
                         console.log(`🎯 Detalles: positionDelta=${positionDelta.toFixed(3)}, targetDelta=${targetDelta.toFixed(3)}, tiempo=${timeSinceStart}ms`);
                         
                         // VERIFICAR PERÍODO DE GRACIA SOLO PARA LA DESACTIVACIÓN DE CONTACT
@@ -2926,14 +2750,11 @@
                                 contactIframe.contentWindow.postMessage({
                                     action: 'realMovementDetected'
                                 }, '*');
-                                console.log("📤 MOVIMIENTO REAL detectado - mensaje específico enviado a contact.html");
                             }
                             
                             sendMessageToContact('turnOffScreen');
                             forceContactCoverVisible(); // Forzar cover negro inmediatamente
-                            console.log("📤 MOVIMIENTO REAL detectado - contact.html desactivado");
                         } else if (inGracePeriod) {
-                            console.log("🎯 Movimiento detectado pero en período de gracia - contact protegido");
                         }
                         
                         // Para projects y otros, aplicar normalmente (sin período de gracia)
@@ -2943,11 +2764,9 @@
                                 projectsIframe.contentWindow.postMessage({
                                     action: 'realMovementDetected'
                                 }, '*');
-                                console.log("📤 MOVIMIENTO REAL detectado - mensaje específico enviado a projects.html");
                             }
                             
                             sendMessageToProjects('turnOffScreen');
-                            console.log("📤 MOVIMIENTO REAL detectado - projects.html desactivado");
                         }
                         
                         // TAMBIÉN desactivar el plano duplicado (box.html) cuando hay movimiento real
@@ -2961,7 +2780,6 @@
                                 aboutMeDuplicateIframe.contentWindow.postMessage({
                                     action: 'realMovementDetected'
                                 }, '*');
-                                console.log("📤 MOVIMIENTO REAL detectado - mensaje específico enviado a box.html");
                             }
                             
                             sendMessageToAboutMeDuplicate('turnOffScreen');
@@ -2970,7 +2788,6 @@
                         
                         // TAMBIÉN desactivar community cuando hay movimiento real
                         if (communityButtonClicked) {
-                            console.log("📤 MOVIMIENTO REAL detectado - desactivando community");
                             communityButtonClicked = false;
                             
                             // Enviar mensaje al iframe de community
@@ -2978,7 +2795,6 @@
                                 communityIframe.contentWindow.postMessage({
                                     action: 'realMovementDetected'
                                 }, '*');
-                                console.log("📤 MOVIMIENTO REAL detectado - mensaje específico enviado a community.html");
                             }
                             
                             sendMessageToCommunity('turnOffScreen');
@@ -3023,7 +2839,6 @@
                 // SOLUCIÓN DEFINITIVA: Ignorar completamente eventos que NO sean del canvas
                 // Si el evento no viene directamente del canvas, no procesarlo
                 if (event.target !== renderer.domElement) {
-                    console.log("🚫 Evento ignorado - no proviene del canvas 3D");
                     return;
                 }
                 
@@ -3038,10 +2853,8 @@
                             // CAMBIO: Solo bloquear si es el iframe de projects Y el botón NO está clickeado
                             if (iframe.src && iframe.src.includes('projects.html')) {
                                 if (!projectsButtonClicked) {
-                                    console.log("🚫 Click en iframe de projects pero botón no activo - ignorando");
                                     return; // Salir completamente
                                 } else {
-                                    console.log("🔥🔥🔥 NUEVA VERSION - Click en iframe de projects con botón activo - FORWARDING click to iframe [v2.0] 🔥🔥🔥");
                                     
                                     // Forwardear el click manualmente al iframe
                                     try {
@@ -3049,7 +2862,6 @@
                                         const relativeX = event.clientX - rect.left;
                                         const relativeY = event.clientY - rect.top;
                                         
-                                        console.log(`🎯 Forwarding click at relative position: ${relativeX}, ${relativeY}`);
                                         
                                         // Enviar el evento de click al iframe
                                         if (iframe.contentWindow && iframe.contentDocument) {
@@ -3064,28 +2876,22 @@
                                             
                                             // Buscar el elemento bajo las coordenadas
                                             const elementAtPoint = iframe.contentDocument.elementFromPoint(relativeX, relativeY);
-                                            console.log("🎯 Element at point:", elementAtPoint);
                                             
                                             if (elementAtPoint) {
                                                 elementAtPoint.dispatchEvent(iframeEvent);
-                                                console.log("🎯 Click dispatched to:", elementAtPoint.tagName, elementAtPoint.className);
                                             } else {
                                                 iframe.contentDocument.dispatchEvent(iframeEvent);
-                                                console.log("🎯 Click dispatched to document");
                                             }
                                         }
                                     } catch (error) {
-                                        console.error("❌ Error forwarding click to iframe:", error);
                                     }
                                     
                                     return; // Salir completamente del event listener
                                 }
                             } else if (iframe.src && iframe.src.includes('contact-main.html')) {
                                 if (!contactButtonClicked) {
-                                    console.log("🚫 Click en iframe de contact pero botón no activo - ignorando");
                                     return; // Salir completamente
                                 } else {
-                                    console.log("🎯 Contact click detected - forwarding to form");
                                     
                                     // Forwardear el click manualmente al iframe
                                     try {
@@ -3117,14 +2923,11 @@
                                                 if (elementAtPoint.tagName === 'INPUT' || elementAtPoint.tagName === 'TEXTAREA') {
                                                     elementAtPoint.focus();
                                                     elementAtPoint.click();
-                                                    console.log(`📝 ${elementAtPoint.tagName}: ${elementAtPoint.id || elementAtPoint.name || 'field'}`);
                                                 } else if (elementAtPoint.tagName === 'SELECT') {
                                                     elementAtPoint.focus();
                                                     elementAtPoint.click();
-                                                    console.log(`📋 ${elementAtPoint.tagName}: ${elementAtPoint.id || elementAtPoint.name || 'dropdown'}`);
                                                 } else if (elementAtPoint.tagName === 'BUTTON') {
                                                     elementAtPoint.click();
-                                                    console.log(`🔘 ${elementAtPoint.tagName}: ${elementAtPoint.id || elementAtPoint.textContent || 'button'}`);
                                                 } else {
                                                     // Para otros elementos, enviar evento de mouse
                                                     const clickEvent = new MouseEvent('click', {
@@ -3139,7 +2942,6 @@
                                             }
                                         }
                                     } catch (error) {
-                                        console.error("❌ Contact click error:", error);
                                     }
                                     
                                     return; // Salir completamente del event listener
@@ -3147,10 +2949,8 @@
                             } else if (iframe.src && iframe.src.includes('community.html')) {
                                 // NUEVO: Manejo específico para community.html
                                 if (!communityButtonClicked) {
-                                    console.log("🚫 Click en iframe de community pero botón no activo - ignorando");
                                     return; // Salir completamente
                                 } else {
-                                    console.log("🎯 Community click detected - forwarding to iframe");
                                     
                                     // Forwardear el click manualmente al iframe
                                     try {
@@ -3171,7 +2971,6 @@
                                         relativeX = iframeWidth - relativeX;
                                         relativeY = iframeHeight - relativeY;
                                         
-                                        console.log(`🎯 Community click at position: ${relativeX}, ${relativeY}`);
                                         
                                         // Enviar el evento de click al iframe
                                         if (iframe.contentWindow && iframe.contentDocument) {
@@ -3189,7 +2988,6 @@
                                                 });
                                                 
                                                 elementAtPoint.dispatchEvent(clickEvent);
-                                                console.log(`🎯 Community click dispatched to: ${elementAtPoint.tagName} ${elementAtPoint.className || elementAtPoint.id || ''}`);
                                             } else {
                                                 // Si no hay elemento específico, disparar en el documento
                                                 const docClickEvent = new MouseEvent('click', {
@@ -3199,18 +2997,15 @@
                                                     clientY: relativeY
                                                 });
                                                 iframe.contentDocument.dispatchEvent(docClickEvent);
-                                                console.log("🎯 Community click dispatched to document");
                                             }
                                         }
                                     } catch (error) {
-                                        console.error("❌ Community click error:", error);
                                     }
                                     
                                     return; // Salir completamente del event listener
                                 }
                             } else if (iframe.src && iframe.src.includes('box.html')) {
                                 // NUEVO: Manejo específico para box.html (plano duplicado)
-                                console.log("🎯 Box.html click detected - forwarding to iframe");
                                 
                                 try {
                                     // Obtener dimensiones del iframe y sus transformaciones
@@ -3230,13 +3025,10 @@
                                     // relativeX = iframeWidth - relativeX;  // COMENTADO: No necesario
                                     // relativeY = iframeHeight - relativeY; // COMENTADO: No necesario
                                     
-                                    console.log(`🎯 Box click at relative position: ${relativeX}, ${relativeY}`);
-                                    console.log(`🎯 Box iframe dimensions: ${iframeWidth} x ${iframeHeight}`);
                                     
                                     // CORRECCIÓN: Usar coordenadas invertidas que funcionan correctamente
                                     const invertedX = iframeWidth - relativeX;
                                     const invertedY = iframeHeight - relativeY;
-                                    console.log(`🎯 Box using inverted coordinates: ${invertedX}, ${invertedY}`);
                                     
                                     // Enviar el evento de click al iframe usando coordenadas invertidas
                                     if (iframe.contentWindow && iframe.contentDocument) {
@@ -3260,11 +3052,9 @@
                                                 let nestedX = relativeX;
                                                 let nestedY = relativeY;
                                                 
-                                                console.log(`🎯 Nested iframe click at position: ${nestedX}, ${nestedY}`);
                                                 
                                                 // Buscar el elemento en el iframe anidado con coordenadas normales
                                                 const nestedElement = nestedIframe.contentDocument.elementFromPoint(nestedX, nestedY);
-                                                console.log("🎯 Nested element at point:", nestedElement);
                                                 
                                                 if (nestedElement) {
                                                     // Crear evento específico para el elemento anidado usando coordenadas normales
@@ -3277,7 +3067,6 @@
                                                     });
                                                     
                                                     nestedElement.dispatchEvent(nestedClickEvent);
-                                                    console.log(`🎯 Nested click dispatched to: ${nestedElement.tagName} ${nestedElement.className || nestedElement.id || ''}`);
                                                     
                                                     // También enviar el evento al documento del iframe anidado
                                                     const nestedDocEvent = new MouseEvent('click', {
@@ -3287,7 +3076,6 @@
                                                         clientY: nestedY
                                                     });
                                                     nestedIframe.contentDocument.dispatchEvent(nestedDocEvent);
-                                                    console.log("🎯 Nested document click also dispatched");
                                                 } else {
                                                     // Si no hay elemento específico en el iframe anidado
                                                     const nestedDocEvent = new MouseEvent('click', {
@@ -3311,7 +3099,6 @@
                                             });
                                             
                                             elementAtPoint.dispatchEvent(clickEvent);
-                                            console.log(`🎯 Box click dispatched to: ${elementAtPoint.tagName} ${elementAtPoint.className || ''}`);
                                         } else {
                                             // Si no hay elemento específico, disparar en el documento usando coordenadas invertidas
                                             const docClickEvent = new MouseEvent('click', {
@@ -3321,23 +3108,19 @@
                                                 clientY: invertedY
                                             });
                                             iframe.contentDocument.dispatchEvent(docClickEvent);
-                                            console.log("🎯 Box click dispatched to document");
                                         }
                                     }
                                 } catch (error) {
-                                    console.error("❌ Box click error:", error);
                                 }
                                 
                                 return; // Salir completamente del event listener
                             } else {
-                                console.log("🚫 Click está sobre un iframe visible - ignorando");
                                 return; // Salir completamente
                             }
                         }
                     }
                 }
                 
-                console.log("✅ Procesando click del canvas 3D");
                 
                 // Obtener las coordenadas del clic normalizadas (-1 a +1)
                 const mouse = new THREE.Vector2();
@@ -3368,7 +3151,6 @@
                         // Actualizar el estado
                         window.screenOn = false;
                         
-                        console.log("Pantalla de menú de cafés apagada");
                     }
                 }
                 
@@ -3385,11 +3167,9 @@
                     const projectsIntersects = raycaster.intersectObject(window.projectsPlane);
                     if (projectsIntersects.length > 0) {
                         clickedOnProjects = true;
-                        console.log("Click detectado en el plano de projects");
                         
                         // Toggle del estado del botón de projects
                         projectsButtonClicked = !projectsButtonClicked;
-                        console.log("Projects button toggled:", projectsButtonClicked ? "ACTIVADO" : "DESACTIVADO");
                         
                         if (projectsButtonClicked) {
                             // Activar la pantalla de projects
@@ -3404,7 +3184,6 @@
                 // Si el clic no fue en el plano de projects y la pantalla está activa, desactivarla
                 // SOLO si fue un click genuino en el canvas 3D
                 if (!clickedOnProjects && projectsButtonClicked) {
-                    console.log("Click fuera del plano de projects - desactivando pantalla");
                     projectsButtonClicked = false;
                     deactivateProjectsScreen();
                     
@@ -3426,7 +3205,6 @@
                         
                         // Si el plano ya está activo, forwardear el click al iframe
                         if (aboutMeDuplicateButtonClicked) {
-                            console.log("🔥 Plano duplicado activo - forwarding click to box.html iframe");
                             
                             // Buscar el iframe de box.html
                             const boxIframe = document.querySelector('iframe[src*="box.html"]');
@@ -3445,12 +3223,10 @@
                                     relativeX = (relativeX / iframeRect.width) * iframeWidth;
                                     relativeY = (relativeY / iframeRect.height) * iframeHeight;
                                     
-                                    console.log(`🎯 Box click forwarding at relative position: ${relativeX}, ${relativeY}`);
                                     
                                     // Buscar el elemento bajo las coordenadas corregidas
                                     const elementAtPoint = boxIframe.contentDocument.elementFromPoint(relativeX, relativeY);
                                     
-                                    console.log("🎯 Box element at point:", elementAtPoint);
                                     
                                     if (elementAtPoint) {
                                         // Crear evento de click específico
@@ -3463,7 +3239,6 @@
                                         });
                                         
                                         elementAtPoint.dispatchEvent(clickEvent);
-                                        console.log(`🎯 Box click dispatched to: ${elementAtPoint.tagName} ${elementAtPoint.className || ''}`);
                                     } else {
                                         // Si no hay elemento específico, disparar en el documento
                                         const docClickEvent = new MouseEvent('click', {
@@ -3473,13 +3248,10 @@
                                             clientY: relativeY
                                         });
                                         boxIframe.contentDocument.dispatchEvent(docClickEvent);
-                                        console.log("🎯 Box click dispatched to document");
                                     }
                                 } catch (error) {
-                                    console.error("❌ Box click forwarding error:", error);
                                 }
                             } else {
-                                console.error("❌ No se encontró el iframe de box.html para forwarding");
                             }
                             
                             // No cambiar el estado del botón si ya está activo
@@ -3488,7 +3260,6 @@
                         
                         // Toggle del estado del botón del plano duplicado (solo si no estaba activo)
                         aboutMeDuplicateButtonClicked = !aboutMeDuplicateButtonClicked;
-                        console.log("About Me Duplicate button toggled:", aboutMeDuplicateButtonClicked ? "ACTIVADO" : "DESACTIVADO");
                         
                         if (aboutMeDuplicateButtonClicked) {
                             // Activar la pantalla del plano duplicado
@@ -3503,7 +3274,6 @@
                 // Si el clic no fue en el plano duplicado y la pantalla está activa, desactivarla
                 // Permitir desactivación por clic fuera del plano, incluso si fue activado por el último botón
                 if (!clickedOnAboutMeDuplicate && aboutMeDuplicateButtonClicked) {
-                    console.log("🔴 Click fuera del plano duplicado - desactivando pantalla");
                     aboutMeDuplicateButtonClicked = false;
                     aboutMeDuplicateActivatedByLastButton = false; // Reset del flag
                     deactivateAboutMeDuplicateScreen();
@@ -3525,7 +3295,6 @@
                 }
                 
                 if (!clickedOnContact && contactButtonClicked) {
-                    console.log("Click fuera del plano de contact - desactivando pantalla");
                     contactButtonClicked = false;
                     deactivateContactScreen();
                     
@@ -3546,7 +3315,6 @@
                 }
                 
                 if (!clickedOnCommunity && communityButtonClicked) {
-                    console.log("Click fuera del plano de community - desactivando pantalla");
                     communityButtonClicked = false;
                     deactivateCommunityScreen();
                     
@@ -3567,7 +3335,6 @@
                 }
                 
                 if (!clickedOnCafeMenu && cafeMenuButtonClicked) {
-                    console.log("Click fuera del plano de cafe menu - desactivando pantalla");
                     cafeMenuButtonClicked = false;
                     deactivateCafeMenuScreen();
                     
@@ -3596,7 +3363,6 @@
             
             // Asegurar que el estado inicial de projects esté correcto
             setTimeout(function() {
-                console.log("Inicializando estado predeterminado de projects con cover negro");
                 if (window.aboutMe2ScreenMaterial && window.aboutMe2BackPlane) {
                     // Forzar el estado inicial: cover negro visible, contenido oculto
                     window.aboutMe2ScreenMaterial.color.set(0x000000);
@@ -3611,13 +3377,11 @@
                         window.aboutMe2CssObject.element.style.pointerEvents = 'none';
                     }
                     
-                    console.log("Estado inicial de projects configurado: cover negro visible");
                 }
             }, 800); // Reducido de 1500ms a 800ms para inicialización más rápida
             
             // Activar automáticamente el segundo plano después de 3 segundos (opcional)
             setTimeout(function() {
-                console.log("Activando automáticamente el segundo plano About Me");
                 aboutMe2ButtonClicked = true;
                 
                 // Hacer transparente el cover negro del segundo plano
@@ -3625,7 +3389,6 @@
                     window.aboutMe2ScreenMaterial.transparent = true;
                     window.aboutMe2ScreenMaterial.opacity = 0.0;
                     window.aboutMe2ScreenMaterial.needsUpdate = true;
-                    console.log("Cover negro del segundo plano hecho transparente automáticamente");
                 }
                 
                 // Activar contenido HTML si es visible desde el frente
@@ -3753,7 +3516,6 @@
                 if (attempts < MAX_TEXTURE_LOAD_ATTEMPTS) {
                     // Special handling for blob URLs
                     if (url.startsWith('blob:')) {
-                        console.log('Attempting to reload Blob URL texture with enhanced error handling');
                         
                         try {
                             // For Blob URLs, we'll try a different approach
@@ -3761,21 +3523,18 @@
                             img.crossOrigin = 'anonymous';
                             
                             img.onload = function() {
-                                console.log('Blob URL image loaded successfully, creating texture');
                                 const texture = new THREE.Texture(img);
                                 texture.needsUpdate = true;
                                 onSuccess(texture);
                             };
                             
                             img.onerror = function(err) {
-                                console.error('Failed to load Blob URL image:', err);
                                 onError(new Error(`Failed to load image from Blob URL: ${url}`));
                             };
                             
                             // Set the source to trigger loading
                             img.src = url;
                         } catch (e) {
-                            console.error('Exception during Blob URL texture reload:', e);
                             onError(e);
                         }
                     } else {
@@ -3793,18 +3552,15 @@
                         );
                     }
                 } else {
-                    console.error(`Máximo de intentos alcanzado para textura: ${url}`);
                     onError(new Error(`Máximo de intentos alcanzado (${MAX_TEXTURE_LOAD_ATTEMPTS})`));
                 }
             }
             
             // Handle loading errors with retry mechanism and enhanced debugging
             manager.onError = function(url) {
-                console.error('Error loading:', url);
                 
                 // Add detailed diagnostics for Blob URLs
                 if (url.startsWith('blob:')) {
-                    console.log('Debugging Blob URL:', url);
                     
                     // Check if the Blob URL is still valid
                     try {
@@ -3812,12 +3568,10 @@
                         xhr.open('HEAD', url, false); // Synchronous request to check URL validity
                         xhr.onreadystatechange = function() {
                             if (xhr.readyState === 4) {
-                                console.log(`Blob URL status: ${xhr.status}, valid: ${xhr.status !== 0 && xhr.status < 400}`);
                             }
                         };
                         xhr.send();
                     } catch (e) {
-                        console.error('Error checking Blob URL validity:', e);
                     }
                 }
                 
@@ -3827,10 +3581,8 @@
                 if (isTexture) {
                     // Si es una textura, intentar recargarla
                     const attempts = textureLoadAttempts.get(url) || 0;
-                    console.log(`Texture load attempt ${attempts + 1}/${MAX_TEXTURE_LOAD_ATTEMPTS} for: ${url}`);
                     
                     if (attempts < MAX_TEXTURE_LOAD_ATTEMPTS) {
-                        console.log(`Error de carga de textura, reintentando: ${url}`);
                         // No mostrar error aún, intentaremos recargar
                         
                         // Add a small delay before retry to allow any pending operations to complete
@@ -3839,7 +3591,6 @@
                                 url,
                                 function() { console.log(`Recarga exitosa de textura: ${url}`); },
                                 function(err) {
-                                    console.error('Texture reload failed:', err);
                                 }
                             );
                         }, 500);
@@ -3848,7 +3599,6 @@
                         
                         // For Blob URLs, try to create a fallback texture instead of showing error
                         if (url.startsWith('blob:')) {
-                            console.log('Creating fallback texture for failed Blob URL');
                             const fallbackTexture = new THREE.Texture();
                             fallbackTexture.image = new Image();
                             fallbackTexture.needsUpdate = true;
@@ -3863,7 +3613,6 @@
                                             if (material.map && material.map.source &&
                                                 material.map.source.data &&
                                                 material.map.source.data.src === url) {
-                                                console.log('Replacing failed texture in material:', material.name || 'unnamed');
                                                 material.map = fallbackTexture;
                                                 material.needsUpdate = true;
                                             }
@@ -3878,7 +3627,6 @@
             
             // Función para mostrar errores - redefinida para no mostrar texto
             function showError(message) {
-                console.error(message);
                 // No mostramos mensajes de error visualmente
             }
             
@@ -3914,7 +3662,6 @@
                                 // Iniciar la animación de la cámara hacia el punto específico para el primer botón
                                 startFirstButtonCameraAnimation();
                             });
-                            console.log("Evento de clic añadido al primer botón");
                             
                             // El segundo botón es el de carpeta (projects)
                             const projectsButton = buttons[1]; // Índice 1 (el segundo botón - carpeta)
@@ -3926,7 +3673,6 @@
                                 // Iniciar la animación de la cámara hacia el punto específico para projects
                                 startProjectsButtonCameraAnimation();
                             });
-                            console.log("Evento de clic añadido al botón de projects");
                             
                             // El tercer botón es el de mensajes/contacto
                             const messagesButton = buttons[2]; // Índice 2 (el tercer botón - mensajes)
@@ -3938,7 +3684,6 @@
                                 // Iniciar la animación de la cámara hacia el punto específico para mensajes
                                 startMessagesButtonCameraAnimation();
                             });
-                            console.log("Evento de clic añadido al botón de mensajes");
                             
                             // El cuarto botón es el de clientes (iconClientes)
                             const clientsButton = buttons[3]; // Índice 3 (el cuarto botón - clientes)
@@ -3950,7 +3695,6 @@
                                 // Iniciar la animación de la cámara hacia el punto específico para clientes
                                 startFourthButtonCameraAnimation();
                             });
-                            console.log("Evento de clic añadido al botón de clientes");
                             
                             // El quinto botón es el que tiene el icono de servicios
                             const serviceButton = buttons[4]; // Índice 4 (el quinto botón, contando desde 0)
@@ -3962,12 +3706,10 @@
                                 // Iniciar la animación de la cámara hacia el punto específico
                                 startButtonCameraAnimation();
                             });
-                            console.log("Evento de clic añadido al botón de servicios");
                             
                             // 🎬 ÚLTIMO BOTÓN (SEXTO BOTÓN) - ANIMACIÓN PERSONALIZADA + ACTIVAR BOX.HTML
                             const lastButton = buttons[5]; // Índice 5 (el sexto botón - último botón)
                             lastButton.addEventListener('click', function() {
-                                console.log("🎬 Último botón clickeado - iniciando animación personalizada y activando box.html");
                                 
                                 // Coordenadas específicas proporcionadas por el usuario
                                 const targetPos = new THREE.Vector3(6.05, 6.05, -3.26);
@@ -3981,7 +3723,6 @@
                                 // Activar la pantalla del plano duplicado después de un breve delay
                                 setTimeout(function() {
                                     activateAboutMeDuplicateScreen();
-                                    console.log("🎯 Pantalla del plano duplicado activada después del delay");
                                 }, 500);
                                 
                                 // Iniciar la animación personalizada
@@ -3989,7 +3730,6 @@
                             });
                             console.log("🎯 Evento de clic añadido al ÚLTIMO BOTÓN (animación personalizada)");
                         } else {
-                            console.warn("No se encontraron suficientes botones. Se encontraron:", buttons.length);
                         }
                     }, 250); // Reducido de 500ms a 250ms
                 }, 500); // Reducido de 1000ms a 500ms
@@ -4003,16 +3743,10 @@
             dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
             loader.setDRACOLoader(dracoLoader);
             
-            // Log versions for debugging
-            console.log("THREE.js version:", THREE.REVISION);
-            // Use a more reliable way to check GLTFLoader version
-            console.log("GLTFLoader version:", "r132 (matched with THREE.js)");
-            
             // Use Cloudflare R2 directly for model loading
             const primaryModelUrl = 'https://corsproxy.io/?https://pub-3eee7465d9374f15a9c4a6192489c0b1.r2.dev/modelo3d.glb';
             const fallbackModelUrl = 'https://proxy.cors.sh/https://pub-3eee7465d9374f15a9c4a6192489c0b1.r2.dev/modelo3d.glb';
             
-            console.log('🔧 DEBUG: Using Cloudflare R2 URLs - Primary:', primaryModelUrl, 'Fallback:', fallbackModelUrl);
             // Model loading initiated
             
             
@@ -4022,7 +3756,6 @@
                     url,
                     // Success callback
                     function(gltf) {
-                        console.log("3D model loaded successfully");
                         
                         // Process the loaded model
                         model = gltf.scene;
@@ -4072,19 +3805,15 @@
                                         // Store original texture URL if it's a blob
                                         if (material.map.image && material.map.image.src &&
                                             material.map.image.src.startsWith('blob:')) {
-                                            console.log(`Material using Blob texture: ${material.map.image.src}`);
                                             // Store the URL for debugging
                                             material._blobTextureUrl = material.map.image.src;
                                         }
                                         
                                         // Add enhanced error handling for texture loading
                                         material.map.onError = function(err) {
-                                            console.warn("Error loading texture:", err);
-                                            console.log("Material with error:", material.name || "unnamed");
                                             
                                             // Log texture details if available
                                             if (material.map.image) {
-                                                console.log("Texture image source:", material.map.image.src);
                                             }
                                             
                                             // Check if this is a floor element by position or name
@@ -4097,7 +3826,6 @@
                                                 ));
                                             
                                             // Create a fallback texture
-                                            console.log("Creating fallback texture");
                                             const fallbackTexture = new THREE.Texture();
                                             fallbackTexture.image = new Image(1, 1);
                                             fallbackTexture.image.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=';
@@ -4109,7 +3837,6 @@
                                             
                                             // For floor elements, also apply a special material
                                             if (isFloor) {
-                                                console.log("Aplicando material alternativo al piso:", node.name);
                                                 
                                                 // Create alternative floor material
                                                 const floorMaterial = new THREE.MeshStandardMaterial({
@@ -4184,11 +3911,9 @@
                     },
                     // Error callback
                     function(error) {
-                        console.error(`Error cargando desde ${url}:`, error);
                         
                         if (!isFallback) {
                             // If first attempt fails, try alternative filename
-                            console.log("Intentando con nombre alternativo:", fallbackModelUrl);
                             tryLoadModel(fallbackModelUrl, true);
                         } else {
                             // If both attempts fail, show error
@@ -4203,7 +3928,6 @@
         }
         
         function showError(message) {
-            console.error("ERROR:", message);
             
             // Crear un elemento de error si no existe
             let errorDiv = document.getElementById('error-message');
@@ -4339,7 +4063,6 @@
                 textGroup.position.set(-4.65, -11.8, 9.11);
                 
                 // Asegurarse de que la posición sea exactamente la especificada
-                console.log("Posición del texto:", textGroup.position.x, textGroup.position.y, textGroup.position.z);
                 
                 // Rotar para que esté acostado (horizontal en el suelo) con una inclinación mayor
                 // Ajustar la rotación en X para crear una inclinación desde el nombre hacia los roles
@@ -4355,7 +4078,6 @@
                 // Añadir el grupo de texto a la escena
                 scene.add(textGroup);
                 
-                console.log("Texto 3D añadido a la escena");
             });
         }
         
@@ -4367,7 +4089,6 @@
             // Actualizar también el tamaño del CSS3DRenderer
             if (css3dRenderer) {
                 css3dRenderer.setSize(window.innerWidth, window.innerHeight);
-                console.log("CSS3DRenderer redimensionado");
             }
         }
         
@@ -4464,11 +4185,6 @@
             camera.position.copy(absoluteStartPos);
             controls.target.copy(absoluteTargetPos);
             
-            console.log("Iniciando animación de cámara con trayectoria circular");
-            console.log("Posición inicial:", absoluteStartPos);
-            console.log("Posición final:", absoluteEndPos);
-            console.log("Objetivo:", absoluteTargetPos);
-            console.log("Puntos de trayectoria:", cameraAnimation.waypoints.length);
         }
         
         // Función para iniciar la animación de la cámara hacia un punto específico cuando se hace clic en el botón
@@ -4492,7 +4208,6 @@
             
             // Marcar que el botón de cafe-menu ha sido clickeado
             cafeMenuButtonClicked = true;
-            console.log("Botón de cafe-menu clickeado - Cover negro se quitará cuando se active la pantalla");
             
             // NOTIFICAR A CONTACT.HTML QUE OTRO BOTÓN FUE PRESIONADO
             sendMessageToContact('turnOffScreen');
@@ -4503,7 +4218,6 @@
             // NOTIFICAR A COMMUNITY.HTML QUE OTRO BOTÓN FUE PRESIONADO
             sendMessageToCommunity('turnOffScreen');
             communityButtonClicked = false;
-            console.log("🔄 Desactivando community desde cafe-menu button");
             
             // ENVIAR MENSAJE ESPECÍFICO DE BOTÓN PRESIONADO AL CAFE-MENU
             setTimeout(function() {
@@ -4512,7 +4226,6 @@
                         action: 'buttonPressed',
                         button: 'services'
                     }, '*');
-                    console.log("📤 Mensaje 'buttonPressed: services' enviado a cafe-menu.html");
                 }
             }, 100);
             
@@ -4526,7 +4239,6 @@
                 
                 // Actualizar el estado de la pantalla
                 window.screenOn = true;
-                console.log("Pantalla encendida - Estado actualizado");
             }
             
             // Mostrar el iframe (encender la pantalla)
@@ -4534,7 +4246,6 @@
             iframes.forEach(iframe => {
                 iframe.style.display = 'block';
             });
-            console.log("Pantalla encendida - Mostrando menú de cafés");
             
             // Configurar la animación
             cameraAnimation.enabled = true;
@@ -4571,10 +4282,6 @@
             const coordDisplay = document.getElementById('coordinates-display');
             coordDisplay.style.display = 'none';
             
-            console.log("Iniciando animación de cámara hacia el punto específico");
-            console.log("Posición inicial:", currentCameraPos);
-            console.log("Posición final:", absoluteTargetPos);
-            console.log("Mirando hacia:", lookAtPoint);
         }
         
         // Función para iniciar la animación de la cámara hacia un punto específico cuando se hace clic en el primer botón
@@ -4597,7 +4304,6 @@
             
             // Marcar que el botón de about-me ha sido clickeado
             aboutMeButtonClicked = true;
-            console.log("Botón de about-me clickeado - Cover negro se quitará cuando se active la pantalla");
             
             // NOTIFICAR A CONTACT.HTML QUE OTRO BOTÓN FUE PRESIONADO
             sendMessageToContact('turnOffScreen');
@@ -4611,10 +4317,8 @@
             // NOTIFICAR A COMMUNITY.HTML QUE OTRO BOTÓN FUE PRESIONADO
             sendMessageToCommunity('turnOffScreen');
             communityButtonClicked = false;
-            console.log("🔄 Desactivando community desde about-me button");
             
             // Activar la pantalla personal (about-me.html)
-            console.log("Enviando mensaje para activar pantalla de about-me desde startFirstButtonCameraAnimation");
             
             // Cambiar el color del plano negro de about-me a transparente (encender la pantalla)
             // Solo si el botón ha sido clickeado (que ya se marcó arriba)
@@ -4622,7 +4326,6 @@
                 window.aboutMeScreenMaterial.transparent = true;
                 window.aboutMeScreenMaterial.opacity = 0.0; // Hacer transparente
                 window.aboutMeScreenMaterial.needsUpdate = true;
-                console.log("Plano negro de about-me hecho transparente - Pantalla encendida");
             }
             
             // Asegurar que el contenido HTML sea visible si estamos viendo desde el frente
@@ -4677,10 +4380,6 @@
             const coordDisplay = document.getElementById('coordinates-display');
             coordDisplay.style.display = 'none';
             
-            console.log("Iniciando animación de cámara hacia el punto específico para el primer botón");
-            console.log("Posición inicial:", currentCameraPos);
-            console.log("Posición final:", absoluteTargetPos);
-            console.log("Mirando hacia:", lookAtPoint);
         }
         
         // Función para iniciar la animación de la cámara hacia el punto específico cuando se hace clic en el botón de projects (carpetas)
@@ -4704,7 +4403,6 @@
             
             // Marcar que el botón de projects ha sido clickeado
             projectsButtonClicked = true;
-            console.log("Botón de projects clickeado - Cover negro se quitará cuando se active la pantalla");
             
             // NOTIFICAR A CONTACT.HTML QUE OTRO BOTÓN FUE PRESIONADO
             sendMessageToContact('turnOffScreen');
@@ -4718,7 +4416,6 @@
             // NOTIFICAR A COMMUNITY.HTML QUE OTRO BOTÓN FUE PRESIONADO
             sendMessageToCommunity('turnOffScreen');
             communityButtonClicked = false;
-            console.log("🔄 Desactivando community desde projects button");
             
             // ENVIAR MENSAJE ESPECÍFICO DE BOTÓN PRESIONADO AL PROJECTS
             setTimeout(function() {
@@ -4727,12 +4424,10 @@
                         action: 'buttonPressed',
                         button: 'projects'
                     }, '*');
-                    console.log("📤 Mensaje 'buttonPressed: projects' enviado a projects.html");
                 }
             }, 100);
             
             // Activar la pantalla de projects
-            console.log("Enviando mensaje para activar pantalla de projects desde startProjectsButtonCameraAnimation");
             
             // Cambiar el color del plano negro de projects a transparente (encender la pantalla)
             // Solo si el botón ha sido clickeado (que ya se marcó arriba)
@@ -4740,19 +4435,16 @@
                 window.aboutMe2ScreenMaterial.transparent = true;
                 window.aboutMe2ScreenMaterial.opacity = 0.0;
                 window.aboutMe2ScreenMaterial.needsUpdate = true;
-                console.log("Cover negro de projects hecho transparente inmediatamente por clic del botón");
             }
             
             // Mostrar el contenido HTML si está visible desde el frente
             if (projectsButtonClicked && window.aboutMe2CssObject && window.aboutMe2CssObject.element && isAboutMe2PlaneVisibleFromFront()) {
                 window.aboutMe2CssObject.element.style.visibility = 'visible';
                 window.aboutMe2CssObject.element.style.pointerEvents = 'auto';
-                console.log("Contenido HTML de projects activado por clic del botón");
             }
             
             // Enviar mensaje para activar la pantalla después de un pequeño retraso
             setTimeout(function() {
-                console.log("Enviando mensaje para activar pantalla de projects");
                 sendMessageToProjects('turnOnScreen');
                 
                 // Intentar de nuevo después de un breve retraso por si acaso
@@ -4800,10 +4492,6 @@
             const coordDisplay = document.getElementById('coordinates-display');
             coordDisplay.style.display = 'none';
             
-            console.log("Iniciando animación de cámara hacia el punto específico para el botón de projects");
-            console.log("Posición inicial:", currentCameraPos);
-            console.log("Posición final:", absoluteTargetPos);
-            console.log("Mirando hacia:", lookAtPoint);
         }
         
         // Función para iniciar la animación de la cámara hacia el punto específico cuando se hace clic en el botón de mensajes (tercer botón)
@@ -4827,7 +4515,6 @@
             
             // Marcar que el botón de contacto ha sido clickeado - ESTO ES LO QUE FALTABA
             contactButtonClicked = true;
-            console.log("Botón de contacto activado - Cover negro se quitará cuando se active la pantalla");
             
             // NOTIFICAR A PROJECTS.HTML QUE OTRO BOTÓN FUE PRESIONADO
             sendMessageToProjects('turnOffScreen');
@@ -4838,7 +4525,6 @@
             // NOTIFICAR A COMMUNITY.HTML QUE OTRO BOTÓN FUE PRESIONADO
             sendMessageToCommunity('turnOffScreen');
             communityButtonClicked = false;
-            console.log("🔄 Desactivando community desde messages button");
             
             // ENVIAR MENSAJE ESPECÍFICO DE BOTÓN PRESIONADO AL CONTACT
             setTimeout(function() {
@@ -4847,7 +4533,6 @@
                         action: 'buttonPressed',
                         button: 'contact'
                     }, '*');
-                    console.log("📤 Mensaje 'buttonPressed: contact' enviado a contact.html");
                 }
             }, 100);
             
@@ -4889,10 +4574,6 @@
             const coordDisplay = document.getElementById('coordinates-display');
             coordDisplay.style.display = 'none';
             
-            console.log("Iniciando animación de cámara hacia el punto específico para el botón de mensajes");
-            console.log("Posición inicial:", currentCameraPos);
-            console.log("Posición final:", absoluteTargetPos);
-            console.log("Mirando hacia:", lookAtPoint);
         }
         
         // Función para iniciar la animación de la cámara hacia el punto específico cuando se hace clic en el cuarto botón (iconClientes)
@@ -4916,7 +4597,6 @@
             
             // ACTIVAR COMMUNITY SCREEN CUANDO SE HACE CLIC EN EL CUARTO BOTÓN
             communityButtonClicked = true;
-            console.log("Community activado - Cover negro se quitará cuando se active la pantalla");
             
             // DESACTIVAR BOX.HTML CUANDO SE CLICK OTRO BOTÓN
             aboutMeDuplicateButtonClicked = false;
@@ -4966,10 +4646,6 @@
             const coordDisplay = document.getElementById('coordinates-display');
             coordDisplay.style.display = 'none';
             
-            console.log("Iniciando animación de cámara hacia el punto específico para el cuarto botón");
-            console.log("Posición inicial:", currentCameraPos);
-            console.log("Posición final:", absoluteTargetPos);
-            console.log("Mirando hacia:", lookAtPoint);
         }
         
         // ===============================================
@@ -4994,10 +4670,8 @@
             
             // Marcar que el botón de about-me2 ha sido clickeado
             aboutMe2ButtonClicked = true;
-            console.log("Segundo about-me activado - Cover negro se quitará cuando se active la pantalla");
             
             // Activar la segunda pantalla personal (about-me2.html)
-            console.log("Enviando mensaje para activar segunda pantalla de about-me desde startSecondAboutMeCameraAnimation");
             
             // Cambiar el color del plano negro de about-me2 a transparente (encender la pantalla)
             // Solo si el botón ha sido clickeado (que ya se marcó arriba)
@@ -5005,7 +4679,6 @@
                 window.aboutMe2ScreenMaterial.transparent = true;
                 window.aboutMe2ScreenMaterial.opacity = 0.0; // Hacer transparente
                 window.aboutMe2ScreenMaterial.needsUpdate = true;
-                console.log("Plano negro de about-me2 hecho transparente - Segunda pantalla encendida");
             }
             
             // Asegurar que el contenido HTML sea visible si estamos viendo desde el frente
@@ -5060,10 +4733,6 @@
             const coordDisplay = document.getElementById('coordinates-display');
             coordDisplay.style.display = 'none';
             
-            console.log("Iniciando animación de cámara hacia el segundo plano about-me");
-            console.log("Posición inicial:", currentCameraPos);
-            console.log("Posición final:", absoluteTargetPos);
-            console.log("Mirando hacia:", lookAtPoint);
         }
         
         // ===============================================
@@ -5072,7 +4741,6 @@
         
         // Nueva función para regresar a la posición inicial
         function returnToInitialPosition() {
-            console.log("Iniciando animación de regreso al punto inicial");
             
             // Coordenadas iniciales del sistema de coordenadas
             // Cámara: X: -23.15, Y: 22.89, Z: 66.07
@@ -5087,9 +4755,6 @@
             // Posición actual de la cámara
             const currentCameraPos = new THREE.Vector3().copy(camera.position);
             
-            console.log("Regresando a posición inicial:");
-            console.log("Posición de cámara objetivo:", initialCameraPos);
-            console.log("Punto de mira objetivo:", initialLookAtPos);
             
             // Configurar la animación
             cameraAnimation.enabled = true;
@@ -5128,13 +4793,9 @@
                 coordDisplay.style.display = 'none';
             }
             
-            console.log("Animación de regreso al punto inicial configurada");
         }
 
         function startCustomCameraAnimation(targetPos, lookAtPos) {
-            console.log("Iniciando animación de cámara personalizada");
-            console.log("Coordenadas objetivo:", targetPos);
-            console.log("Punto objetivo:", lookAtPos);
             
             // Convertir coordenadas relativas a absolutas (sumando el offset)
             const absoluteTargetPos = new THREE.Vector3().copy(targetPos).add(originOffset);
@@ -5183,10 +4844,6 @@
                 coordDisplay.style.display = 'none';
             }
             
-            console.log("Animación de cámara personalizada configurada");
-            console.log("Posición inicial:", currentCameraPos);
-            console.log("Posición final:", absoluteTargetPos);
-            console.log("Mirando hacia:", absoluteLookAtPos);
         }
         
         function animate() {
@@ -5244,12 +4901,10 @@
                             // NUEVO: Marcar que acaba de terminar una animación
                             animationJustFinished = true;
                             animationFinishTime = Date.now();
-                            console.log("🎯 Animación terminada - período de gracia activado");
                             
                             // Reset del flag después del período de gracia
                             setTimeout(() => {
                                 animationJustFinished = false;
-                                console.log("🎯 Período de gracia terminado - detección de movimiento reactivada");
                             }, postAnimationGracePeriod);
                             
                             // Asegurarse de que la cámara esté exactamente en la posición objetivo
@@ -5268,10 +4923,8 @@
                             
                             // Calcular las coordenadas relativas para verificar
                             const adjustedCamPos = new THREE.Vector3().copy(camera.position).sub(originOffset);
-                            console.log("Animación de cámara completada");
                             console.log("Posición final de la cámara (absoluta):", camera.position);
                             console.log("Posición final de la cámara (relativa):", adjustedCamPos);
-                            console.log("Controles restaurados:", controls.enabled);
                         }
                     } else {
                         // Actualizar controles solo cuando no hay animación
@@ -5362,19 +5015,16 @@
                 css3dRenderer.domElement.style.top = '0';
                 css3dRenderer.domElement.style.pointerEvents = 'none'; // Evitar que interfiera con los controles
                 document.body.appendChild(css3dRenderer.domElement);
-                console.log("CSS3D Renderer creado");
             }
             
             // Crear escena CSS3D si no existe
             if (!css3dScene) {
                 css3dScene = new THREE.Scene();
-                console.log("CSS3D Scene creada");
             } else {
                 // Limpiar escena CSS3D si existe
                 while(css3dScene.children.length > 0) {
                     css3dScene.remove(css3dScene.children[0]);
                 }
-                console.log("CSS3D Scene limpiada");
             }
             
             // Eliminar el plano anterior
@@ -5417,7 +5067,6 @@
                 'assets/media/icons/coffeDisplayBackground.jpg',
                 // Callback de éxito
                 function(texture) {
-                    console.log("Textura cargada correctamente:", texture);
                     
                     // Crear un material blanco sólido en lugar de usar la textura
                     const bigBlockerMaterial = new THREE.MeshBasicMaterial({
@@ -5433,7 +5082,6 @@
                     if (screenPlane) {
                         screenPlane.material = bigBlockerMaterial;
                         screenPlane.material.needsUpdate = true;
-                        console.log("Material del plano actualizado con la textura");
                     }
                 },
                 // Callback de progreso
@@ -5442,7 +5090,6 @@
                 },
                 // Callback de error
                 function(error) {
-                    console.error("Error al cargar la textura:", error);
                     
                     // En caso de error, usar un color blanco sólido
                     const fallbackMaterial = new THREE.MeshBasicMaterial({
@@ -5458,7 +5105,6 @@
                     if (screenPlane) {
                         screenPlane.material = fallbackMaterial;
                         screenPlane.material.needsUpdate = true;
-                        console.log("Material del plano actualizado con color de fallback");
                     }
                 }
             );
@@ -5523,7 +5169,6 @@
             
             // Añadir el plano trasero a la escena (mantener el plano blanco de fondo)
             scene.add(backPlane);
-            console.log("Plano trasero añadido a la escena:", backPlane);
             
             // Crear un iframe para cargar el HTML del menú de cafés
             const iframe = document.createElement('iframe');
@@ -5560,7 +5205,6 @@
             
             // Añadir el objeto CSS3D a la escena CSS3D
             css3dScene.add(cssObject);
-            console.log("Objeto CSS3D añadido a la escena");
             
             // Crear elementos para la pantalla interactiva
             function createScreenHTML() {
@@ -5792,7 +5436,6 @@
                 }
                 
                 // Ahora estamos usando un iframe para cargar el HTML desde un archivo externo
-                console.log("Usando iframe para cargar el menú de cafés desde cafe-menu.html");
             }
             
         // La función setupPersonalInfoScreen y su llamada han sido eliminadas
@@ -5807,13 +5450,11 @@
                     // Crear una escena CSS3D para el plano café si no existe
                     if (!window.aboutMeScene) {
                         window.aboutMeScene = new THREE.Scene();
-                        console.log("CSS3D Scene para About Me creada");
                     } else {
                         // Limpiar escena CSS3D si existe
                         while(window.aboutMeScene.children.length > 0) {
                             window.aboutMeScene.remove(window.aboutMeScene.children[0]);
                         }
-                        console.log("CSS3D Scene para About Me limpiada");
                     }
                     
                     // COORDENADAS EXACTAS proporcionadas por el usuario
@@ -5828,11 +5469,6 @@
                     const absoluteBottomLeft = new THREE.Vector3().copy(bottomLeft).add(originOffset);
                     const absoluteBottomRight = new THREE.Vector3().copy(bottomRight).add(originOffset);
                     
-                    console.log("Coordenadas absolutas:");
-                    console.log("Top Left:", absoluteTopLeft);
-                    console.log("Top Right:", absoluteTopRight);
-                    console.log("Bottom Left:", absoluteBottomLeft);
-                    console.log("Bottom Right:", absoluteBottomRight);
                     
                     // Calcular el centro del plano
                     const center = new THREE.Vector3()
@@ -5858,7 +5494,6 @@
                     const width = absoluteTopLeft.distanceTo(absoluteTopRight);
                     const height = absoluteTopLeft.distanceTo(absoluteBottomLeft);
                     
-                    console.log("Dimensiones del plano:", width, height);
                     
                     // Crear un objeto invisible para raycasting
                     const invisiblePlane = new THREE.Mesh(
@@ -5917,10 +5552,8 @@
                     
                     // Añadir el plano negro a la escena
                     scene.add(aboutMeBackPlane);
-                    console.log("Plano negro de fondo para about-me añadido a la escena:", aboutMeBackPlane);
                     
                     // Forzar que el cover negro sea visible inicialmente
-                    console.log("Forzando cover negro inicial visible");
                     
                     // Crear un iframe con el tamaño original
                     const iframe = document.createElement('iframe');
@@ -5949,7 +5582,6 @@
                     // Aumentar la escala vertical en un 1.1% adicional para cubrir los huecos
                     const verticalScaleAdjustment = 1.011; // Reducido de 1.015 a 1.011 (quitando un 0.4% adicional)
                     
-                    console.log("Factores de escala:", scaleX, scaleY);
                     
                     // Aplicar la escala calculada con el ajuste vertical
                     cssObject.scale.set(scaleX, scaleY * verticalScaleAdjustment, 1);
@@ -5966,15 +5598,10 @@
                     // Ajustar la posición vertical para centrar el contenido extendido
                     cssObject.position.y -= 0.003; // Ajuste mínimo para compensar la menor extensión vertical
             
-            console.log("Posición final del CSS3D:", cssObject.position);
-            console.log("Rotación final del CSS3D:", cssObject.rotation);
             
-            console.log("Posición del objeto CSS3D:", cssObject.position);
-            console.log("Rotación del objeto CSS3D:", cssObject.rotation);
             
             // Añadir el objeto CSS3D a la escena CSS3D
             window.aboutMeScene.add(cssObject);
-            console.log("Objeto CSS3D para About Me añadido a la escena");
             
             // Guardar referencia al objeto CSS3D para control de visibilidad
             window.aboutMeCssObject = cssObject;
@@ -5982,9 +5609,6 @@
             // Configurar evento de clic para el plano
             brownPlane.userData.clickable = true;
             
-            console.log("Plano café interactivo creado con las coordenadas especificadas");
-            console.log("Posición del plano:", center);
-            console.log("Rotación del plano:", rotation);
             
             return invisiblePlane;
         }
@@ -5994,13 +5618,11 @@
             // Crear una escena CSS3D separada para el plano duplicado si no existe
             if (!window.aboutMeDuplicateScene) {
                 window.aboutMeDuplicateScene = new THREE.Scene();
-                console.log("CSS3D Scene para About Me Duplicado creada");
             } else {
                 // Limpiar escena CSS3D si existe
                 while(window.aboutMeDuplicateScene.children.length > 0) {
                     window.aboutMeDuplicateScene.remove(window.aboutMeDuplicateScene.children[0]);
                 }
-                console.log("CSS3D Scene para About Me Duplicado limpiada");
             }
             
             // COORDENADAS EXACTAS ESPECIFICADAS PARA EL DUPLICADO
@@ -6015,11 +5637,6 @@
             const absoluteBottomLeft = new THREE.Vector3().copy(bottomLeft).add(originOffset);
             const absoluteBottomRight = new THREE.Vector3().copy(bottomRight).add(originOffset);
             
-            console.log("Coordenadas absolutas del duplicado:");
-            console.log("Top Left:", absoluteTopLeft);
-            console.log("Top Right:", absoluteTopRight);
-            console.log("Bottom Left:", absoluteBottomLeft);
-            console.log("Bottom Right:", absoluteBottomRight);
             
             // Calcular el centro del plano duplicado
             const center = new THREE.Vector3()
@@ -6045,7 +5662,6 @@
             const width = absoluteTopLeft.distanceTo(absoluteTopRight);
             const height = absoluteTopLeft.distanceTo(absoluteBottomLeft);
             
-            console.log("Dimensiones del plano duplicado:", width, height);
             
             // Crear un objeto invisible para raycasting del duplicado
             const invisiblePlaneDuplicate = new THREE.Mesh(
@@ -6102,7 +5718,6 @@
             
             // Añadir el plano negro duplicado a la escena
             scene.add(aboutMeDuplicateBackPlane);
-            console.log("Plano negro de fondo para about-me duplicado añadido a la escena:", aboutMeDuplicateBackPlane);
             
             // Crear un iframe duplicado
             const iframeDuplicate = document.createElement('iframe');
@@ -6129,7 +5744,6 @@
             const scaleY = height / 606;
             const verticalScaleAdjustment = 1.011;
             
-            console.log("Factores de escala del duplicado:", scaleX, scaleY);
             
             // Aplicar la escala calculada
             cssObjectDuplicate.scale.set(scaleX, scaleY * verticalScaleAdjustment, 1);
@@ -6140,12 +5754,9 @@
             cssObjectDuplicate.position.z += 0.001;
             cssObjectDuplicate.position.y -= 0.003;
             
-            console.log("Posición final del CSS3D duplicado:", cssObjectDuplicate.position);
-            console.log("Rotación final del CSS3D duplicado:", cssObjectDuplicate.rotation);
             
             // Añadir el objeto CSS3D duplicado a la escena CSS3D
             window.aboutMeDuplicateScene.add(cssObjectDuplicate);
-            console.log("Objeto CSS3D para About Me Duplicado añadido a la escena");
             
             // Guardar referencia al objeto CSS3D duplicado
             window.aboutMeDuplicateCssObject = cssObjectDuplicate;
@@ -6153,9 +5764,6 @@
             // Configurar evento de clic para el plano duplicado
             invisiblePlaneDuplicate.userData.clickable = true;
             
-            console.log("Plano About Me duplicado creado con las coordenadas especificadas");
-            console.log("Posición del plano duplicado:", center);
-            console.log("Rotación del plano duplicado:", rotation);
             
             return invisiblePlaneDuplicate;
         }
@@ -6170,7 +5778,6 @@
                 css3dRenderer.domElement.style.top = '0';
                 css3dRenderer.domElement.style.pointerEvents = 'none'; // Evitar que interfiera con los controles
                 document.body.appendChild(css3dRenderer.domElement);
-                console.log("CSS3D Renderer creado para el plano café");
             }
             
             // Configurar el plano invisible para la pantalla interactiva
@@ -6238,7 +5845,6 @@
                 const intersects = raycaster.intersectObject(invisiblePlane);
                 
                 if (intersects.length > 0) {
-                    console.log("Click on the HTML content plane");
                     // You can add more interactivity here if desired
                 }
                 
@@ -6246,7 +5852,6 @@
                 const duplicateIntersects = raycaster.intersectObject(invisiblePlaneDuplicate);
                 
                 if (duplicateIntersects.length > 0) {
-                    console.log("Click on the duplicate HTML content plane");
                     // You can add more interactivity here if desired
                 }
             });
@@ -6261,13 +5866,11 @@
                     // Crear una escena CSS3D para el segundo plano café si no existe
                     if (!window.aboutMe2Scene) {
                         window.aboutMe2Scene = new THREE.Scene();
-                        console.log("CSS3D Scene para About Me 2 creada");
                     } else {
                         // Limpiar escena CSS3D si existe
                         while(window.aboutMe2Scene.children.length > 0) {
                             window.aboutMe2Scene.remove(window.aboutMe2Scene.children[0]);
                         }
-                        console.log("CSS3D Scene para About Me 2 limpiada");
                     }
                     
                     // COORDENADAS EXACTAS proporcionadas por el usuario para el segundo plano
@@ -6282,11 +5885,6 @@
                     const absoluteBottomLeft = new THREE.Vector3().copy(bottomLeft).add(originOffset);
                     const absoluteBottomRight = new THREE.Vector3().copy(bottomRight).add(originOffset);
                     
-                    console.log("Coordenadas absolutas para About Me 2:");
-                    console.log("Top Left:", absoluteTopLeft);
-                    console.log("Top Right:", absoluteTopRight);
-                    console.log("Bottom Left:", absoluteBottomLeft);
-                    console.log("Bottom Right:", absoluteBottomRight);
                     
                     // Calcular el centro del plano
                     const center = new THREE.Vector3()
@@ -6312,7 +5910,6 @@
                     const width = absoluteTopLeft.distanceTo(absoluteTopRight);
                     const height = absoluteTopLeft.distanceTo(absoluteBottomLeft);
                     
-                    console.log("Dimensiones del segundo plano:", width, height);
                     
                     // Crear un objeto invisible para raycasting
                     const invisiblePlane = new THREE.Mesh(
@@ -6371,10 +5968,8 @@
                     
                     // Añadir el plano negro a la escena
                     scene.add(aboutMe2BackPlane);
-                    console.log("Plano negro de fondo para about-me2 añadido a la escena:", aboutMe2BackPlane);
                     
                     // Forzar que el cover negro sea visible inicialmente
-                    console.log("Forzando cover negro inicial visible para about-me2");
                     
                     // Crear un iframe con el tamaño original
                     const iframe = document.createElement('iframe');
@@ -6405,7 +6000,6 @@
                     // Aumentar la escala vertical en un 1.1% adicional para cubrir los huecos
                     const verticalScaleAdjustment = 1.011; // Reducido de 1.015 a 1.011 (quitando un 0.4% adicional)
                     
-                    console.log("Factores de escala para about-me2:", scaleX, scaleY);
                     
                     // Aplicar la escala calculada con el ajuste vertical
                     cssObject.scale.set(scaleX, scaleY * verticalScaleAdjustment, 1);
@@ -6424,15 +6018,10 @@
                     // Ajustar la posición vertical para centrar el contenido extendido
                     cssObject.position.y -= 0.003; // Ajuste mínimo para compensar la menor extensión vertical
             
-            console.log("Posición final del CSS3D para about-me2:", cssObject.position);
-            console.log("Rotación final del CSS3D para about-me2:", cssObject.rotation);
             
-            console.log("Posición del objeto CSS3D para about-me2:", cssObject.position);
-            console.log("Rotación del objeto CSS3D para about-me2:", cssObject.rotation);
             
             // Añadir el objeto CSS3D a la escena CSS3D del segundo plano
             window.aboutMe2Scene.add(cssObject);
-            console.log("Objeto CSS3D para About Me 2 añadido a la escena");
             
             // Guardar referencia al objeto CSS3D para control de visibilidad
             window.aboutMe2CssObject = cssObject;
@@ -6440,9 +6029,6 @@
             // Configurar evento de clic para el plano
             invisiblePlane.userData.clickable = true;
             
-            console.log("Segundo plano café interactivo creado con las coordenadas especificadas");
-            console.log("Posición del segundo plano:", center);
-            console.log("Rotación del segundo plano:", rotation);
             
             return invisiblePlane;
         }
@@ -6457,7 +6043,6 @@
                 css3dRenderer.domElement.style.top = '0';
                 css3dRenderer.domElement.style.pointerEvents = 'none'; // Evitar que interfiera con los controles
                 document.body.appendChild(css3dRenderer.domElement);
-                console.log("CSS3D Renderer creado para el segundo plano café");
             }
             
             // Configurar el plano invisible para la pantalla interactiva
@@ -6471,7 +6056,6 @@
                     window.aboutMe2ScreenMaterial.opacity = 1.0;
                     window.aboutMe2ScreenMaterial.needsUpdate = true;
                     window.aboutMe2BackPlane.visible = true;
-                    console.log("Cover negro inicializado como visible para about-me2 - primer intento");
                 }
             }, 100);
             
@@ -6483,7 +6067,6 @@
                     window.aboutMe2ScreenMaterial.opacity = 1.0;
                     window.aboutMe2ScreenMaterial.needsUpdate = true;
                     window.aboutMe2BackPlane.visible = true;
-                    console.log("Cover negro inicializado como visible para about-me2 - segundo intento");
                 }
             }, 500);
             
@@ -6517,13 +6100,11 @@
                     // Crear una escena CSS3D para el plano de projects si no existe
                     if (!window.projectsScene) {
                         window.projectsScene = new THREE.Scene();
-                        console.log("CSS3D Scene para Projects creada");
                     } else {
                         // Limpiar escena CSS3D si existe
                         while(window.projectsScene.children.length > 0) {
                             window.projectsScene.remove(window.projectsScene.children[0]);
                         }
-                        console.log("CSS3D Scene para Projects limpiada");
                     }
                     
                     // COORDENADAS PARA EL PLANO DE PROJECTS (CORREGIDO - agrandando correctamente)
@@ -6538,11 +6119,6 @@
                     const absoluteBottomLeft = new THREE.Vector3().copy(bottomLeft).add(originOffset);
                     const absoluteBottomRight = new THREE.Vector3().copy(bottomRight).add(originOffset);
                     
-                    console.log("Coordenadas absolutas para Projects:");
-                    console.log("Top Left:", absoluteTopLeft);
-                    console.log("Top Right:", absoluteTopRight);
-                    console.log("Bottom Left:", absoluteBottomLeft);
-                    console.log("Bottom Right:", absoluteBottomRight);
                     
                     // Calcular el centro del plano
                     const center = new THREE.Vector3()
@@ -6568,7 +6144,6 @@
                     const width = absoluteTopLeft.distanceTo(absoluteTopRight);
                     const height = absoluteTopLeft.distanceTo(absoluteBottomLeft);
                     
-                    console.log("Dimensiones del plano de projects:", width, height);
                     
                     // Crear un objeto invisible para raycasting
                     const invisiblePlane = new THREE.Mesh(
@@ -6623,10 +6198,8 @@
                     
                     // Añadir el plano negro a la escena
                     scene.add(projectsBackPlane);
-                    console.log("Plano negro de fondo para projects añadido a la escena:", projectsBackPlane);
                     
                     // Forzar que el cover negro sea visible inicialmente
-                    console.log("Forzando cover negro inicial visible para projects");
                     
                     // Crear un iframe con el tamaño original
                     const iframe = document.createElement('iframe');
@@ -6657,7 +6230,6 @@
                     // Aumentar la escala vertical en un 1.1% adicional para cubrir los huecos
                     const verticalScaleAdjustment = 1.011;
                     
-                    console.log("Factores de escala para projects:", scaleX, scaleY);
                     
                     // Aplicar la escala calculada con el ajuste vertical
                     cssObject.scale.set(scaleX, scaleY * verticalScaleAdjustment, 1);
@@ -6676,12 +6248,9 @@
                     // Ajustar la posición vertical para centrar el contenido extendido
                     cssObject.position.y -= 0.003; // Ajuste mínimo para compensar la menor extensión vertical
             
-            console.log("Posición final del CSS3D para projects:", cssObject.position);
-            console.log("Rotación final del CSS3D para projects:", cssObject.rotation);
             
             // Añadir el objeto CSS3D a la escena CSS3D del plano de projects
             window.projectsScene.add(cssObject);
-            console.log("Objeto CSS3D para Projects añadido a la escena");
             
             // Guardar referencia al objeto CSS3D para control de visibilidad
             window.projectsCssObject = cssObject;
@@ -6689,9 +6258,6 @@
             // Configurar evento de clic para el plano
             invisiblePlane.userData.clickable = true;
             
-            console.log("Plano de projects interactivo creado con las coordenadas especificadas");
-            console.log("Posición del plano de projects:", center);
-            console.log("Rotación del plano de projects:", rotation);
             
             return invisiblePlane;
         }
@@ -6706,7 +6272,6 @@
                 css3dRenderer.domElement.style.top = '0';
                 css3dRenderer.domElement.style.pointerEvents = 'none'; // Evitar que interfiera con los controles
                 document.body.appendChild(css3dRenderer.domElement);
-                console.log("CSS3D Renderer creado para el plano de projects");
             }
             
             // Configurar el plano invisible para la pantalla interactiva
@@ -6720,7 +6285,6 @@
                     window.projectsScreenMaterial.opacity = 1.0;
                     window.projectsScreenMaterial.needsUpdate = true;
                     window.projectsBackPlane.visible = true;
-                    console.log("Cover negro inicializado como visible para projects");
                 }
             }, 100);
             
@@ -6738,7 +6302,6 @@
             
             // Forzar la actualización de la visibilidad inicial después de la configuración
             setTimeout(function() {
-                console.log("Forzando actualización inicial de visibilidad para projects");
                 updateProjectsVisibility();
             }, 1000);
             
@@ -6747,21 +6310,18 @@
         
         // Función para activar la pantalla de projects (buenas prácticas)
         function activateProjectsScreen() {
-            console.log("Activando pantalla de projects...");
             
             // Hacer transparente el cover negro
             if (window.projectsScreenMaterial) {
                 window.projectsScreenMaterial.transparent = true;
                 window.projectsScreenMaterial.opacity = 0.0;
                 window.projectsScreenMaterial.needsUpdate = true;
-                console.log("Cover negro de projects hecho transparente");
             }
             
             // Mostrar contenido HTML si es visible desde el frente
             if (window.projectsCssObject && window.projectsCssObject.element && isProjectsPlaneVisibleFromFront()) {
                 window.projectsCssObject.element.style.visibility = 'visible';
                 window.projectsCssObject.element.style.pointerEvents = 'auto';
-                console.log("Contenido HTML de projects mostrado");
             }
             
             // Enviar mensaje al iframe para encender la pantalla
@@ -6772,7 +6332,6 @@
         
         // Función para desactivar la pantalla de projects (buenas prácticas)
         function deactivateProjectsScreen() {
-            console.log("Desactivando pantalla de projects...");
             
             // Los límites de ángulo ya están siempre activos, no necesitan restaurarse
             
@@ -6783,14 +6342,12 @@
                 window.projectsScreenMaterial.opacity = 1.0;
                 window.projectsScreenMaterial.needsUpdate = true;
                 window.projectsBackPlane.visible = true;
-                console.log("Cover negro de projects restaurado");
             }
             
             // Ocultar contenido HTML
             if (window.projectsCssObject && window.projectsCssObject.element) {
                 window.projectsCssObject.element.style.visibility = 'hidden';
                 window.projectsCssObject.element.style.pointerEvents = 'none';
-                console.log("Contenido HTML de projects oculto");
             }
             
             // Enviar mensaje al iframe para apagar la pantalla
@@ -6812,14 +6369,12 @@
                 window.aboutMeDuplicateScreenMaterial.transparent = true;
                 window.aboutMeDuplicateScreenMaterial.opacity = 0.0;
                 window.aboutMeDuplicateScreenMaterial.needsUpdate = true;
-                console.log("🎯 Cover negro del plano duplicado hecho transparente");
             }
             
             // Mostrar contenido HTML si es visible desde el frente
             if (window.aboutMeDuplicateCssObject && window.aboutMeDuplicateCssObject.element && isAboutMeDuplicatePlaneVisibleFromFront()) {
                 window.aboutMeDuplicateCssObject.element.style.visibility = 'visible';
                 window.aboutMeDuplicateCssObject.element.style.pointerEvents = 'auto';
-                console.log("🎯 Contenido HTML del plano duplicado mostrado");
             }
             
             // Enviar mensaje al iframe para encender la pantalla
@@ -6830,7 +6385,6 @@
         
         // Función para desactivar la pantalla del plano duplicado de about-me
         function deactivateAboutMeDuplicateScreen() {
-            console.log("🎯 Desactivando pantalla del plano duplicado de about-me...");
             
             // Mostrar el cover negro del duplicado
             if (window.aboutMeDuplicateScreenMaterial && window.aboutMeDuplicateBackPlane) {
@@ -6839,14 +6393,12 @@
                 window.aboutMeDuplicateScreenMaterial.opacity = 1.0;
                 window.aboutMeDuplicateScreenMaterial.needsUpdate = true;
                 window.aboutMeDuplicateBackPlane.visible = true;
-                console.log("🎯 Cover negro del plano duplicado restaurado");
             }
             
             // Ocultar contenido HTML del duplicado
             if (window.aboutMeDuplicateCssObject && window.aboutMeDuplicateCssObject.element) {
                 window.aboutMeDuplicateCssObject.element.style.visibility = 'hidden';
                 window.aboutMeDuplicateCssObject.element.style.pointerEvents = 'none';
-                console.log("🎯 Contenido HTML del plano duplicado oculto");
             }
             
             // Enviar mensaje al iframe para apagar la pantalla
@@ -6857,37 +6409,29 @@
         
         // Función para enviar mensajes al iframe del plano duplicado de about-me
         function sendMessageToAboutMeDuplicate(action) {
-            console.log(`🎯 Intentando enviar mensaje a box.html: ${action}`);
-            console.log("Estado del iframe del duplicado: Buscando...");
             
             // Buscar todos los iframes
             const iframes = document.querySelectorAll('iframe');
             
             for (let iframe of iframes) {
                 if (iframe.src && iframe.src.includes('box.html')) {
-                    console.log("🎯 Encontrado iframe de box.html:", iframe);
                     
                     // Verificar si el iframe está completamente cargado
                     if (iframe.contentWindow && iframe.contentDocument && iframe.contentDocument.readyState === 'complete') {
                         try {
                             iframe.contentWindow.postMessage({ action: action }, '*');
-                            console.log(`🎯 Mensaje enviado a box.html: ${action}`);
                             
                             // Actualizar estado local
                             if (action === 'turnOnScreen') {
                                 aboutMeDuplicateScreenOn = true;
-                                console.log("🎯 Pantalla del plano duplicado marcada como ENCENDIDA");
                             } else if (action === 'turnOffScreen') {
                                 aboutMeDuplicateScreenOn = false;
-                                console.log("🎯 Pantalla del plano duplicado marcada como APAGADA");
                             }
                             
                             return; // Salir una vez encontrado y enviado
                         } catch (error) {
-                            console.error("❌ Error enviando mensaje a box.html:", error);
                         }
                     } else {
-                        console.log("🎯 El iframe de box.html no está completamente cargado, esperando...");
                         
                         // Intentar de nuevo después de un breve retraso
                         setTimeout(function() {
@@ -6898,7 +6442,6 @@
                 }
             }
             
-            console.warn("⚠️ No se encontró el iframe de box.html o su contentWindow");
         }
         
         // ===============================================
@@ -6910,13 +6453,11 @@
                     // Crear una escena CSS3D para el plano de contacto si no existe
                     if (!window.contactScene) {
                         window.contactScene = new THREE.Scene();
-                        console.log("CSS3D Scene para Contact creada");
                     } else {
                         // Limpiar escena CSS3D si existe
                         while(window.contactScene.children.length > 0) {
                             window.contactScene.remove(window.contactScene.children[0]);
                         }
-                        console.log("CSS3D Scene para Contact limpiada");
                     }
                     
                     // COORDENADAS EXACTAS proporcionadas por el usuario para el plano de contacto
@@ -6931,11 +6472,6 @@
                     const absoluteBottomLeft = new THREE.Vector3().copy(bottomLeft).add(originOffset);
                     const absoluteBottomRight = new THREE.Vector3().copy(bottomRight).add(originOffset);
                     
-                    console.log("Coordenadas absolutas para Contact:");
-                    console.log("Top Left:", absoluteTopLeft);
-                    console.log("Top Right:", absoluteTopRight);
-                    console.log("Bottom Left:", absoluteBottomLeft);
-                    console.log("Bottom Right:", absoluteBottomRight);
                     
                     // Calcular el centro del plano (método simple como en projects)
                     const center = new THREE.Vector3()
@@ -6948,7 +6484,6 @@
                     // Ajustar posición para el trapecio - mover hacia la derecha
                     center.x -= 0.3; // Mover 0.3 unidades hacia la derecha para cubrir hasta X: -0.53
                     
-                    console.log("Centro ajustado para trapecio:", center);
                     
                     // Calcular vectores para la orientación
                     const vX = new THREE.Vector3().subVectors(absoluteTopRight, absoluteTopLeft).normalize();
@@ -7043,17 +6578,10 @@
                     
                     // Añadir el plano negro a la escena
                     scene.add(contactBackPlane);
-                    console.log("Plano negro de fondo para contact añadido a la escena:", contactBackPlane);
-                    console.log("📏 DIMENSIONES EXACTAS DEL COVER NEGRO:");
                     console.log("  - Ancho (width):", width);
                     console.log("  - Alto (height):", height);
-                    console.log("  - Posición cover negro:", contactBackPlane.position);
-                    console.log("  - Rotación cover negro:", contactBackPlane.rotation);
-                    console.log("  - Escala cover negro:", contactBackPlane.scale);
-                    console.log("📏 PARA COMPARAR CON EL CONTENIDO HTML:");
                     
                     // Forzar que el cover negro sea visible inicialmente
-                    console.log("Forzando cover negro inicial visible para contact");
                     
                     // Crear un iframe con el tamaño estándar (igual que projects)
                     const iframe = document.createElement('iframe');
@@ -7115,17 +6643,9 @@
                     // Ajustar la posición vertical para centrar el contenido extendido
                     cssObject.position.y -= 0.003; // Ajuste mínimo para compensar la menor extensión vertical
             
-            console.log("Posición final del CSS3D para contact:", cssObject.position);
-            console.log("Rotación final del CSS3D para contact:", cssObject.rotation);
-            console.log("📏 CONTENIDO HTML CONFIGURADO:");
-            console.log("  - Iframe tamaño: 800px x 606px");
-            console.log("  - Escala aplicada:", cssObject.scale);
-            console.log("  - Posición final HTML:", cssObject.position);
-            console.log("  - Rotación final HTML:", cssObject.rotation);
             
             // Añadir el objeto CSS3D a la escena CSS3D del plano de contacto
             window.contactScene.add(cssObject);
-            console.log("Objeto CSS3D para Contact añadido a la escena");
             
             // Guardar referencia al objeto CSS3D para control de visibilidad
             window.contactCssObject = cssObject;
@@ -7133,9 +6653,6 @@
             // Configurar evento de clic para el plano
             invisiblePlane.userData.clickable = true;
             
-            console.log("Plano de contacto interactivo creado con las coordenadas especificadas");
-            console.log("Posición del plano de contacto:", center);
-            console.log("Rotación del plano de contacto:", rotation);
             
             return invisiblePlane;
         }
@@ -7150,7 +6667,6 @@
                 css3dRenderer.domElement.style.top = '0';
                 css3dRenderer.domElement.style.pointerEvents = 'none'; // Evitar que interfiera con los controles
                 document.body.appendChild(css3dRenderer.domElement);
-                console.log("CSS3D Renderer creado para el plano de contacto");
             }
             
             // Configurar el plano invisible para la pantalla interactiva
@@ -7164,7 +6680,6 @@
                     window.contactScreenMaterial.opacity = 1.0;
                     window.contactScreenMaterial.needsUpdate = true;
                     window.contactBackPlane.visible = true;
-                    console.log("Cover negro inicializado como visible para contact");
                 }
             }, 100);
             
@@ -7182,7 +6697,6 @@
             
             // INICIALIZACIÓN ADICIONAL - Forzar estado inicial correcto
             setTimeout(function() {
-                console.log("🚀 INICIALIZACIÓN CONTACT: Forzando estado inicial");
                 
                 // 1. Asegurar que las variables de estado estén correctas
                 contactButtonClicked = false;
@@ -7199,23 +6713,19 @@
                     window.contactScreenMaterial.opacity = 1.0;
                     window.contactScreenMaterial.needsUpdate = true;
                     window.contactBackPlane.visible = true;
-                    console.log("✅ Cover negro FORZADO como visible");
                 }
                 
                 // 3. Forzar contenido HTML oculto
                 if (window.contactCssObject && window.contactCssObject.element) {
                     window.contactCssObject.element.style.visibility = 'hidden';
                     window.contactCssObject.element.style.pointerEvents = 'none';
-                    console.log("✅ Contenido HTML FORZADO como oculto");
                 }
             }, 800);
             
             // Forzar la actualización de la visibilidad inicial después de la configuración
             setTimeout(function() {
-                console.log("Forzando actualización inicial de visibilidad para contact");
                 
                 updateContactVisibility();
-                console.log("Forzando actualización inicial de visibilidad para cafe-menu");
                 updateCafeMenuVisibility();
             }, 1000);
             
@@ -7224,7 +6734,6 @@
         
         // Función de verificación periódica para Contact - VERSION MEJORADA
         function verifyContactInitialState() {
-            console.log("🔍 VERIFICANDO ESTADO INICIAL DE CONTACT:");
             
             // Verificar variables de estado
             console.log("Variables:", {
@@ -7253,7 +6762,6 @@
                 });
                 
                 // FORZAR CORRECCIÓN AGRESIVA - SIN CAMBIAR ESCALA
-                console.log("🔧 FORZANDO CONFIGURACIÓN AGRESIVA DEL COVER NEGRO:");
                 window.contactScreenMaterial.color.set(0x000000);
                 window.contactScreenMaterial.transparent = false;
                 window.contactScreenMaterial.opacity = 1.0;
@@ -7266,7 +6774,6 @@
                 window.contactBackPlane.renderOrder = 200; // Aumentar aún más
                 
                 // NO CAMBIAR ESCALA - mantener tamaño exacto del HTML
-                console.log("🔧 Manteniendo escala original del cover negro:", window.contactBackPlane.scale);
                 
                 // TAMBIÉN FORZAR EL PLANO DE RESPALDO
                 if (window.contactBackupCover) {
@@ -7274,10 +6781,8 @@
                     window.contactBackupCover.material.transparent = false;
                     window.contactBackupCover.material.opacity = 1.0;
                     window.contactBackupCover.material.needsUpdate = true;
-                    console.log("🔧 Plano de respaldo también forzado");
                 }
                 
-                console.log("✅ Cover negro configuración forzada completada");
             }
             
             // Verificar estado del contenido HTML
@@ -7292,10 +6797,8 @@
                 
                 // Forzar corrección si es necesario
                 if (visibility !== 'hidden' && !contactButtonClicked) {
-                    console.log("⚠️ CORRECCIÓN: Contenido HTML visible sin botón clickeado, corrigiendo...");
                     window.contactCssObject.element.style.visibility = 'hidden';
                     window.contactCssObject.element.style.pointerEvents = 'none';
-                    console.log("✅ Contenido HTML corregido");
                 }
             }
         }
@@ -7305,7 +6808,6 @@
             verifyContactInitialState();
             
             // NUEVA: Comparar con otros covers que funcionan
-            console.log("🔍 COMPARANDO CON OTROS COVERS:");
             
             if (window.projectsScreenMaterial && window.projectsBackPlane) {
                 console.log("Projects cover (FUNCIONA):", {
@@ -7343,14 +6845,12 @@
                 
                 if (verificationCount >= 2) { // Solo 2 verificaciones = 10 segundos total
                     clearInterval(verificationInterval);
-                    console.log("🏁 Verificaciones periódicas de Contact completadas");
                 }
             }, 2000); // Reducido de 5000ms a 2000ms para mayor rapidez
         }, 3000);
         
         // Función para activar la pantalla de contacto (buenas prácticas)
         function activateContactScreen() {
-            console.log("Activando pantalla de contacto...");
             
             // IMPORTANTE: Marcar la pantalla como encendida
             contactScreenOn = true;
@@ -7381,7 +6881,6 @@
             if (window.contactCssObject && window.contactCssObject.element && isContactPlaneVisibleFromFront()) {
                 window.contactCssObject.element.style.visibility = 'visible';
                 window.contactCssObject.element.style.pointerEvents = 'auto';
-                console.log("Contenido HTML de contact mostrado");
             }
             
             // Enviar mensaje al iframe para encender la pantalla
@@ -7392,7 +6891,6 @@
         
         // Función para desactivar la pantalla de contacto (buenas prácticas)
         function deactivateContactScreen() {
-            console.log("Desactivando pantalla de contacto...");
             
             // IMPORTANTE: Marcar la pantalla como apagada
             contactScreenOn = false;
@@ -7414,14 +6912,12 @@
                     window.contactBackupCover.visible = true;
                 }
                 
-                console.log("Cover negro de contact restaurado");
             }
             
             // Ocultar contenido HTML
             if (window.contactCssObject && window.contactCssObject.element) {
                 window.contactCssObject.element.style.visibility = 'hidden';
                 window.contactCssObject.element.style.pointerEvents = 'none';
-                console.log("Contenido HTML de contact oculto");
             }
             
             // Enviar mensaje al iframe para apagar la pantalla
@@ -7432,7 +6928,6 @@
         
         // Función para desactivar la pantalla de community
         function deactivateCommunityScreen() {
-            console.log("Desactivando pantalla de community...");
             
             // IMPORTANTE: Marcar la pantalla como apagada
             communityScreenOn = false;
@@ -7444,14 +6939,12 @@
                 window.communityScreenMaterial.opacity = 1.0;
                 window.communityScreenMaterial.needsUpdate = true;
                 window.communityBackPlane.visible = true;
-                console.log("Cover negro de community restaurado");
             }
             
             // Ocultar contenido HTML
             if (window.communityCssObject && window.communityCssObject.element) {
                 window.communityCssObject.element.style.visibility = 'hidden';
                 window.communityCssObject.element.style.pointerEvents = 'none';
-                console.log("Contenido HTML de community oculto");
             }
             
             // Enviar mensaje al iframe para apagar la pantalla
@@ -7462,7 +6955,6 @@
         
         // Función para desactivar la pantalla de cafe menu
         function deactivateCafeMenuScreen() {
-            console.log("Desactivando pantalla de cafe menu...");
             
             // IMPORTANTE: Marcar la pantalla como apagada
             cafeMenuScreenOn = false;
@@ -7474,14 +6966,12 @@
                 window.cafeMenuScreenMaterial.opacity = 1.0;
                 window.cafeMenuScreenMaterial.needsUpdate = true;
                 window.cafeMenuBackPlane.visible = true;
-                console.log("Cover negro de cafe menu restaurado");
             }
             
             // Ocultar contenido HTML
             if (window.cafeMenuCssObject && window.cafeMenuCssObject.element) {
                 window.cafeMenuCssObject.element.style.visibility = 'hidden';
                 window.cafeMenuCssObject.element.style.pointerEvents = 'none';
-                console.log("Contenido HTML de cafe menu oculto");
             }
             
             // Enviar mensaje al iframe para apagar la pantalla
@@ -7499,13 +6989,11 @@
             // Crear una escena CSS3D para el plano de community si no existe
             if (!window.communityScene) {
                 window.communityScene = new THREE.Scene();
-                console.log("CSS3D Scene para Community creada");
             } else {
                 // Limpiar escena CSS3D si existe
                 while(window.communityScene.children.length > 0) {
                     window.communityScene.remove(window.communityScene.children[0]);
                 }
-                console.log("CSS3D Scene para Community limpiada");
             }
             
             // COORDENADAS EXACTAS proporcionadas por el usuario para el plano de community
@@ -7520,11 +7008,6 @@
             const absoluteBottomLeft = new THREE.Vector3().copy(bottomLeft).add(originOffset);
             const absoluteBottomRight = new THREE.Vector3().copy(bottomRight).add(originOffset);
             
-            console.log("Coordenadas absolutas para Community:");
-            console.log("Top Left:", absoluteTopLeft);
-            console.log("Top Right:", absoluteTopRight);
-            console.log("Bottom Left:", absoluteBottomLeft);
-            console.log("Bottom Right:", absoluteBottomRight);
             
             // Calcular el centro del plano
             const center = new THREE.Vector3()
@@ -7534,7 +7017,6 @@
                 .add(absoluteBottomRight)
                 .multiplyScalar(0.25);
             
-            console.log("Centro del plano de community:", center);
             
             // Calcular vectores para la orientación
             const vX = new THREE.Vector3().subVectors(absoluteTopRight, absoluteTopLeft).normalize();
@@ -7552,7 +7034,6 @@
             const width = absoluteTopLeft.distanceTo(absoluteTopRight);
             const height = absoluteTopLeft.distanceTo(absoluteBottomLeft);
             
-            console.log("Dimensiones del plano de community:", { width, height });
             
             // Crear un objeto invisible para raycasting
             const invisiblePlane = new THREE.Mesh(
@@ -7616,9 +7097,7 @@
             
             // Añadir el cover negro a la escena
             scene.add(communityBackPlane);
-            console.log("Cover negro para community creado y añadido a la escena");
             
-            console.log("Community plane añadido a la escena");
             
             // Crear un iframe con community.html
             const iframe = document.createElement('iframe');
@@ -7645,7 +7124,6 @@
             const scaleY = height / 606;
             const verticalScaleAdjustment = 1.011;
             
-            console.log("Factores de escala para community:", scaleX, scaleY);
             
             // Aplicar la escala calculada
             cssObject.scale.set(scaleX, scaleY * verticalScaleAdjustment, 1);
@@ -7656,20 +7134,16 @@
             cssObject.position.z += 0.001;
             cssObject.position.y -= 0.003;
             
-            console.log("Posición final del CSS3D para community:", cssObject.position);
-            console.log("Rotación final del CSS3D para community:", cssObject.rotation);
             
             // Añadir el objeto CSS3D a la escena CSS3D
             window.communityScene.add(cssObject);
-            console.log("Objeto CSS3D para Community añadido a la escena");
             
             // Guardar referencia al objeto CSS3D
             window.communityCssObject = cssObject;
             
             // Configurar evento de clic para el plano
-            communityPlane.userData.clickable = true;
+            invisiblePlane.userData.clickable = true;
             
-            console.log("Plano community interactivo creado con las coordenadas especificadas");
             
             // Inicializar el estado del cover negro
             setTimeout(function() {
@@ -7680,14 +7154,12 @@
                     window.communityScreenMaterial.opacity = 1.0;
                     window.communityScreenMaterial.needsUpdate = true;
                     window.communityBackPlane.visible = true;
-                    console.log("🖤 Cover negro de community inicializado como VISIBLE");
                 }
                 
                 // Asegurar que el contenido HTML esté oculto inicialmente
                 if (window.communityCssObject && window.communityCssObject.element) {
                     window.communityCssObject.element.style.visibility = 'hidden';
                     window.communityCssObject.element.style.pointerEvents = 'none';
-                    console.log("🔒 Contenido HTML de community inicializado como OCULTO");
                 }
             }, 100);
             
@@ -7704,13 +7176,11 @@
                 css3dRenderer.domElement.style.top = '0';
                 css3dRenderer.domElement.style.pointerEvents = 'none';
                 document.body.appendChild(css3dRenderer.domElement);
-                console.log("CSS3D Renderer creado para el plano de community");
             }
             
             // Configurar el plano invisible para la pantalla interactiva
             const invisiblePlane = setupCommunityScreen();
             
-            console.log("Community plane configurado correctamente");
             
             return invisiblePlane;
         }
