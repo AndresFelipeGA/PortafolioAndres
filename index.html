@@ -521,6 +521,36 @@
     <script src="assets/scripts/music-autoplay.js"></script>
 
     <script>
+        // Mobile device detection
+        function isMobileDevice() {
+            // Check for a URL parameter to force mobile mode for testing
+            const urlParams = new URLSearchParams(window.location.search);
+            const forceMobile = urlParams.get('forceMobile') === 'true';
+            
+            if (forceMobile) {
+                console.log("Mobile mode forced by URL parameter");
+                return true;
+            }
+            
+            // Check if the user agent string contains mobile keywords
+            const mobileKeywords = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+            const isMobileUserAgent = mobileKeywords.test(navigator.userAgent);
+            
+            // Also check screen size as a fallback
+            const isMobileScreenSize = window.innerWidth < 768;
+            
+            // Log detection for debugging
+            console.log("Mobile detection:", {
+                userAgent: navigator.userAgent,
+                isMobileUserAgent: isMobileUserAgent,
+                screenWidth: window.innerWidth,
+                isMobileScreenSize: isMobileScreenSize,
+                isMobile: isMobileUserAgent || isMobileScreenSize
+            });
+            
+            return isMobileUserAgent || isMobileScreenSize;
+        }
+        
         // Configuración inicial
         let camera, scene, renderer, controls;
         let model = null;
@@ -531,6 +561,104 @@
         let musicButtonClicked = false;
         let musicMuted = false;
         let musicControlCreated = false;
+        
+        // Function to handle mobile-specific content
+        function handleMobileDevice() {
+            console.log("Mobile device detected! Showing mobile-specific content");
+            
+            // Get the loading container
+            const loadingContainer = document.getElementById('loading-container');
+            
+            // Get the coffee container and image
+            const coffeeContainer = document.querySelector('.coffee-container');
+            const coffeeGif = document.querySelector('.coffee-gif');
+            
+            // Get the random phrases container
+            const randomPhrasesContainer = document.querySelector('.random-phrases-container');
+            const randomPhrase = document.getElementById('random-phrase');
+            
+            // Hide the music button for mobile
+            const musicButton = document.getElementById('music-activate-btn');
+            if (musicButton) {
+                musicButton.style.display = 'none';
+            }
+            
+            // Show the loading screen for exactly 3 seconds
+            console.log("Setting timeout for 3 seconds to change content");
+            setTimeout(() => {
+                console.log("Timeout executed - changing content for mobile");
+                
+                // Replace the coffee GIF with DeadCoffe.png
+                if (coffeeGif) {
+                    console.log("Replacing coffee GIF with DeadCoffe.png");
+                    coffeeGif.src = 'assets/media/icons/DeadCoffe.png';
+                    coffeeGif.style.filter = 'none'; // Remove filters applied to the GIF
+                    coffeeGif.style.mixBlendMode = 'normal'; // Remove blend mode
+                    coffeeGif.style.transform = 'scale(1.0)'; // Reset the scale
+                }
+                
+                // Display the formal message
+                if (randomPhrase) {
+                    console.log("Setting mobile message");
+                    randomPhrase.textContent = "We are unable to load the page on your mobile device. Please try again on a desktop computer.";
+                    randomPhrase.classList.add('visible');
+                    
+                    // Make sure the message is visible
+                    randomPhrase.style.opacity = '1';
+                    randomPhrase.style.color = '#ffffff';
+                    randomPhrase.style.fontSize = '18px';
+                    randomPhrase.style.textAlign = 'center';
+                    randomPhrase.style.padding = '20px';
+                    randomPhrase.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    randomPhrase.style.borderRadius = '10px';
+                    randomPhrase.style.maxWidth = '80%';
+                    randomPhrase.style.margin = '0 auto';
+                }
+                
+                // Make sure the loading container stays visible
+                loadingContainer.style.opacity = '1';
+                loadingContainer.style.display = 'flex';
+                
+                // Stop the random phrases from changing
+                if (window.phraseInterval) {
+                    console.log("Clearing phrase interval");
+                    clearInterval(window.phraseInterval);
+                    window.phraseInterval = null;
+                }
+            }, 3000);
+            
+            // Create dummy functions for desktop-only code
+            console.log("Creating dummy functions for desktop-only code");
+            window.init = function() {
+                console.log("Dummy init function called");
+            };
+            window.animate = function() {
+                // Empty function to prevent errors
+            };
+            
+            // Prevent the rest of the script from executing
+            console.log("Mobile handling complete - preventing desktop code execution");
+            return true; // Indicate that mobile handling is active
+        }
+        
+        // Check for mobile device on page load
+        let isMobile = false;
+        if (isMobileDevice()) {
+            isMobile = handleMobileDevice();
+        } else {
+            console.log("Desktop device detected - proceeding with normal initialization");
+        }
+        
+        // Also check when the window is resized
+        window.addEventListener('resize', function() {
+            // Only handle if not already in mobile mode
+            if (!isMobile && isMobileDevice()) {
+                console.log("Mobile device detected after resize!");
+                isMobile = handleMobileDevice();
+                // Reload the page to ensure proper handling
+                window.location.reload();
+            }
+        });
         
         // YouTube video ID from the provided URL
         const youtubeVideoId = 'uALnlDC4yug';
