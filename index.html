@@ -609,15 +609,15 @@
                     coffeeGif.style.transform = 'scale(0.5)'; // Make the image 50% smaller
                 }
                 
-                // Display the formal message
+                // Display the friendly message
                 if (randomPhrase) {
                     console.log("Setting mobile message");
-                    randomPhrase.textContent = "We are unable to load the page on your mobile device. Please try again on a desktop computer.";
+                    randomPhrase.textContent = "Sorry! This page isn't available on mobile. Please open it on a desktop.";
                     randomPhrase.classList.add('visible');
                     
-                    // Make sure the message is visible with red text
+                    // Make sure the message is visible with a lighter, friendlier red text
                     randomPhrase.style.opacity = '1';
-                    randomPhrase.style.color = '#ff0000'; // Red text color
+                    randomPhrase.style.color = '#ff6b6b'; // Lighter, friendlier red color
                     randomPhrase.style.fontSize = '18px';
                     randomPhrase.style.textAlign = 'center';
                     randomPhrase.style.padding = '20px';
@@ -626,6 +626,8 @@
                     randomPhrase.style.maxWidth = '80%';
                     randomPhrase.style.margin = '0 auto';
                     randomPhrase.style.fontWeight = 'bold'; // Make text bold for better visibility
+                    randomPhrase.style.lineHeight = '1.5'; // Better readability
+                    randomPhrase.style.letterSpacing = '0.5px'; // Slightly more spaced out text
                 }
                 
                 // Make sure the loading container stays visible
