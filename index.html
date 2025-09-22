@@ -583,6 +583,11 @@
                 musicButton.style.display = 'none';
             }
             
+            // Immediately hide any random phrases that might be showing
+            if (randomPhrase) {
+                randomPhrase.style.opacity = '0';
+            }
+            
             // Show the loading screen for exactly 3 seconds
             console.log("Setting timeout for 3 seconds to change content");
             setTimeout(() => {
@@ -594,7 +599,7 @@
                     coffeeGif.src = 'assets/media/icons/DeadCoffe.png';
                     coffeeGif.style.filter = 'none'; // Remove filters applied to the GIF
                     coffeeGif.style.mixBlendMode = 'normal'; // Remove blend mode
-                    coffeeGif.style.transform = 'scale(1.0)'; // Reset the scale
+                    coffeeGif.style.transform = 'scale(0.5)'; // Make the image 50% smaller
                 }
                 
                 // Display the formal message
@@ -603,9 +608,9 @@
                     randomPhrase.textContent = "We are unable to load the page on your mobile device. Please try again on a desktop computer.";
                     randomPhrase.classList.add('visible');
                     
-                    // Make sure the message is visible
+                    // Make sure the message is visible with red text
                     randomPhrase.style.opacity = '1';
-                    randomPhrase.style.color = '#ffffff';
+                    randomPhrase.style.color = '#ff0000'; // Red text color
                     randomPhrase.style.fontSize = '18px';
                     randomPhrase.style.textAlign = 'center';
                     randomPhrase.style.padding = '20px';
@@ -613,17 +618,24 @@
                     randomPhrase.style.borderRadius = '10px';
                     randomPhrase.style.maxWidth = '80%';
                     randomPhrase.style.margin = '0 auto';
+                    randomPhrase.style.fontWeight = 'bold'; // Make text bold for better visibility
                 }
                 
                 // Make sure the loading container stays visible
                 loadingContainer.style.opacity = '1';
                 loadingContainer.style.display = 'flex';
                 
-                // Stop the random phrases from changing
+                // Stop the random phrases from changing and ensure no other phrases appear
                 if (window.phraseInterval) {
                     console.log("Clearing phrase interval");
                     clearInterval(window.phraseInterval);
                     window.phraseInterval = null;
+                }
+                
+                // Make sure the loading text stays visible
+                const loadingText = document.querySelector('#loading-text');
+                if (loadingText) {
+                    loadingText.style.display = 'none'; // Hide the loading text
                 }
             }, 3000);
             
