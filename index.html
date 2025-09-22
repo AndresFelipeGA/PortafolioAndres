@@ -588,6 +588,13 @@
                 randomPhrase.style.opacity = '0';
             }
             
+            // Completely disable the random phrases functionality for mobile
+            // Override the showRandomPhrase function before it's even defined
+            window.showRandomPhrase = function() {
+                console.log("Random phrases disabled for mobile");
+                return false; // Prevent execution of the original function
+            };
+            
             // Show the loading screen for exactly 3 seconds
             console.log("Setting timeout for 3 seconds to change content");
             setTimeout(() => {
@@ -625,6 +632,17 @@
                 loadingContainer.style.opacity = '1';
                 loadingContainer.style.display = 'flex';
                 
+                // Make sure no random phrases can appear
+                const randomPhrasesContainer = document.querySelector('.random-phrases-container');
+                if (randomPhrasesContainer) {
+                    // Clear any existing content except our error message
+                    Array.from(randomPhrasesContainer.children).forEach(child => {
+                        if (child !== randomPhrase) {
+                            randomPhrasesContainer.removeChild(child);
+                        }
+                    });
+                }
+                
                 // Stop the random phrases from changing and ensure no other phrases appear
                 if (window.phraseInterval) {
                     console.log("Clearing phrase interval");
@@ -637,6 +655,12 @@
                 if (loadingText) {
                     loadingText.style.display = 'none'; // Hide the loading text
                 }
+                
+                // Override any functions that might show random phrases
+                window.showRandomPhrases = function() {
+                    console.log("Blocked attempt to show random phrases");
+                    return false;
+                };
             }, 3000);
             
             // Create dummy functions for desktop-only code
@@ -2742,6 +2766,12 @@
         
         // Función para mostrar una frase aleatoria
         function showRandomPhrase() {
+            // Check if we're in mobile mode - if so, don't show random phrases
+            if (isMobile) {
+                console.log("Not showing random phrases in mobile mode");
+                return;
+            }
+            
             const phraseElement = document.getElementById('random-phrase');
             if (!phraseElement || isShowingPhrase) return;
             
@@ -2777,8 +2807,13 @@
             // Mostrar la primera frase inmediatamente
             showRandomPhrase();
             
-            // Mostrar frases cada 0.2 segundos para mayor velocidad
-            phraseInterval = setInterval(showRandomPhrase, 200);
+            // No iniciar el intervalo si estamos en modo móvil
+            if (!isMobile) {
+                // Mostrar frases cada 0.2 segundos para mayor velocidad
+                phraseInterval = setInterval(showRandomPhrase, 200);
+            } else {
+                console.log("Not starting phrase interval in mobile mode");
+            }
         }
         
         // Función para detener el sistema de frases
