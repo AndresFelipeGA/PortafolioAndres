@@ -4,156 +4,119 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coffee Menu</title>
+    <link rel="icon" type="image/png" href="assets/media/icons/typeOfCoffes/cafeNumeroUno.png">
+    <link rel="stylesheet" href="assets/css/screens.css">
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: white;
-            color: #333;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            transition: background-color 0.3s ease;
-        }
+        /* Iframe de 1000 x 600 px (ver index.html) - carta de cafe de especialidad */
+        .screen-header { padding-bottom: 12px; }
+        .screen-header h1 { font-size: 38px; }
         
-        body.dark-background {
-            background-color: #121212;
-            color: #f5f5f5;
-        }
-        
-        .interactive-screen {
-            width: 80%;
-            max-width: 1000px;
-            height: 78%;
-            padding: 20px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            margin: 0 auto;
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-        }
-        
-        /* Cuando el fondo es negro, hacemos la interfaz más grande */
-        body.dark-background .interactive-screen {
-            width: 90%;
-            max-width: 1200px;
-            height: 88%;
-        }
-        
-        .screen-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .screen-header h1 {
-            margin: 0;
-            color: #5D4037;
-            font-size: 24px;
-        }
-        
+        .screen-body { padding-top: 6px; padding-bottom: 14px; overflow: hidden; }
+
         .coffee-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .coffee-item {
-            background: white;
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .coffee-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-        }
-        
-        .coffee-item:active {
-            transform: translateY(0px);
-        }
-        
-        .coffee-image {
-            width: 80px;
-            height: 100px;
-            object-fit: contain;
-            margin-bottom: 8px;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
-        }
-        
-        .coffee-title {
-            font-size: 14px;
-            font-weight: 600;
-            margin: 0 0 4px 0;
-            color: #5D4037;
-            text-align: center;
-        }
-        
-        .coffee-description {
-            font-size: 11px;
-            color: #7D5A50;
-            text-align: center;
-            margin: 0;
-            line-height: 1.3;
-        }
-        
-        .coffee-badge {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: #C2185B;
-            color: white;
-            font-size: 10px;
-            padding: 3px 6px;
-            border-radius: 10px;
-            font-weight: bold;
-        }
-        
-        .buttons-row {
-            display: flex;
-            justify-content: center;
-            margin-top: 10px;
-        }
-        
-        .select-button {
-            background: linear-gradient(135deg, #6F4E37, #A67C52);
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
-        
-        .select-button:hover {
-            transform: scale(1.05);
-        }
-        
-        .select-button:active {
-            transform: scale(0.98);
-        }
-        
-        /* Cover Negro para la pantalla de cafe menu */
-        .screen-cover {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
+            grid-template-columns: 1fr 1fr;
+            grid-auto-rows: 1fr;
+            gap: 12px 16px;
             height: 100%;
+        }
+
+        .coffee-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-height: 88px;
+            padding: 12px 16px 12px 14px;
+            background: var(--paper-raised);
+            border: 1.5px solid var(--line);
+            border-radius: var(--radius);
+            color: inherit;
+            font: inherit;
+            text-align: left;
+            cursor: pointer;
+            transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+        }
+        .coffee-item:hover, .coffee-item:focus-visible {
+            border-color: var(--coffee);
+            box-shadow: 0 6px 18px rgba(78, 53, 36, 0.10);
+            outline: none;
+        }
+        .coffee-item.selected {
+            border-color: var(--coffee);
+            background: #FBF3E6;
+            box-shadow: 0 0 0 3px rgba(111, 78, 55, 0.18);
+        }
+
+        .coffee-thumb {
+            flex: 0 0 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #EFE5D6;
+        }
+        .coffee-image { max-width: 46px; max-height: 50px; object-fit: contain; }
+
+        .coffee-text { flex: 1 1 auto; min-width: 0; display: block; }
+        .coffee-no {
+            display: inline-block;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            color: var(--clay);
+        }
+        .coffee-badge {
+            display: inline-block;
+            margin-left: 8px;
+            padding: 1px 9px;
+            border-radius: 999px;
+            background: var(--co-yellow);
+            color: var(--ink);
+            font-size: 13px;
+            font-weight: 700;
+            vertical-align: 1px;
+        }
+        .coffee-title {
+            margin: 1px 0 2px;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 21px;
+            line-height: 1.2;
+            color: var(--ink);
+        }
+        .coffee-description {
+            margin: 0;
+            font-size: 15px;
+            line-height: 1.4;
+            color: var(--ink-soft);
+        }
+
+        /* Indicador de seleccion (visible sin hover) */
+        .coffee-check {
+            flex: 0 0 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--line);
+            background: var(--paper-raised);
+            transition: border-color .2s ease, background .2s ease;
+        }
+        .coffee-item.selected .coffee-check {
+            border-color: var(--coffee);
+            background: var(--coffee);
+            box-shadow: inset 0 0 0 5px var(--paper-raised);
+        }
+
+        .screen-footer { justify-content: space-between; padding-top: 12px; padding-bottom: 18px; }
+        .footer-hint { margin: 0; font-size: 15px; color: var(--ink-soft); }
+        .select-button { min-width: 260px; min-height: 52px; font-size: 17px; }
+        .select-button:not(.ready) { background: transparent; color: var(--coffee); }
+
+        /* Cover negro: la pantalla arranca "apagada" hasta recibir turnOnScreen */
+        .screen-cover {
+            position: fixed;
+            inset: 0;
             background: #000000;
             z-index: 9999;
             opacity: 1;
@@ -161,74 +124,99 @@
             transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
             pointer-events: auto;
         }
-        
         .screen-cover.hidden {
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
         }
-        
     </style>
 </head>
-<body>
-    <div class="interactive-screen">
-        <!-- Cover negro que se muestra por defecto - SIN TEXTO NI BOTONES -->
-        <div class="screen-cover" id="screen-cover"></div>
-        
-        <div class="screen-header">
-            <h1>Select Your Colombian Coffee</h1>
-        </div>
-        
+<body class="screen">
+    <!-- Cover negro que se muestra por defecto - SIN TEXTO NI BOTONES -->
+    <div class="screen-cover" id="screen-cover"></div>
+
+    <div class="tricolor"></div>
+    <header class="screen-header">
+        <p class="overline">Services &middot; Coffee menu</p>
+        <h1>Select your Colombian coffee</h1>
+    </header>
+
+    <main class="screen-body">
         <div class="coffee-grid">
             <!-- Coffee 1 -->
-            <div class="coffee-item" data-service="software">
-                <img src="assets/media/icons/typeOfCoffes/cafeNumeroUno.png" alt="Custom Software Coffee" class="coffee-image">
-                <h3 class="coffee-title">Custom Software</h3>
-                <p class="coffee-description">Personalized web, mobile and desktop systems with full-stack programming.</p>
-            </div>
-            
+            <button type="button" class="coffee-item" data-service="software" aria-pressed="false">
+                <span class="coffee-thumb"><img src="assets/media/icons/typeOfCoffes/cafeNumeroUno.png" alt="Custom Software Coffee" class="coffee-image"></span>
+                <span class="coffee-text">
+                    <span class="coffee-no">N&ordm; 01</span>
+                    <h3 class="coffee-title">Custom Software</h3>
+                    <p class="coffee-description">Personalized web, mobile and desktop systems with full-stack programming.</p>
+                </span>
+                <span class="coffee-check" aria-hidden="true"></span>
+            </button>
+
             <!-- Coffee 2 -->
-            <div class="coffee-item" data-service="automation">
-                <img src="assets/media/icons/typeOfCoffes/cafeNumeroDos.png" alt="Automation Coffee" class="coffee-image">
-                <h3 class="coffee-title">Automation</h3>
-                <p class="coffee-description">Optimization of repetitive tasks through scripts and bots for your business.</p>
-            </div>
-            
+            <button type="button" class="coffee-item" data-service="automation" aria-pressed="false">
+                <span class="coffee-thumb"><img src="assets/media/icons/typeOfCoffes/cafeNumeroDos.png" alt="Automation Coffee" class="coffee-image"></span>
+                <span class="coffee-text">
+                    <span class="coffee-no">N&ordm; 02</span>
+                    <h3 class="coffee-title">Automation</h3>
+                    <p class="coffee-description">Repetitive tasks optimized through scripts and bots for your business.</p>
+                </span>
+                <span class="coffee-check" aria-hidden="true"></span>
+            </button>
+
             <!-- Coffee 3 -->
-            <div class="coffee-item" data-service="consulting">
-                <img src="assets/media/icons/typeOfCoffes/cafeNumeroTres.png" alt="Tech Consulting Coffee" class="coffee-image">
-                <h3 class="coffee-title">Tech Consulting</h3>
-                <p class="coffee-description">Advisory in architecture, development and performance for strategic decisions in technological projects.</p>
-            </div>
-            
+            <button type="button" class="coffee-item" data-service="consulting" aria-pressed="false">
+                <span class="coffee-thumb"><img src="assets/media/icons/typeOfCoffes/cafeNumeroTres.png" alt="Tech Consulting Coffee" class="coffee-image"></span>
+                <span class="coffee-text">
+                    <span class="coffee-no">N&ordm; 03</span>
+                    <h3 class="coffee-title">Tech Consulting</h3>
+                    <p class="coffee-description">Strategic advice on architecture, development and performance.</p>
+                </span>
+                <span class="coffee-check" aria-hidden="true"></span>
+            </button>
+
             <!-- Coffee 4 -->
-            <div class="coffee-item" data-service="freelance">
-                <span class="coffee-badge">Popular</span>
-                <img src="assets/media/icons/typeOfCoffes/cafeNumeroCuatro.png" alt="Freelance Services Coffee" class="coffee-image">
-                <h3 class="coffee-title">Freelance Services</h3>
-                <p class="coffee-description">Development of programming solutions and technical services with flexible remote work.</p>
-            </div>
-            
+            <button type="button" class="coffee-item" data-service="freelance" aria-pressed="false">
+                <span class="coffee-thumb"><img src="assets/media/icons/typeOfCoffes/cafeNumeroCuatro.png" alt="Freelance Services Coffee" class="coffee-image"></span>
+                <span class="coffee-text">
+                    <span class="coffee-no">N&ordm; 04</span>
+                    <span class="coffee-badge">Popular</span>
+                    <h3 class="coffee-title">Freelance Services</h3>
+                    <p class="coffee-description">Programming solutions and technical services with flexible remote work.</p>
+                </span>
+                <span class="coffee-check" aria-hidden="true"></span>
+            </button>
+
             <!-- Coffee 5 -->
-            <div class="coffee-item" data-service="web">
-                <img src="assets/media/icons/typeOfCoffes/cafeNumeroCinco.png" alt="Web & E-commerce Coffee" class="coffee-image">
-                <h3 class="coffee-title">Web & E-commerce</h3>
-                <p class="coffee-description">Development of all types of websites and custom e-commerce platforms.</p>
-            </div>
-            
+            <button type="button" class="coffee-item" data-service="web" aria-pressed="false">
+                <span class="coffee-thumb"><img src="assets/media/icons/typeOfCoffes/cafeNumeroCinco.png" alt="Web &amp; E-commerce Coffee" class="coffee-image"></span>
+                <span class="coffee-text">
+                    <span class="coffee-no">N&ordm; 05</span>
+                    <h3 class="coffee-title">Web &amp; E-commerce</h3>
+                    <p class="coffee-description">All types of websites and custom e&#8209;commerce platforms.</p>
+                </span>
+                <span class="coffee-check" aria-hidden="true"></span>
+            </button>
+
             <!-- Coffee 6 -->
-            <div class="coffee-item" data-service="mobile">
-                <img src="assets/media/icons/typeOfCoffes/cafeNumeroSeis.png" alt="Mobile App Development Coffee" class="coffee-image">
-                <h3 class="coffee-title">Mobile App Development</h3>
-                <p class="coffee-description">Native and cross-platform mobile applications for iOS and Android with modern frameworks.</p>
-            </div>
+            <button type="button" class="coffee-item" data-service="mobile" aria-pressed="false">
+                <span class="coffee-thumb"><img src="assets/media/icons/typeOfCoffes/cafeNumeroSeis.png" alt="Mobile App Development Coffee" class="coffee-image"></span>
+                <span class="coffee-text">
+                    <span class="coffee-no">N&ordm; 06</span>
+                    <h3 class="coffee-title">Mobile App Development</h3>
+                    <p class="coffee-description">Native and cross-platform iOS and Android apps with modern frameworks.</p>
+                </span>
+                <span class="coffee-check" aria-hidden="true"></span>
+            </button>
         </div>
-        
-        <div class="buttons-row">
-            <button class="select-button">Select Coffee</button>
-        </div>
-        
-    </div>
+    </main>
+
+    <footer class="screen-footer">
+        <p class="footer-hint">Each coffee is a service. Pick one, then confirm.</p>
+        <button type="button" class="btn select-button">Select Coffee</button>
+    </footer>
+    <div class="wayuu-band"></div>
 
     <script>
         // Function to detect background color and adjust size
@@ -279,11 +267,14 @@
             item.addEventListener('click', function() {
                 // Remove previous selection
                 document.querySelectorAll('.coffee-item').forEach(el => {
-                    el.style.border = 'none';
+                    el.classList.remove('selected');
+                    el.setAttribute('aria-pressed', 'false');
                 });
                 
                 // Mark as selected
-                this.style.border = '2px solid #C2185B';
+                this.classList.add('selected');
+                this.setAttribute('aria-pressed', 'true');
+                document.querySelector('.select-button').classList.add('ready');
                 
                 // Save selected service
                 selectedService = this.getAttribute('data-service');
@@ -376,46 +367,63 @@
                     left: 0;
                     width: 100%;
                     height: 100%;
-                    background: rgba(0, 0, 0, 0.5);
+                    background: rgba(43, 29, 20, 0.45);
                     display: flex;
                     justify-content: center;
                     align-items: center;
+                    cursor: pointer;
                 }
                 
                 .popup-content {
-                    background: white;
-                    padding: 30px;
-                    border-radius: 15px;
+                    position: relative;
+                    overflow: hidden;
+                    background: var(--paper-raised, #FFFCF7);
+                    border: 1px solid var(--line, #E6DAC8);
+                    padding: 44px 48px 36px;
+                    border-radius: 20px;
                     text-align: center;
-                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-                    max-width: 400px;
+                    box-shadow: 0 18px 48px rgba(43, 29, 20, 0.28);
+                    max-width: 520px;
                     margin: 20px;
                     animation: slideUp 0.3s ease-out;
                 }
                 
+                .popup-content::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: 8px;
+                    background: linear-gradient(90deg, #F2B705 0 50%, #1F3C88 50% 75%, #C8102E 75% 100%);
+                }
+                
                 .popup-icon {
-                    width: 60px;
-                    height: 60px;
-                    background: #4CAF50;
+                    width: 64px;
+                    height: 64px;
+                    background: var(--leaf, #2F6B3B);
                     border-radius: 50%;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 30px;
-                    color: white;
-                    margin: 0 auto 20px;
+                    font-size: 32px;
+                    color: #FFFCF7;
+                    margin: 0 auto 18px;
                     animation: checkmark 0.6s ease-out 0.3s both;
                 }
                 
                 .popup-content h3 {
-                    color: #333;
+                    color: var(--ink, #2B1D14);
                     margin: 0 0 10px;
-                    font-size: 1.5em;
+                    font-family: var(--font-display, Georgia, serif);
+                    font-size: 28px;
+                    line-height: 1.15;
                 }
                 
                 .popup-content p {
-                    color: #666;
+                    color: var(--ink-soft, #6B5646);
                     margin: 0;
+                    font-size: 17px;
                     line-height: 1.5;
                 }
                 

@@ -4,349 +4,66 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Community</title>
-    
-    <!-- Material-UI CSS -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-    <link rel="stylesheet" href="https://unpkg.com/@material-ui/core@latest/umd/material-ui.min.css" />
-    
-    <!-- Colombian Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link rel="stylesheet" href="assets/css/screens.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Poppins', 'Roboto', sans-serif;
-            background: transparent;
-            height: 100vh;
-            color: #333;
-            font-size: 13px;
-            overflow: hidden;
-        }
-        
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
+        /* Iframe de 993 x 606 px (ver index.html) */
+        .screen-header { padding-top: 24px; }
+        .screen-header h1 { font-size: 36px; }
+        .screen-body { display: flex; align-items: center; }
+
+        .community-layout {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 28px;
+            align-items: stretch;
             width: 100%;
-            height: 100%;
-            background: url('assets/media/pictures/picturesOfSometingElse/Community.png') no-repeat center center;
-            background-size: cover;
-            transform: scaleX(-1);
-            z-index: -1;
         }
-        
-        .container {
-            height: 100vh;
-            padding: 8px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-        
-        .community-card {
-            background: linear-gradient(145deg,
-                rgba(255, 248, 220, 0.95) 0%,
-                rgba(254, 250, 235, 0.92) 100%);
-            backdrop-filter: blur(10px);
-            border: none;
-            border-radius: 20px;
-            padding: 20px 28px;
-            max-width: 680px;
-            width: 88%;
-            max-height: 82vh;
-            box-shadow: 
-                0 20px 40px rgba(139, 69, 19, 0.15),
-                0 12px 28px rgba(184, 134, 11, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        .community-text p { margin: 0 0 16px; color: var(--ink-soft); font-size: 18px; line-height: 1.55; }
+        .community-text p:first-child { color: var(--ink); font-size: 21px; line-height: 1.5; }
+        .community-text .tags { margin-top: 6px; }
+
+        .cta-card {
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
-            overflow: hidden;
-            position: relative;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            gap: 18px;
+            padding: 26px 26px 24px;
+            border-top: 4px solid var(--co-yellow);
         }
-        
-        .community-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, 
-                #FCD116 0%,    /* Amarillo de la bandera */
-                #003893 50%,   /* Azul de la bandera */
-                #CE1126 100%); /* Rojo de la bandera */
-            border-radius: 24px 24px 0 0;
-        }
-        
-        .impact-icon {
-            background: linear-gradient(135deg, #FCD116, #FFD700);
-            border-radius: 50%;
-            width: 42px;
-            height: 42px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 12px;
-            box-shadow: 0 6px 12px rgba(252, 209, 22, 0.3);
-        }
-        
-        .community-content {
-            width: 100%;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        
-        .text-paragraph {
-            color: #4a4a4a;
-            font-size: 14px;
-            line-height: 1.5;
-            text-align: left;
-            margin-bottom: 12px;
-            font-weight: 400;
-            letter-spacing: 0.2px;
-        }
-        
-        .highlight {
-            color: #8b4513;
-            font-weight: 600;
-            background: linear-gradient(120deg, transparent 0%, rgba(252, 209, 22, 0.2) 0%);
-            padding: 2px 6px;
-            border-radius: 4px;
-            transition: all 0.2s ease;
-        }
-        
-        .highlight:hover {
-            background: linear-gradient(120deg, transparent 0%, rgba(252, 209, 22, 0.4) 0%);
-        }
-        
-        .cta-section {
-            margin-top: 4px;
-            padding: 12px;
-            background: linear-gradient(135deg, 
-                rgba(252, 209, 22, 0.08) 0%, 
-                rgba(0, 56, 147, 0.05) 100%);
-            border-radius: 12px;
-            border-left: 3px solid #FCD116;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .cta-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="%23FCD116" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="%23003893" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="%23CE1126" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>') repeat;
-            opacity: 0.3;
-            z-index: 0;
-        }
-        
-        .cta-text {
-            position: relative;
-            z-index: 1;
-        }
-        
-        .coffee-accent {
-            position: absolute;
-            bottom: 12px;
-            right: 12px;
-            opacity: 0.1;
-            font-size: 20px;
-            color: #8b4513;
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .community-card {
-                padding: 20px 16px;
-                margin: 8px;
-                width: 95%;
-                max-height: 90vh;
-            }
-            
-            .text-paragraph {
-                font-size: 14px;
-                margin-bottom: 12px;
-                line-height: 1.5;
-            }
-            
-            .impact-icon {
-                width: 40px;
-                height: 40px;
-                margin-bottom: 12px;
-            }
-            
-            .cta-section {
-                padding: 12px;
-                margin-top: 6px;
-            }
-            
-            .mui-button {
-                padding: 10px 20px;
-                font-size: 13px;
-                min-width: 160px;
-            }
-        }
-        
-        /* Colombian Coffee Animation */
-        @keyframes coffee-steam {
-            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
-            50% { transform: translateY(-4px) rotate(2deg); opacity: 1; }
-        }
-        
-        .coffee-accent {
-            animation: coffee-steam 3s ease-in-out infinite;
-        }
-        
-        /* MUI Button Colombian Style */
-        .contact-button-container {
-            display: flex;
-            justify-content: center;
-            margin-top: 8px;
-        }
-        
-        .mui-button {
-            background: linear-gradient(135deg, #FCD116 0%, #FFD700 100%);
-            border: none;
-            border-radius: 20px;
-            padding: 10px 20px;
-            font-family: 'Poppins', sans-serif;
-            font-size: 13px;
-            font-weight: 600;
-            color: #8b4513;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 
-                0 4px 8px rgba(252, 209, 22, 0.3),
-                0 2px 4px rgba(252, 209, 22, 0.2);
-            text-transform: none;
-            letter-spacing: 0.3px;
-            min-width: 160px;
-            height: 36px;
-        }
-        
-        .mui-button:hover {
-            background: linear-gradient(135deg, #FFD700 0%, #FCD116 100%);
-            transform: translateY(-2px);
-            box-shadow: 
-                0 12px 24px rgba(252, 209, 22, 0.4),
-                0 8px 16px rgba(252, 209, 22, 0.3);
-        }
-        
-        .mui-button:active {
-            transform: translateY(0px);
-            box-shadow: 
-                0 6px 12px rgba(252, 209, 22, 0.4),
-                0 3px 6px rgba(252, 209, 22, 0.3);
-        }
-        
-        .mui-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.6s;
-        }
-        
-        .mui-button:hover::before {
-            left: 100%;
-        }
-        
-        .button-coffee {
-            margin-left: 8px;
-            animation: coffee-bounce 2s ease-in-out infinite;
-        }
-        
-        @keyframes coffee-bounce {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-2px); }
-        }
-        
-        /* Ripple effect */
-        .mui-button::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.5);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-        
-        .mui-button:active::after {
-            width: 300px;
-            height: 300px;
-        }
+        .cta-card .icon { font-size: 34px; line-height: 1; }
+        .cta-card p { font-size: 18px; line-height: 1.5; color: var(--ink); }
+        .cta-card .btn { margin-top: auto; width: 100%; min-height: 56px; font-size: 18px; }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="community-card">
-            <!-- Icono de impacto inspirado en café colombiano -->
-            <div class="impact-icon">
-                <span class="material-icons" style="color: #8b4513; font-size: 20px;">auto_awesome</span>
-            </div>
-            
-            <div class="community-content">
-                <p class="text-paragraph">
-                    What I love most about developing is creating things that make a <span class="highlight">real impact</span> on people. I'm passionate about working with startups and entrepreneurs because each project is unique, each idea has the potential to change lives.
-                </p>
-                
-                <p class="text-paragraph">
-                    I understand perfectly the challenges entrepreneurs face when starting their projects. That's why I try to offer accessible costs for software development, websites, and applications.
-                </p>
-                
-                <div class="cta-section">
-                    <p class="text-paragraph cta-text" style="margin-bottom: 10px;">
-                        If you have an idea, an entrepreneurship, or a startup that needs technological development, <span class="highlight">let's talk</span>. I love being part of the process of turning ideas into reality.
-                    </p>
-                    
-                    <!-- MUI Colombian Style Button -->
-                    <div class="contact-button-container">
-                        <button class="mui-button contact-btn" onclick="handleContactClick()">
-                            <span class="material-icons" style="margin-right: 5px; font-size: 16px;">chat_bubble_outline</span>
-                            Let's talk!
-                            <span class="button-coffee" style="margin-left: 5px;">☕</span>
-                        </button>
-                    </div>
+<body class="screen">
+    <div class="tricolor"></div>
+    <header class="screen-header">
+        <p class="overline">Community</p>
+        <h1>Technology with real impact</h1>
+        <p class="lead">Working side by side with startups and entrepreneurs.</p>
+    </header>
+
+    <main class="screen-body">
+        <div class="community-layout">
+            <div class="community-text">
+                <p>What I love most about developing is creating things that make a <span class="highlight">real impact</span> on people. I'm passionate about working with startups and entrepreneurs because each project is unique, and each idea has the potential to change lives.</p>
+                <p>I understand the challenges entrepreneurs face when starting their projects. That's why I try to offer <span class="highlight">accessible costs</span> for software development, websites and applications.</p>
+                <div class="tags">
+                    <span class="tag">Startups</span>
+                    <span class="tag">Entrepreneurs</span>
+                    <span class="tag">Websites</span>
+                    <span class="tag">Applications</span>
                 </div>
             </div>
-            
-            <!-- Acento colombiano sutil -->
-            <div class="coffee-accent">☕</div>
+
+            <aside class="card cta-card">
+                <span class="icon" aria-hidden="true">☕</span>
+                <p>If you have an idea, an entrepreneurship or a startup that needs technological development, <span class="highlight">let's talk</span>. I love being part of the process of turning ideas into reality.</p>
+                <button type="button" class="btn mui-button contact-btn" onclick="handleContactClick(event)">💬 Let's talk!</button>
+            </aside>
         </div>
-    </div>
-    
-    <!-- Material-UI JavaScript -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@mui/material@latest/umd/material-ui.min.js"></script>
-    
+    </main>
+    <div class="wayuu-band"></div>
+
     <script>
         
         let isActive = false;
@@ -361,7 +78,7 @@
         }
         
         // Function to handle contact button click
-        function handleContactClick() {
+        function handleContactClick(e) {
             
             // Vibration if available (mobile)
             if (navigator.vibrate) {
@@ -388,14 +105,20 @@
             }
             
             // Temporary visual feedback
-            const button = event.target.closest('.mui-button');
+            const ev = e || window.event;
+            const button = (ev && ev.target && ev.target.closest('.contact-btn')) || document.querySelector('.contact-btn');
+            if (!button || button.dataset.busy) return;
+            button.dataset.busy = '1';
             const originalText = button.innerHTML;
-            button.innerHTML = '<span class="material-icons" style="margin-right: 8px;">check_circle</span>Activating contact!<span style="margin-left: 8px;">✨</span>';
-            button.style.background = 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)';
-            
+            button.innerHTML = '✓ Opening contact…';
+            button.style.background = 'var(--leaf)';
+            button.style.borderColor = 'var(--leaf)';
+
             setTimeout(() => {
                 button.innerHTML = originalText;
                 button.style.background = '';
+                button.style.borderColor = '';
+                delete button.dataset.busy;
             }, 2000);
         }
         

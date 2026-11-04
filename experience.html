@@ -4,124 +4,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Experience</title>
+    <link rel="stylesheet" href="assets/css/screens.css">
     <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
-            color: #ffffff;
-            overflow: hidden;
+        /* Se carga dentro de #contentIframe de box.html (765 x 606 px) y hereda
+           la rotación de su body, por eso aquí no se aplica ninguna transformación. */
+        .timeline { display: flex; flex-direction: column; gap: 14px; }
+        .job { position: relative; padding: 17px 24px 16px 36px; }
+        .job::before {
+            content: '';
+            position: absolute;
+            left: 16px; top: 18px; bottom: 18px;
+            width: 5px;
+            border-radius: 3px;
+            background: var(--co-yellow);
         }
-        
-        .container {
-            padding: 20px;
-            max-width: 100%;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            box-sizing: border-box;
-        }
-        
-        h1 {
-            font-size: 2.5em;
-            text-align: center;
-            margin-bottom: 20px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            flex-shrink: 0;
-        }
-        
-        .experience-item {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            flex: 1;
-            min-height: 0;
-        }
-        
-        .experience-title {
-            font-size: 1.3em;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-        
-        .experience-company {
-            font-size: 1.1em;
-            opacity: 0.8;
-            margin-bottom: 10px;
-        }
-        
-        .experience-description {
-            line-height: 1.4;
-            opacity: 0.9;
-            font-size: 0.9em;
-        }
-        
-        /* Botón de volver minimalista */
-        .back-button {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            width: 50px;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            z-index: 1000;
-            font-size: 20px;
-            color: white;
-        }
-        
-        .back-button:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.1);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-        
-        .back-button::before {
-            content: '←';
-            font-weight: bold;
-        }
+        .job:nth-child(2)::before { background: var(--co-blue); }
+        .job-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+        .job h2 { font-size: 22px; margin: 0 0 2px; }
+        .job .company { margin: 0 0 8px; font-size: 16px; font-weight: 600; color: var(--ink); }
+        .job .meta { white-space: nowrap; }
+        .job p.desc { font-size: 16px; line-height: 1.5; }
+        .job .tags { margin-top: 10px; }
     </style>
 </head>
-<body>
-    <button class="back-button" onclick="goBackToBox()" title="Back to menu"></button>
-    
-    <div class="container">
-        <h1>💼 My Experience</h1>
-        
-        <div class="experience-item">
-            <div class="experience-title">Software Engineer | Data Engineering</div>
-            <div class="experience-company">Ingenian Software • Jul 2024 - Present</div>
-            <div class="experience-description">
-                <strong>Full-stack + Data Engineering:</strong> Design, automation and optimization of data flows and integrations. 
-                WhatsApp chatbot automation with YFlow/JavaScript, ETL pipeline development, API integration, 
-                and automated data processing. SCRUM methodology.
-            </div>
+<body class="screen">
+    <div class="tricolor"></div>
+    <button class="back-btn" onclick="goBackToBox()" title="Back to menu" aria-label="Back to menu">&larr;</button>
+    <header class="screen-header with-back">
+        <p class="overline">Profile &middot; Experience</p>
+        <h1>My experience</h1>
+    </header>
+
+    <main class="screen-body">
+        <div class="timeline">
+            <article class="card job">
+                <div class="job-head">
+                    <h2>Software Engineer | Data Engineering</h2>
+                    <span class="meta">Jul 2024 &ndash; Present</span>
+                </div>
+                <p class="company">Ingenian Software</p>
+                <p class="desc">Full-stack + data engineering: design, automation and optimization of data flows and integrations. WhatsApp chatbot automation with YFlow/JavaScript, ETL pipelines, API integration and automated data processing.</p>
+                <div class="tags">
+                    <span class="tag">ETL</span>
+                    <span class="tag">YFlow</span>
+                    <span class="tag">JavaScript</span>
+                    <span class="tag">APIs</span>
+                    <span class="tag">SCRUM</span>
+                </div>
+            </article>
+
+            <article class="card job">
+                <div class="job-head">
+                    <h2>Junior Data Engineer | Software Engineer</h2>
+                    <span class="meta">Jan 2022 &ndash; Jun 2024</span>
+                </div>
+                <p class="company">Forgracol</p>
+                <p class="desc">Full-stack + database systems: inventory and business management web apps with a Python/SQL back-end, PostgreSQL/MySQL optimization, process automation and ETL flow documentation.</p>
+                <div class="tags">
+                    <span class="tag">Python</span>
+                    <span class="tag">SQL</span>
+                    <span class="tag">PostgreSQL</span>
+                    <span class="tag">MySQL</span>
+                    <span class="tag">Automation</span>
+                </div>
+            </article>
         </div>
-        
-        <div class="experience-item">
-            <div class="experience-title">Junior Data Engineer | Software Engineer</div>
-            <div class="experience-company">Forgracol • Jan 2022 - Jun 2024</div>
-            <div class="experience-description">
-                <strong>Full-Stack + Database Systems:</strong> Development of inventory and business management systems. 
-                Complete creation of web applications with Python/SQL backend, PostgreSQL/MySQL database optimization, 
-                process automation and ETL flow documentation for inventory systems.
-            </div>
-        </div>
-    </div>
-    
+    </main>
+    <div class="wayuu-band"></div>
+
     <script>
         function goBackToBox() {
             // Communicate to parent iframe to go back to box.html

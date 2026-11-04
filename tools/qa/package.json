@@ -1,0 +1,9 @@
+{
+  "name": "portfolio-qa",
+  "private": true,
+  "type": "module",
+  "description": "Pruebas en navegador real (Chrome del sistema + puppeteer-core) para la escena 3D",
+  "dependencies": {
+    "puppeteer-core": "^23.0.0"
+  }
+}

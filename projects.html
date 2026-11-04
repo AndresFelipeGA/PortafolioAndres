@@ -4,519 +4,107 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Andres Coffee - Projects</title>
-    
-    <!-- Favicon -->
     <link rel="icon" type="image/png" href="assets/media/icons/typeOfCoffes/cafeNumeroUno.png">
     <link rel="shortcut icon" type="image/png" href="assets/media/icons/typeOfCoffes/cafeNumeroUno.png">
+    <link rel="stylesheet" href="assets/css/screens.css">
     <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: url('assets/media/pictures/picturesOfSometingElse/AztecaBackground.jpg') no-repeat center center;
-            background-size: cover;
-            background-attachment: fixed;
-            color: #ffffff;
-            overflow: hidden;
-            /* Permitir eventos normalmente */
-            pointer-events: auto !important;
-            isolation: isolate;
-            z-index: 99999;
-        }
-        
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 0;
-            /* Permitir funcionalidad normal */
-            position: relative;
-            z-index: 999999;
-            isolation: isolate;
-            contain: layout style paint;
-        }
-        
-        .interactive-screen {
-            width: 100%;
-            height: 100%;
-            padding: 0;
-            box-sizing: border-box;
-            display: block;
-            margin: 0;
-            background: transparent;
-            border-radius: 0;
-            box-shadow: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            overflow: hidden;
-            backdrop-filter: blur(3px);
-            /* ULTRA AGRESIVO: Maximum event priority */
-            pointer-events: auto !important;
-            isolation: isolate;
-            z-index: 999999;
-            /* Crear una barrera de eventos */
-            contain: layout style paint;
-        }
-        
-        .content-section {
-            width: 90%;
-            margin: 10px auto;
-            height: auto;
-            display: block;
-            position: relative;
-            background: linear-gradient(135deg,
-                rgba(255, 255, 255, 0.75) 0%,
-                rgba(248, 248, 250, 0.70) 100%);
-            padding: 20px;
-            border-radius: 15px;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(200, 200, 200, 0.15);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-            /* Prevent any events from bubbling up */
-            pointer-events: auto !important;
-            isolation: isolate;
-            z-index: 1001;
-        }
-        
-        .screen-header {
-            text-align: center;
-            margin-bottom: 15px;
-        }
-        
-        .screen-header h1 {
-            margin: 0;
-            color: #654321;
-            font-size: 32px;
-            font-weight: 700;
-            text-shadow: 2px 2px 4px rgba(139, 69, 19, 0.3);
-            letter-spacing: 1px;
-            text-align: center;
-        }
-        
-        .projects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 15px;
-            margin-top: 5px;
-            justify-items: center;
-        }
-        
+        /* Iframe de 884 x 606 px (ver index.html) */
+        /* .interactive-screen y .content-section los usa el script: se conservan */
+        .interactive-screen { display: contents; }
+
         .project-card {
-            background: linear-gradient(135deg,
-                rgba(245, 245, 220, 0.85) 0%,
-                rgba(255, 248, 220, 0.80) 100%);
-            border-radius: 15px;
-            padding: 15px;
-            border: 2px solid rgba(139, 69, 19, 0.4);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            box-shadow: 0 8px 25px rgba(139, 69, 19, 0.2);
-            pointer-events: auto !important;
-            max-width: 220px;
-            min-height: 180px;
-            /* Prevent any events from bubbling up */
-            isolation: isolate;
-            z-index: 1002;
-            /* Asegurar que toda la tarjeta sea clickeable */
-            cursor: pointer !important;
+            display: grid;
+            grid-template-columns: 330px 1fr;
+            gap: 24px;
+            padding: 20px 24px;
         }
-        
-        .project-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 15px 35px rgba(139, 69, 19, 0.3);
-            border-color: rgba(160, 82, 45, 0.5);
-            background: linear-gradient(135deg, 
-                rgba(255, 248, 220, 0.90) 0%, 
-                rgba(245, 245, 220, 0.88) 100%);
-        }
-        
-        .project-image {
-            width: 100%;
-            height: 80px;
-            margin-bottom: 4px;
-            border-radius: 6px;
-            overflow: hidden;
-            background: rgba(240, 240, 240, 0.2);
-            /* Asegurar que sea clickeable */
-            pointer-events: auto !important;
-            cursor: pointer !important;
-        }
-        
-        .project-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-            /* Asegurar que sea clickeable */
-            pointer-events: auto !important;
-            cursor: pointer !important;
-        }
-        
-        .project-image:hover img {
-            transform: scale(1.05);
-        }
-        
-        .project-title {
-            font-size: 15px;
-            font-weight: 700;
-            color: #654321;
-            margin-bottom: 4px;
-            text-shadow: 2px 2px 4px rgba(139, 69, 19, 0.8), 
-                         1px 1px 2px rgba(255, 255, 255, 0.5);
-            line-height: 1.2;
-            /* Asegurar que sea clickeable */
-            pointer-events: auto !important;
-            cursor: pointer !important;
-            user-select: none; /* Evitar selección de texto que pueda interferir */
-        }
-        
-        .project-description {
-            font-size: 11px;
-            color: #5d4037;
-            margin-bottom: 3px;
-            line-height: 1.3;
-            font-weight: 500;
-            /* Asegurar que sea clickeable */
-            pointer-events: auto !important;
-            cursor: pointer !important;
-            user-select: none; /* Evitar selección de texto que pueda interferir */
-            background: rgba(245, 235, 220, 0.3);
-            padding: 6px 8px;
-            border-radius: 4px;
-            border-left: 2px solid #8b4513;
-            text-shadow: 1px 1px 2px rgba(139, 69, 19, 0.6), 
-                         0 0 1px rgba(255, 255, 255, 0.5);
-            max-height: 60px;
-            overflow: hidden;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            line-clamp: 3;
-            -webkit-box-orient: vertical;
-        }
-        
-        .project-tech {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            margin-bottom: 6px;
-        }
-        
-        .tech-tag {
-            background: linear-gradient(135deg, 
-                rgba(160, 82, 45, 0.8) 0%, 
-                rgba(139, 69, 19, 0.8) 100%);
-            color: white;
-            padding: 2px 6px;
-            border-radius: 8px;
-            font-size: 9px;
-            font-weight: 500;
-            border: 1px solid rgba(139, 69, 19, 0.6);
-            backdrop-filter: blur(5px);
-            transition: all 0.2s ease;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-        }
-        
-        .tech-tag:hover {
-            transform: scale(1.05);
-            background: linear-gradient(135deg, 
-                rgba(205, 133, 63, 0.9) 0%, 
-                rgba(160, 82, 45, 0.9) 100%);
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-        }
-        
-        .project-links {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        
-        .project-link {
-            background: linear-gradient(135deg, 
-                rgba(139, 69, 19, 0.9) 0%, 
-                rgba(101, 67, 33, 0.9) 100%);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 12px;
-            text-decoration: none;
-            font-size: 10px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(139, 69, 19, 0.7);
-            backdrop-filter: blur(5px);
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-            pointer-events: auto;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-        }
-        
-        .project-link:hover {
-            background: linear-gradient(135deg, 
-                rgba(205, 133, 63, 0.9) 0%, 
-                rgba(160, 82, 45, 0.9) 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-            border-color: rgba(205, 133, 63, 0.8);
-        }
-        
-        /* Estilo específico para la tarjeta del Portfolio 3D - más larga verticalmente */
-        .project-card.portfolio-3d {
-            min-height: 450px; /* Reducida aún más para eliminar espacios */
-            display: flex;
-            flex-direction: column; /* Layout vertical */
-            padding: 6px 8px 4px 8px; /* Padding ultra compacto */
-        }
-        
-        .project-card.portfolio-3d .project-description {
-            max-height: 280px; /* Mantener espacio para evitar cortes */
-            -webkit-line-clamp: 12; /* Permitir muchas más líneas */
-            line-clamp: 12;
-            padding: 6px 8px; /* Padding mínimo */
-            margin-bottom: 2px; /* Margen mínimo */
-            overflow: visible; /* Asegurar que no se corte */
-        }
-        
-        .project-card.portfolio-3d .project-image {
-            height: 140px; /* Mantener tamaño de imagen */
-            margin-bottom: 2px; /* Margen mínimo */
-        }
-        
-        .project-card.portfolio-3d .project-title {
-            margin-bottom: 2px; /* Margen mínimo */
-        }
-        
-        .project-card.portfolio-3d .mini-tech-tags {
-            display: flex;
-            gap: 4px;
-            margin-bottom: 2px; /* Margen mínimo */
-            margin-top: auto; /* Empujar hacia abajo */
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        
-        .project-card.portfolio-3d .mini-tech-tag {
-            background: linear-gradient(135deg, 
-                rgba(34, 139, 34, 0.8) 0%, 
-                rgba(0, 100, 0, 0.8) 100%);
-            color: white;
-            padding: 2px 6px;
-            border-radius: 8px;
-            font-size: 8px;
-            font-weight: 600;
-            border: 1px solid rgba(34, 139, 34, 0.6);
-            backdrop-filter: blur(5px);
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-        }
-        
-        /* Estilos para tarjetas expandidas */
-        .project-card.expanded {
-            max-width: 450px;
-            min-height: 350px;
-            z-index: 1005;
-            transform: scale(1.05) translateY(-10px);
-            background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.35) 0%, 
-                rgba(248, 248, 250, 0.30) 100%);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
-            border: 2px solid rgba(205, 133, 63, 0.6);
-        }
-        
-        .project-card .expanded-content {
-            display: none;
-            margin-top: 15px;
-            padding: 15px;
-            background: linear-gradient(135deg,
-                rgba(255, 255, 255, 0.2) 0%,
-                rgba(248, 248, 250, 0.15) 100%);
-            border-radius: 10px;
-            border-left: 4px solid #CD853F;
-            backdrop-filter: blur(10px);
-        }
-        
-        .project-card.expanded .expanded-content {
-            display: block;
-            animation: fadeInUp 0.3s ease-out;
-        }
-        
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .expanded-details {
+        /* El script pone cursor:pointer en línea, pero la tarjeta no navega: no fingir un enlace */
+        .project-card, .project-card * { cursor: default !important; }
+
+        .project-media { display: flex; flex-direction: column; gap: 14px; }
+        .project-image.photo-frame { aspect-ratio: 1666 / 732; }
+        .project-media .tags { margin-top: 0; }
+
+        .project-info { display: flex; flex-direction: column; min-width: 0; }
+        .card .project-info .meta { margin: 0 0 4px; }
+        .card h2.project-title { font-size: 26px; margin-bottom: 10px; }
+        .card .project-description { margin: 0 0 12px; font-size: 16.5px; line-height: 1.5; color: var(--ink-soft); }
+        .card .features-title {
+            margin: 0 0 8px;
             font-size: 13px;
-            color: #2c3e50;
-            line-height: 1.5;
-            margin-bottom: 12px;
             font-weight: 600;
-            background: rgba(255, 255, 255, 0.3);
-            padding: 8px;
-            border-radius: 6px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--ink-soft);
         }
-        
-        .expanded-features {
-            list-style: none;
-            padding: 0;
-            margin: 12px 0;
-        }
-        
-        .expanded-features li {
-            font-size: 12px;
-            color: #2c3e50;
-            margin: 6px 0;
-            padding: 4px 0 4px 20px;
-            position: relative;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
-            padding-left: 25px;
-            transition: background 0.2s ease;
-        }
-        
-        .expanded-features li:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-        
-        .expanded-features li:before {
-            content: "✓";
-            position: absolute;
-            left: 8px;
-            color: #CD853F;
-            font-weight: bold;
-            font-size: 14px;
-        }
-        
-        .close-btn {
-            position: absolute;
-            top: 8px;
-            right: 12px;
-            background: linear-gradient(135deg, 
-                rgba(205, 133, 63, 0.9) 0%, 
-                rgba(160, 82, 45, 0.9) 100%);
-            color: white;
-            border: none;
+        .project-info .list { gap: 3px; }
+        .project-info .list li { font-size: 15.5px; line-height: 1.45; color: var(--ink); }
+
+        .live-dot {
+            display: inline-block;
+            width: 9px;
+            height: 9px;
+            margin-right: 6px;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            display: none;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            transition: all 0.2s ease;
-            /* Prevent any events from bubbling up */
-            pointer-events: auto !important;
-            isolation: isolate;
-            z-index: 1006;
+            background: var(--leaf);
+            vertical-align: 1px;
         }
-        
-        .close-btn:hover {
-            background: linear-gradient(135deg, 
-                rgba(139, 69, 19, 0.95) 0%, 
-                rgba(101, 67, 33, 0.95) 100%);
-            transform: scale(1.1);
-            box-shadow: 0 3px 12px rgba(139, 69, 19, 0.4);
+
+        .coming-soon {
+            margin: 10px 2px 0;
+            font-size: 15px;
+            color: var(--ink-soft);
         }
-        
-        .project-card.expanded .close-btn {
-            display: block;
-            animation: fadeIn 0.3s ease-out 0.2s both;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+
+        /* El botón cerrar solo existe para el script (la tarjeta no se expande) */
+        .project-card .close-btn { display: none; }
     </style>
 </head>
-<body>
+<body class="screen">
     <div class="interactive-screen">
-        <div class="content-section">
-            <div class="screen-header">
-                <h1>My Public Projects</h1>
-            </div>
-            
+        <div class="tricolor"></div>
+        <header class="screen-header">
+            <p class="overline">Projects</p>
+            <h1>My Public Projects</h1>
+        </header>
+
+        <main class="screen-body content-section">
             <div class="projects-grid">
-                <div class="project-card portfolio-3d" data-category="web">
-                    <button class="close-btn">×</button>
-                    <div class="project-image">
-                        <img src="assets/media/pictures/picturesOfSometingElse/ImagenModelo3D.png" alt="Portfolio 3D Interactivo" />
-                    </div>
-                    <div class="project-title">Interactive 3D Portfolio</div>
-                    <div class="project-description">
-                        This is more than a portfolio, it's a piece of my life converted into code. Every line of Three.js reflects my passion for creating experiences that connect with people. I developed this 3D world because I believe technology should be human, emotional, and memorable. Here I don't just show my technical skills, but also my way of seeing development: as an art that combines creativity, innovation, and a personal touch that makes a difference.
-                    </div>
-                    <div class="mini-tech-tags">
-                        <span class="mini-tech-tag">Three.js</span>
-                        <span class="mini-tech-tag">Blender</span>
-                        <span class="mini-tech-tag">WebGL</span>
-                        <span class="mini-tech-tag">GSAP</span>
-                        <span class="mini-tech-tag">JavaScript</span>
-                        <span class="mini-tech-tag">GLSL</span>
-                    </div>
-                    <div class="expanded-content">
-                        <div class="expanded-details">
-                            <strong>Complete Description:</strong> This portfolio represents the evolution from traditional presentation to an immersive 3D experience. Developed from scratch with Three.js, it includes an innovative navigation system that allows users to explore my projects and skills interactively. The implementation includes custom shaders, dynamic lighting, and mobile device optimizations.
+                <article class="card project-card portfolio-3d" data-category="web">
+                    <button class="close-btn" type="button" aria-label="Close">×</button>
+                    <div class="project-media">
+                        <div class="project-image photo-frame">
+                            <img src="assets/media/pictures/picturesOfSometingElse/ImagenModelo3D.png" alt="Interactive 3D Portfolio">
                         </div>
-                        <div class="expanded-details">
-                            <strong>Technologies:</strong> Three.js, WebGL, CSS3DRenderer, JavaScript ES6, GLSL Shaders, Webpack
+                        <div class="tags">
+                            <span class="tag">Three.js</span>
+                            <span class="tag">WebGL</span>
+                            <span class="tag">CSS3DRenderer</span>
+                            <span class="tag">GLSL</span>
+                            <span class="tag">GSAP</span>
+                            <span class="tag">Blender</span>
+                            <span class="tag">JavaScript</span>
                         </div>
-                        <ul class="expanded-features">
-                            <li>Real-time 3D rendering with performance optimization</li>
-                            <li>Intuitive navigation system with smooth transitions</li>
-                            <li>Interactive 3D models with basic physics</li>
+                    </div>
+                    <div class="project-info">
+                        <p class="meta"><span class="live-dot"></span>Live &middot; you're exploring it right now</p>
+                        <h2 class="project-title">Interactive 3D Portfolio</h2>
+                        <p class="project-description">More than a portfolio: a piece of my life turned into code. Built from scratch with Three.js, because I believe technology should be human, emotional and memorable.</p>
+                        <p class="features-title">Highlights</p>
+                        <ul class="list">
+                            <li>Real-time 3D rendering, optimized for performance</li>
+                            <li>Navigation with smooth camera transitions</li>
                             <li>Fluid animations with CSS3D and GSAP</li>
-                            <li>Responsive design adapted for mobile and tablets</li>
-                            <li>Progressive asset loading system</li>
-                            <li>Optimized cross-browser compatibility</li>
+                            <li>Custom shaders and dynamic lighting</li>
+                            <li>Responsive on mobile and tablets</li>
+                            <li>Progressive asset loading</li>
                         </ul>
                     </div>
-                </div>
-                
-                <!-- Espacios vacíos manteniendo el mismo layout de grid -->
-                <div class="project-card empty-card" style="visibility: hidden;">
-                    <button class="close-btn">×</button>
-                    <div class="project-title">Future Project</div>
-                    <div class="project-description">Space reserved for upcoming projects</div>
-                </div>
-                
-                <div class="project-card empty-card" style="visibility: hidden;">
-                    <button class="close-btn">×</button>
-                    <div class="project-title">Future Project</div>
-                    <div class="project-description">Space reserved for upcoming projects</div>
-                </div>
-                
-                <div class="project-card empty-card" style="visibility: hidden;">
-                    <button class="close-btn">×</button>
-                    <div class="project-title">Future Project</div>
-                    <div class="project-description">Space reserved for upcoming projects</div>
-                </div>
-                
-                <div class="project-card empty-card" style="visibility: hidden;">
-                    <button class="close-btn">×</button>
-                    <div class="project-title">Future Project</div>
-                    <div class="project-description">Space reserved for upcoming projects</div>
-                </div>
-                
-                <div class="project-card empty-card" style="visibility: hidden;">
-                    <button class="close-btn">×</button>
-                    <div class="project-title">Future Project</div>
-                    <div class="project-description">Space reserved for upcoming projects</div>
-                </div>
+                </article>
             </div>
-        </div>
+            <p class="coming-soon">☕ More public projects are on the way.</p>
+        </main>
+        <div class="wayuu-band"></div>
     </div>
 
     <script>

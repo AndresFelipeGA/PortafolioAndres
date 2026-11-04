@@ -4,303 +4,129 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile</title>
+    <link rel="stylesheet" href="assets/css/screens.css">
     <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: url('assets/media/pictures/picturesOfSometingElse/ContactBack.jpg') center center / cover no-repeat,
-                        linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #ffffff;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
+        /* Iframe de 765 x 606 px (ver index.html). Las subpáginas se cargan en
+           #contentIframe y heredan la rotación aplicada a este body. */
+        .profile-main { display: flex; flex-direction: column; height: 100%; }
+        .screen-body { display: flex; flex-direction: column; overflow: hidden; }
+
+        .cards-grid {
+            flex: 1 1 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            min-height: 0;
         }
 
-        /* Transparency layer over the background */
-        html::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            z-index: 1;
-            pointer-events: none;
-        }
-        
-        .main-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            box-sizing: border-box;
-            position: relative;
-            z-index: 2;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 20px;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
-        
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            color: #ffffff;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-            font-weight: bold;
-        }
-        
-        .header p {
-            font-size: 1.2em;
-            opacity: 0.9;
-            margin: 0;
-        }
-        
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 25px;
-            max-width: 650px;
-            width: 100%;
-            padding: 20px;
-        }
-        
-        /* Adjustments for 3 cards layout */
-        .cards-grid .card:nth-child(3) {
-            grid-column: 1 / -1;
-            max-width: 400px;
-            margin: 0 auto;
-        }
-        
-        .card {
-            background: rgba(255, 255, 255, 0.35);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border-radius: 20px;
-            padding: 25px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            position: relative;
-            overflow: hidden;
-            min-height: 150px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            /* Ensure that the entire card is clickable */
+        /* Toda la tarjeta es el objetivo táctil (los clics reenviados desde la
+           escena 3D deben caer siempre en la tarjeta, no en sus hijos) */
+        .cards-grid .card {
+            padding: 24px 22px;
+            gap: 10px;
             user-select: none;
             -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
+            border-top-width: 6px;
         }
-        
-        .card * {
-            /* Make all internal elements part of the click */
-            pointer-events: none;
-            user-select: none;
-        }
-        
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
-        
-        .card:hover::before {
-            left: 100%;
-        }
-        
-        .card:hover {
-            transform: translateY(-8px) scale(1.03);
-            background: rgba(255, 255, 255, 0.55);
-            border: 2px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-        }
-        
-        .card:active {
-            transform: translateY(-4px) scale(1.01);
-            background: rgba(255, 255, 255, 0.3);
-        }
-        
-        .card-content {
-            width: 100%;
-            height: 100%;
+        .cards-grid .card * { pointer-events: none; user-select: none; }
+        .experience-card { border-top-color: var(--co-yellow); }
+        .skills-card { border-top-color: var(--co-blue); }
+        .certifications-card { border-top-color: var(--co-red); }
+
+        .nav-card .icon {
+            width: 60px;
+            height: 60px;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
             align-items: center;
-            gap: 15px;
-            /* Ensure that content does not interfere with clicks */
-            pointer-events: none;
+            justify-content: center;
+            border-radius: 50%;
+            background: #EFE5D6;
+            font-size: 30px;
+            margin-bottom: 6px;
         }
-        
-        .card-icon {
-            font-size: 3.2em;
-            margin-bottom: 8px;
-            display: block;
-            line-height: 1;
+        .nav-card .title { font-size: 25px; }
+        .nav-card .desc { font-size: 16px; line-height: 1.45; }
+        .nav-card .arrow {
+            display: inline-flex;
+            align-items: center;
+            min-height: var(--tap);
+            font-size: 16px;
         }
-        
-        .card-title {
-            font-size: 1.5em;
-            font-weight: bold;
-            margin-bottom: 8px;
-            color: #ffffff;
-            line-height: 1.2;
+
+        .hint {
+            flex: 0 0 auto;
+            margin: 16px 0 0;
+            font-size: 15px;
+            color: var(--ink-soft);
+            text-align: center;
         }
-        
-        .card-description {
-            font-size: 0.95em;
-            opacity: 0.9;
-            line-height: 1.4;
-            max-width: 90%;
-        }
-        
-        .experience-card {
-            background: linear-gradient(135deg, rgba(252, 209, 22, 0.25), rgba(252, 209, 22, 0.15));
-            border: 2px solid rgba(252, 209, 22, 0.4);
-        }
-        
-        .skills-card {
-            background: linear-gradient(135deg, rgba(12, 71, 162, 0.25), rgba(12, 71, 162, 0.15));
-            border: 2px solid rgba(12, 71, 162, 0.4);
-        }
-        
-        .certifications-card {
-            background: linear-gradient(135deg, rgba(206, 17, 38, 0.25), rgba(206, 17, 38, 0.15));
-            border: 2px solid rgba(206, 17, 38, 0.4);
-        }
-        
-        .credits-card {
-            background: linear-gradient(135deg, rgba(156, 39, 176, 0.2), rgba(156, 39, 176, 0.1));
-        }
-        
-        .animate-float {
-            animation: float 6s ease-in-out infinite;
-        }
-        
-        .animate-float:nth-child(2) { animation-delay: -1s; }
-        .animate-float:nth-child(3) { animation-delay: -2s; }
-        .animate-float:nth-child(4) { animation-delay: -3s; }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
-        }
-        
-        .back-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(255, 255, 255, 0.3);
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 1em;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-            display: none; /* Initially hidden */
-            z-index: 3;
-        }
-        
-        .back-button:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.05);
-        }
-        
-        /* Iframe container for navigation */
+
+        /* Botón usado por navigateTo()/goBack(); queda debajo del iframe
+           (cada subpágina trae su propio botón volver). */
+        .back-button { display: none; position: absolute; z-index: 1; }
+
+        /* Contenedor de las subpáginas */
         .iframe-container {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            inset: 0;
+            background: var(--paper);
             display: none;
             z-index: 1000;
         }
-        
-        .iframe-container iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
+        .iframe-container iframe { display: block; width: 100%; height: 100%; border: none; }
     </style>
 </head>
-<body>
-    <button class="back-button" onclick="goBack()">← Back</button>
-    
-    <div class="main-container" id="mainContainer">
-        <div class="header">
-            <h1>My Profile</h1>
-            <p>Discover my skills and professional experience</p>
-        </div>
-        
-        <div class="cards-grid">
-            <div class="card experience-card animate-float" onclick="navigateTo('skills.html')" data-page="skills.html">
-                <div class="card-content">
-                    <div class="card-icon">💼</div>
-                    <div class="card-title">Experience</div>
-                    <div class="card-description">My professional journey and featured projects</div>
+<body class="screen">
+    <button class="back-button btn btn-ghost" onclick="goBack()" aria-hidden="true" tabindex="-1">&larr; Back</button>
+
+    <div class="profile-main" id="mainContainer">
+        <div class="tricolor"></div>
+        <header class="screen-header">
+            <p class="overline">Profile</p>
+            <h1>My professional profile</h1>
+            <p class="lead">Where I've worked, what I use and what I've studied.</p>
+        </header>
+
+        <main class="screen-body">
+            <div class="cards-grid">
+                <div class="card nav-card experience-card" role="button" tabindex="0" onclick="navigateTo('experience.html')" data-page="experience.html">
+                    <span class="icon">💼</span>
+                    <span class="title">Experience</span>
+                    <span class="desc">My professional journey and featured projects</span>
+                    <span class="arrow">Open &rarr;</span>
                 </div>
-            </div>
-            
-            <div class="card skills-card animate-float" onclick="navigateTo('experience.html')" data-page="experience.html">
-                <div class="card-content">
-                    <div class="card-icon">⚡</div>
-                    <div class="card-title">Skills</div>
-                    <div class="card-description">Technologies and tools I master</div>
+
+                <div class="card nav-card skills-card" role="button" tabindex="0" onclick="navigateTo('skills.html')" data-page="skills.html">
+                    <span class="icon">⚡</span>
+                    <span class="title">Skills</span>
+                    <span class="desc">Technologies and tools I work with</span>
+                    <span class="arrow">Open &rarr;</span>
                 </div>
-            </div>
-            
-            <div class="card certifications-card animate-float" onclick="navigateTo('certifications.html')" data-page="certifications.html">
-                <div class="card-content">
-                    <div class="card-icon">🏆</div>
-                    <div class="card-title">Certifications</div>
-                    <div class="card-description">Courses and certificates obtained</div>
+
+                <div class="card nav-card certifications-card" role="button" tabindex="0" onclick="navigateTo('certifications.html')" data-page="certifications.html">
+                    <span class="icon">🏆</span>
+                    <span class="title">Certifications</span>
+                    <span class="desc">Courses and certificates obtained</span>
+                    <span class="arrow">Open &rarr;</span>
                 </div>
-            </div>
-            
-            <!-- 
-            <div class="card credits-card animate-float" onclick="navigateTo('credits.html')" data-page="credits.html">
-                <div class="card-content">
-                    <div class="card-icon">✨</div>
-                    <div class="card-title">Créditos</div>
-                    <div class="card-description">Agradecimientos y reconocimientos</div>
+
+                <!--
+                <div class="card nav-card credits-card" role="button" tabindex="0" onclick="navigateTo('credits.html')" data-page="credits.html">
+                    <span class="icon">✨</span>
+                    <span class="title">Credits</span>
+                    <span class="desc">Thanks and acknowledgements</span>
+                    <span class="arrow">Open &rarr;</span>
                 </div>
+                -->
             </div>
-            -->
-        </div>
+            <p class="hint">Tap a card to open it</p>
+        </main>
+        <div class="wayuu-band"></div>
     </div>
-    
+
     <!-- Iframe container for navigation -->
     <div class="iframe-container" id="iframeContainer">
-        <iframe id="contentIframe" src=""></iframe>
+        <iframe id="contentIframe" src="" title="Profile section"></iframe>
     </div>
 
     <script>
@@ -391,9 +217,29 @@
                         currentTarget: e.currentTarget
                     });
                     
-                    if (page) {
+                    // The 3D scene (index.html) forwards clicks to this iframe as
+                    // synthetic (untrusted) events whose X coordinate is mirrored
+                    // (it uses iframeWidth - x), so the element that receives the
+                    // event is the horizontal mirror of the card the user actually
+                    // touched. Un-mirror X to find the card that is really visible
+                    // there. Real (trusted) clicks/keyboard go straight to the card.
+                    let targetPage = page;
+                    if (!e.isTrusted && e.clientX) {
+                        const hit = document.elementFromPoint(window.innerWidth - e.clientX, e.clientY);
+                        const visibleCard = hit && hit.closest ? hit.closest('.card') : null;
+                        targetPage = visibleCard ? visibleCard.getAttribute('data-page') : null;
+                    }
+
+                    if (targetPage) {
+                        navigateTo(targetPage);
+                    }
+                });
+
+                // Keyboard support (cards are role="button")
+                card.addEventListener('keydown', function(e) {
+                    if ((e.key === 'Enter' || e.key === ' ') && page) {
+                        e.preventDefault();
                         navigateTo(page);
-                    } else {
                     }
                 });
                 

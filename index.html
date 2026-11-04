@@ -2799,6 +2799,7 @@
             lastCameraTarget.copy(controls.target);
             
             controls.addEventListener('start', function() {
+                releaseMobileScreenFocus();
                 // Usuario empezó a interactuar - siempre permitir esto
                 isUserActuallyMoving = false;
                 movementStartTime = Date.now();
@@ -4203,21 +4204,95 @@
         // el campo horizontal es mucho más angosto y las pantallas quedaban cortadas.
         // Se amplía el FOV vertical para que el ancho visible sea igual al de 16:9.
         // En PC no cambia nada (FOV 45).
-        function applyResponsiveFov() {
+        // FOV "normal" para el tamaño de ventana actual (sin zoom a pantalla)
+        function responsiveBaseFov() {
             // Constantes locales: init() se ejecuta antes de que el script llegue
             // a esta línea, así que no pueden ser const de nivel superior (TDZ).
             const BASE_FOV = 45;
             const REFERENCE_ASPECT = 16 / 9;
             const aspect = window.innerWidth / window.innerHeight;
-            camera.aspect = aspect;
             if (isMobile && aspect < REFERENCE_ASPECT) {
                 const halfFovRad = THREE.MathUtils.degToRad(BASE_FOV / 2);
-                camera.fov = THREE.MathUtils.radToDeg(
+                return THREE.MathUtils.radToDeg(
                     2 * Math.atan(Math.tan(halfFovRad) * REFERENCE_ASPECT / aspect));
-            } else {
-                camera.fov = BASE_FOV;
             }
+            return BASE_FOV;
+        }
+        
+        function applyResponsiveFov() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.fov = responsiveBaseFov();
+            if (window.fovTransition) window.fovTransition = null;
             camera.updateProjectionMatrix();
+        }
+        
+        // ---- Zoom a pantalla en celular -------------------------------------
+        // Al llegar a una pantalla con un botón, en celular la pantalla quedaba
+        // ocupando ~50% del ancho. Se anima el FOV para que la pantalla que quedó
+        // en el centro ocupe casi todo el ancho; al girar o elegir otro botón se
+        // vuelve al FOV normal. Solo celular; en PC no hace nada.
+        function animateFovTo(targetFov, durationMs) {
+            window.fovTransition = {
+                from: camera.fov, to: targetFov,
+                start: performance.now(), duration: durationMs || 450
+            };
+        }
+        
+        function stepFovTransition() {
+            const tr = window.fovTransition;
+            if (!tr) return;
+            const k = Math.min((performance.now() - tr.start) / tr.duration, 1);
+            camera.fov = tr.from + (tr.to - tr.from) * easeInOutCubic(k);
+            camera.updateProjectionMatrix();
+            if (k >= 1) window.fovTransition = null;
+        }
+        
+        // Pantalla CSS3D que la cámara tiene enfrente (cerca y en el centro de la vista)
+        function findFocusedScreen() {
+            const scenes = [css3dScene, window.aboutMeScene, window.aboutMeDuplicateScene,
+                window.aboutMe2Scene, window.projectsScene, window.contactScene, window.communityScene];
+            let best = null;
+            const center = new THREE.Vector3();
+            scenes.forEach(function(sc) {
+                if (!sc) return;
+                sc.traverse(function(obj) {
+                    if (!obj.isCSS3DObject || !obj.element) return;
+                    obj.getWorldPosition(center);
+                    const dist = camera.position.distanceTo(center);
+                    if (dist > 12) return;
+                    const ndc = center.clone().project(camera);
+                    if (ndc.z > 1 || Math.abs(ndc.x) > 0.5 || Math.abs(ndc.y) > 0.5) return;
+                    // La más cercana gana: detrás de Contact, en la misma línea de visión,
+                    // está la pantalla del menú de café y antes se elegía esa.
+                    const score = dist;
+                    if (!best || score < best.score) best = { obj: obj, dist: dist, score: score };
+                });
+            });
+            return best;
+        }
+        
+        function focusMobileScreen() {
+            if (!isMobile) return;
+            const hit = findFocusedScreen();
+            if (!hit) return;
+            const el = hit.obj.element;
+            const worldWidth = (parseFloat(el.style.width) || el.offsetWidth) * hit.obj.scale.x;
+            const worldHeight = (parseFloat(el.style.height) || el.offsetHeight) * hit.obj.scale.y;
+            const margin = 1.08; // ~4% de aire a cada lado
+            const aspect = camera.aspect;
+            // FOV vertical para que quepa a lo ancho y a lo alto
+            const vFovForWidth = 2 * Math.atan((worldWidth * margin / 2) / (hit.dist * aspect));
+            const vFovForHeight = 2 * Math.atan((worldHeight * margin / 2) / hit.dist);
+            let target = THREE.MathUtils.radToDeg(Math.max(vFovForWidth, vFovForHeight));
+            target = Math.min(target, responsiveBaseFov()); // solo acercar, nunca alejar
+            target = Math.max(target, 15);
+            animateFovTo(target, 500);
+        }
+        
+        function releaseMobileScreenFocus() {
+            if (!isMobile) return;
+            const base = responsiveBaseFov();
+            if (Math.abs(camera.fov - base) > 0.01 || window.fovTransition) animateFovTo(base, 400);
         }
         
         function onWindowResize() {
@@ -4995,6 +5070,7 @@
                         if (cameraAnimation._momentumClearedFor !== cameraAnimation.startTime) {
                             cameraAnimation._momentumClearedFor = cameraAnimation.startTime;
                             clearOrbitMomentum();
+                            releaseMobileScreenFocus();
                         }
                         
                         const elapsed = Date.now() - cameraAnimation.startTime;
@@ -5042,7 +5118,8 @@
                             camera.lookAt(currentTarget);
                         } else {
                             // Animación completa
-                            cameraAnimation.enabled = false;
+                            // (cameraAnimation.enabled se pone en false más abajo, después de
+                            // sincronizar OrbitControls con la pose final)
                             
                             // NUEVO: Marcar que acaba de terminar una animación
                             animationJustFinished = true;
@@ -5067,6 +5144,17 @@
                             // OrbitControls los corregía de golpe al llegar. Se amplía el rango
                             // solo lo necesario hasta que el usuario vuelva al rango normal.
                             allowCurrentPolarAngle();
+                            
+                            // Sincronizar el estado interno de OrbitControls con la pose final
+                            // MIENTRAS la animación sigue marcada como activa. Si no, el primer
+                            // update() posterior comparaba contra la pose de ANTES de la animación,
+                            // emitía 'change' y el detector de "movimiento real" apagaba la
+                            // pantalla recién abierta (Box, Projects...).
+                            controls.update();
+                            cameraAnimation.enabled = false;
+                            
+                            // Celular: acercar hasta que la pantalla ocupe casi todo el ancho
+                            focusMobileScreen();
                             
                             // Mostrar las coordenadas si estaban visibles antes
                             if (coordinatesVisible) {
@@ -5110,6 +5198,9 @@
                     // Actualizar visibilidad de community basada en la orientación de la cámara
                     updateCommunityVisibility();
 
+                    // Transición de FOV (zoom a pantalla en celular)
+                    stepFovTransition();
+                    
                     // Render bajo demanda: si nada cambió, no redibujar (el último frame
                     // sigue en pantalla y es idéntico). Ver assets/scripts/render-scheduler.js
                     if (window.RenderScheduler &&
@@ -5772,7 +5863,7 @@
                     
                     // Crear un iframe con el tamaño original
                     const iframe = document.createElement('iframe');
-                    iframe.style.width = '800px';
+                    iframe.style.width = '604px'; // = 606 x aspecto del plano: evita deformar el texto
                     iframe.style.height = '606px'; // Aumentado un 1.1% verticalmente (600 * 1.011 = 606) - reducido un 18.9% del 20% original
                     iframe.style.border = 'none';
                     iframe.style.overflow = 'hidden';
@@ -5781,7 +5872,7 @@
                     
                     // Crear un elemento div para contener el iframe
                     const div = document.createElement('div');
-                    div.style.width = '800px';
+                    div.style.width = '604px'; // mismo ancho que el iframe
                     div.style.height = '606px'; // Aumentado un 1.1% verticalmente
                     div.style.backgroundColor = 'transparent';
                     div.style.overflow = 'hidden';
@@ -5791,7 +5882,7 @@
                     const cssObject = new THREE.CSS3DObject(div);
                     
                     // Calcular la escala adecuada basada en el tamaño real del plano
-                    const scaleX = width / 800;
+                    const scaleX = width / 604;
                     const scaleY = height / 606; // Ajustado para la nueva altura
                     
                     // Aumentar la escala vertical en un 1.1% adicional para cubrir los huecos
@@ -5936,7 +6027,7 @@
             
             // Crear un iframe duplicado
             const iframeDuplicate = document.createElement('iframe');
-            iframeDuplicate.style.width = '800px';
+            iframeDuplicate.style.width = '765px'; // = 606 x aspecto del plano: evita deformar el texto
             iframeDuplicate.style.height = '606px';
             iframeDuplicate.style.border = 'none';
             iframeDuplicate.style.overflow = 'hidden';
@@ -5945,7 +6036,7 @@
             
             // Crear un elemento div para contener el iframe duplicado
             const divDuplicate = document.createElement('div');
-            divDuplicate.style.width = '800px';
+            divDuplicate.style.width = '765px'; // mismo ancho que el iframe
             divDuplicate.style.height = '606px';
             divDuplicate.style.backgroundColor = 'transparent';
             divDuplicate.style.overflow = 'hidden';
@@ -5955,7 +6046,7 @@
             const cssObjectDuplicate = new THREE.CSS3DObject(divDuplicate);
             
             // Calcular la escala adecuada basada en el tamaño real del plano duplicado
-            const scaleX = width / 800;
+            const scaleX = width / 765;
             const scaleY = height / 606;
             const verticalScaleAdjustment = 1.011;
             
@@ -6418,7 +6509,7 @@
                     
                     // Crear un iframe con el tamaño original
                     const iframe = document.createElement('iframe');
-                    iframe.style.width = '800px';
+                    iframe.style.width = '884px'; // = 606 x aspecto del plano: evita deformar el texto
                     iframe.style.height = '606px';
                     iframe.style.border = 'none';
                     iframe.style.overflow = 'hidden';
@@ -6428,7 +6519,7 @@
                     
                     // Crear un elemento div para contener el iframe
                     const div = document.createElement('div');
-                    div.style.width = '800px';
+                    div.style.width = '884px'; // mismo ancho que el iframe
                     div.style.height = '606px';
                     div.style.backgroundColor = 'transparent';
                     div.style.overflow = 'hidden';
@@ -6439,7 +6530,7 @@
                     const cssObject = new THREE.CSS3DObject(div);
                     
                     // Calcular la escala adecuada basada en el tamaño real del plano
-                    const scaleX = width / 800;
+                    const scaleX = width / 884;
                     const scaleY = height / 606;
                     
                     // Aumentar la escala vertical en un 1.1% adicional para cubrir los huecos
@@ -6800,7 +6891,7 @@
                     
                     // Crear un iframe con el tamaño estándar (igual que projects)
                     const iframe = document.createElement('iframe');
-                    iframe.style.width = '800px';
+                    iframe.style.width = '1024px'; // = 606 x aspecto del plano: evita deformar el texto
                     iframe.style.height = '606px';
                     iframe.style.border = 'none';
                     iframe.style.overflow = 'hidden';
@@ -6810,7 +6901,7 @@
                     
                     // Crear un elemento div para contener el iframe
                     const div = document.createElement('div');
-                    div.style.width = '800px';
+                    div.style.width = '1024px'; // mismo ancho que el iframe
                     div.style.height = '606px';
                     div.style.backgroundColor = 'transparent';
                     div.style.overflow = 'hidden';
@@ -6821,7 +6912,7 @@
                     const cssObject = new THREE.CSS3DObject(div);
                     
                     // Calcular la escala adecuada basada en el tamaño real del plano
-                    const scaleX = width / 800;
+                    const scaleX = width / 1024;
                     const scaleY = height / 606;
                     
                     // Aumentar la escala vertical en un 1.1% adicional para cubrir los huecos
@@ -7316,7 +7407,7 @@
             
             // Crear un iframe con community.html
             const iframe = document.createElement('iframe');
-            iframe.style.width = '800px';
+            iframe.style.width = '993px'; // = 606 x aspecto del plano: evita deformar el texto
             iframe.style.height = '606px';
             iframe.style.border = 'none';
             iframe.style.overflow = 'hidden';
@@ -7325,7 +7416,7 @@
             
             // Crear un elemento div para contener el iframe
             const div = document.createElement('div');
-            div.style.width = '800px';
+            div.style.width = '993px'; // mismo ancho que el iframe
             div.style.height = '606px';
             div.style.backgroundColor = 'transparent';
             div.style.overflow = 'hidden';
@@ -7335,7 +7426,7 @@
             const cssObject = new THREE.CSS3DObject(div);
             
             // Calcular la escala adecuada
-            const scaleX = width / 800;
+            const scaleX = width / 993;
             const scaleY = height / 606;
             const verticalScaleAdjustment = 1.011;
             

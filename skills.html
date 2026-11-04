@@ -4,184 +4,113 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skills</title>
+    <link rel="stylesheet" href="assets/css/screens.css">
     <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
-            color: #ffffff;
-            overflow: hidden;
-        }
-        
-        .container {
-            padding: 15px 20px 10px 20px;
-            max-width: 100%;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            box-sizing: border-box;
-        }
-        
-        h1 {
-            font-size: 2.3em;
-            text-align: center;
-            margin-bottom: 15px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            flex-shrink: 0;
-        }
-        
+        /* Se carga dentro de #contentIframe de box.html (765 x 606 px) y hereda
+           la rotación de su body, por eso aquí no se aplica ninguna transformación. */
         .skills-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(3, 1fr);
+            grid-template-columns: repeat(3, 1fr);
+            grid-auto-rows: 1fr;
             gap: 12px;
-            flex: 1;
-            min-height: 0;
-            max-height: calc(100vh - 100px);
-            padding: 0 5px;
-        }
-        
-        .skill-category {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            display: flex;
-            flex-direction: column;
             height: 100%;
-            box-sizing: border-box;
         }
-        
-        .skill-title {
-            font-size: 1.1em;
-            font-weight: bold;
-            margin-bottom: 10px;
-            text-align: center;
-            flex-shrink: 0;
-        }
-        
-        .skill-list {
-            line-height: 1.35;
-            opacity: 0.9;
-            font-size: 0.82em;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-around;
-        }
-        
-        /* Botón de volver minimalista */
-        .back-button {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            width: 50px;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            cursor: pointer;
+        .skill { padding: 16px 16px; }
+        .skill h2 {
             display: flex;
             align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            z-index: 1000;
-            font-size: 20px;
-            color: white;
+            gap: 8px;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--line);
+            font-size: 18px;
+            letter-spacing: -0.01em;
+            line-height: 1.2;
         }
-        
-        .back-button:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.1);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-        
-        .back-button::before {
-            content: '←';
-            font-weight: bold;
-        }
+        .skill-icon { font-size: 18px; line-height: 1; }
+        .skill .list { gap: 3px; }
+        .skill .list li { font-size: 15.5px; line-height: 1.4; color: var(--ink); }
     </style>
 </head>
-<body>
-    <button class="back-button" onclick="goBackToBox()" title="Back to menu"></button>
-    
-    <div class="container">
-        <h1>⚡ My Skills</h1>
-        
+<body class="screen">
+    <div class="tricolor"></div>
+    <button class="back-btn" onclick="goBackToBox()" title="Back to menu" aria-label="Back to menu">&larr;</button>
+    <header class="screen-header with-back">
+        <p class="overline">Profile &middot; Skills</p>
+        <h1>My skills</h1>
+    </header>
+
+    <main class="screen-body">
         <div class="skills-grid">
-            <div class="skill-category">
-                <div class="skill-title">💻 Frontend</div>
-                <div class="skill-list">
-                    • JavaScript (ES6+)<br>
-                    • HTML5 & CSS3<br>
-                    • Three.js<br>
-                    • React.js<br>
-                    • Responsive Design
-                </div>
-            </div>
-            
-            <div class="skill-category">
-                <div class="skill-title">⚙️ Backend</div>
-                <div class="skill-list">
-                    • Python<br>
-                    • Node.js<br>
-                    • Express.js<br>
-                    • REST APIs<br>
-                    • Microservices
-                </div>
-            </div>
-            
-            <div class="skill-category">
-                <div class="skill-title">🗄️ Data Engineering</div>
-                <div class="skill-list">
-                    • PostgreSQL & MySQL<br>
-                    • ETL Pipelines<br>
-                    • YFlow<br>
-                    • SQL Optimization<br>
-                    • Data Integration
-                </div>
-            </div>
-            
-            <div class="skill-category">
-                <div class="skill-title">🛠️ DevOps & Tools</div>
-                <div class="skill-list">
-                    • Docker<br>
-                    • Git & GitHub<br>
-                    • VS Code<br>
-                    • PowerShell<br>
-                    • SendGrid API
-                </div>
-            </div>
-            
-            <div class="skill-category">
-                <div class="skill-title">📋 Methodologies</div>
-                <div class="skill-list">
-                    • Agile/SCRUM<br>
-                    • CI/CD<br>
-                    • TDD<br>
-                    • Process Automation<br>
-                    • Data Modeling
-                </div>
-            </div>
-            
-            <div class="skill-category">
-                <div class="skill-title">🤝 Soft Skills</div>
-                <div class="skill-list">
-                    • Teamwork<br>
-                    • Effective Communication<br>
-                    • Problem Solving<br>
-                    • Mentoring & Training<br>
-                    • Adaptability
-                </div>
-            </div>
+            <section class="card skill">
+                <h2><span class="skill-icon" aria-hidden="true">💻</span>Frontend</h2>
+                <ul class="list">
+                    <li>JavaScript (ES6+)</li>
+                    <li>HTML5 &amp; CSS3</li>
+                    <li>Three.js</li>
+                    <li>React.js</li>
+                    <li>Responsive Design</li>
+                </ul>
+            </section>
+
+            <section class="card skill">
+                <h2><span class="skill-icon" aria-hidden="true">⚙️</span>Backend</h2>
+                <ul class="list">
+                    <li>Python</li>
+                    <li>Node.js</li>
+                    <li>Express.js</li>
+                    <li>REST APIs</li>
+                    <li>Microservices</li>
+                </ul>
+            </section>
+
+            <section class="card skill">
+                <h2><span class="skill-icon" aria-hidden="true">🗄️</span>Data Engineering</h2>
+                <ul class="list">
+                    <li>PostgreSQL &amp; MySQL</li>
+                    <li>ETL Pipelines</li>
+                    <li>YFlow</li>
+                    <li>SQL Optimization</li>
+                    <li>Data Integration</li>
+                </ul>
+            </section>
+
+            <section class="card skill">
+                <h2><span class="skill-icon" aria-hidden="true">🛠️</span>DevOps &amp; Tools</h2>
+                <ul class="list">
+                    <li>Docker</li>
+                    <li>Git &amp; GitHub</li>
+                    <li>VS Code</li>
+                    <li>PowerShell</li>
+                    <li>SendGrid API</li>
+                </ul>
+            </section>
+
+            <section class="card skill">
+                <h2><span class="skill-icon" aria-hidden="true">📋</span>Methodologies</h2>
+                <ul class="list">
+                    <li>Agile/SCRUM</li>
+                    <li>CI/CD</li>
+                    <li>TDD</li>
+                    <li>Process Automation</li>
+                    <li>Data Modeling</li>
+                </ul>
+            </section>
+
+            <section class="card skill">
+                <h2><span class="skill-icon" aria-hidden="true">🤝</span>Soft Skills</h2>
+                <ul class="list">
+                    <li>Teamwork</li>
+                    <li>Effective Communication</li>
+                    <li>Problem Solving</li>
+                    <li>Mentoring &amp; Training</li>
+                    <li>Adaptability</li>
+                </ul>
+            </section>
         </div>
-    </div>
-    
+    </main>
+    <div class="wayuu-band"></div>
+
     <script>
         function goBackToBox() {
             // Communicate to parent iframe to go back to box.html

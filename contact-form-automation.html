@@ -4,278 +4,130 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact Form - Automation</title>
+    <link rel="icon" type="image/png" href="assets/media/icons/typeOfCoffes/cafeNumeroUno.png">
+    <link rel="stylesheet" href="assets/css/screens.css">
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: white;
-            color: #333;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
+        /* Iframe de 1000 x 600 px (ver index.html) - mismo layout en los 6 formularios */
+        .form-header { display: flex; align-items: center; gap: 24px; padding-bottom: 12px; }
+        .form-header .header-text { flex: 1 1 auto; min-width: 0; }
+        .form-header h1 { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 12px; }
+        .form-header .lead { max-width: none; }
+        .popular-badge {
+            display: inline-flex;
             align-items: center;
+            min-height: 28px;
+            padding: 2px 12px;
+            border-radius: 999px;
+            background: var(--co-yellow);
+            color: var(--ink);
+            font: 700 14px/1 var(--font-body);
+            letter-spacing: 0;
         }
-        
-        .contact-container {
-            width: 100%;
-            height: 100%;
-            padding: 20px;
-            box-sizing: border-box;
+        .service-thumb {
+            flex: 0 0 84px;
+            height: 84px;
             display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-        
-        /* Botón de regreso en la esquina superior izquierda */
-        .back-corner-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            width: 40px;
-            height: 40px;
-            background-color: rgba(166, 124, 82, 0.8);
+            align-items: center;
+            justify-content: center;
             border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            background: #EFE5D6;
+        }
+        .service-icon { max-width: 58px; max-height: 62px; object-fit: contain; }
+
+        /* El form envuelve cuerpo + pie para que los botones sigan dentro del <form> */
+        .contact-form { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; margin: 0; }
+        .form-body { padding-top: 6px; padding-bottom: 16px; }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.15fr;
+            gap: 20px 28px;
+            height: 100%;
+        }
+        .form-column { display: flex; flex-direction: column; gap: 16px; min-height: 0; }
+        .form-column-wide .field { flex: 1 1 auto; min-height: 0; }
+        .form-column-wide textarea { flex: 1 1 auto; min-height: 120px; }
+        .field label { font-size: 15px; }
+        .field .req { color: var(--clay); margin-left: 2px; }
+        .field input, .field select, .field textarea { min-height: 54px; font-size: 16px; border-color: #D9C8B1; }
+        .field select {
+            -webkit-appearance: none;
+            appearance: none;
+            padding-right: 44px;
             cursor: pointer;
-            z-index: 100;
-            transition: all 0.2s ease;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' fill='none' stroke='%236F4E37' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
         }
-        
-        .back-corner-button:hover {
-            background-color: rgba(111, 78, 55, 0.9);
-            transform: scale(1.1);
-        }
-        
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {
-                transform: translateY(0);
-            }
-            40% {
-                transform: translateY(-10px);
-            }
-            60% {
-                transform: translateY(-5px);
-            }
-        }
-        
-        .form-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .form-header h1 {
-            margin: 0;
-            color: #5D4037;
-            font-size: 24px;
-        }
-        
-        .form-header .service-icon {
-            width: 80px;
-            height: 80px;
-            object-fit: contain;
-            margin: 10px auto;
-            display: block;
-        }
-        
-        .form-header .service-description {
-            font-size: 14px;
-            color: #7D5A50;
-            text-align: center;
-            margin: 10px 0;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        .contact-form {
-            max-width: 1000px;
-            width: 90%;
-            margin: 0 auto;
-            background: #f9f9f9;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        
-        .form-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 20px;
-        }
-        
-        .form-column {
-            flex: 1;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #5D4037;
-        }
-        
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 15px;
-            box-sizing: border-box;
-        }
-        
-        .form-group textarea {
-            height: 120px;
-            resize: vertical;
-        }
-        
-        .form-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-        }
-        
-        .back-button {
-            background: #E0E0E0;
-            color: #5D4037;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
-        
-        .submit-button {
-            background: linear-gradient(135deg, #6F4E37, #A67C52);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
-        
-        .submit-button:disabled {
-            background: #cccccc;
-            color: #666666;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .back-button:hover, .submit-button:hover {
-            transform: scale(1.05);
-        }
-        
-        .back-button:active, .submit-button:active {
-            transform: scale(0.98);
-        }
-        
-        .back-icon {
-            margin-right: 5px;
-            font-size: 16px;
-        }
-        
-        /* Campos específicos para cada servicio */
-        .service-specific-fields {
-            border-top: 1px solid #ddd;
-            margin-top: 15px;
-            padding-top: 15px;
-        }
-        
-        .checkbox-group {
-            margin-top: 10px;
-        }
-        
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        
-        .checkbox-item input[type="checkbox"] {
-            width: auto;
-            margin-right: 10px;
-        }
+
+        .form-buttons { gap: 14px; }
+        .form-note { margin: 0 auto 0 0; font-size: 15px; color: var(--ink-soft); }
+        .back-icon { font-size: 18px; line-height: 1; }
+        .submit-button { min-width: 180px; min-height: 52px; font-size: 17px; }
+        .back-button { min-height: 52px; font-size: 17px; }
+        .form-note-error { color: var(--co-red); font-weight: 600; }
     </style>
 </head>
-<body>
-    <div class="contact-container">
-        <div class="back-corner-button" onclick="window.location.href='cafe-menu.html'">←</div>
-        <div class="form-header">
-            <h1>Contact Form</h1>
-            <img src="assets/media/icons/typeOfCoffes/cafeNumeroDos.png" alt="Automation" class="service-icon" id="serviceIcon">
-            <h2 id="serviceTitle">Automation</h2>
-            <p class="service-description" id="serviceDescription">Optimization of repetitive tasks through scripts and bots for your business.</p>
+<body class="screen">
+    <div class="tricolor"></div>
+    <header class="screen-header with-back form-header">
+        <button type="button" class="back-btn back-corner-button" onclick="window.location.href='cafe-menu.html'" aria-label="Back to menu">&larr;</button>
+        <div class="header-text">
+            <p class="overline">Contact form &middot; Coffee menu</p>
+            <h1 id="serviceTitle">Automation</h1>
+            <p class="lead service-description" id="serviceDescription">Optimization of repetitive tasks through scripts and bots for your business.</p>
         </div>
-        
-        <form class="contact-form" id="contactForm" action="https://api.staticforms.xyz/submit" method="POST" onsubmit="return handleFormSubmit(event)">
-            <!-- Static Forms Configuration -->
-            <input type="hidden" name="accessKey" value="sf_0eh8kk35hfj689nf30hhdnm9">
-            <input type="hidden" name="subject" value="New contact form: Automation">
-            <input type="hidden" name="replyTo" value="andresfgonzalezaristizabal@outlook.com">
-            <input type="hidden" name="redirectTo" value="cafe-menu.html?sent=true">
-            <input type="hidden" name="service" value="Automation">
-            <div class="form-row">
-                <div class="form-column">
-                    <!-- Left column -->
-                    <div class="form-group">
-                        <label for="nombre">Full Name*</label>
-                        <input type="text" id="nombre" name="nombre" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="tipoAutomatizacion">Automation Type*</label>
-                        <select id="tipoAutomatizacion" name="tipoAutomatizacion" required>
-                            <option value="">Select an option</option>
-                            <option value="procesos">Process Automation</option>
-                            <option value="datos">Data Extraction and Processing</option>
-                            <option value="reportes">Report Generation</option>
-                            <option value="bots">Bots and Virtual Assistants</option>
-                            <option value="rpa">RPA (Robotic Process Automation)</option>
-                            <option value="otro">Other</option>
-                        </select>
-                    </div>
+        <span class="service-thumb"><img src="assets/media/icons/typeOfCoffes/cafeNumeroDos.png" alt="Automation" class="service-icon" id="serviceIcon"></span>
+    </header>
+
+    <form class="contact-form" id="contactForm" action="https://api.staticforms.xyz/submit" method="POST" onsubmit="return handleFormSubmit(event)">
+        <!-- Static Forms Configuration -->
+        <input type="hidden" name="accessKey" value="sf_0eh8kk35hfj689nf30hhdnm9">
+        <input type="hidden" name="subject" value="New contact form: Automation">
+        <input type="hidden" name="replyTo" value="andresfgonzalezaristizabal@outlook.com">
+        <input type="hidden" name="redirectTo" value="cafe-menu.html?sent=true">
+        <input type="hidden" name="service" value="Automation">
+        <main class="screen-body form-body">
+            <div class="form-grid">
+            <div class="form-column">
+                <div class="field form-group">
+                    <label for="nombre">Full Name<span class="req" aria-hidden="true">*</span></label>
+                    <input type="text" id="nombre" name="nombre" required>
                 </div>
-                
-                <div class="form-column">
-                    <!-- Right column -->
-                    <div class="form-group">
-                        <label for="email">Email Address*</label>
-                        <input type="email" id="email" name="email" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="descripcionProceso">Process Description to Automate*</label>
-                        <textarea id="descripcionProceso" name="descripcionProceso" required placeholder="Describe the current process you want to automate, including steps, current time it takes and expected results"></textarea>
-                    </div>
+                <div class="field form-group">
+                    <label for="email">Email Address<span class="req" aria-hidden="true">*</span></label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="field form-group">
+                    <label for="tipoAutomatizacion">Automation Type<span class="req" aria-hidden="true">*</span></label>
+                    <select id="tipoAutomatizacion" name="tipoAutomatizacion" required>
+                        <option value="">Select an option</option>
+                        <option value="procesos">Process Automation</option>
+                        <option value="datos">Data Extraction and Processing</option>
+                        <option value="reportes">Report Generation</option>
+                        <option value="bots">Bots and Virtual Assistants</option>
+                        <option value="rpa">RPA (Robotic Process Automation)</option>
+                        <option value="otro">Other</option>
+                    </select>
                 </div>
             </div>
-            
-            <div class="form-buttons">
-                <button type="button" class="back-button" onclick="window.location.href='cafe-menu.html'">
-                    <span class="back-icon">←</span> Back to Menu
-                </button>
-                <a href="cafe-menu.html?sent=true" class="submit-button" style="display: inline-block; text-decoration: none; text-align: center; line-height: 1;">Send Request</a>
+            <div class="form-column form-column-wide">
+                <div class="field form-group">
+                    <label for="descripcionProceso">Process Description to Automate<span class="req" aria-hidden="true">*</span></label>
+                    <textarea id="descripcionProceso" name="descripcionProceso" required placeholder="Describe the current process you want to automate, including steps, current time it takes and expected results"></textarea>
+                </div>
             </div>
-        </form>
-    </div>
+            </div>
+        </main>
+
+        <footer class="screen-footer form-buttons">
+            <p class="form-note" id="formNote" role="status" aria-live="polite">All fields are required.</p>
+            <button type="button" class="btn btn-ghost back-button" onclick="window.location.href='cafe-menu.html'">
+                <span class="back-icon">&larr;</span> Back to Menu
+            </button>
+            <button type="submit" class="btn submit-button">Send Request</button>
+        </footer>
+    </form>
+    <div class="wayuu-band"></div>
 
     <script>
         // Function to validate the form and enable/disable the submit button
@@ -297,35 +149,41 @@
             submitButton.disabled = !isValid;
         }
         
-        // Function to handle form submission and redirect immediately
-        function handleFormSubmit(event) {
-            event.preventDefault(); // Prevent default form submission
-            
+        // Envía el formulario a staticforms y SOLO muestra "enviado" si la respuesta es correcta.
+        // (Antes "Send Request" era un enlace a cafe-menu.html?sent=true: nunca se enviaba nada.)
+        async function handleFormSubmit(event) {
+            event.preventDefault();
             const form = document.getElementById('contactForm');
-            const formData = new FormData(form);
-            
-            // Show loading state
             const submitButton = form.querySelector('.submit-button');
+            const note = document.getElementById('formNote');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return false;
+            }
+            const originalText = submitButton.textContent;
             submitButton.textContent = 'Sending...';
             submitButton.disabled = true;
-            
-            // Redirect immediately to avoid StaticForms ugly page
-            window.location.href = 'cafe-menu.html?sent=true';
-            
-            // Try to send form data in background (may fail due to redirect)
             try {
-                fetch('https://api.staticforms.xyz/submit', {
+                const response = await fetch(form.action, {
                     method: 'POST',
-                    body: formData,
-                    keepalive: true // Try to keep request alive after redirect
-                }).catch(error => {
-                    console.log('Form submission error (expected due to redirect):', error);
+                    body: new FormData(form),
+                    headers: { 'Accept': 'application/json' }
                 });
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok || data.success === false) {
+                    throw new Error(data.message || ('HTTP ' + response.status));
+                }
+                window.location.href = 'cafe-menu.html?sent=true';
             } catch (error) {
-                console.log('Fetch error (expected due to redirect):', error);
+                console.error('Form submission failed:', error);
+                if (note) {
+                    note.textContent = 'Could not send your request. Please try again or write on WhatsApp.';
+                    note.classList.add('form-note-error');
+                }
+                submitButton.textContent = originalText;
+                submitButton.disabled = false;
             }
-            
-            return false; // Prevent default form submission
+            return false;
         }
         
         // Configure the page on load

@@ -1,0 +1,345 @@
+/* ==========================================================================
+   "Café de origen" — sistema de diseño de las pantallas 3D del portafolio
+   --------------------------------------------------------------------------
+   Estas páginas se muestran DENTRO de iframes de tamaño fijo que la escena 3D
+   coloca sobre monitores/cuadros (CSS3DRenderer):
+     - 800 x 606 px  (about-me, box, projects, contact-main, community y subpáginas)
+     - 1000 x 600 px (cafe-menu, contact-form-*, thank-you)
+   La pantalla se ve pequeña y en perspectiva, así que:
+     - texto base >= 17px, títulos grandes, mucho contraste
+     - objetivos táctiles >= 48px (también se usan en celular)
+     - sin depender de :hover (en táctil no existe)
+     - todo debe caber sin scroll; si no, scroll solo dentro de .screen-body
+   Temática colombiana sobria: papel crema + café tostado, franja tricolor con
+   las proporciones reales de la bandera (2:1:1) y una banda geométrica
+   inspirada en el tejido wayuu. Sin imágenes de stock: todo es CSS.
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    /* Base */
+    --paper: #F7F1E8;          /* crema, café con leche */
+    --paper-raised: #FFFCF7;   /* tarjetas */
+    --ink: #2B1D14;            /* café tostado (texto principal) */
+    --ink-soft: #6B5646;       /* texto secundario */
+    --line: #E6DAC8;           /* bordes suaves */
+    --coffee: #6F4E37;         /* acción principal */
+    --coffee-dark: #4E3524;
+
+    /* Acentos de la bandera (usar con moderación) */
+    --co-yellow: #F2B705;
+    --co-blue: #1F3C88;
+    --co-red: #C8102E;
+
+    /* Acentos de la tierra */
+    --leaf: #2F6B3B;           /* verde cafetal */
+    --clay: #B5562F;           /* terracota */
+
+    --radius: 16px;
+    --radius-sm: 10px;
+    --tap: 48px;               /* tamaño mínimo táctil */
+    --pad: 36px;               /* margen interno de la pantalla */
+
+    --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+    --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 17px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* --------------------------------------------------------------------------
+   Estructura de una pantalla
+   <body class="screen">
+     <div class="tricolor"></div>
+     <header class="screen-header"> overline + h1 + lead </header>
+     <main class="screen-body"> ... </main>
+     <footer class="screen-footer"> acciones </footer>
+   </body>
+   -------------------------------------------------------------------------- */
+.screen {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+}
+
+/* Franja tricolor: amarillo 50%, azul 25%, rojo 25% (proporción de la bandera) */
+.tricolor {
+    flex: 0 0 auto;
+    height: 8px;
+    background: linear-gradient(90deg,
+        var(--co-yellow) 0 50%,
+        var(--co-blue) 50% 75%,
+        var(--co-red) 75% 100%);
+}
+
+/* Banda geométrica inspirada en el tejido wayuu (rombos) */
+.wayuu-band {
+    height: 14px;
+    background:
+        linear-gradient(135deg, var(--clay) 25%, transparent 25%) -7px 0 / 14px 14px,
+        linear-gradient(225deg, var(--clay) 25%, transparent 25%) -7px 0 / 14px 14px,
+        linear-gradient(315deg, var(--clay) 25%, transparent 25%) 0 0 / 14px 14px,
+        linear-gradient(45deg, var(--clay) 25%, transparent 25%) 0 0 / 14px 14px;
+    opacity: 0.22;
+}
+
+.screen-header {
+    flex: 0 0 auto;
+    padding: 26px var(--pad) 14px;
+    position: relative;
+}
+
+.screen-header.with-back { padding-left: calc(var(--pad) + var(--tap) + 14px); }
+
+.overline {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 6px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+}
+
+.overline::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--co-yellow);
+    box-shadow: 12px 0 0 var(--co-blue), 24px 0 0 var(--co-red);
+    margin-right: 26px;
+}
+
+.screen-header h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 38px;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+}
+
+.lead {
+    margin: 8px 0 0;
+    font-size: 17px;
+    color: var(--ink-soft);
+    max-width: 60ch;
+}
+
+.screen-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 8px var(--pad) 20px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
+}
+
+.screen-footer {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 14px var(--pad) 22px;
+    border-top: 1px solid var(--line);
+}
+
+/* --------------------------------------------------------------------------
+   Componentes
+   -------------------------------------------------------------------------- */
+.card {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+}
+
+.card h2, .card h3 {
+    margin: 0 0 6px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--ink);
+}
+.card h2 { font-size: 24px; }
+.card h3 { font-size: 20px; }
+.card p { margin: 0; color: var(--ink-soft); }
+
+.meta {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--clay);
+    letter-spacing: 0.02em;
+}
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.stack { display: flex; flex-direction: column; gap: 14px; }
+
+/* Tarjeta navegable (toda la tarjeta es el objetivo táctil) */
+.nav-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 120px;
+    padding: 22px;
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    color: inherit;
+    text-decoration: none;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease;
+}
+.nav-card:hover, .nav-card:focus-visible {
+    border-color: var(--coffee);
+    box-shadow: 0 6px 18px rgba(78, 53, 36, 0.12);
+    transform: translateY(-2px);
+    outline: none;
+}
+.nav-card:active { transform: translateY(0); }
+.nav-card .icon { font-size: 30px; line-height: 1; }
+.nav-card .title { font-family: var(--font-display); font-weight: 700; font-size: 22px; }
+.nav-card .desc { font-size: 15px; color: var(--ink-soft); }
+.nav-card .arrow { margin-top: auto; font-weight: 600; color: var(--coffee); font-size: 15px; }
+
+/* Etiquetas (tecnologías, etc.) */
+.tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: #EFE5D6;
+    color: var(--coffee-dark);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* Botones */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: var(--tap);
+    padding: 0 22px;
+    border-radius: 999px;
+    border: 1.5px solid var(--coffee);
+    background: var(--coffee);
+    color: var(--paper-raised);
+    font: 600 16px/1 var(--font-body);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background .2s ease, border-color .2s ease, transform .1s ease;
+}
+.btn:hover, .btn:focus-visible { background: var(--coffee-dark); border-color: var(--coffee-dark); outline: none; }
+.btn:active { transform: scale(0.98); }
+.btn-ghost { background: transparent; color: var(--coffee); }
+.btn-ghost:hover, .btn-ghost:focus-visible { background: #EFE5D6; color: var(--coffee-dark); }
+.btn-whatsapp { background: #1F8F4E; border-color: #1F8F4E; }
+.btn-whatsapp:hover, .btn-whatsapp:focus-visible { background: #186F3D; border-color: #186F3D; }
+.btn[disabled] { opacity: .55; cursor: not-allowed; }
+
+/* Botón volver (siempre arriba a la izquierda) */
+.back-btn {
+    position: absolute;
+    top: 30px;
+    left: var(--pad);
+    width: var(--tap);
+    height: var(--tap);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1.5px solid var(--line);
+    background: var(--paper-raised);
+    color: var(--ink);
+    font-size: 22px;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    z-index: 5;
+}
+.back-btn:hover, .back-btn:focus-visible { border-color: var(--coffee); color: var(--coffee); outline: none; }
+
+/* Formularios */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 14px; font-weight: 600; color: var(--ink); }
+.field input, .field select, .field textarea {
+    width: 100%;
+    min-height: var(--tap);
+    padding: 12px 14px;
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--paper-raised);
+    color: var(--ink);
+    font: 400 16px/1.4 var(--font-body); /* >=16px evita el zoom automático de iOS */
+}
+.field textarea { min-height: 96px; resize: none; }
+.field input:focus, .field select:focus, .field textarea:focus {
+    outline: none;
+    border-color: var(--coffee);
+    box-shadow: 0 0 0 3px rgba(111, 78, 55, 0.15);
+}
+.field ::placeholder { color: #A8978A; }
+
+/* Lista con marcadores tricolor */
+.list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.list li { position: relative; padding-left: 18px; color: var(--ink-soft); }
+.list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: .62em;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--co-yellow);
+}
+.list li:nth-child(3n+2)::before { background: var(--co-blue); }
+.list li:nth-child(3n)::before { background: var(--co-red); }
+
+/* Foto con marco */
+.photo-frame {
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: #EFE5D6;
+}
+.photo-frame img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+/* Texto resaltado */
+.highlight {
+    background: linear-gradient(transparent 60%, rgba(242, 183, 5, 0.45) 60%);
+    font-weight: 600;
+    color: var(--ink);
+}
+
+/* Accesibilidad: respetar "reducir movimiento" */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+}

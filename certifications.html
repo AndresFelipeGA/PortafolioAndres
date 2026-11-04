@@ -4,151 +4,94 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Certifications</title>
+    <link rel="stylesheet" href="assets/css/screens.css">
     <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%);
-            color: #ffffff;
-            overflow: hidden;
+        /* Se carga dentro de #contentIframe de box.html (765 x 606 px) y hereda
+           la rotación de su body, por eso aquí no se aplica ninguna transformación. */
+        .certs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-auto-rows: 1fr;
+            gap: 14px;
+            height: 100%;
         }
-        
-        .container {
-            padding: 20px;
-            max-width: 100%;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            box-sizing: border-box;
-        }
-        
-        h1 {
-            font-size: 2.5em;
-            text-align: center;
-            margin-bottom: 20px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            flex-shrink: 0;
-        }
-        
-        .certification-item {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            flex: 1;
-            min-height: 0;
-        }
-        
+        .cert { display: flex; flex-direction: column; padding: 18px 20px; }
         .cert-icon {
-            font-size: 3em;
-            min-width: 60px;
-        }
-        
-        .cert-content {
-            flex: 1;
-        }
-        
-        .cert-title {
-            font-size: 1.5em;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-        
-        .cert-issuer {
-            font-size: 1.2em;
-            opacity: 0.8;
-            margin-bottom: 5px;
-        }
-        
-        .cert-date {
-            font-size: 1em;
-            opacity: 0.7;
-        }
-        
-        /* Botón de volver minimalista */
-        .back-button {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            width: 50px;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            cursor: pointer;
+            width: 52px;
+            height: 52px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
-            z-index: 1000;
-            font-size: 20px;
-            color: white;
+            border-radius: 50%;
+            background: #EFE5D6;
+            font-size: 26px;
+            line-height: 1;
+            margin-bottom: 12px;
         }
-        
-        .back-button:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.1);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-        
-        .back-button::before {
-            content: '←';
-            font-weight: bold;
+        .cert h2 { font-size: 21px; line-height: 1.2; margin: 0 0 4px; }
+        .cert .issuer { font-size: 16px; color: var(--ink-soft); }
+        .cert-foot {
+            margin-top: auto;
+            padding-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px 12px;
         }
     </style>
 </head>
-<body>
-    <button class="back-button" onclick="goBackToBox()" title="Back to menu"></button>
-    
-    <div class="container">
-        <h1>🏆 Certifications</h1>
-        
-        <div class="certification-item">
-            <div class="cert-icon">🎓</div>
-            <div class="cert-content">
-                <div class="cert-title">Software Engineering</div>
-                <div class="cert-issuer">Universidad Manuela Beltrán</div>
-                <div class="cert-date">2020 - 2025</div>
-            </div>
+<body class="screen">
+    <div class="tricolor"></div>
+    <button class="back-btn" onclick="goBackToBox()" title="Back to menu" aria-label="Back to menu">&larr;</button>
+    <header class="screen-header with-back">
+        <p class="overline">Profile &middot; Certifications</p>
+        <h1>Certifications</h1>
+    </header>
+
+    <main class="screen-body">
+        <div class="certs">
+            <article class="card cert">
+                <span class="cert-icon" aria-hidden="true">🎓</span>
+                <h2>Software Engineering</h2>
+                <p class="issuer">Universidad Manuela Beltrán</p>
+                <div class="cert-foot">
+                    <span class="meta">2020 &ndash; 2025</span>
+                </div>
+            </article>
+
+            <article class="card cert">
+                <span class="cert-icon" aria-hidden="true">🔧</span>
+                <h2>IBM Data Engineering Professional</h2>
+                <p class="issuer">IBM via Coursera</p>
+                <div class="cert-foot">
+                    <span class="meta">Jan 2025</span>
+                    <span class="tag">Big Data &amp; ETL Pipelines</span>
+                </div>
+            </article>
+
+            <article class="card cert">
+                <span class="cert-icon" aria-hidden="true">🐧</span>
+                <h2>NDG Linux Essentials</h2>
+                <p class="issuer">Cisco Networking Academy</p>
+                <div class="cert-foot">
+                    <span class="meta">Sep 2022</span>
+                    <span class="tag">Linux Admin</span>
+                </div>
+            </article>
+
+            <article class="card cert">
+                <span class="cert-icon" aria-hidden="true">🐍</span>
+                <h2>PCAP: Python Programming</h2>
+                <p class="issuer">Cisco Networking Academy</p>
+                <div class="cert-foot">
+                    <span class="meta">Aug 2021</span>
+                    <span class="tag">OOP &amp; Database Dev</span>
+                </div>
+            </article>
         </div>
-        
-        <div class="certification-item">
-            <div class="cert-icon">🔧</div>
-            <div class="cert-content">
-                <div class="cert-title">IBM Data Engineering Professional</div>
-                <div class="cert-issuer">IBM via Coursera</div>
-                <div class="cert-date">Jan 2025 - Big Data & ETL Pipelines</div>
-            </div>
-        </div>
-        
-        <div class="certification-item">
-            <div class="cert-icon">🐧</div>
-            <div class="cert-content">
-                <div class="cert-title">NDG Linux Essentials</div>
-                <div class="cert-issuer">Cisco Networking Academy</div>
-                <div class="cert-date">Sep 2022 - Linux Admin</div>
-            </div>
-        </div>
-        
-        <div class="certification-item">
-            <div class="cert-icon">🐍</div>
-            <div class="cert-content">
-                <div class="cert-title">PCAP: Python Programming</div>
-                <div class="cert-issuer">Cisco Networking Academy</div>
-                <div class="cert-date">Aug 2021 - OOP & Database Dev</div>
-            </div>
-        </div>
-    </div>
-    
+    </main>
+    <div class="wayuu-band"></div>
+
     <script>
         function goBackToBox() {
             // Communicate to parent iframe to go back to box.html
