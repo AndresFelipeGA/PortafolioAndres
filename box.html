@@ -75,6 +75,9 @@
         }
         .iframe-container iframe { display: block; width: 100%; height: 100%; border: none; }
     </style>
+    <!-- Mismo volteo que aplica el script al cargar, pero desde el primer instante
+         (Safari alcanzaba a mostrar la página sin voltear = invertida en la escena 3D) -->
+    <style>body { transform: rotate(180deg) scaleX(-1); }</style>
 </head>
 <body class="screen">
     <button class="back-button btn btn-ghost" onclick="goBack()" aria-hidden="true" tabindex="-1">&larr; Back</button>

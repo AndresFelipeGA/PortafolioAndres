@@ -19,6 +19,9 @@
         .about-aside { display: flex; flex-direction: column; gap: 12px; }
         .about-aside .photo-frame { height: 240px; }
     </style>
+    <!-- Mismo volteo que aplica el script al cargar, pero desde el primer instante
+         (Safari alcanzaba a mostrar la página sin voltear = invertida en la escena 3D) -->
+    <style>body { transform: rotate(180deg) scaleX(-1); }</style>
 </head>
 <body class="screen">
     <div class="tricolor"></div>

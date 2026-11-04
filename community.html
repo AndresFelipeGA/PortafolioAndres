@@ -33,6 +33,9 @@
         .cta-card p { font-size: 18px; line-height: 1.5; color: var(--ink); }
         .cta-card .btn { margin-top: auto; width: 100%; min-height: 56px; font-size: 18px; }
     </style>
+    <!-- Mismo volteo que aplica el script al cargar, pero desde el primer instante
+         (Safari alcanzaba a mostrar la página sin voltear = invertida en la escena 3D) -->
+    <style>body { transform: rotate(180deg) scaleX(-1); }</style>
 </head>
 <body class="screen">
     <div class="tricolor"></div>

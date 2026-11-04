@@ -59,6 +59,9 @@
         /* El botón cerrar solo existe para el script (la tarjeta no se expande) */
         .project-card .close-btn { display: none; }
     </style>
+    <!-- Mismo volteo que aplica el script al cargar, pero desde el primer instante
+         (Safari alcanzaba a mostrar la página sin voltear = invertida en la escena 3D) -->
+    <style>body { transform: rotate(180deg); }</style>
 </head>
 <body class="screen">
     <div class="interactive-screen">

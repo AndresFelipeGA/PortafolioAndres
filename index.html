@@ -2918,6 +2918,10 @@
             
             // Manejar redimensionamiento de ventana
             window.addEventListener('resize', onWindowResize);
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', onWindowResize);
+            }
+            window.addEventListener('orientationchange', onWindowResize);
             
             // Variable para rastrear si la pantalla está encendida
             window.screenOn = false;
@@ -4300,6 +4304,60 @@
             if (css3dRenderer) {
                 css3dRenderer.setSize(window.innerWidth, window.innerHeight);
             }
+            
+            // Safari/iOS: al cambiar el alto (la barra de Safari se encoge/expande) cambia
+            // la perspectiva CSS3D, pero WebKit no vuelve a dibujar las capas de los iframes
+            // y el HTML quedaba desalineado de su marco. Forzar el redibujo.
+            refreshCss3dLayers();
+            // iOS dispara resize antes de terminar la animación de la barra: repetir.
+            clearTimeout(window.__resizeRefreshTimer);
+            window.__resizeRefreshTimer = setTimeout(function() {
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                if (css3dRenderer) css3dRenderer.setSize(window.innerWidth, window.innerHeight);
+                applyResponsiveFov();
+                refreshCss3dLayers();
+            }, 400);
+        }
+        
+        // Comprueba (barato) que lienzo WebGL, capa CSS3D y ventana tengan el mismo tamaño.
+        function syncRendererSizes() {
+            if (!renderer) return;
+            const w = window.innerWidth, h = window.innerHeight;
+            const glSize = renderer.getSize(window.__glSizeVec || (window.__glSizeVec = new THREE.Vector2()));
+            let mismatch = glSize.x !== w || glSize.y !== h;
+            if (!mismatch && css3dRenderer) {
+                const cssSize = css3dRenderer.getSize();
+                mismatch = cssSize.width !== w || cssSize.height !== h;
+            }
+            if (mismatch) onWindowResize();
+        }
+        
+        // Obliga a CSS3DRenderer a reescribir la transformación de cada pantalla HTML.
+        // CSS3DRenderer solo reescribe el estilo si la matriz cambia, así que se desplaza
+        // cada objeto una millonésima de unidad (invisible) y se restaura en el siguiente
+        // frame: dos reescrituras que hacen que Safari recalcule la capa con la perspectiva
+        // actual.
+        function refreshCss3dLayers() {
+            const scenes = [css3dScene, window.aboutMeScene, window.aboutMeDuplicateScene,
+                window.aboutMe2Scene, window.projectsScene, window.contactScene, window.communityScene];
+            const nudged = [];
+            scenes.forEach(function(sc) {
+                if (!sc) return;
+                sc.traverse(function(obj) {
+                    if (obj.isCSS3DObject) {
+                        obj.position.x += 1e-6;
+                        nudged.push(obj);
+                    }
+                });
+            });
+            if (!nudged.length) return;
+            if (window.RenderScheduler) window.RenderScheduler.wake();
+            requestAnimationFrame(function() {
+                requestAnimationFrame(function() {
+                    nudged.forEach(function(obj) { obj.position.x -= 1e-6; });
+                    if (window.RenderScheduler) window.RenderScheduler.wake();
+                });
+            });
         }
         
         // Función para iniciar la animación de la cámara
@@ -5149,6 +5207,9 @@
                             controls.update();
                             cameraAnimation.enabled = false;
                             
+                            // Safari: asegurar que las capas HTML usan la perspectiva actual
+                            refreshCss3dLayers();
+                            
                             // Celular: acercar hasta que la pantalla ocupe casi todo el ancho
                             // (el propio acercamiento no vuelve a disparar otro)
                             if (cameraAnimation._screenFocusStartTime !== cameraAnimation.startTime) {
@@ -5197,6 +5258,11 @@
                     // Actualizar visibilidad de community basada en la orientación de la cámara
                     updateCommunityVisibility();
 
+                    // iOS cambia el alto de la ventana (barra de Safari) a veces sin evento
+                    // 'resize'; si el lienzo WebGL y la capa CSS3D quedan con tamaños
+                    // distintos, el HTML se proyecta más chico y corrido respecto al marco.
+                    syncRendererSizes();
+                    
                     // Render bajo demanda: si nada cambió, no redibujar (el último frame
                     // sigue en pantalla y es idéntico). Ver assets/scripts/render-scheduler.js
                     if (window.RenderScheduler &&
@@ -5315,6 +5381,7 @@
                 css3dRenderer.setSize(window.innerWidth, window.innerHeight);
                 css3dRenderer.domElement.style.position = 'absolute';
                 css3dRenderer.domElement.style.top = '0';
+                css3dRenderer.domElement.style.left = '0';
                 css3dRenderer.domElement.style.pointerEvents = 'none'; // Evitar que interfiera con los controles
                 document.body.appendChild(css3dRenderer.domElement);
             }
@@ -6078,6 +6145,7 @@
                 css3dRenderer.setSize(window.innerWidth, window.innerHeight);
                 css3dRenderer.domElement.style.position = 'absolute';
                 css3dRenderer.domElement.style.top = '0';
+                css3dRenderer.domElement.style.left = '0';
                 css3dRenderer.domElement.style.pointerEvents = 'none'; // Evitar que interfiera con los controles
                 document.body.appendChild(css3dRenderer.domElement);
             }
@@ -6343,6 +6411,7 @@
                 css3dRenderer.setSize(window.innerWidth, window.innerHeight);
                 css3dRenderer.domElement.style.position = 'absolute';
                 css3dRenderer.domElement.style.top = '0';
+                css3dRenderer.domElement.style.left = '0';
                 css3dRenderer.domElement.style.pointerEvents = 'none'; // Evitar que interfiera con los controles
                 document.body.appendChild(css3dRenderer.domElement);
             }
@@ -6572,6 +6641,7 @@
                 css3dRenderer.setSize(window.innerWidth, window.innerHeight);
                 css3dRenderer.domElement.style.position = 'absolute';
                 css3dRenderer.domElement.style.top = '0';
+                css3dRenderer.domElement.style.left = '0';
                 css3dRenderer.domElement.style.pointerEvents = 'none'; // Evitar que interfiera con los controles
                 document.body.appendChild(css3dRenderer.domElement);
             }
@@ -6967,6 +7037,7 @@
                 css3dRenderer.setSize(window.innerWidth, window.innerHeight);
                 css3dRenderer.domElement.style.position = 'absolute';
                 css3dRenderer.domElement.style.top = '0';
+                css3dRenderer.domElement.style.left = '0';
                 css3dRenderer.domElement.style.pointerEvents = 'none'; // Evitar que interfiera con los controles
                 document.body.appendChild(css3dRenderer.domElement);
             }
@@ -7476,6 +7547,7 @@
                 css3dRenderer.setSize(window.innerWidth, window.innerHeight);
                 css3dRenderer.domElement.style.position = 'absolute';
                 css3dRenderer.domElement.style.top = '0';
+                css3dRenderer.domElement.style.left = '0';
                 css3dRenderer.domElement.style.pointerEvents = 'none';
                 document.body.appendChild(css3dRenderer.domElement);
             }

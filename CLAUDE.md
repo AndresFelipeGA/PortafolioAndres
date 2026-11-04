@@ -95,9 +95,15 @@ Guía viva del proyecto. **Léela antes de tocar código y actualízala al termi
   pantalla 16:9; así las pantallas caben en vertical sin tocar coordenadas. En PC el FOV es 45.
 - Celular: al llegar a una pantalla, `focusMobileScreen()` ACERCA la cámara (traslación, misma
   orientación) con una animación corta para que la pantalla ocupe ~92% del ancho.
-  **Nunca cambiar `camera.fov` después del inicio**: en Safari/iOS las capas CSS3D no se
-  refrescan al cambiar la perspectiva y el HTML queda desalineado del marco (reportado en un
-  iPhone real; la emulación con Chrome NO lo reproduce).
+  (Antes se hacía cambiando el FOV; se sustituyó por precaución con Safari.)
+- **iOS: lienzo WebGL y capa CSS3D deben tener siempre el mismo tamaño.** iOS cambia el alto de
+  la ventana (barra de Safari) a veces SIN evento `resize`, y la capa CSS3D se crea más tarde
+  que el lienzo. Con alturas distintas el HTML se proyecta más chico y corrido respecto a su
+  marco (síntoma real en iPhone: "la pantalla no cubre el cuadro"). `syncRendererSizes()` lo
+  comprueba en cada frame; `refreshCss3dLayers()` fuerza el redibujo de las capas en Safari.
+  Reproducible en Chrome con `tools/qa/size-desync-test.mjs`.
+- Las páginas de pantalla aplican su volteo también en CSS (`<style>body{transform:…}</style>`):
+  si solo lo hace el script, Safari alcanza a mostrarlas sin voltear (se ven invertidas).
 - Al terminar una animación, `controls.update()` se llama mientras `cameraAnimation.enabled`
   sigue en true: si no, el primer update emitía `change` contra la pose previa y el detector de
   "movimiento real" apagaba la pantalla recién abierta.
