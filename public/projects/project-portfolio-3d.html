@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio 3D Interactivo - Detalles</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: url('../../assets/media/pictures/picturesOfSometingElse/coffeBackground.jpg') no-repeat center center;
+            background-size: cover;
+            background-attachment: fixed;
+            height: 100vh;
+            color: #333;
+            font-size: 13px;
+            overflow: hidden;
+        }
+        
+        .container {
+            height: 100vh;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        
+        .back-button {
+            position: fixed !important;
+            top: 20px !important;
+            left: 20px !important;
+            background: linear-gradient(135deg, 
+                rgba(139, 69, 19, 0.9) 0%, 
+                rgba(101, 67, 33, 0.9) 100%) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 50% !important;
+            width: 60px !important;
+            height: 60px !important;
+            font-size: 24px !important;
+            cursor: pointer !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5) !important;
+            transition: all 0.3s ease !important;
+            z-index: 999999 !important;
+            pointer-events: auto !important;
+            user-select: none !important;
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            isolation: isolate !important;
+            transform: none !important;
+        }
+        
+        .back-button:hover {
+            transform: scale(1.2) !important;
+            background: linear-gradient(135deg, 
+                rgba(160, 82, 45, 0.9) 0%, 
+                rgba(139, 69, 19, 0.9) 100%) !important;
+        }
+        
+        .project-card {
+            background: linear-gradient(135deg,
+                rgba(245, 245, 220, 0.95) 0%,
+                rgba(255, 248, 220, 0.90) 100%);
+            border: 3px solid rgba(139, 69, 19, 0.4);
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 900px;
+            width: 95%;
+            height: 90vh;
+            box-shadow: 0 15px 35px rgba(139, 69, 19, 0.3);
+            display: flex;
+            gap: 25px;
+            overflow: hidden;
+        }
+        
+        .left-section {
+            flex: 0 0 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .right-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding-right: 10px;
+        }
+        
+        .project-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 15px;
+            border: 3px solid rgba(139, 69, 19, 0.3);
+            margin-bottom: 20px;
+            box-shadow: 0 8px 20px rgba(139, 69, 19, 0.2);
+        }
+        
+        .project-title {
+            color: #654321;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(139, 69, 19, 0.2);
+            text-align: center;
+        }
+        
+        .project-description {
+            color: #5d4037;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(139, 69, 19, 0.1);
+            border-radius: 12px;
+            border-left: 4px solid #8b4513;
+            text-align: left;
+        }
+        
+        .main-features {
+            color: #5d4037;
+            font-size: 13px;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: rgba(160, 82, 45, 0.1);
+            border-radius: 12px;
+            border-left: 3px solid #a0522d;
+            text-align: left;
+        }
+        
+        .main-features h3 {
+            color: #654321;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .main-features ul {
+            margin: 0;
+            padding-left: 20px;
+            list-style-type: disc;
+        }
+        
+        .main-features li {
+            margin: 6px 0;
+            color: #5d4037;
+            line-height: 1.3;
+        }
+        
+        .tech-stack {
+            background: rgba(139, 69, 19, 0.08);
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 3px solid #8b4513;
+            margin-top: 15px;
+        }
+        
+        .tech-stack h3 {
+            color: #654321;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        
+        .tech-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+        }
+        
+        .tech-tag {
+            background: linear-gradient(135deg, 
+                rgba(139, 69, 19, 0.8) 0%, 
+                rgba(101, 67, 33, 0.8) 100%);
+            color: #f5f5dc;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            border: 1px solid rgba(139, 69, 19, 0.6);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 6px rgba(139, 69, 19, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .tech-tag:hover {
+            background: linear-gradient(135deg, 
+                rgba(160, 82, 45, 0.9) 0%, 
+                rgba(139, 69, 19, 0.9) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(139, 69, 19, 0.4);
+        }
+        
+        .project-description h4 {
+            color: #654321;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        
+        .project-description p {
+            margin-bottom: 12px;
+            text-align: justify;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        
+        .main-features strong {
+            color: #654321;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" id="backButton" 
+            onclick="window.location.href='projects.html'; return false;"
+            onmousedown="window.location.href='projects.html'; return false;"
+            ontouchstart="window.location.href='projects.html'; return false;">←</button>
+    
+    <div class="container">
+        <div class="project-card">
+            <div class="left-section">
+                                <img src="../../assets/media/pictures/picturesOfSometingElse/ImagenModelo3D.png" alt="Portfolio 3D Interactivo" class="project-image">
+                
+                <div class="project-title">Portfolio 3D Interactivo</div>
+                
+                <div class="tech-stack">
+                    <h3>🛠️ Stack Tecnológico</h3>
+                    <div class="tech-grid">
+                        <span class="tech-tag" title="Librería principal para gráficos 3D en el navegador">Three.js</span>
+                        <span class="tech-tag" title="Modelado y diseño 3D profesional">Blender</span>
+                        <span class="tech-tag" title="Renderizado acelerado por hardware">WebGL</span>
+                        <span class="tech-tag" title="Animaciones fluidas y transiciones">GSAP</span>
+                        <span class="tech-tag" title="Lógica de aplicación y interactividad">JavaScript ES6+</span>
+                        <span class="tech-tag" title="Shaders personalizados para efectos visuales">GLSL</span>
+                        <span class="tech-tag" title="Estructura y semántica web">HTML5</span>
+                        <span class="tech-tag" title="Estilos avanzados y animaciones">CSS3</span>
+                        <span class="tech-tag" title="Control de cámaras 3D">OrbitControls</span>
+                        <span class="tech-tag" title="Carga de modelos 3D">GLTFLoader</span>
+                        <span class="tech-tag" title="Gestión de texturas">TextureLoader</span>
+                        <span class="tech-tag" title="Física y colisiones">Cannon.js</span>
+                        <span class="tech-tag" title="Postprocesado y efectos">EffectComposer</span>
+                        <span class="tech-tag" title="Iluminación avanzada">HDR Lighting</span>
+                        <span class="tech-tag" title="Herramientas de desarrollo">Webpack</span>
+                        <span class="tech-tag" title="Servidor de desarrollo">Node.js</span>
+                        <span class="tech-tag" title="Control de versiones">Git</span>
+                        <span class="tech-tag" title="Hosting y deployment">GitHub Pages</span>
+                        <span class="tech-tag" title="Optimización de assets">Draco Compression</span>
+                        <span class="tech-tag" title="Audio espacial 3D">Web Audio API</span>
+                        <span class="tech-tag" title="Detección de dispositivos">Device Detection</span>
+                        <span class="tech-tag" title="Gestión de memoria">Memory Management</span>
+                        <span class="tech-tag" title="Compatibilidad cross-browser">Polyfills</span>
+                        <span class="tech-tag" title="Métricas de rendimiento">Performance API</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="right-section">
+                <div class="project-description">
+                    <h4>📋 Descripción del Proyecto</h4>
+                    <p>Una experiencia inmersiva que combina tecnología y creatividad para mostrar mis proyectos de manera única e interactiva.</p>
+                    
+                    <p>Desarrollado con Three.js, incluye navegación innovadora, modelos optimizados, iluminación dinámica y shaders personalizados.</p>
+                </div>
+                
+                <div class="main-features">
+                    <h3>🚀 Funcionalidades Principales</h3>
+                    <ul>
+                        <li><strong>Navegación 3D Inmersiva:</strong> Controles intuitivos para explorar el modelo</li>
+                        <li><strong>Portfolio Interactivo:</strong> Proyectos con transiciones y animaciones</li>
+                        <li><strong>Información Personal:</strong> Historia y trayectoria profesional</li>
+                        <li><strong>Servicios Profesionales:</strong> Detalle de servicios disponibles</li>
+                        <li><strong>Sistema de Contacto:</strong> Comunicación directa integrada</li>
+                        <li><strong>Optimización Performance:</strong> Carga progresiva y responsive</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        
+        // Variables globales
+        let navigationAttempts = 0;
+        
+        // Función de navegación ultra agresiva
+        function FORCE_NAVIGATION() {
+            navigationAttempts++;
+            
+            try {
+                // Método directo
+                window.location.href = 'projects.html';
+                return true;
+            } catch (e) {
+            }
+            
+            try {
+                // Método alternativo
+                window.location.assign('projects.html');
+                return true;
+            } catch (e) {
+            }
+            
+            try {
+                // Método de ventana
+                window.open('projects.html', '_self');
+                return true;
+            } catch (e) {
+            }
+            
+            // Si todo falla, usar replace
+            try {
+                window.location.replace('projects.html');
+                return true;
+            } catch (e) {
+            }
+            
+            return false;
+        }
+        
+        // Interceptar TODOS los eventos posibles en el área del botón
+        function setupUltraAgressiveInterception() {
+            const events = [
+                'click', 'mousedown', 'mouseup', 'touchstart', 'touchend', 
+                'pointerdown', 'pointerup', 'dblclick'
+            ];
+            
+            // Interceptar en documento completo
+            events.forEach(eventType => {
+                document.addEventListener(eventType, function(e) {
+                    const x = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX);
+                    const y = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY);
+                    
+                    // Área expandida del botón (20-80px desde la esquina)
+                    if (x >= 10 && x <= 90 && y >= 10 && y <= 90) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+                        console.log(`🎯 ${eventType.toUpperCase()} EN ÁREA DE BOTÓN`);
+                        FORCE_NAVIGATION();
+                        return false;
+                    }
+                    
+                    // También si el target es el botón
+                    if (e.target && (e.target.id === 'backButton' || e.target.classList.contains('back-button'))) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+                        console.log(`🎯 ${eventType.toUpperCase()} EN BOTÓN DIRECTO`);
+                        FORCE_NAVIGATION();
+                        return false;
+                    }
+                }, { passive: false, capture: true });
+            });
+        }
+        
+        // Navegación por teclado
+        function setupKeyboardNavigation() {
+            document.addEventListener('keydown', function(e) {
+                const navKeys = ['Escape', 'Backspace', 'Home', 'ArrowLeft'];
+                if (navKeys.includes(e.key)) {
+                    e.preventDefault();
+                    FORCE_NAVIGATION();
+                }
+            }, { passive: false, capture: true });
+        }
+        
+        // Configurar botón específico
+        function setupButton() {
+            const button = document.getElementById('backButton');
+            
+            if (button) {
+                button.onclick = FORCE_NAVIGATION;
+                button.onmousedown = FORCE_NAVIGATION;
+                button.ontouchstart = FORCE_NAVIGATION;
+            }
+        }
+        
+        // Ejecutar TODO inmediatamente
+        setupUltraAgressiveInterception();
+        setupKeyboardNavigation();
+        setupButton();
+        
+        // También después del DOM
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // Aplicar transformación pero mantener botones sin transformar
+            document.body.style.transform = 'rotate(180deg)';
+            
+            const backBtn = document.getElementById('backButton');
+            
+            if (backBtn) {
+                backBtn.style.transform = 'none';
+                backBtn.style.position = 'fixed';
+                backBtn.style.zIndex = '999999';
+            }
+            
+            setupUltraAgressiveInterception();
+            setupKeyboardNavigation();
+            setupButton();
+        });
+        
+        // Auto-navegación de emergencia después de 15 segundos
+        setTimeout(function() {
+            if (navigationAttempts === 0) {
+                FORCE_NAVIGATION();
+            }
+        }, 15000);
+        
+    </script>
+</body>
+</html>

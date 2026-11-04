@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Menu</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: white;
+            color: #333;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            transition: background-color 0.3s ease;
+        }
+        
+        body.dark-background {
+            background-color: #121212;
+            color: #f5f5f5;
+        }
+        
+        .interactive-screen {
+            width: 80%;
+            max-width: 1000px;
+            height: 78%;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        
+        /* Cuando el fondo es negro, hacemos la interfaz más grande */
+        body.dark-background .interactive-screen {
+            width: 90%;
+            max-width: 1200px;
+            height: 88%;
+        }
+        
+        .screen-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .screen-header h1 {
+            margin: 0;
+            color: #5D4037;
+            font-size: 24px;
+        }
+        
+        .coffee-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .coffee-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .coffee-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+        
+        .coffee-item:active {
+            transform: translateY(0px);
+        }
+        
+        .coffee-image {
+            width: 80px;
+            height: 100px;
+            object-fit: contain;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+        }
+        
+        .coffee-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin: 0 0 4px 0;
+            color: #5D4037;
+            text-align: center;
+        }
+        
+        .coffee-description {
+            font-size: 11px;
+            color: #7D5A50;
+            text-align: center;
+            margin: 0;
+            line-height: 1.3;
+        }
+        
+        .coffee-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #C2185B;
+            color: white;
+            font-size: 10px;
+            padding: 3px 6px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        
+        .buttons-row {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        
+        .select-button {
+            background: linear-gradient(135deg, #6F4E37, #A67C52);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .select-button:hover {
+            transform: scale(1.05);
+        }
+        
+        .select-button:active {
+            transform: scale(0.98);
+        }
+        
+        /* Cover Negro para la pantalla de cafe menu */
+        .screen-cover {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000000;
+            z-index: 9999;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+            pointer-events: auto;
+        }
+        
+        .screen-cover.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="interactive-screen">
+        <!-- Cover negro que se muestra por defecto - SIN TEXTO NI BOTONES -->
+        <div class="screen-cover" id="screen-cover"></div>
+        
+        <div class="screen-header">
+            <h1>Select Your Colombian Coffee</h1>
+        </div>
+        
+        <div class="coffee-grid">
+            <!-- Coffee 1 -->
+            <div class="coffee-item" data-service="software">
+                <img src="assets/media/icons/typeOfCoffes/cafeNumeroUno.png" alt="Custom Software Coffee" class="coffee-image">
+                <h3 class="coffee-title">Custom Software</h3>
+                <p class="coffee-description">Personalized web, mobile and desktop systems with full-stack programming.</p>
+            </div>
+            
+            <!-- Coffee 2 -->
+            <div class="coffee-item" data-service="automation">
+                <img src="assets/media/icons/typeOfCoffes/cafeNumeroDos.png" alt="Automation Coffee" class="coffee-image">
+                <h3 class="coffee-title">Automation</h3>
+                <p class="coffee-description">Optimization of repetitive tasks through scripts and bots for your business.</p>
+            </div>
+            
+            <!-- Coffee 3 -->
+            <div class="coffee-item" data-service="consulting">
+                <img src="assets/media/icons/typeOfCoffes/cafeNumeroTres.png" alt="Tech Consulting Coffee" class="coffee-image">
+                <h3 class="coffee-title">Tech Consulting</h3>
+                <p class="coffee-description">Advisory in architecture, development and performance for strategic decisions in technological projects.</p>
+            </div>
+            
+            <!-- Coffee 4 -->
+            <div class="coffee-item" data-service="freelance">
+                <span class="coffee-badge">Popular</span>
+                <img src="assets/media/icons/typeOfCoffes/cafeNumeroCuatro.png" alt="Freelance Services Coffee" class="coffee-image">
+                <h3 class="coffee-title">Freelance Services</h3>
+                <p class="coffee-description">Development of programming solutions and technical services with flexible remote work.</p>
+            </div>
+            
+            <!-- Coffee 5 -->
+            <div class="coffee-item" data-service="web">
+                <img src="assets/media/icons/typeOfCoffes/cafeNumeroCinco.png" alt="Web & E-commerce Coffee" class="coffee-image">
+                <h3 class="coffee-title">Web & E-commerce</h3>
+                <p class="coffee-description">Development of all types of websites and custom e-commerce platforms.</p>
+            </div>
+            
+            <!-- Coffee 6 -->
+            <div class="coffee-item" data-service="mobile">
+                <img src="assets/media/icons/typeOfCoffes/cafeNumeroSeis.png" alt="Mobile App Development Coffee" class="coffee-image">
+                <h3 class="coffee-title">Mobile App Development</h3>
+                <p class="coffee-description">Native and cross-platform mobile applications for iOS and Android with modern frameworks.</p>
+            </div>
+        </div>
+        
+        <div class="buttons-row">
+            <button class="select-button">Select Coffee</button>
+        </div>
+        
+    </div>
+
+    <script>
+        // Function to detect background color and adjust size
+        function adjustSizeBasedOnBackground() {
+            // Get computed background color
+            const bodyBackgroundColor = window.getComputedStyle(document.body).backgroundColor;
+            
+            // Convert color to RGB values
+            const rgbValues = bodyBackgroundColor.match(/\d+/g);
+            
+            if (rgbValues) {
+                const [r, g, b] = rgbValues.map(Number);
+                // Calculate brightness (simplified formula)
+                const brightness = (r + g + b) / 3;
+                
+                // If background is dark (low brightness)
+                if (brightness < 128) {
+                    document.body.classList.add('dark-background');
+                } else {
+                    document.body.classList.remove('dark-background');
+                }
+            }
+        }
+        
+        // Execute on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            adjustSizeBasedOnBackground();
+        });
+        
+        // Also execute if background color changes
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.attributeName === 'style' &&
+                    (mutation.target === document.body || mutation.target === document.documentElement)) {
+                    adjustSizeBasedOnBackground();
+                }
+            });
+        });
+        
+        observer.observe(document.body, { attributes: true, attributeFilter: ['style'] });
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
+        
+        // Variable to store selected service
+        let selectedService = null;
+        
+        // Assign events to coffee items
+        document.querySelectorAll('.coffee-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // Remove previous selection
+                document.querySelectorAll('.coffee-item').forEach(el => {
+                    el.style.border = 'none';
+                });
+                
+                // Mark as selected
+                this.style.border = '2px solid #C2185B';
+                
+                // Save selected service
+                selectedService = this.getAttribute('data-service');
+                
+                // Update button text
+                document.querySelector('.select-button').textContent = 'Select ' + this.querySelector('.coffee-title').textContent;
+            });
+        });
+        
+        // Assign event to selection button
+        document.querySelector('.select-button').addEventListener('click', function() {
+            if (selectedService) {
+                // Redirect to corresponding form based on selected service
+                switch (selectedService) {
+                    case 'software':
+                        window.location.href = 'contact-form-software.html';
+                        break;
+                    case 'automation':
+                        window.location.href = 'contact-form-automation.html';
+                        break;
+                    case 'consulting':
+                        window.location.href = 'contact-form-consulting.html';
+                        break;
+                    case 'freelance':
+                        window.location.href = 'contact-form-freelance.html';
+                        break;
+                    case 'web':
+                        window.location.href = 'contact-form-web.html';
+                        break;
+                    case 'mobile':
+                        window.location.href = 'contact-form-mobile.html';
+                        break;
+                    default:
+                        alert('Please select a service first.');
+                }
+            } else {
+                alert('Please select a service first.');
+            }
+        });
+        
+        // ===============================================
+        // SISTEMA DE COVER NEGRO REACTIVO PARA CAFE MENU
+        // ===============================================
+        
+        // Variables para el control del cover negro
+        const screenCover = document.getElementById('screen-cover');
+        // Function to check if we're returning from a contact form
+        function isReturningFromContactForm() {
+            // Check if the referring page was a contact form
+            return document.referrer && document.referrer.includes('contact-form-');
+        }
+        
+        // Function to check if form was sent successfully
+        function checkFormSent() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('sent') === 'true';
+        }
+        
+        // Success popup function
+        function showSuccessPopup() {
+            // Create popup HTML
+            const popup = document.createElement('div');
+            popup.id = 'success-popup';
+            popup.innerHTML = `
+                <div class="popup-overlay">
+                    <div class="popup-content">
+                        <div class="popup-icon">✓</div>
+                        <h3>Message Sent Successfully!</h3>
+                        <p>Thank you for your interest. I'll get back to you soon.</p>
+                    </div>
+                </div>
+            `;
+            
+            // Add popup styles
+            const style = document.createElement('style');
+            style.textContent = `
+                #success-popup {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 10000;
+                    animation: fadeIn 0.3s ease-out;
+                }
+                
+                .popup-overlay {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.5);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+                
+                .popup-content {
+                    background: white;
+                    padding: 30px;
+                    border-radius: 15px;
+                    text-align: center;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                    max-width: 400px;
+                    margin: 20px;
+                    animation: slideUp 0.3s ease-out;
+                }
+                
+                .popup-icon {
+                    width: 60px;
+                    height: 60px;
+                    background: #4CAF50;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 30px;
+                    color: white;
+                    margin: 0 auto 20px;
+                    animation: checkmark 0.6s ease-out 0.3s both;
+                }
+                
+                .popup-content h3 {
+                    color: #333;
+                    margin: 0 0 10px;
+                    font-size: 1.5em;
+                }
+                
+                .popup-content p {
+                    color: #666;
+                    margin: 0;
+                    line-height: 1.5;
+                }
+                
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                
+                @keyframes slideUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(30px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                
+                @keyframes checkmark {
+                    from {
+                        transform: scale(0);
+                    }
+                    to {
+                        transform: scale(1);
+                    }
+                }
+            `;
+            
+            // Add to page
+            document.head.appendChild(style);
+            document.body.appendChild(popup);
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                popup.style.animation = 'fadeIn 0.3s ease-out reverse';
+                setTimeout(() => {
+                    if (popup.parentNode) {
+                        popup.parentNode.removeChild(popup);
+                    }
+                    if (style.parentNode) {
+                        style.parentNode.removeChild(style);
+                    }
+                }, 300);
+            }, 3000);
+            
+            // Hide on click
+            popup.addEventListener('click', () => {
+                popup.style.animation = 'fadeIn 0.3s ease-out reverse';
+                setTimeout(() => {
+                    if (popup.parentNode) {
+                        popup.parentNode.removeChild(popup);
+                    }
+                    if (style.parentNode) {
+                        style.parentNode.removeChild(style);
+                    }
+                }, 300);
+            });
+        }
+        
+        // Check for form success popup when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            if (checkFormSent()) {
+                // Wait a bit for the page to fully load, then show popup
+                setTimeout(() => {
+                    showSuccessPopup();
+                    // Clean URL without refreshing page
+                    const url = new URL(window.location);
+                    url.searchParams.delete('sent');
+                    window.history.replaceState({}, document.title, url);
+                }, 500);
+            }
+        });
+        
+        // Initial screen state - should start active if returning from contact form
+        let screenActive = isReturningFromContactForm(); // INICIA ACTIVADA si viene de formulario de contacto
+        
+        // Set initial cover state based on screenActive
+        if (screenActive) {
+            screenCover.classList.add('hidden');
+            console.log("🚀 Inicializando cafe-menu.html con cover OCULTO (pantalla activa) - regreso de formulario");
+        } else {
+            screenCover.classList.remove('hidden');
+        }
+        
+        // Check if page is in an iframe
+        function isInIframe() {
+            try {
+                return window.self !== window.top;
+            } catch (e) {
+                return true;
+            }
+        }
+        
+        // Function to activate screen (remove black cover)
+        function turnOnScreen() {
+            screenActive = true;
+            screenCover.classList.add('hidden');
+            
+            // Notificar al padre si está en iframe
+            if (isInIframe()) {
+                try {
+                    window.parent.postMessage({ action: 'cafeMenuScreenTurnedOn' }, '*');
+                } catch (e) {
+                }
+            }
+        }
+        
+        // Function to deactivate screen (show black cover)
+        function turnOffScreen() {
+            screenActive = false;
+            screenCover.classList.remove('hidden');
+            
+            // Notificar al padre si está en iframe
+            if (isInIframe()) {
+                try {
+                    window.parent.postMessage({ action: 'cafeMenuScreenTurnedOff' }, '*');
+                } catch (e) {
+                }
+            }
+        }
+        
+        // Listen for messages from the parent window - SISTEMA REACTIVO
+        window.addEventListener('message', function(event) {
+            
+            if (event.data && event.data.action === 'turnOnScreen') {
+                turnOnScreen();
+            }
+            
+            if (event.data && event.data.action === 'turnOffScreen') {
+                turnOffScreen();
+            }
+            
+            // NUEVOS LISTENERS PARA REACTIVIDAD CON OTROS BOTONES
+            if (event.data && event.data.action === 'buttonPressed') {
+                if (event.data.button === 'services' || event.data.button === 'servicio' || event.data.button === 'cafe') {
+                    turnOnScreen();
+                } else {
+                    turnOffScreen();
+                }
+            }
+            
+            // Escuchar movimiento del usuario
+            if (event.data && event.data.action === 'userMoving') {
+                turnOffScreen();
+            }
+            
+            // Escuchar cualquier actividad del modelo 3D que indique cambio de foco
+            if (event.data && (
+                event.data.action === 'modelRotated' ||
+                event.data.action === 'cameraChanged' ||
+                event.data.action === 'sceneInteraction' ||
+                event.data.action === 'navigationStarted' ||
+                event.data.action === 'realMovementDetected'
+            )) {
+                turnOffScreen();
+            }
+            
+            // Escuchar específicamente movimiento real (no micro-movimientos)
+            if (event.data && event.data.action === 'realMovementDetected') {
+                turnOffScreen();
+            }
+            
+            // Ignorar movimientos menores (hover, micro-movimientos)
+            if (event.data && event.data.action === 'minorMovement') {
+                console.log("📨 Micro-movimiento detectado - IGNORANDO (no apagar pantalla)");
+                // No hacer nada - mantener el estado actual
+            }
+        });
+        
+        // Send ready message to parent
+        if (isInIframe()) {
+            try {
+                window.parent.postMessage({ 
+                    action: 'cafeMenuReady',
+                    screenActive: screenActive
+                }, '*');
+            } catch (e) {
+            }
+        }
+        
+    </script>
+</body>
+</html>

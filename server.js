@@ -224,138 +224,101 @@ const server = http.createServer((req, res) => {
         console.log(`[${requestId}] Secure model request from: ${req.headers.referer || 'direct'}`);
         
         // More flexible validation for Railway deployment
-        // Ultra-permissive validation for deployment compatibility
+        // Enhanced validation for deployment environments
         const referer = req.headers.referer;
         const userAgent = req.headers['user-agent'] || '';
         const host = req.headers.host;
         const origin = req.headers.origin;
         
-        // Only block obvious automated tools/scrapers
-        const isDefinitelyMalicious = userAgent.toLowerCase().includes('wget') ||
-                                     userAgent.toLowerCase().includes('curl') ||
-                                     userAgent.toLowerCase().includes('python-requests') ||
-                                     userAgent.toLowerCase().includes('scrapy') ||
-                                     userAgent.toLowerCase().includes('postman');
+        // Create comprehensive valid patterns for different deployment environments
+        const validPatterns = [
+            // Local development
+            `http://localhost`,
+            `http://127.0.0.1`,
+            `http://${host}`,
+            `https://${host}`,
+            // Railway patterns
+            'https://portafolioandres-production',
+            'railway.app',
+            // Render patterns
+            'https://portafolioandres3d.onrender.com',
+            'onrender.com',
+            // Vercel patterns
+            'vercel.app',
+            // Netlify patterns
+            'netlify.app',
+            // Heroku patterns
+            'herokuapp.com'
+        ];
         
-        // Allow almost everything except definite malicious agents
-        if (isDefinitelyMalicious) {
-            console.log(`[${requestId}] BLOCKED secure model access - Malicious agent detected:`);
+        // Enhanced referer/origin validation
+        const isValidRequest = () => {
+            // Allow requests from same origin
+            if (origin && validPatterns.some(pattern => origin.includes(pattern))) {
+                return true;
+            }
+            
+            // Allow requests with valid referer
+            if (referer && validPatterns.some(pattern => referer.includes(pattern))) {
+                return true;
+            }
+            
+            // Allow requests from same host
+            if (host && (
+                (referer && referer.includes(host)) ||
+                (origin && origin.includes(host))
+            )) {
+                return true;
+            }
+            
+            // Allow direct requests in development (no referer/origin)
+            if (!referer && !origin && host && (
+                host.includes('localhost') ||
+                host.includes('127.0.0.1')
+            )) {
+                return true;
+            }
+            
+            return false;
+        };
+        
+        // Block only obvious malicious requests
+        const isMaliciousAgent = userAgent.toLowerCase().includes('wget') ||
+                                userAgent.toLowerCase().includes('curl') ||
+                                userAgent.toLowerCase().includes('python-requests') ||
+                                userAgent.toLowerCase().includes('scrapy');
+        
+        // Enhanced blocking logic
+        if (isMaliciousAgent || !isValidRequest()) {
+            console.log(`[${requestId}] BLOCKED secure model access:`);
+            console.log(`[${requestId}]   Referer: ${referer || 'none'}`);
+            console.log(`[${requestId}]   Origin: ${origin || 'none'}`);
+            console.log(`[${requestId}]   Host: ${host}`);
             console.log(`[${requestId}]   User-Agent: ${userAgent}`);
+            console.log(`[${requestId}]   Valid request: ${isValidRequest()}`);
+            console.log(`[${requestId}]   Malicious agent: ${isMaliciousAgent}`);
             res.writeHead(403, { 'Content-Type': 'text/plain' });
             res.end('Access denied');
             activeRequests.delete(requestId);
             return;
         }
         
-        // Log successful access for debugging
-        console.log(`[${requestId}] ALLOWED secure model access:`);
-        console.log(`[${requestId}]   Referer: ${referer || 'none'}`);
-        console.log(`[${requestId}]   Origin: ${origin || 'none'}`);
-        console.log(`[${requestId}]   Host: ${host}`);
-        console.log(`[${requestId}]   User-Agent: ${userAgent.substring(0, 100)}...`);
-        
         console.log(`[${requestId}] ALLOWED secure model access - Valid referer and user agent`);
         
         // Serve the protected model with HTTP compression
         const modelPath = path.join(__dirname, 'private-assets', 'xk9m7p4q2w8n5v3z1r6t8y4u9i2o7e5a3s6d8f1g4h7j9k2l5m8n1b6v4c7x9z2q5w8e3r6.glb');
         
-        console.log(`[${requestId}] Looking for model at: ${modelPath}`);
-        console.log(`[${requestId}] Current directory: ${__dirname}`);
-        
-        // Check if private-assets directory exists
-        const privateAssetsDir = path.join(__dirname, 'private-assets');
-        console.log(`[${requestId}] Checking private-assets directory: ${privateAssetsDir}`);
-        
-        try {
-            const dirContents = fs.readdirSync(privateAssetsDir);
-            console.log(`[${requestId}] private-assets directory contents:`, dirContents);
-        } catch (dirErr) {
-            console.error(`[${requestId}] private-assets directory not found or not readable:`, dirErr.message);
-        }
-        
-        // Try to serve local model first
         fs.access(modelPath, fs.constants.F_OK, (err) => {
             if (err) {
-                console.log(`[${requestId}] Local model not found, serving from external URL`);
-                
-                // Redirect to external model URL (GitHub raw or similar)
-                // Try multiple URLs for the external model
-                const externalModelUrls = [
-                    // Firebase Storage URL (primary - secure, 1GB free, supports large files)
-                    'https://firebasestorage.googleapis.com/v0/b/xk9m7p4q2w8n5v3z1r6t8y4u9i2.firebasestorage.app/o/xk9m7p4q2w8n5v3z1r6t8y4u9i2o7e5a3s6d8f1g4h7j9k2l5m8n1b6v4c7x9z2q5w8e3r6.glb?alt=media&token=1dd0fd5c-079a-4f12-b360-859073937249',
-                    // GitHub Releases URL (fallback - supports large files)
-                    'https://github.com/AndresFelipeGA/PortafolioAndres/releases/download/v1.0.0/xk9m7p4q2w8n5v3z1r6t8y4u9i2o7e5a3s6d8f1g4h7j9k2l5m8n1b6v4c7x9z2q5w8e3r6.glb',
-                    // Additional fallback URLs
-                    'https://github.com/AndresFelipeGA/PortafolioAndres/raw/main/private-assets/xk9m7p4q2w8n5v3z1r6t8y4u9i2o7e5a3s6d8f1g4h7j9k2l5m8n1b6v4c7x9z2q5w8e3r6.glb',
-                    'https://raw.githubusercontent.com/AndresFelipeGA/PortafolioAndres/main/private-assets/xk9m7p4q2w8n5v3z1r6t8y4u9i2o7e5a3s6d8f1g4h7j9k2l5m8n1b6v4c7x9z2q5w8e3r6.glb'
-                ];
-                
-                const tryExternalUrl = (urlIndex = 0) => {
-                    if (urlIndex >= externalModelUrls.length) {
-                        console.error(`[${requestId}] All external URLs failed`);
-                        res.writeHead(404, { 'Content-Type': 'text/plain' });
-                        res.end('Model not found');
-                        activeRequests.delete(requestId);
-                        return;
-                    }
-                    
-                    const externalModelUrl = externalModelUrls[urlIndex];
-                    console.log(`[${requestId}] Trying external model URL ${urlIndex + 1}/${externalModelUrls.length}: ${externalModelUrl}`);
-                    
-                    // Proxy the external file
-                    const protocol = externalModelUrl.startsWith('https:') ? https : http;
-                    const proxyReq = protocol.get(externalModelUrl, (proxyRes) => {
-                        console.log(`[${requestId}] External model response status: ${proxyRes.statusCode}`);
-                        
-                        if (proxyRes.statusCode !== 200) {
-                            console.error(`[${requestId}] Failed to fetch external model from URL ${urlIndex + 1}: ${proxyRes.statusCode}`);
-                            // Try next URL
-                            tryExternalUrl(urlIndex + 1);
-                            return;
-                        }
-                        
-                        // Set headers for GLB file
-                        const headers = {
-                            'Content-Type': 'model/gltf-binary',
-                            'Cache-Control': 'no-cache, no-store, must-revalidate',
-                            'Pragma': 'no-cache',
-                            'Expires': '0'
-                        };
-                        
-                        if (proxyRes.headers['content-length']) {
-                            headers['Content-Length'] = proxyRes.headers['content-length'];
-                            const sizeMB = (parseInt(proxyRes.headers['content-length']) / (1024 * 1024)).toFixed(2);
-                            console.log(`[${requestId}] Serving external model: ${sizeMB} MB`);
-                        }
-                        
-                        addCorsHeaders(res);
-                        res.writeHead(200, headers);
-                        
-                        // Pipe the external response to our response
-                        proxyRes.pipe(res);
-                        
-                        proxyRes.on('end', () => {
-                            console.log(`[${requestId}] External model served successfully from URL ${urlIndex + 1}`);
-                            activeRequests.delete(requestId);
-                        });
-                        
-                    }).on('error', (proxyErr) => {
-                        console.error(`[${requestId}] Error fetching external model from URL ${urlIndex + 1}:`, proxyErr.message);
-                        // Try next URL
-                        tryExternalUrl(urlIndex + 1);
-                    });
-                };
-                
-                // Start trying URLs
-                tryExternalUrl(0);
+                console.error(`[${requestId}] Protected model not found: ${modelPath}`);
+                res.writeHead(404);
+                res.end('Model not found');
+                activeRequests.delete(requestId);
                 return;
             }
             
-            // Local model exists, serve it normally
-            const actualModelPath = modelPath;
-            
             // Get file stats
-            fs.stat(actualModelPath, (err, stats) => {
+            fs.stat(modelPath, (err, stats) => {
                 if (err) {
                     console.error(`[${requestId}] Error getting model stats: ${err.code}`);
                     res.writeHead(500);
@@ -374,7 +337,7 @@ const server = http.createServer((req, res) => {
                     console.log(`[${requestId}] Compressing model with gzip...`);
                     
                     // Read and compress the file
-                    fs.readFile(actualModelPath, (err, data) => {
+                    fs.readFile(modelPath, (err, data) => {
                         if (err) {
                             console.error(`[${requestId}] Error reading model: ${err.code}`);
                             res.writeHead(500);
@@ -437,7 +400,7 @@ const server = http.createServer((req, res) => {
                     addCorsHeaders(res);
                     
                     // Stream the protected model
-                    const fileStream = fs.createReadStream(actualModelPath, {
+                    const fileStream = fs.createReadStream(modelPath, {
                         highWaterMark: 1024 * 1024 * 4 // 4MB buffer
                     });
                     

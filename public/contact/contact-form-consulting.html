@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Form - Tech Consulting</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: white;
+            color: #333;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .contact-container {
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        /* Botón de regreso en la esquina superior izquierda */
+        .back-corner-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(166, 124, 82, 0.8);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.2s ease;
+        }
+        
+        .back-corner-button:hover {
+            background-color: rgba(111, 78, 55, 0.9);
+            transform: scale(1.1);
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        .form-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .form-header h1 {
+            margin: 0;
+            color: #5D4037;
+            font-size: 24px;
+        }
+        
+        .form-header .service-icon {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin: 10px auto;
+            display: block;
+        }
+        
+        .form-header .service-description {
+            font-size: 14px;
+            color: #7D5A50;
+            text-align: center;
+            margin: 10px 0;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .contact-form {
+            max-width: 1000px;
+            width: 90%;
+            margin: 0 auto;
+            background: #f9f9f9;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .form-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        
+        .form-column {
+            flex: 1;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #5D4037;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 15px;
+            box-sizing: border-box;
+        }
+        
+        .form-group textarea {
+            height: 120px;
+            resize: vertical;
+        }
+        
+        .form-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .back-button {
+            background: #E0E0E0;
+            color: #5D4037;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .submit-button {
+            background: linear-gradient(135deg, #6F4E37, #A67C52);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .submit-button:disabled {
+            background: #cccccc;
+            color: #666666;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .back-button:hover, .submit-button:hover {
+            transform: scale(1.05);
+        }
+        
+        .back-button:active, .submit-button:active {
+            transform: scale(0.98);
+        }
+        
+        .back-icon {
+            margin-right: 5px;
+            font-size: 16px;
+        }
+        
+        /* Campos específicos para cada servicio */
+        .service-specific-fields {
+            border-top: 1px solid #ddd;
+            margin-top: 15px;
+            padding-top: 15px;
+        }
+        
+        .radio-group {
+            margin-top: 10px;
+        }
+        
+        .radio-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .radio-item input[type="radio"] {
+            width: auto;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="contact-container">
+        <div class="back-corner-button" onclick="window.location.href='cafe-menu.html'">←</div>
+        <div class="form-header">
+            <h1>Contact Form</h1>
+            <img src="../assets/media/icons/typeOfCoffes/cafeNumeroTres.png" alt="Tech Consulting" class="service-icon" id="serviceIcon">
+            <h2 id="serviceTitle">Tech Consulting</h2>
+            <p class="service-description" id="serviceDescription">Advisory in architecture, development and performance for strategic decisions in technological projects.</p>
+        </div>
+        
+        <form class="contact-form" id="contactForm" action="https://api.staticforms.xyz/submit" method="POST">
+            <!-- Static Forms Configuration -->
+            <input type="hidden" name="accessKey" value="sf_0eh8kk35hfj689nf30hhdnm9">
+            <input type="hidden" name="subject" value="New contact form: Tech Consulting">
+            <input type="hidden" name="replyTo" value="andresfgonzalezaristizabal@outlook.com">
+            <input type="hidden" name="redirectTo" value="cafe-menu.html">
+            <input type="hidden" name="service" value="Tech Consulting">
+            <div class="form-row">
+                <div class="form-column">
+                    <!-- Left column -->
+                    <div class="form-group">
+                        <label for="nombre">Full Name*</label>
+                        <input type="text" id="nombre" name="nombre" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tipoConsultoria">Type of Consulting*</label>
+                        <select id="tipoConsultoria" name="tipoConsultoria" required>
+                            <option value="">Select an option</option>
+                            <option value="arquitectura">Software Architecture</option>
+                            <option value="rendimiento">Performance Optimization</option>
+                            <option value="seguridad">IT Security</option>
+                            <option value="cloud">Cloud Migration</option>
+                            <option value="estrategia">Digital Strategy</option>
+                            <option value="otro">Other</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-column">
+                    <!-- Right column -->
+                    <div class="form-group">
+                        <label for="email">Email Address*</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="descripcionProblema">Challenge or Problem Description*</label>
+                        <textarea id="descripcionProblema" name="descripcionProblema" required placeholder="Describe the technical challenge, problem or strategic decision for which you need advisory"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-buttons">
+                <button type="button" class="back-button" onclick="window.location.href='cafe-menu.html'">
+                    <span class="back-icon">←</span> Back to Menu
+                </button>
+                <button type="submit" class="submit-button">Send Request</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Función para validar el formulario y habilitar/deshabilitar el botón de envío
+        function validateForm() {
+            const form = document.getElementById('contactForm');
+            const submitButton = form.querySelector('.submit-button');
+            
+            // Verificar si todos los campos requeridos tienen valor
+            const requiredFields = form.querySelectorAll('[required]');
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
+                }
+            });
+            
+            // Habilitar o deshabilitar el botón de envío
+            submitButton.disabled = !isValid;
+        }
+        
+        // Configurar la página al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            // Deshabilitar el botón de envío inicialmente
+            const submitButton = document.querySelector('.submit-button');
+            submitButton.disabled = true;
+            
+            // Agregar eventos de input a todos los campos requeridos
+            const requiredFields = document.querySelectorAll('[required]');
+            requiredFields.forEach(field => {
+                field.addEventListener('input', validateForm);
+            });
+        });
+        
+        // FormSubmit manejará el envío del formulario automáticamente
+        // Solo mantenemos la validación del formulario
+    </script>
+</body>
+</html>
