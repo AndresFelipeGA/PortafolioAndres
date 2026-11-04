@@ -512,6 +512,8 @@
     <script src="https://unpkg.com/three@0.132.0/examples/js/loaders/GLTFLoader.js"></script>
     <!-- Decodificador meshopt: necesario para el modelo optimizado (EXT_meshopt_compression) -->
     <script src="https://unpkg.com/three@0.132.0/examples/js/libs/meshopt_decoder.js"></script>
+    <!-- Render bajo demanda: debe cargarse antes del script principal -->
+    <script src="assets/scripts/render-scheduler.js"></script>
     <script src="https://unpkg.com/three@0.132.0/examples/js/loaders/FontLoader.js"></script>
     <script src="https://unpkg.com/three@0.132.0/examples/js/geometries/TextGeometry.js"></script>
     
@@ -2812,7 +2814,9 @@
             showRandomPhrase();
             
             // No iniciar el intervalo si estamos en modo móvil
-            if (!isMobile) {
+            // Evitar intervalos duplicados: se llama hasta 3 veces al cargar y cada
+            // llamada dejaba un intervalo huérfano corriendo para siempre.
+            if (!isMobile && !phraseInterval) {
                 // Mostrar frases cada 0.2 segundos para mayor velocidad
                 phraseInterval = setInterval(showRandomPhrase, 200);
             } else {
@@ -5167,6 +5171,16 @@
                     
                     // Actualizar visibilidad de community basada en la orientación de la cámara
                     updateCommunityVisibility();
+
+                    // Render bajo demanda: si nada cambió, no redibujar (el último frame
+                    // sigue en pantalla y es idéntico). Ver assets/scripts/render-scheduler.js
+                    if (window.RenderScheduler &&
+                        !window.RenderScheduler.shouldRender(camera, cameraAnimation.enabled)) {
+                        return;
+                    }
+
+                    // Los needsUpdate que Three hace internamente al dibujar no son "cambios"
+                    if (window.RenderScheduler) window.RenderScheduler.beginRender();
                     
                     // Renderizar escena WebGL
                     renderer.render(scene, camera);
@@ -5207,6 +5221,8 @@
                     }
                     
                     // El código para renderizar la escena CSS3D de información personal ha sido eliminado
+                    
+                    if (window.RenderScheduler) window.RenderScheduler.endRender();
                 }
         
         // Función de easing para suavizar la animación
