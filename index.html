@@ -2799,7 +2799,6 @@
             lastCameraTarget.copy(controls.target);
             
             controls.addEventListener('start', function() {
-                releaseMobileScreenFocus();
                 // Usuario empezó a interactuar - siempre permitir esto
                 isUserActuallyMoving = false;
                 movementStartTime = Date.now();
@@ -4222,31 +4221,16 @@
         function applyResponsiveFov() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.fov = responsiveBaseFov();
-            if (window.fovTransition) window.fovTransition = null;
             camera.updateProjectionMatrix();
         }
         
         // ---- Zoom a pantalla en celular -------------------------------------
         // Al llegar a una pantalla con un botón, en celular la pantalla quedaba
-        // ocupando ~50% del ancho. Se anima el FOV para que la pantalla que quedó
-        // en el centro ocupe casi todo el ancho; al girar o elegir otro botón se
-        // vuelve al FOV normal. Solo celular; en PC no hace nada.
-        function animateFovTo(targetFov, durationMs) {
-            window.fovTransition = {
-                from: camera.fov, to: targetFov,
-                start: performance.now(), duration: durationMs || 450
-            };
-        }
-        
-        function stepFovTransition() {
-            const tr = window.fovTransition;
-            if (!tr) return;
-            const k = Math.min((performance.now() - tr.start) / tr.duration, 1);
-            camera.fov = tr.from + (tr.to - tr.from) * easeInOutCubic(k);
-            camera.updateProjectionMatrix();
-            if (k >= 1) window.fovTransition = null;
-        }
-        
+        // ocupando ~50% del ancho. Se ACERCA LA CÁMARA (traslación pura, misma
+        // orientación) hasta que la pantalla ocupe casi todo el ancho.
+        // Importante: NO se cambia el FOV. Safari (iOS) no refresca la perspectiva de
+        // las capas CSS3D cuando cambia el FOV y el HTML quedaba desalineado del marco.
+        // Solo celular; en PC no hace nada.
         // Pantalla CSS3D que la cámara tiene enfrente (cerca y en el centro de la vista)
         function findFocusedScreen() {
             const scenes = [css3dScene, window.aboutMeScene, window.aboutMeDuplicateScene,
@@ -4279,20 +4263,33 @@
             const worldWidth = (parseFloat(el.style.width) || el.offsetWidth) * hit.obj.scale.x;
             const worldHeight = (parseFloat(el.style.height) || el.offsetHeight) * hit.obj.scale.y;
             const margin = 1.08; // ~4% de aire a cada lado
-            const aspect = camera.aspect;
-            // FOV vertical para que quepa a lo ancho y a lo alto
-            const vFovForWidth = 2 * Math.atan((worldWidth * margin / 2) / (hit.dist * aspect));
-            const vFovForHeight = 2 * Math.atan((worldHeight * margin / 2) / hit.dist);
-            let target = THREE.MathUtils.radToDeg(Math.max(vFovForWidth, vFovForHeight));
-            target = Math.min(target, responsiveBaseFov()); // solo acercar, nunca alejar
-            target = Math.max(target, 15);
-            animateFovTo(target, 500);
-        }
-        
-        function releaseMobileScreenFocus() {
-            if (!isMobile) return;
-            const base = responsiveBaseFov();
-            if (Math.abs(camera.fov - base) > 0.01 || window.fovTransition) animateFovTo(base, 400);
+            const halfV = THREE.MathUtils.degToRad(camera.fov / 2);
+            const halfH = Math.atan(Math.tan(halfV) * camera.aspect);
+            // Distancia a la que la pantalla cabe a lo ancho y a lo alto
+            const fitDist = Math.max(
+                (worldWidth * margin / 2) / Math.tan(halfH),
+                (worldHeight * margin / 2) / Math.tan(halfV));
+            if (fitDist >= hit.dist * 0.97) return; // ya está bien encuadrada
+            const screenCenter = new THREE.Vector3();
+            hit.obj.getWorldPosition(screenCenter);
+            const newPos = screenCenter.clone().add(
+                camera.position.clone().sub(screenCenter).setLength(fitDist));
+            const delta = newPos.clone().sub(camera.position);
+            const newTarget = controls.target.clone().add(delta);
+            // Reutiliza el sistema de animación de cámara (suave y protegido del
+            // detector de "movimiento real")
+            cameraAnimation.initialPosition.copy(camera.position);
+            cameraAnimation.targetPosition.copy(newPos);
+            cameraAnimation.initialTarget.copy(controls.target);
+            cameraAnimation.finalTarget.copy(newTarget);
+            cameraAnimation.waypoints = [];
+            cameraAnimation.duration = 550;
+            cameraAnimation.startTime = Date.now();
+            // Marca esta animación como "acercamiento" (si el usuario pulsa otro botón,
+            // su animación tendrá otro startTime y sí hará su propio acercamiento)
+            cameraAnimation._screenFocusStartTime = cameraAnimation.startTime;
+            cameraAnimation.enabled = true;
+            controls.enabled = false;
         }
         
         function onWindowResize() {
@@ -5070,7 +5067,6 @@
                         if (cameraAnimation._momentumClearedFor !== cameraAnimation.startTime) {
                             cameraAnimation._momentumClearedFor = cameraAnimation.startTime;
                             clearOrbitMomentum();
-                            releaseMobileScreenFocus();
                         }
                         
                         const elapsed = Date.now() - cameraAnimation.startTime;
@@ -5154,7 +5150,10 @@
                             cameraAnimation.enabled = false;
                             
                             // Celular: acercar hasta que la pantalla ocupe casi todo el ancho
-                            focusMobileScreen();
+                            // (el propio acercamiento no vuelve a disparar otro)
+                            if (cameraAnimation._screenFocusStartTime !== cameraAnimation.startTime) {
+                                focusMobileScreen();
+                            }
                             
                             // Mostrar las coordenadas si estaban visibles antes
                             if (coordinatesVisible) {
@@ -5198,9 +5197,6 @@
                     // Actualizar visibilidad de community basada en la orientación de la cámara
                     updateCommunityVisibility();
 
-                    // Transición de FOV (zoom a pantalla en celular)
-                    stepFovTransition();
-                    
                     // Render bajo demanda: si nada cambió, no redibujar (el último frame
                     // sigue en pantalla y es idéntico). Ver assets/scripts/render-scheduler.js
                     if (window.RenderScheduler &&

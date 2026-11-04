@@ -93,6 +93,16 @@ Guía viva del proyecto. **Léela antes de tocar código y actualízala al termi
   cuando el usuario vuelve dentro (`restorePolarLimitsIfInside()`).
 - Celular: FOV vertical adaptable (`applyResponsiveFov()`) para que el ancho visible sea el de una
   pantalla 16:9; así las pantallas caben en vertical sin tocar coordenadas. En PC el FOV es 45.
+- Celular: al llegar a una pantalla, `focusMobileScreen()` ACERCA la cámara (traslación, misma
+  orientación) con una animación corta para que la pantalla ocupe ~92% del ancho.
+  **Nunca cambiar `camera.fov` después del inicio**: en Safari/iOS las capas CSS3D no se
+  refrescan al cambiar la perspectiva y el HTML queda desalineado del marco (reportado en un
+  iPhone real; la emulación con Chrome NO lo reproduce).
+- Al terminar una animación, `controls.update()` se llama mientras `cameraAnimation.enabled`
+  sigue en true: si no, el primer update emitía `change` contra la pose previa y el detector de
+  "movimiento real" apagaba la pantalla recién abierta.
+- `box.html`: index.html reenvía los clics al iframe con la X espejada; box.html lo compensa
+  buscando la tarjeta en `innerWidth - x`. La cuadrícula de tarjetas debe seguir simétrica.
 
 ## Diseño de las pantallas ("Café de origen")
 
@@ -148,5 +158,9 @@ Herramientas en `tools/qa/` (Chrome del sistema `/usr/bin/google-chrome` + `pupp
   corregir el tamaño del iframe, no la tipografía.
 - Antes de publicar algo que dependa de un archivo externo (R2), dejar un respaldo automático para
   que el sitio funcione aunque el archivo todavía no exista.
+- La emulación de iPhone en Chrome no reproduce bugs de Safari (WebKit). Playwright WebKit
+  necesita `sudo npx playwright install-deps`; sin eso, pedir al dueño que pruebe en su iPhone.
+- Los formularios del menú de café "fingían" el envío (enlace a `?sent=true`). Probar flujos de
+  negocio de punta a punta, no solo que la UI muestre éxito.
 - Preferir arreglos genéricos (render scheduler, FOV adaptable, borrar inercia en un solo lugar)
   sobre tocar cada una de las decenas de funciones duplicadas de `index.html`.
