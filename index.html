@@ -510,6 +510,8 @@
     <script src="https://unpkg.com/three@0.132.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://unpkg.com/three@0.132.0/examples/js/loaders/DRACOLoader.js"></script>
     <script src="https://unpkg.com/three@0.132.0/examples/js/loaders/GLTFLoader.js"></script>
+    <!-- Decodificador meshopt: necesario para el modelo optimizado (EXT_meshopt_compression) -->
+    <script src="https://unpkg.com/three@0.132.0/examples/js/libs/meshopt_decoder.js"></script>
     <script src="https://unpkg.com/three@0.132.0/examples/js/loaders/FontLoader.js"></script>
     <script src="https://unpkg.com/three@0.132.0/examples/js/geometries/TextGeometry.js"></script>
     
@@ -2855,9 +2857,11 @@
             camera.position.set(0, 5, 10);
             
             // Crear renderer
-            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.shadowMap.enabled = true;
+            // Ningún mesh proyecta sombra (solo receiveShadow), así que el shadow map
+            // solo costaba una pasada extra por frame sin efecto visual.
+            renderer.shadowMap.enabled = false;
             document.body.appendChild(renderer.domElement);
             
             // Controles de órbita
@@ -3924,9 +3928,20 @@
             dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
             loader.setDRACOLoader(dracoLoader);
             
-            // Use Cloudflare R2 directly for model loading
-            const primaryModelUrl = 'https://pub-3eee7465d9374f15a9c4a6192489c0b1.r2.dev/modelo3d.glb';
-            const fallbackModelUrl = 'https://pub-3eee7465d9374f15a9c4a6192489c0b1.r2.dev/modelo3d.glb';
+            // Setup meshopt decoder (modelo optimizado con gltf-transform)
+            if (typeof MeshoptDecoder !== 'undefined') {
+                loader.setMeshoptDecoder(MeshoptDecoder);
+            }
+            
+            // Modelo optimizado (91MB: meshopt + WebP, 134 draw calls) con respaldo
+            // automático al original (532MB) si no existe o falla al cargar.
+            // Para pruebas locales: ?model=assets/archivo.glb (solo rutas relativas dentro de assets/).
+            const OPTIMIZED_MODEL_URL = 'https://pub-3eee7465d9374f15a9c4a6192489c0b1.r2.dev/modelo3d-optimizado.glb';
+            const ORIGINAL_MODEL_URL = 'https://pub-3eee7465d9374f15a9c4a6192489c0b1.r2.dev/modelo3d.glb';
+            const modelOverride = new URLSearchParams(window.location.search).get('model');
+            const safeOverride = modelOverride && /^assets\/[\w\-\/]+\.glb$/.test(modelOverride) ? modelOverride : null;
+            const primaryModelUrl = safeOverride || OPTIMIZED_MODEL_URL;
+            const fallbackModelUrl = ORIGINAL_MODEL_URL;
             
             // Model loading initiated
             
@@ -4048,11 +4063,13 @@
                         });
                         
                         // Center model
-                        const box = new THREE.Box3().setFromObject(model);
-                        const center = box.getCenter(new THREE.Vector3());
-                        model.position.x = -center.x;
-                        model.position.y = -center.y;
-                        model.position.z = -center.z;
+                        // Offset fijo = el que Box3.setFromObject (r132) calculaba sobre el
+                        // modelo ORIGINAL. Toda la navegación (cámara, pantallas CSS3D) usa
+                        // coordenadas absolutas basadas en este centrado. Con el modelo
+                        // optimizado (mallas fusionadas) la caja aproximada de r132 cambia
+                        // aunque la geometría esté en el mismo sitio, así que no se recalcula.
+                        // Si cambias el modelo de escena por otro distinto, revisa este valor.
+                        model.position.set(-12.010644373710583, -14.222619109865065, 7.8103594539535415);
                         
                         // Add to scene
                         scene.add(model);
