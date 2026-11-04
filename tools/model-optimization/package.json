@@ -4,13 +4,15 @@
   "type": "module",
   "description": "Pipeline para optimizar el modelo 3D del portafolio",
   "scripts": {
-    "optimize": "bash optimize.sh"
+    "optimize": "bash optimize.sh",
+    "optimize:mobile": "bash optimize-mobile.sh"
   },
   "dependencies": {
     "@gltf-transform/cli": "^4.0.0",
     "@gltf-transform/core": "^4.0.0",
     "@gltf-transform/extensions": "^4.0.0",
     "meshoptimizer": "^0.22.0",
-    "sharp": "^0.33.0"
+    "sharp": "^0.33.0",
+    "@gltf-transform/functions": "^4.0.0"
   }
 }

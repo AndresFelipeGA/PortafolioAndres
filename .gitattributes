@@ -2,3 +2,6 @@
 *.glb filter=lfs diff=lfs merge=lfs -text
 *.gltf filter=lfs diff=lfs merge=lfs -text
 private-assets/*.glb filter=lfs diff=lfs merge=lfs -text
+
+# Modelo 3D para celular: se sirve desde GitHub Pages, que NO sirve archivos LFS.
+assets/models/modelo3d-movil.glb -filter -diff -merge -text

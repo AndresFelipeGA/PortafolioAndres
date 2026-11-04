@@ -426,6 +426,29 @@
             filter: brightness(10) contrast(1.5) invert(1); /* Hace que el icono sea más blanco y visible */
         }
         
+        /* Celular/tablet (clase añadida por JS solo si isMobile): una sola fila de
+           botones pegada abajo, respetando la barra de inicio del iPhone. En PC no aplica. */
+        html.is-mobile .floating-buttons-container {
+            left: 0;
+            right: 0;
+            transform: none;
+            justify-content: center;
+            flex-wrap: nowrap !important;
+            gap: 10px;
+            bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+        }
+        html.is-mobile .floating-button {
+            width: 42px;
+            height: 42px;
+        }
+        html.is-mobile .floating-button img {
+            width: 22px;
+            height: 22px;
+        }
+        html.is-mobile .floating-button:hover {
+            transform: none; /* en táctil el hover se queda "pegado" tras tocar */
+        }
+        
         /* Estilo específico para iconos que ya son blancos */
         .floating-button img[src*="iconContact"],
         .floating-button img[src*="iconClientes"],
@@ -566,141 +589,11 @@
         let musicMuted = false;
         let musicControlCreated = false;
         
-        // Function to handle mobile-specific content
-        function handleMobileDevice() {
-            console.log("Mobile device detected! Showing mobile-specific content");
-            
-            // Get the loading container
-            const loadingContainer = document.getElementById('loading-container');
-            
-            // Get the coffee container and image
-            const coffeeContainer = document.querySelector('.coffee-container');
-            const coffeeGif = document.querySelector('.coffee-gif');
-            
-            // Get the random phrases container
-            const randomPhrasesContainer = document.querySelector('.random-phrases-container');
-            const randomPhrase = document.getElementById('random-phrase');
-            
-            // Hide the music button for mobile
-            const musicButton = document.getElementById('music-activate-btn');
-            if (musicButton) {
-                musicButton.style.display = 'none';
-            }
-            
-            // Immediately hide any random phrases that might be showing
-            if (randomPhrase) {
-                randomPhrase.style.opacity = '0';
-            }
-            
-            // Completely disable the random phrases functionality for mobile
-            // Override the showRandomPhrase function before it's even defined
-            window.showRandomPhrase = function() {
-                console.log("Random phrases disabled for mobile");
-                return false; // Prevent execution of the original function
-            };
-            
-            // Show the loading screen for exactly 3 seconds
-            console.log("Setting timeout for 3 seconds to change content");
-            setTimeout(() => {
-                console.log("Timeout executed - changing content for mobile");
-                
-                // Replace the coffee GIF with DeadCoffe.png
-                if (coffeeGif) {
-                    console.log("Replacing coffee GIF with DeadCoffe.png");
-                    coffeeGif.src = 'assets/media/icons/DeadCoffe.png';
-                    coffeeGif.style.filter = 'none'; // Remove filters applied to the GIF
-                    coffeeGif.style.mixBlendMode = 'normal'; // Remove blend mode
-                    coffeeGif.style.transform = 'scale(0.5)'; // Make the image 50% smaller
-                }
-                
-                // Display the friendly message
-                if (randomPhrase) {
-                    console.log("Setting mobile message");
-                    randomPhrase.textContent = "Sorry! This page isn't available on mobile. Please open it on a desktop.";
-                    randomPhrase.classList.add('visible');
-                    
-                    // Make sure the message is visible with a lighter, friendlier red text
-                    randomPhrase.style.opacity = '1';
-                    randomPhrase.style.color = '#ff6b6b'; // Lighter, friendlier red color
-                    randomPhrase.style.fontSize = '18px';
-                    randomPhrase.style.textAlign = 'center';
-                    randomPhrase.style.padding = '20px';
-                    randomPhrase.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-                    randomPhrase.style.borderRadius = '10px';
-                    randomPhrase.style.maxWidth = '80%';
-                    randomPhrase.style.margin = '0 auto';
-                    randomPhrase.style.fontWeight = 'bold'; // Make text bold for better visibility
-                    randomPhrase.style.lineHeight = '1.5'; // Better readability
-                    randomPhrase.style.letterSpacing = '0.5px'; // Slightly more spaced out text
-                }
-                
-                // Make sure the loading container stays visible
-                loadingContainer.style.opacity = '1';
-                loadingContainer.style.display = 'flex';
-                
-                // Make sure no random phrases can appear
-                const randomPhrasesContainer = document.querySelector('.random-phrases-container');
-                if (randomPhrasesContainer) {
-                    // Clear any existing content except our error message
-                    Array.from(randomPhrasesContainer.children).forEach(child => {
-                        if (child !== randomPhrase) {
-                            randomPhrasesContainer.removeChild(child);
-                        }
-                    });
-                }
-                
-                // Stop the random phrases from changing and ensure no other phrases appear
-                if (window.phraseInterval) {
-                    console.log("Clearing phrase interval");
-                    clearInterval(window.phraseInterval);
-                    window.phraseInterval = null;
-                }
-                
-                // Make sure the loading text stays visible
-                const loadingText = document.querySelector('#loading-text');
-                if (loadingText) {
-                    loadingText.style.display = 'none'; // Hide the loading text
-                }
-                
-                // Override any functions that might show random phrases
-                window.showRandomPhrases = function() {
-                    console.log("Blocked attempt to show random phrases");
-                    return false;
-                };
-            }, 3000);
-            
-            // Create dummy functions for desktop-only code
-            console.log("Creating dummy functions for desktop-only code");
-            window.init = function() {
-                console.log("Dummy init function called");
-            };
-            window.animate = function() {
-                // Empty function to prevent errors
-            };
-            
-            // Prevent the rest of the script from executing
-            console.log("Mobile handling complete - preventing desktop code execution");
-            return true; // Indicate that mobile handling is active
-        }
-        
-        // Check for mobile device on page load
-        let isMobile = false;
-        if (isMobileDevice()) {
-            isMobile = handleMobileDevice();
-        } else {
-            console.log("Desktop device detected - proceeding with normal initialization");
-        }
-        
-        // Also check when the window is resized
-        window.addEventListener('resize', function() {
-            // Only handle if not already in mobile mode
-            if (!isMobile && isMobileDevice()) {
-                console.log("Mobile device detected after resize!");
-                isMobile = handleMobileDevice();
-                // Reload the page to ensure proper handling
-                window.location.reload();
-            }
-        });
+        // Detección de celular/tablet: ya NO bloquea la página. Solo se usa para
+        // cargar el modelo 3D liviano y ajustar el renderer (ver loadModel/init).
+        // Prueba en PC: ?forceMobile=true
+        let isMobile = isMobileDevice();
+        if (isMobile) document.documentElement.classList.add('is-mobile');
         
         // YouTube video ID from the provided URL
         const youtubeVideoId = 'uALnlDC4yug';
@@ -2772,12 +2665,6 @@
         
         // Función para mostrar una frase aleatoria
         function showRandomPhrase() {
-            // Check if we're in mobile mode - if so, don't show random phrases
-            if (isMobile) {
-                console.log("Not showing random phrases in mobile mode");
-                return;
-            }
-            
             const phraseElement = document.getElementById('random-phrase');
             if (!phraseElement || isShowingPhrase) return;
             
@@ -2813,14 +2700,11 @@
             // Mostrar la primera frase inmediatamente
             showRandomPhrase();
             
-            // No iniciar el intervalo si estamos en modo móvil
             // Evitar intervalos duplicados: se llama hasta 3 veces al cargar y cada
             // llamada dejaba un intervalo huérfano corriendo para siempre.
-            if (!isMobile && !phraseInterval) {
+            if (!phraseInterval) {
                 // Mostrar frases cada 0.2 segundos para mayor velocidad
                 phraseInterval = setInterval(showRandomPhrase, 200);
-            } else {
-                console.log("Not starting phrase interval in mobile mode");
             }
         }
         
@@ -2858,6 +2742,7 @@
             
             // Crear cámara
             camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            applyResponsiveFov();
             camera.position.set(0, 5, 10);
             
             // Crear renderer
@@ -2866,6 +2751,20 @@
             // Ningún mesh proyecta sombra (solo receiveShadow), así que el shadow map
             // solo costaba una pasada extra por frame sin efecto visual.
             renderer.shadowMap.enabled = false;
+            // Celular: pantallas de alta densidad (iPhone = 3x). A 1x se ve borroso;
+            // 2x es nítido y mucho más barato que 3x. En PC se mantiene igual (1x).
+            if (isMobile) {
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+            }
+            // Si el sistema libera la GPU (p. ej. Safari en iPhone por memoria), recargar
+            // una sola vez en lugar de dejar la pantalla negra.
+            renderer.domElement.addEventListener('webglcontextlost', function(event) {
+                event.preventDefault();
+                if (!sessionStorage.getItem('webglContextLostReloaded')) {
+                    sessionStorage.setItem('webglContextLostReloaded', '1');
+                    window.location.reload();
+                }
+            }, false);
             document.body.appendChild(renderer.domElement);
             
             // Controles de órbita
@@ -3942,10 +3841,13 @@
             // Para pruebas locales: ?model=assets/archivo.glb (solo rutas relativas dentro de assets/).
             const OPTIMIZED_MODEL_URL = 'https://pub-3eee7465d9374f15a9c4a6192489c0b1.r2.dev/modelo3d-optimizado.glb';
             const ORIGINAL_MODEL_URL = 'https://pub-3eee7465d9374f15a9c4a6192489c0b1.r2.dev/modelo3d.glb';
+            // Celular: modelo liviano (45MB, 4.5M triángulos, texturas 512-1024px) servido
+            // desde GitHub Pages. Si falla, usa el optimizado de PC (nunca el de 532MB).
+            const MOBILE_MODEL_URL = 'assets/models/modelo3d-movil.glb';
             const modelOverride = new URLSearchParams(window.location.search).get('model');
             const safeOverride = modelOverride && /^assets\/[\w\-\/]+\.glb$/.test(modelOverride) ? modelOverride : null;
-            const primaryModelUrl = safeOverride || OPTIMIZED_MODEL_URL;
-            const fallbackModelUrl = ORIGINAL_MODEL_URL;
+            const primaryModelUrl = safeOverride || (isMobile ? MOBILE_MODEL_URL : OPTIMIZED_MODEL_URL);
+            const fallbackModelUrl = isMobile ? OPTIMIZED_MODEL_URL : ORIGINAL_MODEL_URL;
             
             // Model loading initiated
             
@@ -4296,9 +4198,30 @@
             });
         }
         
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
+        // Campo de visión adaptable (solo celular/tablet). Todas las posiciones de
+        // cámara del sitio están pensadas para una pantalla ancha (16:9). En vertical
+        // el campo horizontal es mucho más angosto y las pantallas quedaban cortadas.
+        // Se amplía el FOV vertical para que el ancho visible sea igual al de 16:9.
+        // En PC no cambia nada (FOV 45).
+        function applyResponsiveFov() {
+            // Constantes locales: init() se ejecuta antes de que el script llegue
+            // a esta línea, así que no pueden ser const de nivel superior (TDZ).
+            const BASE_FOV = 45;
+            const REFERENCE_ASPECT = 16 / 9;
+            const aspect = window.innerWidth / window.innerHeight;
+            camera.aspect = aspect;
+            if (isMobile && aspect < REFERENCE_ASPECT) {
+                const halfFovRad = THREE.MathUtils.degToRad(BASE_FOV / 2);
+                camera.fov = THREE.MathUtils.radToDeg(
+                    2 * Math.atan(Math.tan(halfFovRad) * REFERENCE_ASPECT / aspect));
+            } else {
+                camera.fov = BASE_FOV;
+            }
             camera.updateProjectionMatrix();
+        }
+        
+        function onWindowResize() {
+            applyResponsiveFov();
             renderer.setSize(window.innerWidth, window.innerHeight);
             
             // Actualizar también el tamaño del CSS3DRenderer
