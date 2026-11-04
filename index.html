@@ -3971,7 +3971,20 @@
                                     if (material.roughness !== undefined) {
                                         material.roughness = Math.max(material.roughness, 0.5);
                                     }
-                                    
+
+                                    // RENDIMIENTO: en Three r132 basta UN material con transmission > 0
+                                    // para que toda la escena se dibuje dos veces por frame (pasada de
+                                    // transmisión). En este modelo solo lo usan 2 vidrios pequeños
+                                    // (botones de la cafetera y pantalla de la terminal). Se reemplaza por
+                                    // transparencia simple: visualmente igual, ~2x FPS en vista amplia.
+                                    if (material.transmission > 0) {
+                                        material.transmission = 0;
+                                        material.transparent = true;
+                                        material.opacity = Math.min(material.opacity, 0.35);
+                                        material.depthWrite = false;
+                                        material.needsUpdate = true;
+                                    }
+
                                     // Suppress UV mapping warnings by patching the console
                                     if (!window._originalWarn && !window._uvWarningsSuppressed) {
                                         // Save original console.warn
