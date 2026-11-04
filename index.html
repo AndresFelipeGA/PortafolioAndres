@@ -4989,12 +4989,20 @@
                     
                     // Manejar la animación de la cámara si está activa
                     if (cameraAnimation.enabled) {
+                        // Primer frame de una animación nueva: descartar la inercia que traían
+                        // los controles (si el usuario venía girando, se aplicaba al llegar y
+                        // la cámara "se pasaba" del destino).
+                        if (cameraAnimation._momentumClearedFor !== cameraAnimation.startTime) {
+                            cameraAnimation._momentumClearedFor = cameraAnimation.startTime;
+                            clearOrbitMomentum();
+                        }
+                        
                         const elapsed = Date.now() - cameraAnimation.startTime;
                         const progress = Math.min(elapsed / cameraAnimation.duration, 1.0);
                         
                         if (progress < 1.0) {
-                            // Usar progreso lineal para velocidad uniforme (sin easing)
-                            const uniformProgress = progress;
+                            // Aceleración y frenado suaves (antes era lineal: arrancaba y frenaba en seco)
+                            const uniformProgress = easeInOutCubic(progress);
                             
                             // Calcular la posición de la cámara usando la trayectoria de waypoints
                             if (cameraAnimation.waypoints.length > 0) {
@@ -5053,6 +5061,12 @@
                             
                             // Actualizar el objetivo final de los controles
                             controls.target.copy(cameraAnimation.finalTarget);
+                            camera.lookAt(cameraAnimation.finalTarget);
+                            
+                            // Algunos destinos están fuera del rango vertical permitido (10°-80°);
+                            // OrbitControls los corregía de golpe al llegar. Se amplía el rango
+                            // solo lo necesario hasta que el usuario vuelva al rango normal.
+                            allowCurrentPolarAngle();
                             
                             // Mostrar las coordenadas si estaban visibles antes
                             if (coordinatesVisible) {
@@ -5067,6 +5081,7 @@
                     } else {
                         // Actualizar controles solo cuando no hay animación
                         controls.update();
+                        restorePolarLimitsIfInside();
                     }
                     
                     // Update coordinates display
@@ -5147,6 +5162,56 @@
                     
                     if (window.RenderScheduler) window.RenderScheduler.endRender();
                 }
+        
+        // Rango vertical normal de la cámara (ver init: min/maxPolarAngle).
+        // OJO: funciones y no const, porque animate() corre antes de que el script
+        // llegue a esta línea (una const aquí lanzaría ReferenceError por TDZ).
+        function defaultMinPolar() { return Math.PI / 18; }
+        function defaultMaxPolar() { return Math.PI / 2 - Math.PI / 18; }
+        
+        // Ángulo vertical actual de la cámara respecto a su objetivo (0 = desde arriba)
+        function currentPolarAngle() {
+            const offset = new THREE.Vector3().subVectors(camera.position, controls.target);
+            return Math.atan2(Math.hypot(offset.x, offset.z), offset.y);
+        }
+        
+        // Permite que la cámara se quede en la pose exacta del destino aunque esté
+        // fuera del rango normal. El rango normal se restaura en restorePolarLimitsIfInside().
+        function allowCurrentPolarAngle() {
+            const polar = currentPolarAngle();
+            controls.minPolarAngle = Math.min(defaultMinPolar(), polar);
+            controls.maxPolarAngle = Math.max(defaultMaxPolar(), polar);
+        }
+        
+        // Cuando el usuario gira y vuelve dentro del rango normal, se restaura el límite.
+        function restorePolarLimitsIfInside() {
+            if (controls.minPolarAngle === defaultMinPolar() && controls.maxPolarAngle === defaultMaxPolar()) return;
+            const polar = currentPolarAngle();
+            if (polar >= defaultMinPolar() && polar <= defaultMaxPolar()) {
+                controls.minPolarAngle = defaultMinPolar();
+                controls.maxPolarAngle = defaultMaxPolar();
+            } else {
+                // Ir estrechando el rango hacia el normal a medida que el usuario se mueve
+                controls.minPolarAngle = Math.min(defaultMinPolar(), Math.max(controls.minPolarAngle, polar));
+                controls.maxPolarAngle = Math.max(defaultMaxPolar(), Math.min(controls.maxPolarAngle, polar));
+            }
+        }
+        
+        // Descarta la inercia acumulada de OrbitControls (r132 no expone una API para esto):
+        // un update() sin damping aplica y pone a cero los deltas internos; después se
+        // restaura la pose, así que no hay ningún salto visible.
+        function clearOrbitMomentum() {
+            const position = camera.position.clone();
+            const target = controls.target.clone();
+            const quaternion = camera.quaternion.clone();
+            const damping = controls.enableDamping;
+            controls.enableDamping = false;
+            controls.update();
+            controls.enableDamping = damping;
+            camera.position.copy(position);
+            controls.target.copy(target);
+            camera.quaternion.copy(quaternion);
+        }
         
         // Función de easing para suavizar la animación
         function easeInOutCubic(t) {
